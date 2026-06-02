@@ -3,14 +3,9 @@ from django.db import transaction
 from apps.reports.models import Report
 from django.db.models import UniqueConstraint
 from django.contrib.contenttypes.fields import GenericRelation
-from apps.common.common_models import (
-    BaseModel,
-    RegistrationAccounts,
-    BankerAccounts
-)
+from apps.utils.base_models import BaseModel
 from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
 class Company(BaseModel):
     class ReferType(models.TextChoices):
         BIU = "biu", "BIU"
@@ -203,7 +198,7 @@ class CompanyStructure(BaseModel):
     def __str__(self):
         return f"Structure of {self.company}"
 
-class CompanyOperations(models.Model):
+class CompanyOperations(BaseModel):
     company = models.OneToOneField(
         Company,
         on_delete=models.CASCADE,
@@ -224,21 +219,3 @@ class CompanyOperations(models.Model):
     def __str__(self):
         return f"Operations of {self.company}"
 
-
-class CompanyRegistrationAccounts(RegistrationAccounts):
-    class Meta:
-        app_label = "companies"
-        db_table = "company_registration_accounts"
-        verbose_name = "Company Registration Account"
-        verbose_name_plural = "Company Registration Accounts"
-    
-    def __str__(self):
-        return f"{self.client} | {self.tin_number or 'N/A'} | {self.vat_number or 'N/A'}"
-
-class CompanyBanks(BankerAccounts):
-    class Meta:
-        verbose_name = "Company Banker"
-        verbose_name_plural = "Company Bankers"
-
-    def __str__(self):
-        return f"{self.bank} - {self.account_name} ({self.company})"

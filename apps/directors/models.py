@@ -1,11 +1,11 @@
 from django.db import models
 from django.db.models import UniqueConstraint
-from apps.common.common_models import BaseModelWithClient
+from apps.utils.base_models import BaseModel
 from apps.companies.models import Company
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
-class CompanyDirector(BaseModelWithClient):
+class CompanyDirector(BaseModel):
     class DirectorGender(models.TextChoices):
         MALE = "male", "Male"
         FEMALE = "female", "Female"
@@ -15,6 +15,11 @@ class CompanyDirector(BaseModelWithClient):
         SECRETARY = "secretary", "Secretary"
         OTHER = "other", "Other"
 
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name='director'
+    )
     full_name = models.CharField(
         max_length=50,
         help_text=_("Director full name")

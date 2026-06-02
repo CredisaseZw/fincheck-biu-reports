@@ -1,8 +1,14 @@
 from django.db import models
-from apps.common.common_models import BaseModelWithClient, BaseModel
+from apps.companies.models import Company
+from apps.utils.base_models import BaseModel
 
 # Create your models here.
-class CompanyShareholding(BaseModelWithClient):
+class CompanyShareholding(BaseModel):
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="shareholdings"
+    )
     numbers_of_shares = models.PositiveIntegerField()
     numbers_of_shareholders = models.PositiveIntegerField()
 

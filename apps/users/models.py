@@ -1,4 +1,4 @@
-from apps.common.user_manager import UserManager   
+from apps.utils.user_manager import UserManager   
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid

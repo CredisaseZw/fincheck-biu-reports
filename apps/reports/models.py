@@ -1,5 +1,5 @@
 from django.db import models
-from apps.common.common_models import BaseModelWithClient
+from apps.utils.base_models import BaseModelWithClient, BaseModel
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
@@ -9,14 +9,6 @@ from django.utils import timezone
 
 # Create your models here.
 class Report(BaseModelWithClient):
-    client_content_type = models.ForeignKey(
-        ContentType,
-        on_delete=models.CASCADE,
-        related_name="report_clients"
-    )
-    client_object_id = models.PositiveIntegerField()
-    client = GenericForeignKey("client_content_type", "client_object_id")
-
     subject_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -65,3 +57,42 @@ class Report(BaseModelWithClient):
     
     def __str__(self):
         return f"Report f{self.enquiry_reference}"
+    
+class TradeReferences(BaseModel):
+    class PaymentTrend(models.TextChoices):
+        GOOD = "good", "Good"
+        FAIR = "fair", "Fair"
+        POOR = "poor", "Poor"
+        
+    report = models.OneToOneField(
+        Report,
+        on_delete=models.CASCADE,
+        related_name="references"
+    )
+    referenced_date = models.DateField(auto_now=True)
+    name = models.CharField(max_length=100)
+    contact_info = models.CharField(max_length=100, blank=True, null=True)
+    reference_source = models.CharField(max_length=200, blank=True, null=True)
+    position = models.CharField(max_length=100, blank=True, null=True)
+    credit_limit = models.CharField(max_length=100, blank=True, null=True)
+    credit_terms = models.CharField(max_length=100, blank=True, null=True)
+    payment_trend = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        choices=PaymentTrend.choices,
+    )
+
+    class Meta:
+        app_label = "reports"
+        db_table = "trade_references"
+        verbose_name = _("Trade Reference")
+        verbose_name_plural = _("Trade Reference")
+        ordering = ["-created_at"]
+    
+    def __str__(self):
+        name = self.name or "N/A"
+        contact = self.contact_info or "N/A"
+        return f"{name} | {contact}"
+
+#class Financial(BaseModel):
