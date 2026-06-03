@@ -2,4 +2,6 @@ from django.apps import AppConfig
 
 
 class ReportsConfig(AppConfig):
-    name = 'reports'
+    name = 'apps.reports'
+    label = 'reports'
+    verbose_name = "Reports"

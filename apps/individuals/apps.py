@@ -2,6 +2,6 @@ from django.apps import AppConfig
 
 
 class IndividualsConfig(AppConfig):
-    name = 'individuals'
+    name = 'apps.individuals'
     label = 'individuals'
     verbose_name = "Individuals"

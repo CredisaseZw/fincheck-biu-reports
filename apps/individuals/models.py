@@ -5,6 +5,10 @@ from django.db.models import UniqueConstraint
 
 
 class Individuals(BaseModel):
+    class ReferType(models.TextChoices):
+        BIU = "biu", "BIU"
+        FP3 = "fp3", "FP3"
+        RENTSAFE = "rentsafe", "Rentsafe"
     class MaritalStatus(models.TextChoices):
         SINGLE = "single", "Single"
         MARRIED = "married", "Married"
@@ -27,7 +31,12 @@ class Individuals(BaseModel):
     postal_address = models.TextField(_("Postal address"), blank=True, null=True)
     mobile_number = models.CharField(_("Mobile number"), max_length=50)
     email = models.EmailField(_("Email"), blank=True, null=True)
-
+    refer_type = models.CharField(
+        max_length=10,
+        choices= ReferType.choices,
+        help_text=_("Where was individual data retrieved from, default is BIU."),
+        default= ReferType.BIU
+    )
     class Meta:
         verbose_name = _("Individual")
         verbose_name_plural = _("Individuals")

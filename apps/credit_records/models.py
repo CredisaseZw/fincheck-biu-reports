@@ -52,10 +52,14 @@ class CourtJudgement(BaseModelWithReport):
         decimal_places=2
     )
 
+    def __str__(self):
+        return f"Court Judgement from {self.court_name} on {self.judgement_date}"
     class Meta:
         db_table = "court_judgement"
         verbose_name = "Court Judgement"
         verbose_name_plural = "Court Judgement's"
+
+
 
 class InsolvencyRecord(BaseModelWithReport):
     class InsolvencyType(models.TextChoices):
@@ -81,7 +85,11 @@ class InsolvencyRecord(BaseModelWithReport):
         blank=True,
         null=True
     )
+
+    def __str__(self):
+        return f"{self.get_insolvency_type_display()} record starting from {self.start_date}"
     class Meta:
+        db_table = "insolvency_record"
         verbose_name = "Insolvency Record"
         verbose_name_plural = "Insolvency Records"
 
@@ -89,3 +97,12 @@ class PublicInformation(BaseModelWithReport):
     record_date = models.DateField(_("Record Date")) 
     summary = models.TextField(blank=True, null=True)
     link = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"Public Information on {self.record_date}"
+
+    class Meta:
+        db_table = "public_information"
+        verbose_name = "Public Information"
+        verbose_name_plural = "Public Information"
+

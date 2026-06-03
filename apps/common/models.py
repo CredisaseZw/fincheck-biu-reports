@@ -56,6 +56,7 @@ class BankerAccounts(BaseModelWithClient):
     account_number = models.CharField(max_length=50)
 
     class Meta:
+
         db_table ="bank_accounts"
         verbose_name = "Banker Account"
         verbose_name_plural = "Banker Accounts"
@@ -68,8 +69,78 @@ class ProfessionalPartners(BaseModelWithClient): #PUSH TO COMMON
     lawyers = models.TextField()
     
     class Meta:
-        app_label = "reports"
+        app_label = "common"
         db_table = "professional_partners"
         verbose_name = _("Professional Partner")
         verbose_name_plural = _("Professional Partners")
         ordering = ["-created_at"]
+
+class Financials(BaseModelWithClient):
+    total_assets = models.DecimalField(
+        _("Total Assets"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    net_profit = models.DecimalField(
+        _("Net Profit"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    net_worth = models.DecimalField(
+        _("Net Worth"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    total_revenue = models.DecimalField(
+        _("Total Revenue"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    paid_up_capital = models.DecimalField(
+        _("Paid Up Capital"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    authorized_capital = models.DecimalField(
+        _("Authorized Capital"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    profit_and_loss = models.FileField(
+        _("Profit and Loss Statement"),
+        upload_to="financials/profit_and_loss/",
+        null=True,
+        blank=True
+    )
+    statement_of_financial_position = models.FileField(
+        _("Statement of Financial Position"),
+        upload_to="financials/statement_of_financial_position/",
+        null=True,
+        blank=True
+    )
+    financial_year = models.PositiveIntegerField(
+        _("Financial Year"),
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        app_label = "common"
+        db_table = "financials"
+        verbose_name = _("Financials")
+        verbose_name_plural = _("Financials")
+
+    def __str__(self):
+        return f"{self.client} - {self.financial_year}"

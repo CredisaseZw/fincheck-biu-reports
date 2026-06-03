@@ -52,13 +52,13 @@ class CompanyDirector(BaseModel):
     )
     
     class Meta:
-        ordering = ["-number_of_shares"]
+        ordering = ["-created_at"]
         db_table = 'company_directors'
         verbose_name = "Company Director"
         verbose_name_plural = "Company Directors"
         constraints = [
             UniqueConstraint(
-                fields= ['company__registered_name', 'full_name'],
+                fields= ['position', 'full_name'],
                 name='unique_director_per_company'
             )
         ]

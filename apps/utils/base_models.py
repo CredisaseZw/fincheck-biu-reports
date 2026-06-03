@@ -1,5 +1,4 @@
 from django.db import models
-from apps.reports.models import Report
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
@@ -25,7 +24,7 @@ class BaseModelWithClient(BaseModel):
 
 class BaseModelWithReport(BaseModel):
     report = models.OneToOneField(
-        Report,
+        "reports.Report",
         on_delete=models.CASCADE,
         related_name="%(class)s_report"
     )

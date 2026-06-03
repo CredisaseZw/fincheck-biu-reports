@@ -2,6 +2,6 @@ from django.apps import AppConfig
 
 
 class ShareholdingConfig(AppConfig):
-    name = 'shareholding'
+    name = 'apps.shareholding'
     label = 'shareholding'
     verbose_name = "Shareholding"

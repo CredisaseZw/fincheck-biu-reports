@@ -38,7 +38,7 @@ class Shareholder(BaseModel):
         db_table = "shareholders"
         verbose_name = "Shareholder"
         verbose_name_plural = "Shareholders"
-        ordering = ["-number_of_shares"]
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.full_name} | Shares: {self.number_of_shares} | Company: {self.shareholding.company}"
