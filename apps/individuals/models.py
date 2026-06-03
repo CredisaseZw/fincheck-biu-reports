@@ -3,7 +3,6 @@ from django.db import models
 from apps.utils.base_models import BaseModel
 from django.db.models import UniqueConstraint
 
-
 class Individuals(BaseModel):
     class ReferType(models.TextChoices):
         BIU = "biu", "BIU"
@@ -52,7 +51,7 @@ class Individuals(BaseModel):
         return f"{self.full_name} | {self.national_id}"
 
 class EmploymentInformation(BaseModel):
-    individual = models.ForeignKey(
+    individual = models.OneToOneField(
         Individuals,
         related_name="employment_information",
         on_delete=models.CASCADE,
@@ -75,7 +74,7 @@ class EmploymentInformation(BaseModel):
         ordering = ["employer", "position"]
 
 class NextOfKin(BaseModel):
-    individual = models.ForeignKey(
+    individual = models.OneToOneField(
         Individuals,
         related_name="next_of_kin",
         on_delete=models.CASCADE,
@@ -92,4 +91,3 @@ class NextOfKin(BaseModel):
     def __str__(self):
         return f"{self.name} ({self.relationship})"
     
-

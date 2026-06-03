@@ -209,9 +209,7 @@ class CompanyOperations(BaseModel):
     operations_territories = models.TextField(blank=True)
     property_ownership = models.TextField(blank=True)
     operational_areas = models.TextField(blank=True)
-
-    updated_at = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
         verbose_name = "Company Operations"
         verbose_name_plural = "Company Operations"
