@@ -49,7 +49,6 @@ def refresh_token(request, *args, **kwargs):
 
 @api_view(['POST'])
 @permission_classes([IsStaffUser])
-@authentication_classes([])
 def create_user(request, *args, **kwargs):
     serializer = CreateUserSerializer(data = request.data)
     error = validate_serializer(serializer=serializer)

@@ -1,5 +1,5 @@
 from django.db import models
-from apps.utils.base_models import BaseModelWithClient, BaseModelWithReport
+from apps.utils.base_models import BaseModelWithClient, BaseModelWithReport, BaseModelWithReportOTO
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
@@ -96,7 +96,7 @@ class TradeReferences(BaseModelWithReport):
         return f"{name} | {contact}"
 
 
-class ReportSummary(BaseModelWithReport):
+class ReportSummary(BaseModelWithReportOTO):
     overall_risk_rating = models.CharField(max_length=50, blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
 
@@ -109,6 +109,3 @@ class ReportSummary(BaseModelWithReport):
 
     def __str__(self):
         return f"Summary for Report {self.report.enquiry_reference}"
-
-
-#class Financial(BaseModel):

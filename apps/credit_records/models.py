@@ -58,9 +58,7 @@ class CourtJudgement(BaseModelWithReport):
         db_table = "court_judgement"
         verbose_name = "Court Judgement"
         verbose_name_plural = "Court Judgement's"
-
-
-
+        
 class InsolvencyRecord(BaseModelWithReport):
     class InsolvencyType(models.TextChoices):
         INSOLVENCY = "insolvency", "Insolvency"

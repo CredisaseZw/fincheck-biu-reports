@@ -6,13 +6,13 @@ from .models import Individuals, EmploymentInformation, NextOfKin
 class EmploymentInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmploymentInformation
-        exclude = ["created_at", "updated_at", "individual"]
+        exclude = ["created_at", "updated_at", "individual", "id"]
 
 
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:
         model = NextOfKin
-        exclude = ["created_at", "updated_at", "individual"]
+        exclude = ["created_at", "updated_at", "individual", "id"]
 
 
 class IndividualSerializer(serializers.ModelSerializer):
@@ -25,7 +25,17 @@ class IndividualSerializer(serializers.ModelSerializer):
         model = Individuals
         fields = "__all__"
 
-
+class MiniIndividualSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individuals
+        fields = [
+            "id", 
+            "full_name",
+            "national_id",
+            "residential_address",
+            "mobile_number",
+            "email"
+        ]
 class IndividualListSerializer(serializers.ModelSerializer):
     marital_status = serializers.CharField(source="get_marital_status_display", read_only=True)
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
@@ -68,3 +78,35 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
                     individual = individual
                 )
         return individual
+    
+class IndividualUpdateSerializer(serializers.ModelSerializer):
+    next_of_kin = NextOfKinSerializer(required = False)
+    employment_information = EmploymentInformationSerializer(required = False)
+    marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
+    refer_type = serializers.ChoiceField(choices=Individuals.ReferType.choices)
+
+    class Meta:
+        model = Individuals
+        fields = "__all__"
+
+    def update(self, instance, validated_data):
+        employment_information_data = validated_data.pop("employment_information", None)
+        next_of_kin_data = validated_data.pop("next_of_kin", None)
+
+        with transaction.atomic():
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+
+            if employment_information_data:
+                EmploymentInformation.objects.update_or_create(
+                    individual=instance,
+                    defaults=employment_information_data
+                )
+
+            if next_of_kin_data:
+                NextOfKin.objects.update_or_create(
+                    individual=instance,
+                    defaults=next_of_kin_data
+                )
+        return instance

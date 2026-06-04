@@ -5,14 +5,16 @@ from apps.utils.permissions import IsStaffUser
 from rest_framework.parsers import MultiPartParser, FormParser
 from apps.utils.helpers import validate_serializer
 from rest_framework.response import Response
+from rest_framework import status
 
 class BaseJSONViewSet(ModelViewSet):
-    authentication_classes = [IsStaffUser]
+    permission_classes = [IsStaffUser]
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering = ["-created_at"]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        #serializer.is_valid(raise_exception=True)
         error = validate_serializer(serializer)
         if error:
             return error

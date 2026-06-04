@@ -9,12 +9,24 @@ from apps.companies.models import (
 )
 
 # GET OPERATIONS
-
 class CompanyOverviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyOverview
         exclude = [
-            "created_at", "updated_at","company"
+            "created_at",
+            "updated_at",
+            "company",
+            "id"
+        ]
+class MiniCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = [
+            "id",
+            "registered_name",
+            "trading_name",
+            "address_registered",
+            "email",  
         ]
 
 class CompanyStructureSerializer(serializers.ModelSerializer):
@@ -31,9 +43,12 @@ class CompanyStructureSerializer(serializers.ModelSerializer):
 class CompanyOperationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyOperations
-        exclude = ["created_at", "updated_at", 'company']
-
-
+        exclude = [
+            "created_at",
+            "updated_at",
+            "company",
+            "id"
+        ]
 class CompanySerializer(serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)
     structure = CompanyStructureSerializer(read_only=True)
@@ -43,9 +58,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        exclude = ["reports_as_client", "reports_as_subject"]
-
-
+        fields = "__all__"
 class CompanyListSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(read_only=True)
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
@@ -66,35 +79,60 @@ class CompanyListSerializer(serializers.ModelSerializer):
         ]
 
 #WRITE OPERATIONS
-
 class CompanyCreateSerializer(serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(required=False)
+    structure = CompanyStructureSerializer(required=False)
+    operations = CompanyOperationsSerializer(required=False)
 
     class Meta:
         model = Company
-        exclude = ["reports_as_client", "reports_as_subject"]
+        fields = "__all__"
 
     def create(self, validated_data):
         overview_data = validated_data.pop("overview", None)
-        
+        structure_data = validated_data.pop("structure", None)
+        operations_data = validated_data.pop("operations", None)
+
         with transaction.atomic():
             company = Company.objects.create(**validated_data)
             if overview_data:
                 CompanyOverview.objects.create(company=company, **overview_data)
-        
-        return company
+            if structure_data:
+                CompanyStructure.objects.create(company=company, **structure_data)
+            if operations_data:
+                CompanyOperations.objects.create(company=company, **operations_data)
 
-class CompanyWriteSerializer(serializers.ModelSerializer):
+        return company
+class CompanyUpdateSerializer(serializers.ModelSerializer):
+    overview = CompanyOverviewSerializer(required=False)
+    structure = CompanyStructureSerializer(required=False)
+    operations = CompanyOperationsSerializer(required=False)
+    company_name = serializers.CharField(required=False)
+
     class Meta:
         model = Company
-        exclude = ["reports_as_client", "reports_as_subject"]
+        fields = "__all__"
 
-class CompanyStructureCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyStructure
-        fields = '__all__'
+    def update(self, instance, validated_data):
+        overview_data = validated_data.pop("overview", None)
+        structure_data = validated_data.pop("structure", None)
+        operations_data = validated_data.pop("operations", None)
 
-class CompanyOperationsCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyOperations
-        fields = '__all__'
+        with transaction.atomic():
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+
+            if overview_data:
+                CompanyOverview.objects.update_or_create(
+                    company=instance, defaults=overview_data
+                )
+            if structure_data:
+                CompanyStructure.objects.update_or_create(
+                    company=instance, defaults=structure_data
+                )
+            if operations_data:
+                CompanyOperations.objects.update_or_create(
+                    company=instance, defaults=operations_data
+                )
+        return instance

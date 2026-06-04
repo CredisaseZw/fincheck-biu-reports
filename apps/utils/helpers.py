@@ -5,15 +5,17 @@ from rest_framework import status
 def clean_error(error):
     if isinstance(error, serializers.ValidationError):
         detail = error.detail
-    else: 
+    else:
         detail = error
 
     if isinstance(detail, dict) and detail:
-        return clean_error(next(iter(detail.values())))
+        field = next(iter(detail))
+        message = clean_error(detail[field])
+        return f"[{field.replace('_', ' ').title()}] {message}"
 
     if isinstance(detail, list) and detail:
         return clean_error(detail[0])
-    
+
     return str(detail)
 
 def validate_serializer(serializer):

@@ -54,11 +54,12 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.companies',
     'apps.individuals',
-    'apps.reports',
     'apps.credit_records',
-    'apps.common', 
-    'apps.shareholding',
     'apps.directors',  
+    'apps.shareholding',
+    'apps.common', 
+    'apps.reports',
+
 ]
 
 MIDDLEWARE = [

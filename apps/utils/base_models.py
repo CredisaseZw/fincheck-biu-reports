@@ -23,6 +23,15 @@ class BaseModelWithClient(BaseModel):
         abstract = True
 
 class BaseModelWithReport(BaseModel):
+    report = models.ForeignKey(
+        "reports.Report",
+        on_delete=models.CASCADE,
+        related_name="%(class)s_report"
+    )
+
+    class Meta:
+        abstract = True
+class BaseModelWithReportOTO(BaseModel):
     report = models.OneToOneField(
         "reports.Report",
         on_delete=models.CASCADE,
@@ -31,7 +40,6 @@ class BaseModelWithReport(BaseModel):
 
     class Meta:
         abstract = True
-
 class BaseModelWithDebtor(BaseModelWithReport):
     debtor_content_type = models.ForeignKey(
         ContentType,

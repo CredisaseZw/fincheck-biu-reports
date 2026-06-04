@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_full_name(self, instance: User) -> str:
         return instance.get_full_name()
     
-class UserSignInSerializers(serializers.ModelSerializer):
+class UserSignInSerializers(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(required=True)
 
