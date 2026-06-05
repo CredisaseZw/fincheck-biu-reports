@@ -7,7 +7,6 @@ from apps.common.models import (
     RegistrationAccounts,
 )
 
-
 @admin.register(RegistrationAccounts)
 class RegistrationAccountsAdmin(admin.ModelAdmin):
     list_display = (
@@ -28,7 +27,6 @@ class RegistrationAccountsAdmin(admin.ModelAdmin):
     )
     search_fields = ("tin_number", "vat_number", "nssa_number", "praz_number")
     readonly_fields = ("created_at", "updated_at")
-
 
 @admin.register(BankerAccounts)
 class BankerAccountsAdmin(admin.ModelAdmin):

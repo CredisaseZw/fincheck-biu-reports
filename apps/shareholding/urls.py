@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
-from .views import CreditRecordsViewSet
+from .views import CompanyShareHoldersViewSet
 
 router = SimpleRouter()
-router.register(r"credit-records", CreditRecordsViewSet, basename="credit-records")
+router.register(r"shareholdings", CompanyShareHoldersViewSet, basename="shareholdings")
 
 urlpatterns = [
     path("", include(router.urls)),

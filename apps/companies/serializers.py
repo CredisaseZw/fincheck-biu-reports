@@ -5,9 +5,30 @@ from apps.companies.models import (
     CompanyOperations,
     CompanyOverview,
     CompanyStructure,
-
 )
-
+from apps.common.models import (
+    RegistrationAccounts, 
+    BankerAccounts, 
+    ProfessionalPartners, 
+)
+from apps.common.serializer import (
+    RegistrationAccountsSerializer,
+    BankerAccountsSerializer,
+    ProfessionalPartnersSerializer,
+    FinancialsSerializer
+)
+from apps.common.serializer import (
+    RegistrationAccountsSerializer,
+    RegistrationAccountsWriteSerializer,
+    ProfessionalPartnersSerializer,
+    ProfessionalPartnersWriteSerializer,
+    FinancialsSerializer,
+    BankerAccountsSerializer,
+    BankerAccountsWriteSerializer,
+)
+from django.contrib.contenttypes.models import ContentType
+from apps.directors.serializers import CompanyDirectorSerializer
+from apps.shareholding.serializers import ShareholdingsSerializers
 # GET OPERATIONS
 class CompanyOverviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,17 +37,6 @@ class CompanyOverviewSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "company",
-            "id"
-        ]
-class MiniCompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = [
-            "id",
-            "registered_name",
-            "trading_name",
-            "address_registered",
-            "email",  
         ]
 
 class CompanyStructureSerializer(serializers.ModelSerializer):
@@ -47,15 +57,19 @@ class CompanyOperationsSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "company",
-            "id"
         ]
 class CompanySerializer(serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)
     structure = CompanyStructureSerializer(read_only=True)
     operations = CompanyOperationsSerializer(read_only=True)
+    directors = CompanyDirectorSerializer(many=True, read_only = True)
+    shareholdings = ShareholdingsSerializers(read_only = True)
+    registration_accounts = RegistrationAccountsSerializer(many = True, read_only = True)
+    banker_accounts = BankerAccountsSerializer(many = True, read_only = True)
+    professional_partners = ProfessionalPartnersSerializer(many = True, read_only = True)
+    financials = FinancialsSerializer(many = True, read_only = True)
     company_name = serializers.CharField(read_only=True)
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
-
     class Meta:
         model = Company
         fields = "__all__"
@@ -83,18 +97,35 @@ class CompanyCreateSerializer(serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(required=False)
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)
+    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
+    banker_accounts = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
+    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
 
     class Meta:
         model = Company
         fields = "__all__"
 
+    def _create_generic_relations(self, company, data_list, model):
+        content_type = ContentType.objects.get_for_model(company)
+        for item in data_list:
+            item.pop("id", None)
+            model.objects.create(
+                client_content_type=content_type,
+                client_object_id=company.id,
+                **item
+            )
+
     def create(self, validated_data):
         overview_data = validated_data.pop("overview", None)
         structure_data = validated_data.pop("structure", None)
         operations_data = validated_data.pop("operations", None)
+        registration_accounts_data = validated_data.pop("registration_accounts", [])
+        banker_accounts_data = validated_data.pop("banker_accounts", [])
+        professional_partners_data = validated_data.pop("professional_partners", [])
 
         with transaction.atomic():
             company = Company.objects.create(**validated_data)
+
             if overview_data:
                 CompanyOverview.objects.create(company=company, **overview_data)
             if structure_data:
@@ -102,21 +133,46 @@ class CompanyCreateSerializer(serializers.ModelSerializer):
             if operations_data:
                 CompanyOperations.objects.create(company=company, **operations_data)
 
+            self._create_generic_relations(company, registration_accounts_data, RegistrationAccounts)
+            self._create_generic_relations(company, banker_accounts_data, BankerAccounts)
+            self._create_generic_relations(company, professional_partners_data, ProfessionalPartners)
+
         return company
+
+
 class CompanyUpdateSerializer(serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(required=False)
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)
+    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True, source = "registration_accounts")
+    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True, source = "banker_accounts")
+    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True, source = "professional_partners")
     company_name = serializers.CharField(required=False)
 
     class Meta:
         model = Company
         fields = "__all__"
 
+    def _update_generic_relations(self, company, data_list, model):
+        content_type = ContentType.objects.get_for_model(company)
+        for item in data_list:
+            item_id = item.pop("id", None)
+            if item_id:
+                model.objects.filter(pk=item_id).update(**item)
+            else:
+                model.objects.create(
+                    client_content_type=content_type,
+                    client_object_id=company.id,
+                    **item
+                )
+
     def update(self, instance, validated_data):
         overview_data = validated_data.pop("overview", None)
         structure_data = validated_data.pop("structure", None)
         operations_data = validated_data.pop("operations", None)
+        registration_accounts_data = validated_data.pop("registration_accounts", [])
+        banker_accounts_data = validated_data.pop("banker_accounts", [])
+        professional_partners_data = validated_data.pop("professional_partners", [])
 
         with transaction.atomic():
             for attr, value in validated_data.items():
@@ -124,15 +180,22 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
             instance.save()
 
             if overview_data:
+                overview_data.pop("id", None)
                 CompanyOverview.objects.update_or_create(
                     company=instance, defaults=overview_data
                 )
             if structure_data:
+                structure_data.pop("id", None)
                 CompanyStructure.objects.update_or_create(
                     company=instance, defaults=structure_data
                 )
             if operations_data:
+                operations_data.pop("id", None)
                 CompanyOperations.objects.update_or_create(
                     company=instance, defaults=operations_data
                 )
+
+            self._update_generic_relations(instance, registration_accounts_data, RegistrationAccounts)
+            self._update_generic_relations(instance, banker_accounts_data, BankerAccounts)
+            self._update_generic_relations(instance, professional_partners_data, ProfessionalPartners)
         return instance

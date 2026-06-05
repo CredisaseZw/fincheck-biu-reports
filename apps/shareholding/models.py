@@ -4,7 +4,7 @@ from apps.utils.base_models import BaseModel
 
 # Create your models here.
 class CompanyShareholding(BaseModel):
-    company = models.ForeignKey(
+    company = models.OneToOneField(
         Company,
         on_delete=models.CASCADE,
         related_name="shareholdings"

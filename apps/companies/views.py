@@ -15,10 +15,17 @@ class CompaniesViewSet(BaseJSONViewSet):
     ordering_fields = ["created_at", "registered_name", "trading_name"]
 
     serializer_class = CompanySerializer
-    queryset = Company.objects.select_related(
+    queryset = Company.objects.prefetch_related(
+        "directors",
+        "registration_accounts",
+        "banker_accounts",
+        "professional_partners",
+        "financials",
+    ).select_related(
         "structure",
         "operations",
-        "overview"    
+        "overview",
+        "shareholdings"
     ).filter(is_deleted = False)
     
     def get_serializer_class(self):
@@ -29,3 +36,4 @@ class CompaniesViewSet(BaseJSONViewSet):
         elif self.action in [ "update", "partial_update"]:
             return CompanyUpdateSerializer
         return CompanySerializer
+    

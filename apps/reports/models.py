@@ -17,7 +17,8 @@ class Report(BaseModelWithClient):
     subject_object_id = models.PositiveIntegerField()
     subject = GenericForeignKey("subject_content_type", "subject_object_id")
     enquiry_reference = models.CharField(max_length=20, unique=True, editable=False)
-
+    is_deleted = models.BooleanField(default=False)
+    
     def save(self, *args, **kwargs):
         if not self.enquiry_reference:
             self.enquiry_reference = self._generate_reference()

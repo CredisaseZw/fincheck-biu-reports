@@ -5,7 +5,12 @@ from django.db.models import UniqueConstraint
 from django.contrib.contenttypes.fields import GenericRelation
 from apps.utils.base_models import BaseModel
 from django.utils.translation import gettext_lazy as _
-
+from apps.common.models import (
+    RegistrationAccounts,
+    BankerAccounts,
+    ProfessionalPartners,
+    Financials
+)
 class Company(BaseModel):
     class ReferType(models.TextChoices):
         BIU = "biu", "BIU"
@@ -57,6 +62,28 @@ class Company(BaseModel):
         blank=True,
         null=True,
         help_text=_("Website link for the branch."),
+    )
+    
+    # GENERIC RELATIONS
+    registration_accounts = GenericRelation(
+        RegistrationAccounts,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
+    ) 
+    banker_accounts = GenericRelation(
+        BankerAccounts,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
+    )
+    professional_partners = GenericRelation(
+        ProfessionalPartners,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
+    )
+    financials = GenericRelation(
+        Financials,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
     )
     reports_as_client = GenericRelation(
         Report,

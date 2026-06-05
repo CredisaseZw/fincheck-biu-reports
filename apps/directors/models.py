@@ -18,7 +18,7 @@ class CompanyDirector(BaseModel):
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
-        related_name='director'
+        related_name='directors'
     )
     full_name = models.CharField(
         max_length=50,
@@ -37,7 +37,11 @@ class CompanyDirector(BaseModel):
     )
     dob = models.DateTimeField(help_text= _("Director Date of birth"))
     address_latest = models.TextField(help_text= _("Director Primary Address"))
-    address_prev = models.TextField(help_text= _("Director Prev Address"))
+    address_prev = models.TextField(
+        help_text= _("Director Prev Address"),
+        blank = True,
+        null = True
+    )
     email = models.EmailField(
         max_length=50,
         blank=True, 

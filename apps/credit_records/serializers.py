@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.reports.models import Report
-from apps.companies.serializers import MiniCompanySerializer
-from apps.individuals.serializers import MiniIndividualSerializer
+from apps.utils.mini_serializers import MiniCompanySerializer
+from apps.utils.mini_serializers import MiniIndividualSerializer
 from .models import Claims, Absconders, CourtJudgement, InsolvencyRecord, PublicInformation
 
 def _get_debtor_data(debtor):

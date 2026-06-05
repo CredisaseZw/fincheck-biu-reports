@@ -2,7 +2,13 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 from apps.utils.base_models import BaseModel
 from django.db.models import UniqueConstraint
-
+from django.contrib.contenttypes.fields import GenericRelation
+from apps.common.models import (
+    ProfessionalPartners,
+    BankerAccounts,
+    RegistrationAccounts,
+    Financials
+)
 class Individuals(BaseModel):
     class ReferType(models.TextChoices):
         BIU = "biu", "BIU"
@@ -30,11 +36,33 @@ class Individuals(BaseModel):
     postal_address = models.TextField(_("Postal address"), blank=True, null=True)
     mobile_number = models.CharField(_("Mobile number"), max_length=50)
     email = models.EmailField(_("Email"), blank=True, null=True)
+    is_deleted = models.BooleanField(_("Is deleted"), default=False)
     refer_type = models.CharField(
         max_length=10,
         choices= ReferType.choices,
         help_text=_("Where was individual data retrieved from, default is BIU."),
         default= ReferType.BIU
+    )
+
+    registration_accounts = GenericRelation(
+        RegistrationAccounts,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
+    ) 
+    banker_accounts = GenericRelation(
+        BankerAccounts,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
+    )
+    professional_partners = GenericRelation(
+        ProfessionalPartners,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
+    )
+    financials = GenericRelation(
+        Financials,
+        content_type_field="client_content_type",
+        object_id_field="client_object_id"
     )
     class Meta:
         verbose_name = _("Individual")

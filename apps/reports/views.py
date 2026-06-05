@@ -4,11 +4,11 @@ from apps.reports.models import Report
 from django.db.models import Model
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
-from .serializers import ReportSerializer, ListReportSerializer, CreateReportSerializer
+from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
 from django.contrib.contenttypes.models import ContentType
+
 class ReportViewSet(BaseJSONViewSet):
-    ordering_fields = ["created_at", "enquiry_reference"]
     search_fields = ["enquiry_reference"]
     queryset = Report.objects.prefetch_related(
         "references_report",
@@ -19,7 +19,8 @@ class ReportViewSet(BaseJSONViewSet):
         "publicinformation_report"
     ).select_related(
         "reportsummary_report"
-    )
+    ).filter(is_deleted = False)
+
     serializer_class = ReportSerializer
 
     def _get_content_instance(self, id: int) -> Model:

@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from apps.companies.serializers import CompanySerializer, MiniCompanySerializer
-from apps.individuals.serializers import IndividualSerializer, MiniIndividualSerializer
+from apps.utils.mini_serializers import MiniCompanySerializer, MiniIndividualSerializer
+from apps.companies.serializers import CompanySerializer
+from apps.individuals.serializers import IndividualSerializer
 from .models import TradeReferences, ReportSummary, Report
 from apps.credit_records.serializers import CreditRecordsSerializer
 # READ SERIALIZERS

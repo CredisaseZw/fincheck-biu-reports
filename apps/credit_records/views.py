@@ -38,34 +38,27 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
         "courtjudgement_report",
         "insolvencyrecord_report",
         "publicinformation_report"
-    ).all()
+    ).select_related(
+        "reportsummary_report"
+    ).filter(is_deleted = False)
 
     def _update_record( 
             self,
             request, 
             serializer_class: ModelSerializer, 
             data : any,
-            model: Model
+            instance: Model
         ):
-        record_id = data.pop("id")
-        try:
-            instance = model.objects.get(pk=record_id)
-        except model.DoesNotExist:
-            return Response(
-                {"error": f"{model.__name__} does not exist"},
-                status=STATUS.HTTP_400_BAD_REQUEST
-            )
-
         serializer = serializer_class(
             instance,
-            data=data,
+            data=data.pop("id"),
             partial=True,
             context={"request": request}
         )
         error = validate_serializer(serializer=serializer)
         if error:
             return error
-
+        
         serializer.save()
         return None
 
@@ -93,33 +86,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
         if not debtor:
             return None
         return ContentType.objects.get_for_model(debtor).id
-    
-
-    @action(url_path="claims", methods=["PATCH"], detail=True)
-    def update_or_create_claims(self, request, *args, **kwargs):
-        report = self.get_object()
-        claims = request.data.get("claims", None)
-
-        if not claims:
-            return Response({
-                "error" : "Claims required."
-            }, status=STATUS.HTTP_400_BAD_REQUEST)
-
-        for claim in claims:
-            if claim.get("id", None):
-                self._update_record(
-                    request=request,
-                    serializer_class = ClaimsWriteSerializer,
-                    data = claim,
-                    model= Claims
-                )
-            self._create_record()
-        
-        report.refresh_from_db()
-        return Response(
-            CreditRecordsSerializer(instance = report).data,
-            status=STATUS.HTTP_200_OK
-        )
 
     @action(url_path="claims", methods=["PATCH"], detail=True)
     def update_or_create_claims(self, request, *args, **kwargs):
@@ -142,12 +108,13 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                     )
                 claim["debtor_content_type"] = content_type_id
 
-            if claim.get("id"):
+            instance = Claims.objects.filter(pk = claim.get("id", None)).first()
+            if instance:
                 error = self._update_record(
                     request=request,
                     serializer_class=ClaimsWriteSerializer,
                     data=claim,
-                    model=Claims
+                    instance=instance
                 )
             else:
                 error = self._create_record(
@@ -156,7 +123,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                     serializer_class=ClaimsWriteSerializer,
                     data=claim
                 )
-
             if error:
                 return error
 
@@ -187,12 +153,13 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                     )
                 absconder["debtor_content_type"] = content_type_id
 
-            if absconder.get("id"):
+            instance = Absconders.objects.filter(pk = absconder.get("id", None)).first()
+            if instance:
                 error = self._update_record(
                     request=request,
                     serializer_class=AbscondersWriteSerializer,
                     data=absconder,
-                    model=Absconders
+                    instance=instance
                 )
             else:
                 error = self._create_record(
@@ -232,12 +199,13 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                     )
                 record["debtor_content_type"] = content_type_id
 
-            if record.get("id"):
+            instance = InsolvencyRecord.objects.filter(pk = record.get("id", None)).first()
+            if instance:
                 error = self._update_record(
                     request=request,
                     serializer_class=InsolvencyRecordWriteSerializer,
                     data=record,
-                    model=InsolvencyRecord
+                    instance=instance
                 )
             else:
                 error = self._create_record(
@@ -268,12 +236,13 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
             )
 
         for info in public_information:
-            if info.get("id"):
+            instance = PublicInformation.objects.filter(pk = info.get("id", None)).first()
+            if instance:
                 error = self._update_record(
                     request=request,
                     serializer_class=PublicInformationWriteSerializer,
                     data=info,
-                    model=PublicInformation
+                    instance=instance
                 )
             else:
                 error = self._create_record(
@@ -304,12 +273,13 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
             )
 
         for judgement in court_judgements:
-            if judgement.get("id"):
+            instance = CourtJudgement.objects.filter(pk = judgement.get("id", None)).first()
+            if instance:
                 error = self._update_record(
                     request=request,
                     serializer_class=CourtJudgementWriteSerializer,
                     data=judgement,
-                    model=CourtJudgement
+                    instance=instance
                 )
             else:
                 error = self._create_record(

@@ -11,7 +11,16 @@ class IndividualsViewSet(BaseJSONViewSet):
     """
     A viewset for viewing and editing individual instances.
     """
-    queryset = Individuals.objects.all()
+    queryset = Individuals.objects.prefetch_related(
+        "registration_accounts",
+        "banker_accounts",
+        "professional_partners",
+        "financials",
+    ).select_related(
+        "employment_information",
+        "next_of_kin"
+    ).filter(is_deleted = False)
+
     serializer_class = IndividualSerializer
 
     def get_serializer_class(self):
