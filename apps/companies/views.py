@@ -6,7 +6,7 @@ from .serializers import (
     CompanyCreateSerializer,
     CompanyListSerializer,
     CompanySerializer,
-    CompanyUpdateSerializer
+    CompanyUpdateSerializer,
 )
 
 class CompaniesViewSet(BaseJSONViewSet):

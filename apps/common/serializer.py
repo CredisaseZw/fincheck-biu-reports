@@ -89,3 +89,7 @@ class FinancialsWriteSerializer(serializers.ModelSerializer):
             "statement_of_financial_position",
             "financial_year",
         ]
+        extra_kwargs = {
+            "profit_and_loss": {"required": False},
+            "statement_of_financial_position": {"required": False},
+        }

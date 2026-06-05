@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from apps.utils.base_models import BaseModelWithClient
-
+import os
+import uuid
 # Create your models here.
 class RegistrationAccounts(BaseModelWithClient):
     tin_number = models.CharField(
@@ -76,6 +77,14 @@ class ProfessionalPartners(BaseModelWithClient): #PUSH TO COMMON
         ordering = ["-created_at"]
 
 class Financials(BaseModelWithClient):
+    def profit_and_loss_path(instance, filename):
+        ext = os.path.splitext(filename)[1]
+        return f"financials/profit_and_loss/{uuid.uuid4()}{ext}"
+
+    def statement_of_financial_position_path(instance, filename):
+        ext = os.path.splitext(filename)[1]
+        return f"financials/statement_of_financial_position/{uuid.uuid4()}{ext}"
+    
     total_assets = models.DecimalField(
         _("Total Assets"),
         max_digits=20,
@@ -120,13 +129,13 @@ class Financials(BaseModelWithClient):
     )
     profit_and_loss = models.FileField(
         _("Profit and Loss Statement"),
-        upload_to="financials/profit_and_loss/",
+        upload_to=profit_and_loss_path,
         null=True,
         blank=True
     )
     statement_of_financial_position = models.FileField(
         _("Statement of Financial Position"),
-        upload_to="financials/statement_of_financial_position/",
+        upload_to=statement_of_financial_position_path,
         null=True,
         blank=True
     )
@@ -135,7 +144,7 @@ class Financials(BaseModelWithClient):
         null=True,
         blank=True
     )
-
+    
     class Meta:
         app_label = "common"
         db_table = "financials"
