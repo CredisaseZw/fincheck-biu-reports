@@ -36,10 +36,18 @@ def validate_serializer(serializer):
         )
     return None
 
-def _get_client_content_type(client_object_id) -> int | None:
-    client = Company.objects.filter(pk=client_object_id).first()
-    if not client:
-        client = Individuals.objects.filter(pk=client_object_id).first()
+def get_content_type_id(client_object_id, client_type: str) -> int | None:
+    model_map = {
+        "company": Company,
+        "individual": Individuals,
+    }
+
+    model = model_map.get(client_type)
+    if not model:
+        return None
+
+    client = model.objects.filter(pk=client_object_id).first()
     if not client:
         return None
+
     return ContentType.objects.get_for_model(client).id

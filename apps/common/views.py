@@ -4,12 +4,9 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status as STATUS
 from apps.utils.permissions import IsStaffUser
-from apps.utils.helpers import validate_serializer
+from apps.utils.helpers import validate_serializer, get_content_type_id
 from .models import Financials
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
-from apps.companies.models import Company
-from apps.individuals.models import Individuals
-from django.contrib.contenttypes.models import ContentType
 
 class FinancialsViewSet(
     GenericViewSet,
@@ -28,21 +25,16 @@ class FinancialsViewSet(
             return FinancialsWriteSerializer
         return FinancialsSerializer
 
-    def _get_client_content_type(self, client_object_id) -> int | None:
-        client = Company.objects.filter(pk=client_object_id).first()
-        if not client:
-            client = Individuals.objects.filter(pk=client_object_id).first()
-        if not client:
-            return None
-        return ContentType.objects.get_for_model(client).id
-
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
-        content_type_id = self._get_client_content_type(data.get("client_object_id"))
+        content_type_id = get_content_type_id(
+            data.get("client_object_id"),
+            data.get("client_type")
+        )
 
         if not content_type_id:
             return Response(
-                {"error": "Invalid client_object_id — no matching Company or Individual found."},
+                {"error": "Invalid client_object_id or client_type."},
                 status=STATUS.HTTP_400_BAD_REQUEST
             )
 
@@ -71,10 +63,13 @@ class FinancialsViewSet(
                 instance.statement_of_financial_position.delete(save=False)
 
         if client_object_id := data.get("client_object_id"):
-            content_type_id = _get_client_content_type(client_object_id)
+            content_type_id = get_content_type_id(
+                client_object_id,
+                data.get("client_type")
+            )
             if not content_type_id:
                 return Response(
-                    {"error": "Invalid client_object_id — no matching Company or Individual found."},
+                    {"error": "Invalid client_object_id or client_type."},
                     status=STATUS.HTTP_400_BAD_REQUEST
                 )
             data["client_content_type"] = content_type_id

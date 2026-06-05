@@ -1,12 +1,9 @@
 from rest_framework.response import Response
 from apps.utils.base_viewset import BaseJSONViewSet
+from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
-from django.db.models import Model
-from apps.companies.models import Company
-from apps.individuals.models import Individuals
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
-from django.contrib.contenttypes.models import ContentType
 
 class ReportViewSet(BaseJSONViewSet):
     search_fields = ["enquiry_reference"]
@@ -19,19 +16,9 @@ class ReportViewSet(BaseJSONViewSet):
         "publicinformation_report"
     ).select_related(
         "reportsummary_report"
-    ).filter(is_deleted = False)
+    ).filter(is_deleted=False)
 
     serializer_class = ReportSerializer
-
-    def _get_content_instance(self, id: int) -> Model:
-        instance = Company.objects.filter(pk = id).first()
-        if not instance:
-            instance  = Individuals.objects.filter(pk = id).first()
-        
-        return instance
-
-    def _get_content_type_id(self, model: Model) -> id:
-        return ContentType.objects.get_for_model(model=model).id
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -39,31 +26,37 @@ class ReportViewSet(BaseJSONViewSet):
         return ReportSerializer
 
     def create(self, request, *args, **kwargs):
-        #required subject_object_id, client_object_id
-        
-        subject = self._get_content_instance(request.data.get("subject_object_id", ""))
-        client = self._get_content_instance(request.data.get("client_object_id", ""))
+        subject_id = request.data.get("subject_object_id")
+        client_id = request.data.get("client_object_id")
+        subject_type = request.data.get("subject_type")
+        client_type = request.data.get("client_type")
 
-        if not subject:
-            return Response({
-                "error" : "Subject is required"
-            }, status=STATUS.HTTP_400_BAD_REQUEST)
+        subject_content_type_id = get_content_type_id(subject_id, subject_type)
+        client_content_type_id = get_content_type_id(client_id, client_type)
 
-        if not client:
-            return Response({
-                "error" : "Client is required"
-            }, status=STATUS.HTTP_400_BAD_REQUEST)
+        if not subject_content_type_id:
+            return Response(
+                {"error": "Invalid subject_object_id or subject_type."},
+                status=STATUS.HTTP_400_BAD_REQUEST
+            )
 
-        if subject == client:
-            return Response({
-                "error" : "Subject & client cannot be the same"
-            }, status=STATUS.HTTP_400_BAD_REQUEST)
+        if not client_content_type_id:
+            return Response(
+                {"error": "Invalid client_object_id or client_type."},
+                status=STATUS.HTTP_400_BAD_REQUEST
+            )
+
+        if subject_id == client_id and subject_type == client_type:
+            return Response(
+                {"error": "Subject & client cannot be the same."},
+                status=STATUS.HTTP_400_BAD_REQUEST
+            )
 
         report = Report.objects.create(
-            subject_object_id =  subject.id,
-            client_object_id = client.id,
-            subject_content_type = self._get_content_type_id(subject),
-            client_content_type = self._get_content_type_id(client)   
+            subject_object_id=subject_id,
+            subject_content_type_id=subject_content_type_id,
+            client_object_id=client_id,
+            client_content_type_id=client_content_type_id,
         )
 
         report.refresh_from_db()

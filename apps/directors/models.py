@@ -68,4 +68,4 @@ class CompanyDirector(BaseModel):
         ]
 
     def __str__(self):
-        return f"{self.name} | ({self.company})"
+        return f"{self.full_name} | ({self.company})"

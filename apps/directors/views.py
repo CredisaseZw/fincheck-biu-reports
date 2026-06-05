@@ -4,11 +4,13 @@ from apps.utils.permissions import IsStaffUser
 from apps.companies.models import Company
 from .models import CompanyDirector
 from rest_framework import status as STATUS
+from apps.utils.helpers import validate_serializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializers import CompanyDirectorSerializer, DirectorSerializer
 # Create your views here.
 class DirectorsViewSet(GenericViewSet, RetrieveModelMixin):
+    permission_classes = [IsStaffUser]
     serializer_class = CompanyDirectorSerializer
     queryset = Company.objects.prefetch_related(
         "directors"
@@ -28,7 +30,7 @@ class DirectorsViewSet(GenericViewSet, RetrieveModelMixin):
             )
 
         for director in directors:
-            instance = CompanyDirector.objects.filter(pk=director.pop("id")).first()
+            instance = CompanyDirector.objects.filter(pk=director.pop("id", None)).first()
             if instance:
                 serializer = DirectorSerializer(instance, data=director, partial=True)
             else:

@@ -1,16 +1,20 @@
 from django.contrib import admin
-
 from apps.common.models import (
     BankerAccounts,
     Financials,
     ProfessionalPartners,
     RegistrationAccounts,
 )
-
+class GenericClientMixin:
+    @admin.display(description="Client")
+    def get_client(self, obj):
+        if obj.client:
+            return f"{obj.client.__class__.__name__} | {str(obj.client)}"
+        return "-"
 @admin.register(RegistrationAccounts)
-class RegistrationAccountsAdmin(admin.ModelAdmin):
+class RegistrationAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
     list_display = (
-        "client",
+        "get_client",
         "tin_number",
         "vat_number",
         "nssa_number",
@@ -28,10 +32,11 @@ class RegistrationAccountsAdmin(admin.ModelAdmin):
     search_fields = ("tin_number", "vat_number", "nssa_number", "praz_number")
     readonly_fields = ("created_at", "updated_at")
 
+
 @admin.register(BankerAccounts)
-class BankerAccountsAdmin(admin.ModelAdmin):
+class BankerAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
     list_display = (
-        "client",
+        "get_client",
         "bank",
         "branch",
         "account_name",
@@ -45,15 +50,15 @@ class BankerAccountsAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProfessionalPartners)
-class ProfessionalPartnersAdmin(admin.ModelAdmin):
-    list_display = ("client", "created_at")
+class ProfessionalPartnersAdmin(GenericClientMixin, admin.ModelAdmin):
+    list_display = ("get_client", "created_at")
     readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(Financials)
-class FinancialsAdmin(admin.ModelAdmin):
+class FinancialsAdmin(GenericClientMixin, admin.ModelAdmin):
     list_display = (
-        "client",
+        "get_client",
         "financial_year",
         "total_assets",
         "net_profit",

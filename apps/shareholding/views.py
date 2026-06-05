@@ -15,7 +15,7 @@ class CompanyShareHoldersViewSet(
     ):
     queryset = CompanyShareholding.objects.prefetch_related(
         "shareholders"
-    ).select_related("shareholdings").all()
+    ).select_related("company").all()
     serializer_class = CompanyShareholdingsSerializer
 
     def get_serializer_class(self):
@@ -54,9 +54,9 @@ class CompanyShareHoldersViewSet(
         data = request.data.copy()
         shareholders_data = data.pop("shareholders", [])
 
-        if bool(
-            data.get("numbers_of_shares", None) 
-            or data.get("numbers_of_shareholders", None)
+        if any(
+            data.get(field) is not None
+            for field in ["numbers_of_shares", "numbers_of_shareholders"]
         ):
             serializer = self.get_serializer(
                 instance,

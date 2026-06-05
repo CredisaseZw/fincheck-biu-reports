@@ -33,6 +33,7 @@ class ClaimsSerializer(serializers.ModelSerializer):
         return _get_debtor_data(obj.debtor)
 
 class AbscondersSerializer(serializers.ModelSerializer): 
+    debtor =  serializers.SerializerMethodField()
     status_display = serializers.CharField(source="get_status_display", read_only=True)
     class Meta:
         model = Absconders
@@ -63,21 +64,19 @@ class CourtJudgementSerializer(serializers.ModelSerializer):
         ]
 
 class InsolvencyRecordSerializer(serializers.ModelSerializer):
+    insolvency_type_display = serializers.CharField(source="get_insolvency_type_display", read_only=True)
+
     class Meta:
         model = InsolvencyRecord
         fields = [
             "id",
             "report",
-            "debtor",
-            "creditor_name",
-            "currency",
-            "amount",
-            "insolvency_type",
-            "filing_date",
+            "start_date",
+            "end_date",
+            "court_reference",
+            "insolvency_type_display",
         ]
     
-    def get_debtor(self, obj):
-        return _get_debtor_data(obj.debtor)
 
 class PublicInformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -150,18 +149,10 @@ class CourtJudgementWriteSerializer(serializers.ModelSerializer):
 
 
 class InsolvencyRecordWriteSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = InsolvencyRecord
-        fields = [
-            "report",
-            "debtor_content_type",
-            "debtor_object_id",
-            "creditor_name",
-            "currency",
-            "amount",
-            "insolvency_type",
-            "filing_date",
-        ]
+        fields = '__all__'
 
 
 class PublicInformationWriteSerializer(serializers.ModelSerializer):

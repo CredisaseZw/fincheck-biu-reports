@@ -1,13 +1,10 @@
 from rest_framework.response import Response
 from rest_framework import status as STATUS
-from apps.utils.helpers import validate_serializer
+from apps.utils.helpers import validate_serializer, get_content_type_id
 from apps.utils.permissions import IsStaffUser
-from django.contrib.contenttypes.models import ContentType
 from apps.reports.models import Report
 from django.db.models import Model
 from rest_framework.serializers import ModelSerializer
-from apps.companies.models import Company
-from apps.individuals.models import Individuals
 from rest_framework.decorators import action
 from .models import (
     Absconders, 
@@ -49,9 +46,13 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
             data : any,
             instance: Model
         ):
+        
+        if data.get("id"): 
+            data.pop("id")
+
         serializer = serializer_class(
             instance,
-            data=data.pop("id"),
+            data=data,
             partial=True,
             context={"request": request}
         )
@@ -77,15 +78,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
 
         serializer.save()
         return None
-    
-    
-    def _get_debtor(self, debtor_object_id):
-        debtor = Company.objects.filter(pk=debtor_object_id).first()
-        if not debtor:
-            debtor = Individuals.objects.filter(pk=debtor_object_id).first()
-        if not debtor:
-            return None
-        return ContentType.objects.get_for_model(debtor).id
 
     @action(url_path="claims", methods=["PATCH"], detail=True)
     def update_or_create_claims(self, request, *args, **kwargs):
@@ -100,7 +92,7 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
 
         for claim in claims:
             if debtor_id := claim.get("debtor_object_id"):
-                content_type_id = self._get_debtor(debtor_id)
+                content_type_id = get_content_type_id(debtor_id, claim.get("debtor_type"))
                 if not content_type_id:
                     return Response(
                         {"error": f"Debtor with id {debtor_id} does not exist"},
@@ -118,7 +110,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                 )
             else:
                 error = self._create_record(
-                    request=request,
                     report_id=report.id,
                     serializer_class=ClaimsWriteSerializer,
                     data=claim
@@ -145,7 +136,7 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
 
         for absconder in absconders:
             if debtor_id := absconder.get("debtor_object_id"):
-                content_type_id = self._get_debtor(debtor_id)
+                content_type_id = get_content_type_id(debtor_id, absconder.get("debtor_type"))
                 if not content_type_id:
                     return Response(
                         {"error": f"Debtor with id {debtor_id} does not exist"},
@@ -163,7 +154,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                 )
             else:
                 error = self._create_record(
-                    request=request,
                     report_id=report.id,
                     serializer_class=AbscondersWriteSerializer,
                     data=absconder
@@ -190,15 +180,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
             )
 
         for record in insolvency_records:
-            if debtor_id := record.get("debtor_object_id"):
-                content_type_id = self._get_debtor(debtor_id)
-                if not content_type_id:
-                    return Response(
-                        {"error": f"Debtor with id {debtor_id} does not exist"},
-                        status=STATUS.HTTP_400_BAD_REQUEST
-                    )
-                record["debtor_content_type"] = content_type_id
-
             instance = InsolvencyRecord.objects.filter(pk = record.get("id", None)).first()
             if instance:
                 error = self._update_record(
@@ -209,7 +190,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                 )
             else:
                 error = self._create_record(
-                    request=request,
                     report_id=report.id,
                     serializer_class=InsolvencyRecordWriteSerializer,
                     data=record
@@ -246,7 +226,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                 )
             else:
                 error = self._create_record(
-                    request=request,
                     report_id=report.id,
                     serializer_class=PublicInformationWriteSerializer,
                     data=info
@@ -283,7 +262,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
                 )
             else:
                 error = self._create_record(
-                    request=request,
                     report_id=report.id,
                     serializer_class=CourtJudgementWriteSerializer,
                     data=judgement

@@ -98,7 +98,7 @@ class CompanyCreateSerializer(serializers.ModelSerializer):
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)
     registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
-    banker_accounts = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
+    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
     professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
 
     class Meta:
@@ -144,9 +144,9 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(required=False)
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)
-    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True, source = "registration_accounts")
-    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True, source = "banker_accounts")
-    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True, source = "professional_partners")
+    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
+    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
+    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
     company_name = serializers.CharField(required=False)
 
     class Meta:

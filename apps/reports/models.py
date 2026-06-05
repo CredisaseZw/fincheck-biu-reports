@@ -21,27 +21,21 @@ class Report(BaseModelWithClient):
     
     def save(self, *args, **kwargs):
         if not self.enquiry_reference:
-            self.enquiry_reference = self._generate_reference()
-        super().save(*args, **kwargs)
+            with transaction.atomic():
+                now = timezone.now()
+                prefix = now.strftime("%y%m")
 
-    def _generate_reference(self):
-        now = timezone.now()
-        prefix = now.strftime("%y%m")
-
-        with transaction.atomic():
-            last = (
-                Report.objects.filter(enquiry_reference__startswith=prefix)
-                .select_for_update()
-                .order_by("-enquiry_reference")
-                .first()
-            )
-            if last:
-                last_seq = int(last.enquiry_reference[4:])
-                seq = last_seq + 1
-            else:
-                seq = 1
-
-        return f"{prefix}{seq:04d}"
+                last = (
+                    Report.objects.filter(enquiry_reference__startswith=prefix)
+                    .select_for_update()
+                    .order_by("-enquiry_reference")
+                    .first()
+                )
+                seq = int(last.enquiry_reference[4:]) + 1 if last else 1
+                self.enquiry_reference = f"{prefix}{seq:04d}"
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     class Meta:
         app_label = "reports"
@@ -57,7 +51,7 @@ class Report(BaseModelWithClient):
         ]
     
     def __str__(self):
-        return f"Report f{self.enquiry_reference}"
+        return f"Report {self.enquiry_reference}"
     
 class TradeReferences(BaseModelWithReport):
     class PaymentTrend(models.TextChoices):
@@ -65,11 +59,6 @@ class TradeReferences(BaseModelWithReport):
         FAIR = "fair", "Fair"
         POOR = "poor", "Poor"
         
-    report = models.OneToOneField(
-        Report,
-        on_delete=models.CASCADE,
-        related_name="references"
-    )
     referenced_date = models.DateField(auto_now=True)
     name = models.CharField(max_length=100)
     contact_info = models.CharField(max_length=100, blank=True, null=True)

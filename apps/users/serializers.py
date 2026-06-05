@@ -30,11 +30,11 @@ class UserSignInSerializers(serializers.Serializer):
         except User.DoesNotExist:
             raise serializers.ValidationError({"error": "Invalid email or password"})
 
-        if not user.check_password(password):
-            raise serializers.ValidationError({"error": "Invalid email or password"})
-
         if not user.is_active:
             raise serializers.ValidationError({"error": "Account is locked. Contact support."})
+
+        if not user.check_password(password):
+            raise serializers.ValidationError({"error": "Invalid email or password"})
 
         token = RefreshToken.for_user(user)
         return {
@@ -49,5 +49,5 @@ class UserSignInSerializers(serializers.Serializer):
 class CreateUserSerializer(serializers.Serializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-    email = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
