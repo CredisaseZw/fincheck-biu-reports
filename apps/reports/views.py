@@ -8,9 +8,7 @@ from rest_framework import status as STATUS
 class ReportViewSet(BaseJSONViewSet):
     search_fields = ["enquiry_reference"]
     queryset = Report.objects.prefetch_related(
-        "references_report",
-        "claims_report",
-        "absconders_report",
+        "tradereferences_report",
         "courtjudgement_report",
         "insolvencyrecord_report",
         "publicinformation_report"

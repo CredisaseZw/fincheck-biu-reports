@@ -1,19 +1,47 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-9 w-full min-w-0 rounded-3xl border border-transparent bg-input/50 px-3 py-1 text-base transition-[color,box-shadow,background-color] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
-      )}
-      {...props}
-    />
-  )
+interface InputProps extends React.ComponentProps<"input"> {
+  rounded?: true | false
+  variant?: "default" | "sm" | "ghost"
+  bg?: "transparent" | "fill"
 }
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, variant = "default", bg = "fill", rounded = true, ...props }, ref) => {
+    const edges = rounded ? "rounded-md" : "rounded-none";
+    const base = cn(
+      "bg-light dark:bg-zinc-950/20",
+      "text-gray-600 dark:text-gray-50",
+      "flex w-full text-gray-800 placeholder:text-gray-400 ",
+      "transition-all duration-200",
+      "disabled:cursor-not-allowed disabled:opacity-50",
+      bg === "fill" ? "bg-white" : "bg-transparent"
+    )
+
+    const variants = {
+      default: cn(
+        "border px-3 py-2 text-base md:text-sm",
+        "focus:outline-none bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-[#3C7C9B] "
+      ),
+      sm: cn(
+        "border border-gray-300 px-2 py-2 text-sm",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      ),
+      ghost: "border-none bg-transparent p-0 shadow-none focus:outline-none focus:ring-0",
+    }
+
+    return (
+      <input
+        ref={ref}
+        type={type}
+        className={cn(base, variants[variant], edges, className)}
+        {...props}
+      />
+    )
+  }
+)
+
+Input.displayName = "Input"
 
 export { Input }

@@ -50,7 +50,7 @@ class ReportSummarySerializer(serializers.ModelSerializer):
 class ReportSerializer(serializers.ModelSerializer):
     client = serializers.SerializerMethodField()
     subject = serializers.SerializerMethodField()
-    references  = TradeReferencesSerializer(many = True, read_only=True, source = 'references')
+    references  = TradeReferencesSerializer(many = True, read_only=True, source = 'tradereferences_report')
     credit_records = CreditRecordsSerializer(read_only = True) 
     report_summary = ReportSummarySerializer(read_only = True, source = "reportsummary_report")
 
