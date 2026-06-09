@@ -27,7 +27,8 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 if DEBUG:
     ALLOWED_HOSTS = [
-        'localhost'
+        'localhost',
+        '127.0.0.1'
     ]
 else :
     ALLOWED_HOSTS = [

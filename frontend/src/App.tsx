@@ -6,6 +6,10 @@ import type { RouteItem } from "./types/core";
 import { CORE_ROUTES } from "./constants/routes";
 import { AppLayout } from "./components/layouts/AppLayout";
 import Login from "./components/routes/auth/login";
+import { Toaster } from "./components/ui/sonner"
+import ReportProvider from "./contexts/ReportMutationContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import PrivateRoute from "./components/layouts/PrivateRoute";
 
 function App() {
   const queryClient = new QueryClient();
@@ -20,20 +24,31 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider >
-        <BrowserRouter>
-          <Routes>
-            <Route path={"/"} element={<Login/>} /> 
+      <AuthProvider>
+        <TooltipProvider>
+          <ReportProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path={"/"} element={<Login/>} /> 
 
-            <Route element={<AppLayout />}>
-              {renderRoutes(CORE_ROUTES)}
-            </Route>
-            
-            <Route path="*" element={<Navigate to={"/"} replace />} />
-          </Routes>
-        </BrowserRouter>  
-      </TooltipProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+                <Route element = {<PrivateRoute/>}>
+                  <Route element={<AppLayout />}>
+                    {renderRoutes(CORE_ROUTES)}
+                  </Route>
+                </Route>
+                
+                <Route path="*" element={<Navigate to={"/"} replace />} />
+              </Routes>
+            </BrowserRouter>  
+            <Toaster
+              className={"toast"}
+              position="top-left"
+              duration={10 * 1000}
+            />
+            </ReportProvider>
+        </TooltipProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

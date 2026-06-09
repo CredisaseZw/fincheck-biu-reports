@@ -1,0 +1,68 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-refresh/only-export-components */
+import Cookie from "js-cookie"
+import type { SignInResponse, User } from '@/types/core';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+
+type AuthContextType = {
+  user: User | null;
+  signIn: (data: SignInResponse) => void;
+  signOut: () => void;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(null);
+    
+    useEffect(()=>{
+        if (user) return;
+        const details = localStorage.getItem("USER_DETAILS")
+        if(details){
+            try {
+                const parsedDetails: User = JSON.parse(details);
+                setUser(parsedDetails);
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }, [user])
+
+    const signIn = async (response: SignInResponse) => {
+        const {tokens, ...userDetails}  = response;
+        const cookieOptions = {
+            secure: true,
+            sameSite: "strict",
+        } as const
+
+        
+        localStorage.setItem("USER_DETAILS", JSON.stringify(userDetails))
+        Cookie.set("access", tokens.access, cookieOptions)
+        Cookie.set("refresh", tokens.refresh, cookieOptions)
+        setUser(userDetails)
+    };
+
+    const signOut = async () => {
+      setUser(null);
+
+      localStorage.removeItem("USER_DETAILS");
+      await Promise.all([
+        Cookie.remove("access"),
+        Cookie.remove("refresh"),
+      ]);
+    };
+
+  return (
+    <AuthContext.Provider value={{ user, signIn, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}

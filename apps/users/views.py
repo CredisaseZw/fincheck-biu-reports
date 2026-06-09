@@ -12,7 +12,6 @@ from apps.utils.helpers import validate_serializer
 # Create your views here.
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@authentication_classes([])
 def auth_user(request, *args, **kwargs):
     serializer = UserSignInSerializers(data = request.data)
     error_message = validate_serializer(serializer=serializer)
@@ -32,7 +31,6 @@ def auth_user(request, *args, **kwargs):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@authentication_classes([])
 def refresh_token(request, *args, **kwargs):
     refresh = request.data.get("refresh", None)
     if not refresh:
@@ -46,6 +44,14 @@ def refresh_token(request, *args, **kwargs):
         }, status=STATUS.HTTP_200_OK)
     except TokenError as e:
         return Response({"error": str(e)}, status=STATUS.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['POST'])
+@permission_classes([IsStaffUser])
+def verify_token(request, *args, **kwargs):
+    return Response({
+        "message" : "User valid"
+    }, status= STATUS.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([IsStaffUser])

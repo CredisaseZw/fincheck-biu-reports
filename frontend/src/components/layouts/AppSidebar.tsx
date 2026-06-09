@@ -26,13 +26,15 @@ import {
 import { NavLink, useLocation } from 'react-router-dom'
 import { CORE_ROUTES } from "@/constants/routes"
 import {cn} from "@/lib/utils"
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router';
 
 export function AppSidebar() {
+    const navigate = useNavigate()
     const location = useLocation();
+    const {user , signOut} = useAuth()
 
-    const user = { name: 'Gilbert Lopah', email: 'gilbert@fincheck.co.zw' }
-
-  return (
+    return (
     <Sidebar>
         <SidebarHeader className="px-4 pt-5 pb-3">
             <div className="flex flex-col items-center gap-2 rounded-lg bg-light p-4 transition-colors">            
@@ -116,11 +118,15 @@ export function AppSidebar() {
                 <DropdownMenuTrigger asChild>
                     <SidebarMenuButton className="h-auto py-3">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                        {user.name.charAt(0)}
+                        {   user &&
+                            user.full_name.length > 0
+                            ? user?.full_name.at(0)?.toLocaleUpperCase()
+                            : user?.email.at(0)?.toLocaleUpperCase()
+                        }
                     </div>
                     <div className="flex min-w-0 flex-col text-left">
-                        <span className="truncate text-sm font-medium">{user.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                        <span className="truncate text-sm font-medium">{user && user.full_name ? user.full_name : "-"}</span>
+                        <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
                     </div>
                     <ChevronUp className="ml-auto h-4 w-4 shrink-0" />
                     </SidebarMenuButton>
@@ -128,12 +134,16 @@ export function AppSidebar() {
 
                 <DropdownMenuContent side="top" align="start" className="w-56">
                     <DropdownMenuItem
-                    className="text-destructive focus:text-destructive cursor-pointer"
-                    onClick={() => {
-                        // handle logout
-                    }}
+                        className="text-destructive focus:text-destructive cursor-pointer"
+                        onClick={() => {
+                            signOut()
+                            navigate("/", {replace:true})
+                        }}
                     >
-                    <LogOut className="mr-2 h-4 w-4" />
+                        { 
+                            <LogOut className="mr-2 h-4 w-4" />
+                        }
+                    
                     Log out
                     </DropdownMenuItem>
                 </DropdownMenuContent>
