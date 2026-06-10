@@ -1,0 +1,213 @@
+import useCompanyDetails, { type CompanyFormData } from "@/hooks/useCompanyDetails"
+import { Button } from "../ui/button";
+import { Input } from "../ui/input"
+import { Label } from "../ui/label"
+import ColumnsContainer from "./ColumnsContainer"
+import Fieldset from "./FieldSet"
+import { Controller } from "react-hook-form"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import AddressFieldset from "./AddressFields";
+
+function CompanyDetails() {
+    const { 
+        handleSubmit,
+        register,
+        defaultValues, 
+        control,
+        errors 
+    } = useCompanyDetails()
+
+    const onSubmit = (data: CompanyFormData) => {
+        console.log(data)
+    }
+    
+    return (
+        <div>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <Fieldset legendTitle="Company Information" className="flex flex-col gap-4">
+                    <ColumnsContainer numberOfCols={2}>
+                        <div className="form-group">
+                            <Label className="required">Registered Name</Label>
+                            <Input {...register("registered_name")} />
+                            {errors.registered_name && (
+                                <p className="text-destructive text-sm">{errors.registered_name.message}</p>
+                            )}
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Trading Name</Label>
+                            <Input {...register("trading_name")} />
+                        </div>
+                    </ColumnsContainer>
+                    <ColumnsContainer numberOfCols={3}>
+                        <div className="form-group">
+                            <Label>Email</Label>
+                            <Input type="email" {...register("email")} />
+                            {errors.email && (
+                                <p className="text-destructive text-sm">{errors.email.message}</p>
+                            )}
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Telephone</Label>
+                            <Input {...register("telephone_number")} />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Mobile</Label>
+                            <Input {...register("mobile_number")} />
+                        </div>
+                    </ColumnsContainer>
+                     <div className="form-group">
+                        <Label>Website</Label>
+                        <Input {...register("website")} />
+                        {errors.website && (
+                            <p className="text-destructive text-sm">{errors.website.message}</p>
+                        )}
+                    </div>
+                    <ColumnsContainer numberOfCols={3} gapClass="gap-4">
+                        <div className="form-group">
+                            <Label>Date of Registration</Label>
+                            <Input type="date" {...register("overview.date_of_registration")} />
+                        </div>
+                        <div className="form-group">
+                            <Label>Number of Employees</Label>
+                            <Input type="number" {...register("overview.number_of_employees"), {
+                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
+                            }} />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Last Financial Result</Label>
+                            <Input type="number" step="0.01" {...register("overview.last_financial_result"), {
+                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
+                            }} />
+                        </div>
+                    </ColumnsContainer>
+                    <ColumnsContainer>
+                         <div className="form-group">
+                            <Label>Net Asset Value</Label>
+                            <Input type="number" step="0.01" {...register("overview.net_asset_value"), {
+                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
+                            }} />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Authorized Share Capital</Label>
+                            <Input type="number" step="0.01" {...register("overview.authorized_share_capital"), {
+                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
+                            }} />
+                        </div>
+                    </ColumnsContainer>
+                    <div className="form-group">
+                        <Label>Issued Share Capital</Label>
+                        <Input type="number" step="0.01" {...register("overview.issued_share_capital",{
+                            setValueAs: (v: string) => v === "" ? undefined : Number(v)
+                        })} />
+                    </div>
+                    <ColumnsContainer numberOfCols={4}>
+                        <div className="form-group">
+                            <Label>Trading Status</Label>
+                            <Controller
+                                control={control}
+                                name="overview.trading_status"
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="active">Active</SelectItem>
+                                            <SelectItem value="inactive">Inactive</SelectItem>
+                                            <SelectItem value="suspended">Suspended</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Legal Form</Label>
+                            <Controller
+                                control={control}
+                                name="overview.legal_form"
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select legal form" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="llc">LLC</SelectItem>
+                                            <SelectItem value="plc">PLC</SelectItem>
+                                            <SelectItem value="sole_trader">Sole Trader</SelectItem>
+                                            <SelectItem value="partnership">Partnership</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Condition</Label>
+                            <Controller
+                                control={control}
+                                name="overview.condition"
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select condition" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="good">Good</SelectItem>
+                                            <SelectItem value="fair">Fair</SelectItem>
+                                            <SelectItem value="poor">Poor</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Trend</Label>
+                            <Controller
+                                control={control}
+                                name="overview.trend"
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select trend" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="improving">Improving</SelectItem>
+                                            <SelectItem value="stable">Stable</SelectItem>
+                                            <SelectItem value="declining">Declining</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </div>
+                    </ColumnsContainer>
+                    <AddressFieldset
+                        register={register}
+                        errors={errors}
+                        primaryPrefix="address_registered"
+                        secondaryPrefix="address_operations"
+                        secondaryLabel="Add Operations Address"
+                        initialOpen={!!defaultValues.address_operations}
+                    />
+                    <div className="flex justify-end">
+                        <Button type="submit">Submit</Button>
+                    </div>
+                </Fieldset>
+            </form>
+        </div>
+    )
+}
+
+export default CompanyDetails

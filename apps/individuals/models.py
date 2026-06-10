@@ -30,10 +30,8 @@ class Individuals(BaseModel):
         default= MaritalStatus.SINGLE,
         choices=MaritalStatus.choices
     )
-    status = models.CharField(_("Status"), max_length=50, blank=True, null=True)
     nationality = models.CharField(_("Nationality"), max_length=100)
     residential_address = models.TextField(_("Residential address"))
-    postal_address = models.TextField(_("Postal address"), blank=True, null=True)
     mobile_number = models.CharField(_("Mobile number"), max_length=50)
     email = models.EmailField(_("Email"), blank=True, null=True)
     is_deleted = models.BooleanField(_("Is deleted"), default=False)

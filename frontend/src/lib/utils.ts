@@ -6,6 +6,29 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export function getCurrentDateFormatted() {
+  const now = new Date();
+  const day = now.getDate().toString().padStart(2, "0");
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const month = monthNames[now.getMonth()];
+  const year = now.getFullYear().toString().slice(-2);
+  return `${day}-${month}-${year}`;
+}
+
 export const handleAxiosError = (
   error: Error | AxiosError | unknown,
   title = "An error occurred."
@@ -29,10 +52,9 @@ export const handleAxiosError = (
     });
 
     console.log(error)
-    return;
+    return true;
   }
-
-  toast.error(title, {
-    description: error instanceof Error ? error.message : "Network error.",
-  });
+  return false
 };
+
+

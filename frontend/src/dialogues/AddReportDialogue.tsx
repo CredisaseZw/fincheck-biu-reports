@@ -1,5 +1,11 @@
+import NextOfKin from "@/components/general/NextOfKin"
+import CompanyDetails from "@/components/general/CompanyDetails";
+import CompanyOperations from "@/components/general/CompanyOperations";
+import CompanyStructure from "@/components/general/CompanyStructure";
 import CustomDialogueHeader from "@/components/general/CustomDialogueHeader";
 import CustomDialogueTrigger from "@/components/general/CustomDialogueTrigger";
+import EmploymentInformation from "@/components/general/EmploymentInformation";
+import IndividualDetails from "@/components/general/IndividualDetails";
 import ReportHeader from "@/components/general/ReportHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +27,7 @@ function AddReportDialogue({report} :props) {
             Icon= {Plus}
             label="Add Report"
         />
-        <DialogContent className="md:max-w-250 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="md:max-w-310 max-h-[95vh] overflow-y-auto">
             <CustomDialogueHeader
                 title={
                     report
@@ -29,8 +35,15 @@ function AddReportDialogue({report} :props) {
                     : "Create a new report"
                 }
             />
-            <ReportHeader/>
             
+            <ReportHeader/>
+            <CompanyDetails/>
+            <CompanyStructure/>
+            <CompanyOperations/>
+            <IndividualDetails/>
+            <EmploymentInformation/>
+            <NextOfKin/>
+
             <DialogFooter>
                 <DialogClose>
                     <Button variant={"ghost"}>

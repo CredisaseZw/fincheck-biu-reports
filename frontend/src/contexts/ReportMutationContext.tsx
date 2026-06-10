@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import type { EntityMode, EntityValue, Report } from "@/types/core";
-import { createContext, useState, useContext,  type ReactNode } from "react";
+import { createContext, useState, useContext,  type ReactNode, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 
 
@@ -11,8 +11,9 @@ interface ReportContextProps{
     report : Report | null,
     report_id?: number | null
     onUpdateEntityTypes : (entity : EntityMode, value: EntityValue) => void
-    onSetEntityId : (entity : EntityMode, value: number) => void
-    onEnterClientCreationMode : () => void
+    onSetEntityId : (entity : EntityMode, value: number | null) => void
+    onEnterClientCreationMode : () => void,
+    setReport: Dispatch<SetStateAction<Report | null>>
 }
 
 const ReportContext = createContext<ReportContextProps | undefined>(undefined);
@@ -37,7 +38,7 @@ function ReportProvider({children} : ReportProviderProps){
         setSubjectType(value);
     }
 
-    const onSetEntityId = (entity : EntityMode, value: number) => {
+    const onSetEntityId = (entity : EntityMode, value: number | null) => {
         if (entity === "client"){
             setClientObjectId(value)
             return;
@@ -63,6 +64,7 @@ function ReportProvider({children} : ReportProviderProps){
             onEnterClientCreationMode,
             onUpdateEntityTypes,
             onSetEntityId,
+            setReport
         }}>
             {children}
         </ReportContext.Provider>

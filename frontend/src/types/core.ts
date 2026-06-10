@@ -232,7 +232,7 @@ export interface PublicInformation {
   link: string | null;
 }
 
-export interface DebtorMiniCompany {
+export interface MiniCompany {
   id: number;
   type: "company";
   registered_name: string;
@@ -241,7 +241,7 @@ export interface DebtorMiniCompany {
   email: string | null;
 }
 
-export interface DebtorMiniIndividual {
+export interface MiniIndividual {
   id: number;
   type: "individual";
   full_name: string;
@@ -251,7 +251,7 @@ export interface DebtorMiniIndividual {
   email: string | null;
 }
 
-type DebtorMini = DebtorMiniCompany | DebtorMiniIndividual;
+type DebtorMini = MiniCompany | MiniIndividual;
 export interface TradeReference {
   id: number;
   referenced_date: string;
@@ -306,7 +306,6 @@ export interface Individual extends Timestamps {
   marital_status: string;
   nationality: string;
   residential_address: string;
-  postal_address: string | null;
   mobile_number: string;
   email: string | null;
   status: string | null;
