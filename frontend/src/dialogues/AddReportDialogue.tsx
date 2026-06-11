@@ -15,6 +15,15 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog"
 import { Plus, Printer } from "lucide-react";
+import BankerDetails from "@/components/general/BankersDetails";
+import ProfessionalPartnersDetails from "@/components/general/ProfessionalPartnersDetails";
+import RegistrationAccountsDetails from "@/components/general/RegistrationAccountsDetails";
+import FinancialsDetails from "@/components/general/FinancialsDetails";
+import ShareholdingDetails from "@/components/general/ShareholdingDetails";
+import DirectorDetails from "@/components/general/DirectorDetails";
+import ClaimsDetails from "@/components/general/ClaimsDetails";
+import CourtDetails from "@/components/general/CourtDetails";
+import AbsconderDetails from "@/components/general/AbsconderDetails"
 
 interface props {
     report?: Report
@@ -27,7 +36,7 @@ function AddReportDialogue({report} :props) {
             Icon= {Plus}
             label="Add Report"
         />
-        <DialogContent className="md:max-w-310 max-h-[95vh] overflow-y-auto">
+        <DialogContent className="md:max-w-332 max-h-[95vh] overflow-y-auto">
             <CustomDialogueHeader
                 title={
                     report
@@ -35,7 +44,6 @@ function AddReportDialogue({report} :props) {
                     : "Create a new report"
                 }
             />
-            
             <ReportHeader/>
             <CompanyDetails/>
             <CompanyStructure/>
@@ -43,6 +51,15 @@ function AddReportDialogue({report} :props) {
             <IndividualDetails/>
             <EmploymentInformation/>
             <NextOfKin/>
+            <BankerDetails/>
+            <ProfessionalPartnersDetails/>
+            <RegistrationAccountsDetails/>
+            <FinancialsDetails/>
+            <ShareholdingDetails/>
+            <DirectorDetails/>
+            <ClaimsDetails/>
+            <AbsconderDetails/>
+            <CourtDetails />
 
             <DialogFooter>
                 <DialogClose>

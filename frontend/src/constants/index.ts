@@ -35,3 +35,41 @@ export const ADDRESS_OBJECT = z.object({
     suburb: z.string().min(1, "Suburb is required"),
     postal_code: z.string().optional(),
 })
+
+export const COMMON_RECORD_HEADERS: Header[] =[
+    { name : "Debtor" ,textAlign : "end"},
+    { name : "Creditor Name" ,textAlign : "end"},
+    { name : "Currency" },
+    { name : "Amount"},
+
+]
+export const CLAIMS_HEADERS:Header[] = [...COMMON_RECORD_HEADERS,
+    { name : "Claim Date" },
+    { name : "Status" }
+]
+export const ABSCONDERS_HEADERS:Header [] = [
+    ...COMMON_RECORD_HEADERS,
+    { name : "Start Date" },
+    { name : "Status" }
+]
+
+export const DEBTOR_TYPE = z.enum(["company", "individual"])
+
+export const SETTLEMENT_OPTIONS = z.enum(["open", "settled"])
+
+export const CURRENCY = z.enum(["USD", "ZiG", "AUD", "CAD", "CHF", "ZAR"])
+
+export const numericField = { setValueAs: (v: string) => v === "" ? undefined : Number(v) }
+
+export const MAX_SIZE = 5 * 1024 * 1024
+
+export const ACCEPTED_TYPES = [
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+]

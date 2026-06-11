@@ -11,8 +11,9 @@ import { useReport } from "@/contexts/ReportMutationContext";
 
 interface props {
     entityType: EntityValue,
-    entityMode: EntityMode,
-    defaultSearch?: string 
+    entityMode?: EntityMode,
+    defaultSearch?: string,
+    onSelectItem?: (id: number)=>void
 }
 export interface SearchEntityRef {
   clear: () => void
@@ -22,7 +23,8 @@ export interface SearchEntityRef {
 const SearchEntity = forwardRef<SearchEntityRef, props>(({ 
     defaultSearch,
     entityMode,
-    entityType 
+    entityType,
+    onSelectItem
     }, ref) => {
     
     const { onEnterClientCreationMode, onSetEntityId} = useReport()
@@ -82,21 +84,27 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     const open = useCallback(() => { setIsOpen(true); setActiveIndex(-1) }, [])
 
     const select = useCallback((entity: MiniCompany | MiniIndividual) => {
-        onSetEntityId(entityMode, entity.id)
         setSelected(entity)
         setQuery(_get_display_value(entity) ?? "-")
         setIsOpen(false)
         setActiveIndex(-1)
         inputRef.current?.blur()
-    }, [onSetEntityId, entityMode])
+        if(entityMode){
+            onSetEntityId(entityMode, entity.id)
+        } else{
+            onSelectItem?.(entity.id)
+        }
+
+    }, [onSetEntityId, onSelectItem, entityMode])
 
     const clear = useCallback((e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
         setSelected(null)
         setQuery("")
         setHasInteracted(false)
-        onSetEntityId(entityMode, null)
         inputRef.current?.focus()
+
+        if (entityMode) onSetEntityId(entityMode, null)
     }, [onSetEntityId, entityMode])
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {

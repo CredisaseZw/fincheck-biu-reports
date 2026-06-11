@@ -19,7 +19,6 @@ interface ReportContextProps{
 const ReportContext = createContext<ReportContextProps | undefined>(undefined);
 interface ReportProviderProps {
     children : ReactNode
-
 }
 
 function ReportProvider({children} : ReportProviderProps){

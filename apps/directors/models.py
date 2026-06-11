@@ -35,6 +35,16 @@ class CompanyDirector(BaseModel):
         choices=DirectorGender.choices,
         default=DirectorGender.MALE
     )
+    national_id = models.CharField(
+        _("National ID | Passport Number"),
+        max_length=15,
+        default="" #REMOVE ON A CLEAN DB
+    )
+    insolvencies_judgements = models.TextField(
+        _("Insolvencies, Judgements, Defaults"),
+        blank=True,
+        null=True
+    )
     dob = models.DateTimeField(help_text= _("Director Date of birth"))
     address_latest = models.TextField(help_text= _("Director Primary Address"))
     address_prev = models.TextField(
