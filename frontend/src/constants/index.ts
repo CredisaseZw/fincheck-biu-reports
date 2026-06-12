@@ -53,6 +53,19 @@ export const ABSCONDERS_HEADERS:Header [] = [
     { name : "Status" }
 ]
 
+export const COURT_HEADERS:Header[] = [
+    {name : "Court Name", textAlign : "end"},
+    {name : "Case Number", textAlign : "end"},
+    {name : "Amount",},
+    {name : "Judgement Date", textAlign : "end"},
+]
+
+export const INSOLVENCY_HEADERS:Header[] = [
+    {name : "Insolvency Type", textAlign : "end"},
+    {name : "Start Date", },
+    {name : "End Date",},
+    {name : "Court Reference", textAlign : "end"},
+]
 export const DEBTOR_TYPE = z.enum(["company", "individual"])
 
 export const SETTLEMENT_OPTIONS = z.enum(["open", "settled"])

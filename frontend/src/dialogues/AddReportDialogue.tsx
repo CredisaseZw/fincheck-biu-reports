@@ -24,6 +24,7 @@ import DirectorDetails from "@/components/general/DirectorDetails";
 import ClaimsDetails from "@/components/general/ClaimsDetails";
 import CourtDetails from "@/components/general/CourtDetails";
 import AbsconderDetails from "@/components/general/AbsconderDetails"
+import InsolvencyRecordsDetails from "@/components/general/InsolvencyRecordsDetails";
 
 interface props {
     report?: Report
@@ -44,6 +45,7 @@ function AddReportDialogue({report} :props) {
                     : "Create a new report"
                 }
             />
+
             <ReportHeader/>
             <CompanyDetails/>
             <CompanyStructure/>
@@ -60,6 +62,7 @@ function AddReportDialogue({report} :props) {
             <ClaimsDetails/>
             <AbsconderDetails/>
             <CourtDetails />
+            <InsolvencyRecordsDetails/>
 
             <DialogFooter>
                 <DialogClose>
@@ -72,6 +75,7 @@ function AddReportDialogue({report} :props) {
                     Print 
                 </Button>
             </DialogFooter>
+            
         </DialogContent>
     </Dialog>
 )
