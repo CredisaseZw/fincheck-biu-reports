@@ -1,4 +1,4 @@
-import useCompanyDetails, { type CompanyFormData } from "@/hooks/useCompanyDetails"
+import useCompanyDetails from "@/hooks/useCompanyDetails"
 import { Button } from "../ui/button";
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
@@ -13,19 +13,19 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import AddressFieldset from "./AddressFields";
+import { numericField } from "@/constants";
 
 function CompanyDetails() {
     const { 
         handleSubmit,
         register,
+        onSubmit,
+        isPending,
         defaultValues, 
         control,
         errors 
     } = useCompanyDetails()
 
-    const onSubmit = (data: CompanyFormData) => {
-        console.log(data)
-    }
     
     return (
         <div>
@@ -78,38 +78,28 @@ function CompanyDetails() {
                         </div>
                         <div className="form-group">
                             <Label>Number of Employees</Label>
-                            <Input type="number" {...register("overview.number_of_employees"), {
-                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
-                            }} />
+                            <Input type="number" {...register("overview.number_of_employees", numericField)} />
                         </div>
 
                         <div className="form-group">
                             <Label>Last Financial Result</Label>
-                            <Input type="number" step="0.01" {...register("overview.last_financial_result"), {
-                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
-                            }} />
+                            <Input type="number" step="0.01" {...register("overview.last_financial_result", numericField)} />
                         </div>
                     </ColumnsContainer>
                     <ColumnsContainer>
                          <div className="form-group">
                             <Label>Net Asset Value</Label>
-                            <Input type="number" step="0.01" {...register("overview.net_asset_value"), {
-                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
-                            }} />
+                            <Input type="number" step="0.01" {...register("overview.net_asset_value", numericField)} />
                         </div>
 
                         <div className="form-group">
                             <Label>Authorized Share Capital</Label>
-                            <Input type="number" step="0.01" {...register("overview.authorized_share_capital"), {
-                                setValueAs: (v: string) => v === "" ? undefined : Number(v)
-                            }} />
+                            <Input type="number" step="0.01" {...register("overview.authorized_share_capital", numericField)} />
                         </div>
                     </ColumnsContainer>
                     <div className="form-group">
                         <Label>Issued Share Capital</Label>
-                        <Input type="number" step="0.01" {...register("overview.issued_share_capital",{
-                            setValueAs: (v: string) => v === "" ? undefined : Number(v)
-                        })} />
+                        <Input type="number" step="0.01" {...register("overview.issued_share_capital", numericField)} />
                     </div>
                     <ColumnsContainer numberOfCols={4}>
                         <div className="form-group">
@@ -202,7 +192,10 @@ function CompanyDetails() {
                         initialOpen={!!defaultValues.address_operations}
                     />
                     <div className="flex justify-end">
-                        <Button type="submit">Submit</Button>
+                        <Button 
+                            disabled = {isPending}
+                            className={isPending ? "cursor-not-allowed" : "cursor-pointer"}
+                            type="submit">Submit</Button>
                     </div>
                 </Fieldset>
             </form>

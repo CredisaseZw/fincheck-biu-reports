@@ -49,8 +49,7 @@ export default function Paginator({
               goToPage(previousPage);
             }}
           />
-        </PaginationItem>1
-
+        </PaginationItem>
         <PaginationItem>
           <PaginationLink isActive>
             {currentPage}

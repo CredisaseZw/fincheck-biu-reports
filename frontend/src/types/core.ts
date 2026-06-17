@@ -16,44 +16,44 @@ export interface Header {
   textAlign?: "center" | "left" | "end"
 }
 
-export interface DRFResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
+export interface PaginationData {
+  count :number,
+  prev?: string,
+  next?: string
+}
+
+export interface DRFResponse<T> extends PaginationData{
   results: T[];
 }
 
-export interface PaginationData {
-    count? :number,
-    prev?: string,
-    next?: string
-}
 interface Timestamps {
   created_at: string;
   updated_at: string;
 }
-export interface ListReportClient {
+
+export interface MiniCompany {
   id: number;
+  type: "company";
   registered_name: string;
-  trading_name: string;
+  trading_name: string | null;
   address_registered: string;
-  email: string;
+  email: string | null;
 }
 
-export interface ListReportSubject {
+export interface MiniIndividual {
   id: number;
+  type: "individual";
   full_name: string;
   national_id: string;
   residential_address: string;
   mobile_number: string;
-  email: string;
+  email: string | null;
 }
-
 export interface ListReport {
   id: number;
   enquiry_reference: string;
-  client: ListReportClient;
-  subject: ListReportSubject;
+  client: MiniCompany | MiniIndividual;
+  subject: MiniCompany | MiniIndividual;
   created_at: string;
   updated_at: string;
 }
@@ -79,10 +79,10 @@ export interface CompanyOverview {
   condition: "good" | "fair" | "poor";
   trend: "improving" | "stable" | "declining";
   number_of_employees: number;
-  last_financial_result: string;
-  net_asset_value: string;
-  authorized_share_capital: string;
-  issued_share_capital: string;
+  last_financial_result: number;
+  net_asset_value: number;
+  authorized_share_capital: number;
+  issued_share_capital: number;
 }
 
 export interface CompanyStructure {
@@ -232,25 +232,6 @@ export interface PublicInformation {
   link: string | null;
 }
 
-export interface MiniCompany {
-  id: number;
-  type: "company";
-  registered_name: string;
-  trading_name: string | null;
-  address_registered: string;
-  email: string | null;
-}
-
-export interface MiniIndividual {
-  id: number;
-  type: "individual";
-  full_name: string;
-  national_id: string;
-  residential_address: string;
-  mobile_number: string;
-  email: string | null;
-}
-
 type DebtorMini = MiniCompany | MiniIndividual;
 export interface TradeReference {
   id: number;
@@ -323,6 +304,8 @@ export interface Report extends Timestamps {
   enquiry_reference: string;
   client: Company | Individual;
   subject: Individual | Company;
+  client_type : EntityValue;
+  subject_type: EntityValue
   references: TradeReference[];
   report_summary: ReportSummary | null;
   claims?: Claim[];
@@ -331,3 +314,12 @@ export interface Report extends Timestamps {
   insolvency_records?: InsolvencyRecord[];
   public_information?: PublicInformation[];
 }
+export interface Address {
+  street_address: string ;
+  line_2?: string | undefined;
+  country: string;
+  province: string;
+  city: string;
+  suburb: string;
+  postal_code?: string | undefined;
+};

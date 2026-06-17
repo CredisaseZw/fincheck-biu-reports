@@ -11,17 +11,17 @@ import ReportProvider from "./contexts/ReportMutationContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import PrivateRoute from "./components/layouts/PrivateRoute";
 
+const queryClient = new QueryClient();
+
+function renderRoutes(routes: RouteItem[]) {
+  return routes.map(({ link, component: Component, children }) => (
+    <Route key={link} path={link} element={Component ? <Component /> : undefined}>
+      {children && renderRoutes(children)}
+    </Route>
+  ))
+}
+
 function App() {
-  const queryClient = new QueryClient();
-
-  function renderRoutes(routes: RouteItem[]) {
-    return routes.map(({ link, component: Component, children }) => (
-      <Route key={link} path={link} element={Component ? <Component /> : undefined}>
-        {children && renderRoutes(children)}
-      </Route>
-    ))
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

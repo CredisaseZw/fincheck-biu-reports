@@ -12,11 +12,7 @@ function useGetEntityObject(
         "company" : "/api/companies/",
         "individual": "/api/individuals/"
     }
-    console.log({
-        link:  ENTITY_LINKS[mode],
-        mode,
-        params
-    })
+    
     const {data, isLoading, error} = useQuery({
         queryKey : [mode, params],
         queryFn: async()=>{

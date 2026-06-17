@@ -25,60 +25,86 @@ import ClaimsDetails from "@/components/general/ClaimsDetails";
 import CourtDetails from "@/components/general/CourtDetails";
 import AbsconderDetails from "@/components/general/AbsconderDetails"
 import InsolvencyRecordsDetails from "@/components/general/InsolvencyRecordsDetails";
+import TradeReferencesDetails from "@/components/general/TradeReferencesDetails";
+import useAddReportDialogue from "@/hooks/useAddReportDialogue";
+import type { ListReport } from "@/types/core";
+import { useReport } from "@/contexts/ReportMutationContext";
+import { FormSkeleton } from "@/components/general/Skeletons";
 
 interface props {
-    report?: Report
+    report_item?: ListReport
 }
-function AddReportDialogue({report} :props) {
+
+function AddReportDialogue({ report_item }: props) {
+    const { open, setOpen, isLoading } = useAddReportDialogue(report_item)
+    const { report, reportLoading } = useReport()
+
+
+    const isUpdating = !!report_item;
+    const showSkeleton = reportLoading || (isUpdating && isLoading);
+
     return (
-    <Dialog>
-        <CustomDialogueTrigger
-            mode= {!report ? "create" : "update"}
-            Icon= {Plus}
-            label="Add Report"
-        />
-        <DialogContent className="md:max-w-332 max-h-[95vh] overflow-y-auto">
-            <CustomDialogueHeader
-                title={
-                    report
-                    ? "Edit report information"
-                    : "Create a new report"
-                }
+        <Dialog open={open} onOpenChange={setOpen}>
+            <CustomDialogueTrigger
+                mode={!report_item ? "create" : "update"}
+                Icon={Plus}
+                label="Add Report"
             />
+            <DialogContent className="md:max-w-332 max-h-[95vh] overflow-y-auto">
+                <CustomDialogueHeader
+                    title={report ? "Edit report information" : "Create a new report"}
+                />
 
-            <ReportHeader/>
-            <CompanyDetails/>
-            <CompanyStructure/>
-            <CompanyOperations/>
-            <IndividualDetails/>
-            <EmploymentInformation/>
-            <NextOfKin/>
-            <BankerDetails/>
-            <ProfessionalPartnersDetails/>
-            <RegistrationAccountsDetails/>
-            <FinancialsDetails/>
-            <ShareholdingDetails/>
-            <DirectorDetails/>
-            <ClaimsDetails/>
-            <AbsconderDetails/>
-            <CourtDetails />
-            <InsolvencyRecordsDetails/>
+                <ReportHeader />
 
-            <DialogFooter>
-                <DialogClose>
-                    <Button variant={"ghost"}>
-                        Cancel
+                {showSkeleton
+                    ? <FormSkeleton />
+                    : report?.client_type === "company"
+                        ? <>
+                            <CompanyDetails />
+                            <CompanyStructure />
+                            <CompanyOperations />
+                        </>
+                        : report?.client_type === "individual"
+                            ? <>
+                                <IndividualDetails />
+                                <EmploymentInformation />
+                                <NextOfKin />
+                            </>
+                            : null
+                }
+
+                {showSkeleton
+                    ? <FormSkeleton />
+                    : report &&
+                         <>
+                            <BankerDetails />
+                            <ProfessionalPartnersDetails />
+                            <RegistrationAccountsDetails />
+                            <FinancialsDetails />
+                            <ShareholdingDetails />
+                            <DirectorDetails />
+                            <ClaimsDetails />
+                            <AbsconderDetails />
+                            <CourtDetails />
+                            <InsolvencyRecordsDetails />
+                            <TradeReferencesDetails />
+                        </>
+                        
+                }
+
+                <DialogFooter>
+                    <DialogClose>
+                        <Button variant={"ghost"}>Cancel</Button>
+                    </DialogClose>
+                    <Button>
+                        <Printer />
+                        Print
                     </Button>
-                </DialogClose>
-                <Button>
-                    <Printer/>
-                    Print 
-                </Button>
-            </DialogFooter>
-            
-        </DialogContent>
-    </Dialog>
-)
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
 }
 
 export default AddReportDialogue

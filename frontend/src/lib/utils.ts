@@ -1,3 +1,4 @@
+import type { Address } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
@@ -29,6 +30,25 @@ export function getCurrentDateFormatted() {
   return `${day}-${month}-${year}`;
 }
 
+export function getFormattedDate(dateStr: string){
+   const date = new Date(dateStr);
+
+  if (isNaN(date.getTime())) {
+    throw new Error("Invalid date string");
+  }
+
+  const months = [
+    "jan", "feb", "mar", "apr", "may", "jun",
+    "jul", "aug", "sep", "oct", "nov", "dec",
+  ];
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+}
+
 export const handleAxiosError = (
   error: Error | AxiosError | unknown,
   title = "An error occurred."
@@ -57,4 +77,72 @@ export const handleAxiosError = (
   return false
 };
 
+export const formatAddressToString = (address: Address): string => {
+  return [
+    address.street_address,
+    address.line_2,
+    address.country,
+    address.province,
+    address.city,
+    address.suburb,
+    address.postal_code,
+  ]
+    .map(value => (value?.trim() ? value : "-"))
+    .join(", ");
+};
 
+export const formatAddressToObject = (addressString: string): Address => {
+  const [
+    street_address,
+    line_2,
+    country,
+    province,
+    city,
+    suburb,
+    postal_code,
+  ] = addressString.split(",").map(part => part.trim());
+
+  return {
+    street_address: street_address === "-" ? "" : street_address,
+    line_2: line_2 === "-" ? "" : line_2,
+    country: country === "-" ? "" : country,
+    province: province === "-" ? "" : province,
+    city: city === "-" ? "" : city,
+    suburb: suburb === "-" ? "" : suburb,
+    postal_code: postal_code === "-" ? "" : postal_code,
+  };
+};
+
+export const handleTrackChangedFields = (initial: any, payloadData: any, toastInfo = true): any => {
+  const deepDiff = (obj1: any, obj2: any): any => {
+    return Object.entries(obj2).reduce((acc, [key, value]) => {
+      const original = obj1?.[key];
+
+      if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+        const nestedDiff = deepDiff(original ?? {}, value);
+        if (Object.keys(nestedDiff).length > 0) acc[key] = nestedDiff;
+      } else if (Array.isArray(value)) {
+        if (JSON.stringify(value) !== JSON.stringify(original)) acc[key] = value;
+      } else if (typeof value === "string" && typeof original === "string") {
+        if (value.trim() !== original.trim()) acc[key] = value;
+      } else if (value !== original) {
+        acc[key] = value;
+      }
+
+      return acc;
+    }, {} as any);
+  };
+
+  const changedData = deepDiff(initial, payloadData);
+
+  const isDeepEmpty = (obj: any): boolean =>
+    Object.keys(obj).length === 0 ||
+    Object.values(obj).every(v => v !== null && typeof v === "object" && !Array.isArray(v) && isDeepEmpty(v));
+
+  if (isDeepEmpty(changedData)) {
+    if (toastInfo) toast.info("No changes made.");
+    return undefined;
+  }
+
+  return changedData;
+};

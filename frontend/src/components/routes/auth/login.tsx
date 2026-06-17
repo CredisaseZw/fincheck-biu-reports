@@ -19,7 +19,7 @@ function Login() {
     <div className="h-screen bg-background px-5 flex justify-center items-center">
       <form 
           onSubmit={handleSubmit(onSubmit)}
-          className="p-5 border text-center flex flex-col gap-4 rounded-md shadow bg-light w-full dark:bg-dark md:w-130">
+          className="p-7 border text-center flex flex-col gap-4 rounded-md shadow bg-light w-full dark:bg-dark md:w-130">
           <div className="flex flex-col ">
             <h1 className="font-bold text-2xl text-gray-800 dark:text-gray-200">Welcome back!</h1>
             <span className="text-sm text-gray-600 dark:text-gray-400">Credit Report Portal</span>

@@ -1,4 +1,4 @@
-import Reports from "@/components/routes/core/reports";
+import Reports from "@/components/routes/core/reports-lists";
 import ChangePassword from "@/components/routes/core/users/change-password";
 import type { RouteItem } from "@/types/core";
 import { FileText, KeyRound} from "lucide-react";

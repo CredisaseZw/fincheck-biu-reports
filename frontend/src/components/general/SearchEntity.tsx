@@ -7,12 +7,13 @@ import { Input } from "../ui/input";
 import type { EntityMode, EntityValue, MiniCompany, MiniIndividual } from "@/types/core";
 import useGetEntityObject from "@/hooks/api/useGetEntityObject";
 import { Button } from "../ui/button";
-import { useReport } from "@/contexts/ReportMutationContext";
 
 interface props {
     entityType: EntityValue,
     entityMode?: EntityMode,
     defaultSearch?: string,
+    onSetEntityId:(entity : EntityMode, value: number | null)=> void
+    onEnterClientCreationMode?: ()=> void
     onSelectItem?: (id: number)=>void
 }
 export interface SearchEntityRef {
@@ -24,10 +25,11 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     defaultSearch,
     entityMode,
     entityType,
-    onSelectItem
+    onSelectItem,
+    onSetEntityId,
+    onEnterClientCreationMode
     }, ref) => {
     
-    const { onEnterClientCreationMode, onSetEntityId} = useReport()
     const [query, setQuery] = useState(defaultSearch ?? "")
     const [isOpen, setIsOpen] = useState(false)
     const [activeIndex, setActiveIndex] = useState(-1)

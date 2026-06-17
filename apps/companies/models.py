@@ -151,6 +151,7 @@ class CompanyOverview(BaseModel):
     trading_status = models.CharField(
         max_length=20,
         choices=TradingStatus.choices,
+        null=True,
         blank=True
     )
     date_of_registration = models.DateField(
@@ -160,16 +161,20 @@ class CompanyOverview(BaseModel):
     legal_form = models.CharField(
         max_length=20,
         choices=LegalForm.choices,
+        null=True,
         blank=True
     )
     condition = models.CharField(
         max_length=20,
         choices=Condition.choices,
-        blank=True
+        blank=True,
+        null=True,
+
     )
     trend = models.CharField(
         max_length=20,
         choices=Trend.choices,
+        null=True,
         blank=True
     )
     number_of_employees = models.PositiveIntegerField(

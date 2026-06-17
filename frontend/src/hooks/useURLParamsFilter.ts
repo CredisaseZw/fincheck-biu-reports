@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useSearchParams } from "react-router"
 
 function useURLParamsFilter() {
@@ -24,8 +25,10 @@ function useURLParamsFilter() {
         setSearchParams(newParams);
     }
     
-    const getUrlParams = () => Object.fromEntries(searchParams.entries());
-    
+    const getUrlParams = useCallback(() => {
+        return Object.fromEntries(searchParams.entries());
+    }, [searchParams]);
+
     const removeSingleUrlParam = (param: string) => {
         const newParams = new URLSearchParams(searchParams)
         newParams.delete(param)

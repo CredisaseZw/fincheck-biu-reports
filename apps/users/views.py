@@ -12,6 +12,7 @@ from apps.utils.helpers import validate_serializer
 # Create your views here.
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def auth_user(request, *args, **kwargs):
     serializer = UserSignInSerializers(data = request.data)
     error_message = validate_serializer(serializer=serializer)

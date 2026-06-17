@@ -1,4 +1,4 @@
-import type { Header } from "@/types/core";
+import type { Address, Header } from "@/types/core";
 import {z} from "zod"
 export const ReportHeaders:Header[] = [
     {
@@ -15,8 +15,9 @@ export const ReportHeaders:Header[] = [
         name : "Create At",
         textAlign : "center"
     },
+    { name : "Action", textAlign : "center" },
 ]
-export const DEFAULT_ADDRESSES = {
+export const DEFAULT_ADDRESSES:Address = {
     street_address : "",
     line_2 : "",
     country: "",
@@ -35,6 +36,18 @@ export const ADDRESS_OBJECT = z.object({
     suburb: z.string().min(1, "Suburb is required"),
     postal_code: z.string().optional(),
 })
+export const OPTIONAL_ADDRESS_OBJECT = z.object({
+    street_address: z.string().optional(),
+    line_2: z.string().optional(),
+    country: z.string().optional(),
+    province: z.string().optional(),
+    city: z.string().optional(),
+    suburb: z.string().optional(),
+    postal_code: z.string().optional(),
+})
+
+
+
 
 export const COMMON_RECORD_HEADERS: Header[] =[
     { name : "Debtor" ,textAlign : "end"},
@@ -66,6 +79,19 @@ export const INSOLVENCY_HEADERS:Header[] = [
     {name : "End Date",},
     {name : "Court Reference", textAlign : "end"},
 ]
+
+export const TRADE_REFERENCES_HEADERS: Header[] = [
+    {name : "Name", textAlign: "end"},
+    {name : "Contact Info", textAlign: "end"},
+    {name : "Reference Source", textAlign: "end"},
+    {name : "Position", textAlign: "end"},
+    {name : "Credit Limit", textAlign: "end"},
+    {name : "Credit Terms", textAlign: "end"},
+    {name : "Payment Trends", textAlign: "end"},
+    {name : "Reference Date", textAlign: "end"},
+
+]
+
 export const DEBTOR_TYPE = z.enum(["company", "individual"])
 
 export const SETTLEMENT_OPTIONS = z.enum(["open", "settled"])
