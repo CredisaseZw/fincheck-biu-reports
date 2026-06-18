@@ -62,9 +62,9 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
 
     const close = useCallback(() => {
         setIsOpen(false)
-        setQuery(_get_display_value(selected) ?? "")
+        setQuery(_get_display_value(selected) || defaultSearch || "")
         setActiveIndex(-1)
-    }, [selected])
+    }, [selected, defaultSearch])
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {

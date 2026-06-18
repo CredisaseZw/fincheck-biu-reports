@@ -1,11 +1,17 @@
-import { ADDRESS_OBJECT, DEFAULT_ADDRESSES } from "@/constants";
+import { ADDRESS_OBJECT } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import type { InstanceMutation } from "./api/useInstanceMutation";
+import { formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import useInstanceMutation from "./api/useInstanceMutation";
+import { toast } from "sonner";
 
-const MaritalStatus = z.enum(["single", "married", "divorced", "widowed"])
+const MaritalStatus = z.enum(["single", "married", "divorced", "widowed"], {message : "Marital Status is required"})
 
 export const individualSchema = z.object({
+    id: z.number().optional(),
     full_name: z.string().min(1, "Full name is required").max(255),
     national_id: z.string().min(1, "National ID / Passport is required").max(100),
     date_of_birth: z.string().min(1, "Date of birth is required"),
@@ -19,28 +25,67 @@ export const individualSchema = z.object({
 
 export type IndividualFormData = z.infer<typeof individualSchema>
 
-function useIndividualDetails() {
+function useIndividualDetails(individual_details: IndividualFormData | undefined) {
+    const {mutate, isPending} = useInstanceMutation()
     const {
-        register,
         control,
+        reset,
+        register,
         handleSubmit,
         formState: { errors },
     } = useForm<IndividualFormData>({
         resolver: zodResolver(individualSchema),
-        defaultValues: {
-            full_name: "",
-            national_id: "",
-            date_of_birth: "",
-            gender: "",
-            marital_status: undefined,
-            nationality: "",
-            residential_address: DEFAULT_ADDRESSES,
-            mobile_number: "",
-            email: "",
-        },
+        defaultValues: individual_details
     })
 
-    return { register, control, handleSubmit, errors }
+    useEffect(()=>{
+        if(individual_details){
+            reset(individual_details)
+        }
+    }, [individual_details, reset])
+
+    const onSubmit = (data: IndividualFormData) => {
+        delete data.id;
+        const PAYLOAD:InstanceMutation = {
+            url :"",
+            mode : "create"
+        }
+
+        if(!individual_details){
+            PAYLOAD.url = "/api/individuals/"
+            PAYLOAD.data = data
+        } else{
+            const {id, ...initial_data} = individual_details;
+            const changes = handleTrackChangedFields(initial_data, data);
+            if(!changes) return;
+
+            if (changes.residential_address){
+                changes.residential_address = formatAddressToString(data.residential_address)
+            }
+
+            PAYLOAD.url = `/api/individuals/${id}/`
+            PAYLOAD.mode = "update"
+            PAYLOAD.data = changes
+        }
+
+        console.log(PAYLOAD)
+        mutate(PAYLOAD, {
+            onSuccess : (data) =>{
+                console.log(data) // return Individual as a whole
+                toast.success("Information successfully updated")
+            },
+            onError: (error) => handleAxiosError(error)
+        })
+    }
+
+    return { 
+        errors,
+        control, 
+        isPending,
+        handleSubmit,
+        onSubmit,
+        register,
+    }
 }
 
 export default useIndividualDetails

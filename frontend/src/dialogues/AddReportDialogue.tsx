@@ -6,7 +6,7 @@ import CustomDialogueHeader from "@/components/general/CustomDialogueHeader";
 import CustomDialogueTrigger from "@/components/general/CustomDialogueTrigger";
 import EmploymentInformation from "@/components/general/EmploymentInformation";
 import IndividualDetails from "@/components/general/IndividualDetails";
-import ReportHeader from "@/components/general/ReportHeader";
+import ReportHeaderForm from "@/components/general/ReportHeaderForm";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -30,67 +30,116 @@ import useAddReportDialogue from "@/hooks/useAddReportDialogue";
 import type { ListReport } from "@/types/core";
 import { useReport } from "@/contexts/ReportMutationContext";
 import { FormSkeleton } from "@/components/general/Skeletons";
+import Fieldset from "@/components/general/FieldSet";
+import ReportHeaderCard from "@/components/general/ReportHeaderCard";
 
 interface props {
     report_item?: ListReport
 }
 
 function AddReportDialogue({ report_item }: props) {
-    const { open, setOpen, isLoading } = useAddReportDialogue(report_item)
-    const { report, reportLoading } = useReport()
-
+    const { 
+        individualDetails,
+        companyOverview,
+        defaultHeader,
+        isLoading, 
+        report,
+        open, 
+        clientType,
+        subjectType,
+        headerEditMode,
+        onClear,
+        onEdit,
+        setOpen,
+        onSetEntityId,
+        onUpdateEntityTypes,
+    } = useAddReportDialogue(report_item)
+    const { reportLoading } = useReport()
 
     const isUpdating = !!report_item;
     const showSkeleton = reportLoading || (isUpdating && isLoading);
-
+    
+    const handleOpenChange = (isOpen: boolean) => {
+        if (!isOpen) { onClear() }
+        setOpen(isOpen);
+    };
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <CustomDialogueTrigger
-                mode={!report_item ? "create" : "update"}
+                mode={isUpdating ? "update" : "create"}
                 Icon={Plus}
                 label="Add Report"
             />
             <DialogContent className="md:max-w-332 max-h-[95vh] overflow-y-auto">
                 <CustomDialogueHeader
-                    title={report ? "Edit report information" : "Create a new report"}
+                    title={report_item ? "Edit report information" : "Create a new report"}
                 />
-
-                <ReportHeader />
-
+                {
+                   headerEditMode 
+                   ? <ReportHeaderForm 
+                        default_header={defaultHeader}
+                        clientType={clientType}
+                        subjectType={subjectType}
+                        onSetEntityId={onSetEntityId}
+                        onUpdateEntityTypes={onUpdateEntityTypes}
+                    />
+                    : <ReportHeaderCard
+                        onEdit={onEdit}
+                        default_header={defaultHeader}
+                    />
+                }
+                
                 {showSkeleton
                     ? <FormSkeleton />
-                    : report?.client_type === "company"
+                    : report ? 
+                        clientType === "company"
                         ? <>
-                            <CompanyDetails />
+                            <CompanyDetails
+                                company_overview = {companyOverview}
+                            />
                             <CompanyStructure />
                             <CompanyOperations />
                         </>
-                        : report?.client_type === "individual"
+                        : clientType === "individual"
                             ? <>
-                                <IndividualDetails />
+                                <IndividualDetails 
+                                    individual_details={individualDetails}
+                                />
                                 <EmploymentInformation />
                                 <NextOfKin />
                             </>
                             : null
-                }
+                        : null
+                        }
 
                 {showSkeleton
                     ? <FormSkeleton />
                     : report &&
-                         <>
-                            <BankerDetails />
-                            <ProfessionalPartnersDetails />
-                            <RegistrationAccountsDetails />
-                            <FinancialsDetails />
-                            <ShareholdingDetails />
-                            <DirectorDetails />
+                    <>
+                        {/* REPORT SUMMARY */}
+
+                        <Fieldset legendTitle="Credit Records">
                             <ClaimsDetails />
                             <AbsconderDetails />
                             <CourtDetails />
                             <InsolvencyRecordsDetails />
-                            <TradeReferencesDetails />
-                        </>
                         
+                            {/* PUBLIC INFORMATION */}
+                        
+                        </Fieldset>
+                        {
+                            clientType === "company" &&
+                            <>
+                                <DirectorDetails />             
+                                <ShareholdingDetails />
+                            </>
+                        }
+                        <FinancialsDetails />
+                        <TradeReferencesDetails />
+                        <RegistrationAccountsDetails />
+                        <BankerDetails />
+                        <ProfessionalPartnersDetails />
+                    </>    
                 }
 
                 <DialogFooter>

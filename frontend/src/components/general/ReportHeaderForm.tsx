@@ -1,79 +1,26 @@
-import { useReport } from '@/contexts/ReportMutationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import ColumnsContainer from './ColumnsContainer';
-import type { EntityMode, EntityValue, Report } from '@/types/core';
+import type { DefaultHeaderProps, EntityMode, EntityValue } from '@/types/core';
 import SearchEntity, { type SearchEntityRef } from './SearchEntity';
-import { getCurrentDateFormatted, getFormattedDate, handleAxiosError } from '@/lib/utils';
-import { useEffect, useRef, useState } from 'react';
-import useCreateReport from '@/hooks/api/useCreateReport';
-import { toast } from 'sonner';
+import { getCurrentDateFormatted, getFormattedDate } from '@/lib/utils';
+import { useRef } from 'react';
+interface props{
+    clientType : EntityValue,
+    subjectType : EntityValue    
+    default_header : DefaultHeaderProps | undefined,
+    onUpdateEntityTypes : (entity :EntityMode, value: EntityValue)=> void
+    onSetEntityId : (entity : EntityMode, value: number | null) => void
+}
 
-function ReportHeader() {
-    const { 
-        setShowClientFields,
-        setReportLoading, 
-        setReport,
-        report
-    } = useReport();
-    const [clientType, setClientType] = useState<EntityValue>("company")
-    const [subjectType, setSubjectType] = useState<EntityValue>("company")
-    const [clientObjectId, setClientObjectId] = useState<number | null>(null);
-    const [subjectObjectId, setSubjectObjectId] = useState<number | null>(null);
-    const { mutate } = useCreateReport();
-    
+function ReportHeaderForm({ 
+    default_header, 
+    clientType,
+    subjectType,
+    onSetEntityId,
+    onUpdateEntityTypes
+}: props) {
     const subjectRef = useRef<SearchEntityRef>(null);    
     const clientRef = useRef<SearchEntityRef>(null);
-
-    const onUpdateEntityTypes = ( entity :EntityMode, value: EntityValue)=>{
-        if (entity === "client") {
-            setClientType(value);
-            return;
-        }
-        setSubjectType(value);
-    }
-
-    const onSetEntityId = (entity : EntityMode, value: number | null) => {
-        if (entity === "client"){
-            setClientObjectId(value)
-            return;
-        }
-        setSubjectObjectId(value)
-    }
-
-    const onEnterClientCreationMode = () => {
-        setShowClientFields(true)
-        if(!subjectObjectId) {
-            toast.info("Reminder", {description : "Subject has'nt been selected yet."})
-            return;
-        }
-    }
-    useEffect(()=>{
-        if(clientObjectId && subjectObjectId){
-            setReportLoading(true);
-            mutate({
-                client_object_id : clientObjectId,
-                client_type :  clientType,
-                subject_object_id : subjectObjectId,
-                subject_type : subjectType
-            }, {
-                onSuccess : (data: Report) => {
-                    setReport(data)   
-                },
-                onError : (error) => handleAxiosError(error),
-                onSettled :()=> setReportLoading(false)
-
-            })
-        }
-    }, [
-        clientType,
-        clientObjectId,
-        subjectObjectId,
-        subjectType,
-        mutate,
-        setClientObjectId,
-        setReportLoading,
-        setReport
-    ])
 
     return (
     <div className="w-full">
@@ -86,7 +33,6 @@ function ReportHeader() {
                             value={clientType}
                             onValueChange={(val: EntityValue) =>{
                                 onUpdateEntityTypes("client", val)
-                                setReport(null)
                                 clientRef.current?.clear()
                             }}>
                             <SelectTrigger
@@ -102,9 +48,9 @@ function ReportHeader() {
                         </Select>
                         <SearchEntity
                             ref={clientRef}
+                            defaultSearch={default_header?.client_default_search ?? ""}
                             entityMode="client"
                             entityType={clientType}
-                            onEnterClientCreationMode={onEnterClientCreationMode}
                             onSetEntityId={onSetEntityId}
                         />
                     </div>
@@ -116,7 +62,6 @@ function ReportHeader() {
                             value={subjectType}
                             onValueChange={(val: EntityValue) =>{
                                 onUpdateEntityTypes("subject", val);
-                                setReport(null);
                                 subjectRef.current?.clear();
                             }}>
                             <SelectTrigger
@@ -131,6 +76,7 @@ function ReportHeader() {
                         </Select>
                         <SearchEntity
                             ref = {subjectRef}
+                            defaultSearch= {default_header?.subject_default_search ?? ""}
                             entityMode="subject"
                             entityType={subjectType}
                             onSetEntityId={onSetEntityId}
@@ -143,16 +89,14 @@ function ReportHeader() {
             <div className="flex flex-col gap-1.5">
                 <h6 className="font-semibold text-md text-gray-800 dark:text-gray-200">Enquiry Reference</h6>
                 <span className="text-gray-700 dark:text-gray-100"> 
-                    {
-                        report ? report.enquiry_reference : "-"
-                    }
+                    { default_header?.enquiry_reference ?? "-" }
                 </span>
             </div>
             <div className="flex flex-col gap-1.5 text-end">
               <h6 className="font-semibold text-md text-gray-800 dark:text-gray-200">Report Date</h6>
                 <span className="text-gray-700 dark:text-gray-100">{
-                report?.created_at
-                ? getFormattedDate(report.created_at)
+                default_header?.created_at
+                ? getFormattedDate(default_header.created_at)
                 : getCurrentDateFormatted()}</span>
             </div>
         </div>
@@ -161,4 +105,4 @@ function ReportHeader() {
   )
 }
 
-export default ReportHeader
+export default ReportHeaderForm

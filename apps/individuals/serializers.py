@@ -22,7 +22,6 @@ class EmploymentInformationSerializer(serializers.ModelSerializer):
         model = EmploymentInformation
         exclude = ["created_at", "updated_at", "individual"]
 
-
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:
         model = NextOfKin
@@ -31,7 +30,6 @@ class NextOfKinSerializer(serializers.ModelSerializer):
 class IndividualSerializer(serializers.ModelSerializer):
     employment_information = EmploymentInformationSerializer(read_only=True)
     next_of_kin = NextOfKinSerializer(read_only=True)
-    marital_status = serializers.CharField(source="get_marital_status_display", read_only=True)
     registration_accounts = RegistrationAccountsSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsSerializer(many = True, read_only = True,)
     professional_partners = ProfessionalPartnersSerializer(many = True, read_only = True)
@@ -43,7 +41,6 @@ class IndividualSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class IndividualListSerializer(serializers.ModelSerializer):
-    marital_status = serializers.CharField(source="get_marital_status_display", read_only=True)
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
 
     class Meta:

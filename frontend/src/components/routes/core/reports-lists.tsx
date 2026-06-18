@@ -6,7 +6,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { ReportHeaders } from "@/constants";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
 import useReports from "@/hooks/useReports";
-import { getFormattedDate } from "@/lib/utils";
+import { getEntityName, getFormattedDate } from "@/lib/utils";
 
 function Reports() {
     const {
@@ -40,17 +40,9 @@ function Reports() {
             >
                 {
                     reports.map((item)=>{
-                        const client_top_level = "national_id" in item.client
-                        ? item.client.full_name
-                        : item.client.registered_name
-
                         const client_bottom_level = "national_id" in item.client
                         ? item.client.email ?? "-"
-                        : item.client.trading_name ?? "-" 
-
-                        const subject_top_level = "national_id" in item.subject
-                        ? item.subject.full_name
-                        : item.subject.registered_name
+                        : item.client.trading_name ?? "-"
 
                         const subject_bottom_level = "national_id" in item.subject
                         ? item.subject.email ?? "-"
@@ -61,13 +53,13 @@ function Reports() {
                             <TableCell className="text-center">{item.enquiry_reference}</TableCell>
                             <TableCell>
                                 <div className="flex flex-col gap-1 text-center">
-                                    <span className="font-bold">{client_top_level}</span>
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
                                     <span>{client_bottom_level}</span>
                                 </div>
                             </TableCell>
                             <TableCell>
                                 <div className="flex flex-col gap-1 text-center">
-                                    <span className="font-bold">{subject_top_level}</span>
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.subject)}</span>
                                     <span>{subject_bottom_level}</span>
                                 </div>
                             </TableCell>

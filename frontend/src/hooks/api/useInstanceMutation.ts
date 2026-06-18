@@ -1,7 +1,7 @@
 import { api } from "@/axios/api";
 import { useMutation } from "@tanstack/react-query";
 
-interface props{
+export interface InstanceMutation{
     url: string,
     mode: "create" | "update" | "deletion",
     data?: Record<string, any> 
@@ -12,7 +12,7 @@ function useInstanceMutation() {
             url,
             mode, 
             data
-        }:props) => {
+        }:InstanceMutation) => {
             const response = mode === "create"
             ? api.post(url, data)
             : mode === "update"

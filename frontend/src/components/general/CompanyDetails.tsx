@@ -1,4 +1,4 @@
-import useCompanyDetails from "@/hooks/useCompanyDetails"
+import useCompanyDetails, { type CompanyFormData } from "@/hooks/useCompanyDetails"
 import { Button } from "../ui/button";
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
@@ -14,17 +14,21 @@ import {
 } from "@/components/ui/select"
 import AddressFieldset from "./AddressFields";
 import { numericField } from "@/constants";
+import LoadingIndicator from "./LoadingIndicator";
 
-function CompanyDetails() {
+interface props {
+    company_overview : CompanyFormData | undefined
+}
+
+function CompanyDetails({company_overview} : props) {
     const { 
         handleSubmit,
         register,
         onSubmit,
         isPending,
-        defaultValues, 
         control,
         errors 
-    } = useCompanyDetails()
+    } = useCompanyDetails(company_overview)
 
     
     return (
@@ -83,23 +87,23 @@ function CompanyDetails() {
 
                         <div className="form-group">
                             <Label>Last Financial Result</Label>
-                            <Input type="number" step="0.01" {...register("overview.last_financial_result", numericField)} />
+                            <Input {...register("overview.last_financial_result")} />
                         </div>
                     </ColumnsContainer>
                     <ColumnsContainer>
                          <div className="form-group">
                             <Label>Net Asset Value</Label>
-                            <Input type="number" step="0.01" {...register("overview.net_asset_value", numericField)} />
+                            <Input {...register("overview.net_asset_value")} />
                         </div>
 
                         <div className="form-group">
                             <Label>Authorized Share Capital</Label>
-                            <Input type="number" step="0.01" {...register("overview.authorized_share_capital", numericField)} />
+                            <Input {...register("overview.authorized_share_capital")} />
                         </div>
                     </ColumnsContainer>
                     <div className="form-group">
                         <Label>Issued Share Capital</Label>
-                        <Input type="number" step="0.01" {...register("overview.issued_share_capital", numericField)} />
+                        <Input {...register("overview.issued_share_capital")} />
                     </div>
                     <ColumnsContainer numberOfCols={4}>
                         <div className="form-group">
@@ -184,18 +188,26 @@ function CompanyDetails() {
                         </div>
                     </ColumnsContainer>
                     <AddressFieldset
+                        showRequired
                         register={register}
                         errors={errors}
+                        control={control}
                         primaryPrefix="address_registered"
                         secondaryPrefix="address_operations"
                         secondaryLabel="Add Operations Address"
-                        initialOpen={!!defaultValues.address_operations}
+                        initialOpen={false}
                     />
                     <div className="flex justify-end">
                         <Button 
                             disabled = {isPending}
                             className={isPending ? "cursor-not-allowed" : "cursor-pointer"}
-                            type="submit">Submit</Button>
+                            type="submit">
+                            {
+                                isPending &&
+                                <LoadingIndicator variant="button"/>
+                            }
+                            Submit
+                        </Button>
                     </div>
                 </Fieldset>
             </form>

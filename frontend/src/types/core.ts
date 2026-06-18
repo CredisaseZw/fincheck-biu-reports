@@ -79,10 +79,10 @@ export interface CompanyOverview {
   condition: "good" | "fair" | "poor";
   trend: "improving" | "stable" | "declining";
   number_of_employees: number;
-  last_financial_result: number;
-  net_asset_value: number;
-  authorized_share_capital: number;
-  issued_share_capital: number;
+  last_financial_result: string;
+  net_asset_value: string;
+  authorized_share_capital: string;
+  issued_share_capital: string;
 }
 
 export interface CompanyStructure {
@@ -284,7 +284,7 @@ export interface Individual extends Timestamps {
   national_id: string;
   date_of_birth: string;
   gender: string;
-  marital_status: string;
+  marital_status: "single" | "married" | "divorced" | "widowed";
   nationality: string;
   residential_address: string;
   mobile_number: string;
@@ -320,6 +320,12 @@ export interface Address {
   country: string;
   province: string;
   city: string;
-  suburb: string;
   postal_code?: string | undefined;
 };
+
+export interface DefaultHeaderProps{
+  client_default_search : string,
+  subject_default_search : string,
+  enquiry_reference : string,
+  created_at : string
+}

@@ -20,20 +20,29 @@ export const ReportHeaders:Header[] = [
 export const DEFAULT_ADDRESSES:Address = {
     street_address : "",
     line_2 : "",
-    country: "",
+    country: "Zimbabwe",
     province : "",
     city: "",
-    suburb: "",
     postal_code : ""
 }
+export const COUNTRIES =  ["Zimbabwe", "Zambia", "Yemen", "Western Sahara", "Wallis and Futuna", "Virgin Islands, U.S.", "Virgin Islands, British", "Viet Nam", "Venezuela", "Vanuatu", "Uzbekistan", "Uruguay", "United States Minor Outlying Islands", "United States", "United Kingdom", 
+"United Arab Emirates",
+"Ukraine", "Uganda", "Tuvalu", "Turks and Caicos Islands", 
+"Turkmenistan", "Turkey", "Tunisia", "Trinidad and Tobago", "Tonga",
+"Tokelau", "Togo", "Timor-Leste", "Thailand", "Tanzania, United Republic of",
+"Tajikistan", "Taiwan, Province of China", "Syrian Arab Republic", "Switzerland",
+"Sweden", "Swaziland", "Svalbard and Jan Mayen", "Surivalue", "Sudan", "Sri Lanka",
+"Spain", "South Georgia and the South Sandwich Islands", "South Africa", "Somalia",
+"Solomon Islands", "Slovenia", "Slovakia", "Singapore", "Sierra Leone", "Seychelles", "Serbia", "Senegal", "Saudi Arabia", "Sao Tome and Principe", "San Marino", "Samoa", "Saint Vincent and the Grenadines", "Saint Pierre and Miquelon", "Saint Lucia", "Saint Kitts and Nevis", "Saint Helena", "RWANDA", "Russian Federation", "Romania", "Reunion", "Qatar", "Puerto Rico", "Portugal", "Poland", "Pitcairn", "Philippines", "Peru", "Paraguay", "Papua New Guinea", "Panama", "Palestinian Territory, Occupied", "Palau", "Pakistan", "Oman", "Norway", "Northern Mariana Islands", "Norfolk Island", "Niue", "Nigeria", "Niger", "Nicaragua", "New Zealand", "New Caledonia", "Netherlands Antilles", "Netherlands", "Nepal", "Nauru", "Namibia", "Myanmar", "Mozambique", "Morocco", "Montserrat", "Montenegro", "Mongolia", "Monaco", "Moldova, Republic of", "Micronesia, Federated States of", "Mexico", "Mayotte", "Mauritius", "Mauritania", "Martinique", "Marshall Islands", "Malta", "Mali", "Maldives", "Malaysia", "Malawi", "Madagascar", "Macedonia, The Former Yugoslav Republic of", "Macao", "Luxembourg", "Lithuania", "Liechtenstein", "Libyan Arab Jamahiriya", "Liberia", "Lesotho", "Lebanon", "Latvia", "Lao People's Democratic Republic", "Kyrgyzstan", "Kuwait", "Korea, Republic of", "Korea, Democratic People's Republic of", "Kiribati", "Kenya", "Kazakhstan", "Jordan", "Jersey", "Japan", "Jamaica", "Italy", "Israel", "Isle of Man", "Ireland", "Iraq", "Iran, Islamic Republic Of", "Indonesia", "India", "Iceland", "Hungary", "Hong Kong", "Honduras", "Holy See (Vatican City State)", "Heard Island and Mcdonald Islands", "Haiti", "Guyana", "Guinea-Bissau", "Guinea", "Guernsey", "Guatemala", "Guam", "Guadeloupe", "Grenada", "Greenland", "Greece", "Gibraltar", "Ghana", "Germany", "Georgia", "Gambia", "Gabon", "French Southern Territories", "French Polynesia", "French Guiana", "France", "Finland", "Fiji", "Faroe Islands", "Falkland Islands (Malvinas)", "Ethiopia", "Estonia", "Eritrea", "Equatorial Guinea", "El Salvador", "Egypt", "Ecuador", "Dominican Republic", "Dominica", "Djibouti", "Denmark", "Czech Republic", "Cyprus", "Cuba", "Croatia", "Cote D'Ivoire", "Costa Rica", "Cook Islands", "Congo, The Democratic Republic of the", "Congo", "Comoros", "Colombia", "Cocos (Keeling) Islands", "Christmas Island", "China", "Chile", "Chad", "Central African Republic", "Cayman Islands", "Cape Verde", "Canada", "Cameroon", "Cambodia", "Burundi", "Burkina Faso", "Bulgaria", "Brunei Darussalam", "British Indian Ocean Territory", "Brazil", "Bouvet Island", "Botswana", "Bosnia and Herzegovina", "Bolivia", "Bhutan", "Bermuda", "Benin", "Belize", "Belgium", "Belarus", "Barbados", "Bangladesh", "Bahrain", "Bahamas", "Azerbaijan", "Austria", "Australia", "Aruba", "Armenia", "Argentina", "Antigua and Barbuda", "Antarctica", "Anguilla", "Angola", "AndorrA", "American Samoa", "Algeria", "Albania", "land Islands", "Afghanistan"] 
 
+
+const Countries = z.enum(COUNTRIES, {message : "Country is required"})
 export const ADDRESS_OBJECT = z.object({
     street_address: z.string().min(1, "Street address is required"),
     line_2: z.string().optional(),
-    country: z.string().min(1, "Country is required"),
+    country: Countries,
     province: z.string().min(1, "Province is required"),
     city: z.string().min(1, "City is required"),
-    suburb: z.string().min(1, "Suburb is required"),
     postal_code: z.string().optional(),
 })
 export const OPTIONAL_ADDRESS_OBJECT = z.object({
@@ -42,12 +51,8 @@ export const OPTIONAL_ADDRESS_OBJECT = z.object({
     country: z.string().optional(),
     province: z.string().optional(),
     city: z.string().optional(),
-    suburb: z.string().optional(),
     postal_code: z.string().optional(),
 })
-
-
-
 
 export const COMMON_RECORD_HEADERS: Header[] =[
     { name : "Debtor" ,textAlign : "end"},
@@ -112,3 +117,4 @@ export const ACCEPTED_TYPES = [
     "application/vnd.ms-excel",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ]
+

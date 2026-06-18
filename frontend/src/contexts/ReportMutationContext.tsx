@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { Report } from "@/types/core";
 import { 
     createContext, 
     useState, 
@@ -10,10 +9,7 @@ import {
 } from "react";
 interface ReportContextProps{
     showClientFields : boolean,
-    report : Report | null,
-    report_id?: number | null,
-    reportLoading :  boolean
-    setReport: Dispatch<SetStateAction<Report | null>>,
+    reportLoading : boolean,
     setShowClientFields :Dispatch<SetStateAction<boolean>>
     setReportLoading :Dispatch<SetStateAction<boolean>>
 }
@@ -24,19 +20,15 @@ interface ReportProviderProps {
 }
 
 function ReportProvider({children} : ReportProviderProps){
-    const [showClientFields, setShowClientFields] = useState(false)
-    const [report, setReport] = useState<Report | null>(null);
     const [reportLoading, setReportLoading] = useState(false);
-
+    const [showClientFields, setShowClientFields] = useState(false)
+    
     return (
         <ReportContext.Provider value={{
-            report,
-            reportLoading,
             showClientFields,
-            report_id : report?.id,
+            reportLoading,
             setShowClientFields,
-            setReportLoading,
-            setReport
+            setReportLoading
         }}>
             {children}
         </ReportContext.Provider>

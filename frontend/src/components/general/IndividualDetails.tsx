@@ -10,12 +10,21 @@ import {
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import AddressFieldset from "./AddressFields";
+import LoadingIndicator from "./LoadingIndicator";
 
-function IndividualDetails() {
-    const { register, control, handleSubmit, errors } = useIndividualDetails()
+interface props{
+    individual_details : IndividualFormData | undefined
+}
 
-    const onSubmit = (data: IndividualFormData) => console.log(data)
-
+function IndividualDetails({ individual_details } : props) {
+    const { 
+        isPending,
+        errors,
+        control, 
+        onSubmit,
+        register,
+        handleSubmit,
+     } = useIndividualDetails(individual_details)
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <Fieldset legendTitle="Individual Details" className="flex flex-col gap-4">
@@ -82,10 +91,13 @@ function IndividualDetails() {
                                 </Select>
                             )}
                         />
+                        {errors.marital_status && <p className="text-destructive text-sm">{errors.marital_status.message}</p>}
                     </div>
 
                 </ColumnsContainer>
                 <AddressFieldset
+                    showRequired
+                    control={control}
                     register={register}
                     errors={errors}
                     primaryPrefix="residential_address"
@@ -94,7 +106,18 @@ function IndividualDetails() {
 
                             
                 <div className="flex justify-end">
-                    <Button type="submit">Submit</Button>
+                    <Button
+                        className={isPending ? "cursor-not-allowed" : ""}
+                        disabled = {isPending}
+                        type="submit"
+
+                    >
+                        {
+                            isPending && 
+                            <LoadingIndicator variant="button"/>
+                        }
+                        Submit
+                    </Button>
                 </div>
 
             </Fieldset>

@@ -1,4 +1,4 @@
-import type { Address } from "@/types/core";
+import type { Address, Company, Individual, MiniCompany, MiniIndividual } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
@@ -27,7 +27,7 @@ export function getCurrentDateFormatted() {
   ];
   const month = monthNames[now.getMonth()];
   const year = now.getFullYear().toString().slice(-2);
-  return `${day}-${month}-${year}`;
+  return `${day}-${month.toUpperCase()}-${year}`;
 }
 
 export function getFormattedDate(dateStr: string){
@@ -46,7 +46,7 @@ export function getFormattedDate(dateStr: string){
   const month = months[date.getMonth()];
   const year = date.getFullYear();
 
-  return `${day}-${month}-${year}`;
+  return `${day}-${month.toLowerCase()}-${year}`;
 }
 
 export const handleAxiosError = (
@@ -77,14 +77,14 @@ export const handleAxiosError = (
   return false
 };
 
-export const formatAddressToString = (address: Address): string => {
+export const formatAddressToString = (address: Address | undefined): string => {
+  if (!address) return "-, -, -, -, -, -"
   return [
     address.street_address,
     address.line_2,
     address.country,
     address.province,
     address.city,
-    address.suburb,
     address.postal_code,
   ]
     .map(value => (value?.trim() ? value : "-"))
@@ -98,7 +98,6 @@ export const formatAddressToObject = (addressString: string): Address => {
     country,
     province,
     city,
-    suburb,
     postal_code,
   ] = addressString.split(",").map(part => part.trim());
 
@@ -108,7 +107,6 @@ export const formatAddressToObject = (addressString: string): Address => {
     country: country === "-" ? "" : country,
     province: province === "-" ? "" : province,
     city: city === "-" ? "" : city,
-    suburb: suburb === "-" ? "" : suburb,
     postal_code: postal_code === "-" ? "" : postal_code,
   };
 };
@@ -146,3 +144,9 @@ export const handleTrackChangedFields = (initial: any, payloadData: any, toastIn
 
   return changedData;
 };
+
+export const getEntityName =(item :Company | Individual | MiniCompany | MiniIndividual) =>{
+  return "national_id" in item
+  ? item.full_name
+  : item.registered_name
+}
