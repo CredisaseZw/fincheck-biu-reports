@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from apps.utils.base_models import BaseModelWithClient
+from apps.utils.base_models import BaseModelWithSubject
 import os
 import uuid
 # Create your models here.
-class RegistrationAccounts(BaseModelWithClient):
+class RegistrationAccounts(BaseModelWithSubject):
     tin_number = models.CharField(
         max_length=50,
         blank=True,
@@ -42,8 +42,7 @@ class RegistrationAccounts(BaseModelWithClient):
     def __str__(self):
         return f"{self.client} | {self.tin_number}"
 
-
-class BankerAccounts(BaseModelWithClient):
+class BankerAccounts(BaseModelWithSubject):
     class AccountType(models.TextChoices):
         CURRENT = "current", "Current"
         SAVINGS = "savings", "Savings"
@@ -65,7 +64,7 @@ class BankerAccounts(BaseModelWithClient):
     def __str__(self):
         return f"{self.client} | {self.account_name} ({self.account_number})"
 
-class ProfessionalPartners(BaseModelWithClient): #PUSH TO COMMON 
+class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON 
     auditors = models.TextField()
     lawyers = models.TextField()
     
@@ -76,7 +75,7 @@ class ProfessionalPartners(BaseModelWithClient): #PUSH TO COMMON
         verbose_name_plural = _("Professional Partners")
         ordering = ["-created_at"]
 
-class Financials(BaseModelWithClient):
+class Financials(BaseModelWithSubject):
     def profit_and_loss_path(instance, filename):
         ext = os.path.splitext(filename)[1]
         return f"financials/profit_and_loss/{uuid.uuid4()}{ext}"
@@ -153,3 +152,35 @@ class Financials(BaseModelWithClient):
 
     def __str__(self):
         return f"{self.client} - {self.financial_year}"
+    
+class TradeReferences(BaseModelWithSubject):
+    class PaymentTrend(models.TextChoices):
+        GOOD = "good", "Good"
+        FAIR = "fair", "Fair"
+        POOR = "poor", "Poor"
+        
+    referenced_date = models.DateField(auto_now=True)
+    name = models.CharField(max_length=100)
+    contact_info = models.CharField(max_length=100, blank=True, null=True)
+    reference_source = models.CharField(max_length=200, blank=True, null=True)
+    position = models.CharField(max_length=100, blank=True, null=True)
+    credit_limit = models.CharField(max_length=100, blank=True, null=True)
+    credit_terms = models.CharField(max_length=100, blank=True, null=True)
+    payment_trend = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        choices=PaymentTrend.choices,
+    )
+
+    class Meta:
+        app_label = "common"
+        db_table = "trade_references"
+        verbose_name = _("Trade Reference")
+        verbose_name_plural = _("Trade Reference")
+        ordering = ["-created_at"]
+    
+    def __str__(self):
+        name = self.name or "N/A"
+        contact = self.contact_info or "N/A"
+        return f"{name} | {contact}"

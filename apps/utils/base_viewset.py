@@ -12,9 +12,14 @@ class BaseJSONViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering = ["-created_at"]
 
+    def perform_create(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        #serializer.is_valid(raise_exception=True)
         error = validate_serializer(serializer)
         if error:
             return error

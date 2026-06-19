@@ -21,6 +21,7 @@ class CompaniesViewSet(BaseJSONViewSet):
         "banker_accounts",
         "professional_partners",
         "financials",
+        "trade_references"
     ).select_related(
         "structure",
         "operations",

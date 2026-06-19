@@ -1,5 +1,5 @@
 from django.db import models
-from apps.utils.base_models import BaseModelWithClient, BaseModelWithReport, BaseModelWithReportOTO
+from apps.utils.base_models import BaseModelWithSubject
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
@@ -8,17 +8,47 @@ from django.db import transaction
 from django.utils import timezone
 
 # Create your models here.
-class Report(BaseModelWithClient):
-    subject_content_type = models.ForeignKey(
+class Report(BaseModelWithSubject):
+    class StatusChoices(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        FINALIZED = "finalized", "Finalized"
+    
+    client_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        related_name="report_subjects"
+        related_name="report_clients"
     )
-    subject_object_id = models.PositiveIntegerField()
-    subject = GenericForeignKey("subject_content_type", "subject_object_id")
+    client_object_id = models.PositiveIntegerField()
+    client = GenericForeignKey("client_content_type", "client_object_id")
+    status = models.CharField(
+        max_length=20, 
+        choices=StatusChoices.choices, 
+        default=StatusChoices.DRAFT
+    )
+
+    overall_risk_rating = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+    summary = models.TextField(
+        blank=True, 
+        null=True
+    )
+
     enquiry_reference = models.CharField(max_length=20, unique=True, editable=False)
     is_deleted = models.BooleanField(default=False)
     
+    snapshot = models.JSONField(
+        _("Holds how the data was for the subject at the date of finalization"),
+        default=dict
+    )
+
+    finalized_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     def save(self, *args, **kwargs):
         if not self.enquiry_reference:
             with transaction.atomic():
@@ -52,50 +82,3 @@ class Report(BaseModelWithClient):
     
     def __str__(self):
         return f"Report {self.enquiry_reference}"
-    
-class TradeReferences(BaseModelWithReport):
-    class PaymentTrend(models.TextChoices):
-        GOOD = "good", "Good"
-        FAIR = "fair", "Fair"
-        POOR = "poor", "Poor"
-        
-    referenced_date = models.DateField(auto_now=True)
-    name = models.CharField(max_length=100)
-    contact_info = models.CharField(max_length=100, blank=True, null=True)
-    reference_source = models.CharField(max_length=200, blank=True, null=True)
-    position = models.CharField(max_length=100, blank=True, null=True)
-    credit_limit = models.CharField(max_length=100, blank=True, null=True)
-    credit_terms = models.CharField(max_length=100, blank=True, null=True)
-    payment_trend = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        choices=PaymentTrend.choices,
-    )
-
-    class Meta:
-        app_label = "reports"
-        db_table = "trade_references"
-        verbose_name = _("Trade Reference")
-        verbose_name_plural = _("Trade Reference")
-        ordering = ["-created_at"]
-    
-    def __str__(self):
-        name = self.name or "N/A"
-        contact = self.contact_info or "N/A"
-        return f"{name} | {contact}"
-
-
-class ReportSummary(BaseModelWithReportOTO):
-    overall_risk_rating = models.CharField(max_length=50, blank=True, null=True)
-    summary = models.TextField(blank=True, null=True)
-
-    class Meta:
-        app_label = "reports"
-        db_table = "report_summary"
-        verbose_name = _("Report Summary")
-        verbose_name_plural = _("Report Summaries")
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return f"Summary for Report {self.report.enquiry_reference}"

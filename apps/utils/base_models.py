@@ -1,46 +1,36 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    updated_by = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_updated_by"
+    )
 
     class Meta:
         abstract = True
 
-class BaseModelWithClient(BaseModel):
-    client_content_type = models.ForeignKey(
+class BaseModelWithSubject(BaseModel):
+    subject_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        related_name="%(class)s_client"
+        related_name="%(class)s_subject"
     )
-    client_object_id = models.PositiveIntegerField()
-    client = GenericForeignKey("client_content_type", "client_object_id")
+    subject_object_id = models.PositiveIntegerField()
+    subject = GenericForeignKey("subject_content_type", "subject_object_id")
 
     class Meta:
         abstract = True
 
-class BaseModelWithReport(BaseModel):
-    report = models.ForeignKey(
-        "reports.Report",
-        on_delete=models.CASCADE,
-        related_name="%(class)s_report"
-    )
-
-    class Meta:
-        abstract = True
-class BaseModelWithReportOTO(BaseModel):
-    report = models.OneToOneField(
-        "reports.Report",
-        on_delete=models.CASCADE,
-        related_name="%(class)s_report"
-    )
-
-    class Meta:
-        abstract = True
-class BaseModelWithDebtor(BaseModelWithReport):
+class BaseModelWithDebtor(BaseModelWithSubject):
     debtor_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -51,8 +41,7 @@ class BaseModelWithDebtor(BaseModelWithReport):
 
     class Meta:
         abstract = True
-
-
+        
 class BaseFinancialRecord(BaseModelWithDebtor):
     creditor_name = models.CharField(max_length=255)
     currency = models.CharField(max_length=10)

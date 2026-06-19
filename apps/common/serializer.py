@@ -1,40 +1,48 @@
 from rest_framework import serializers
-from .models import RegistrationAccounts, BankerAccounts, ProfessionalPartners, Financials
+from .models import (
+    RegistrationAccounts,
+    BankerAccounts, 
+    ProfessionalPartners, 
+    Financials,
+    TradeReferences
+)
 
 # READ SERIALIZERS
 class RegistrationAccountsSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationAccounts
-        exclude = ["client_content_type", "client_object_id", "created_at", "updated_at"]
-
+        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
 
 class BankerAccountsSerializer(serializers.ModelSerializer):
     account_type_display = serializers.CharField(source="get_account_type_display", read_only=True)
 
     class Meta:
         model = BankerAccounts
-        exclude = ["client_content_type", "client_object_id", "created_at", "updated_at"]
-
+        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
 
 class ProfessionalPartnersSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfessionalPartners
-        exclude = ["client_content_type", "client_object_id", "created_at", "updated_at"]
-
+        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
 
 class FinancialsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Financials
-        exclude = ["client_content_type", "client_object_id", "created_at", "updated_at"]
+        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
 
+class TradeReferencesSerializer(serializers.ModelSerializer):
+    payment_trend_display = serializers.CharField(source="get_payment_trend_display", read_only=True)
+    class Meta:
+        model = TradeReferences
+        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
 
 # WRITE SERIALIZERS
 class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationAccounts
         fields = [
-            "client_content_type",
-            "client_object_id",
+            "subject_content_type",
+            "subject_object_id",
             "tin_number",
             "vat_number",
             "nssa_number",
@@ -52,8 +60,8 @@ class BankerAccountsWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankerAccounts
         fields = [
-            "client_content_type",
-            "client_object_id",
+            "subject_content_type",
+            "subject_object_id",
             "bank",
             "branch",
             "account_name",
@@ -66,8 +74,8 @@ class ProfessionalPartnersWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfessionalPartners
         fields = [
-            "client_content_type",
-            "client_object_id",
+            "subject_content_type",
+            "subject_object_id",
             "auditors",
             "lawyers",
         ]
@@ -77,8 +85,8 @@ class FinancialsWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Financials
         fields = [
-            "client_content_type",
-            "client_object_id",
+            "subject_content_type",
+            "subject_object_id",
             "total_assets",
             "net_profit",
             "net_worth",
@@ -93,3 +101,24 @@ class FinancialsWriteSerializer(serializers.ModelSerializer):
             "profit_and_loss": {"required": False},
             "statement_of_financial_position": {"required": False},
         }
+
+
+class TradeReferencesWriteSerializer(serializers.ModelSerializer):
+    payment_trend = serializers.ChoiceField(
+        choices=TradeReferences.PaymentTrend.choices,
+        required=False
+    )
+    class Meta:
+        model = TradeReferences
+        fields = [
+            "subject_content_type",
+            "subject_object_id",
+            "name",
+            "contact_info",
+            "reference_source",
+            "position",
+            "credit_limit",
+            "credit_terms",
+            "payment_trend",
+        ]
+

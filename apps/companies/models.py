@@ -9,16 +9,26 @@ from apps.common.models import (
     RegistrationAccounts,
     BankerAccounts,
     ProfessionalPartners,
-    Financials
+    Financials,
+    TradeReferences,
 )
 class Company(BaseModel):
     class ReferType(models.TextChoices):
         BIU = "biu", "BIU"
         FP3 = "fp3", "FP3"
         RENTSAFE = "rentsafe", "Rentsafe"
+    
+    class OwnershipChoices(models.TextChoices):
+        OWNERS = "owners", "Owners"
+        RENTED = "rented", "Rented"
+    class Locations(models.TextChoices):
+        CITY_CENTRE = "city_centre", "City Centre"
+        INDUSTRIAL = "industrial", "Industrial"
+        SUBURBAN = "suburban","Suburban"
+        RURAL_BASED = "rural", "Rural"
 
     registered_name = models.CharField(
-        max_length=50,
+        max_length=200,
         help_text=_("")
     )
     trading_name = models.CharField(
@@ -35,9 +45,23 @@ class Company(BaseModel):
         help_text=_("Where was company data retrieved from, default is BIU."),
         default= ReferType.BIU
     )
+
+    location = models.CharField(
+        max_length=20,
+        choices=Locations.choices,
+        blank=True,
+        null=True
+    )
+    site_ownership = models.CharField(
+        max_length=25,
+        choices=OwnershipChoices.choices,
+        blank=True,
+        null=True,
+    )
+
     address_registered = models.TextField()
     address_operations = models.TextField()
-    
+
     #contact details
     email = models.EmailField(
         max_length=255,
@@ -67,23 +91,28 @@ class Company(BaseModel):
     # GENERIC RELATIONS
     registration_accounts = GenericRelation(
         RegistrationAccounts,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
     ) 
     banker_accounts = GenericRelation(
         BankerAccounts,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
     )
     professional_partners = GenericRelation(
         ProfessionalPartners,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
     )
     financials = GenericRelation(
         Financials,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
+    )
+    trade_references = GenericRelation(
+        TradeReferences,
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id",
     )
     reports_as_client = GenericRelation(
         Report,
@@ -97,8 +126,9 @@ class Company(BaseModel):
         object_id_field="subject_object_id"
     )
 
-    is_address_registered_verified  = models.BooleanField(default=True)
-    is_verified = models.BooleanField(default=True)
+
+    is_address_registered_verified = models.BooleanField(default=True)
+    is_company_verified = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)  
 
@@ -243,9 +273,30 @@ class CompanyOperations(BaseModel):
     operational_areas = models.TextField(blank=True)
     
     class Meta:
-        verbose_name = "Company Operations"
+        verbose_name = "company_operations"
         verbose_name_plural = "Company Operations"
 
     def __str__(self):
         return f"Operations of {self.company}"
 
+
+class CompanyPrincipals(BaseModel):
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name ="principals"
+    )
+    full_name = models.CharField(max_length=255)
+    national_id = models.CharField(
+        max_length = 200,
+        blank= True,
+        null = True
+    )
+    address = models.TextField()
+    
+    class Meta:
+        verbose_name = "company_principals"
+        verbose_name_plural = "Company Principals"
+
+    def __str__(self):
+        return f"{self.company.registered_name} | {self.full_name}"

@@ -41,6 +41,7 @@ function AddReportDialogue({ report_item }: props) {
     const { 
         individualDetails,
         companyOverview,
+        employmentInformation,
         defaultHeader,
         isLoading, 
         report,
@@ -105,7 +106,9 @@ function AddReportDialogue({ report_item }: props) {
                                 <IndividualDetails 
                                     individual_details={individualDetails}
                                 />
-                                <EmploymentInformation />
+                                <EmploymentInformation 
+                                    employment_information = {employmentInformation}
+                                />
                                 <NextOfKin />
                             </>
                             : null

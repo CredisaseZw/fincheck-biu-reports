@@ -2,7 +2,7 @@ from rest_framework import serializers
 from apps.utils.mini_serializers import MiniCompanySerializer, MiniIndividualSerializer
 from apps.companies.serializers import CompanySerializer
 from apps.individuals.serializers import IndividualSerializer
-from .models import TradeReferences, ReportSummary, Report
+from .models import Report
 from apps.credit_records.serializers import CreditRecordsSerializer
 # READ SERIALIZERS
 
@@ -13,44 +13,8 @@ def _content_ob_serializer( content, mini_serializer = False):
         return IndividualSerializer(content).data if not mini_serializer else MiniIndividualSerializer(content).data
     return CompanySerializer(content).data if not mini_serializer else MiniCompanySerializer(content).data
 
-class TradeReferencesSerializer(serializers.ModelSerializer):
-    payment_trend_display = serializers.CharField(source="get_payment_trend_display", read_only=True)
-
-    class Meta:
-        model = TradeReferences
-        fields = [
-            "id",
-            "report",
-            "referenced_date",
-            "name",
-            "contact_info",
-            "reference_source",
-            "position",
-            "credit_limit",
-            "credit_terms",
-            "payment_trend",
-            "payment_trend_display",
-            "created_at",
-            "updated_at",
-        ]
-
-
-class ReportSummarySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ReportSummary
-        fields = [
-            "id",
-            "report",
-            "overall_risk_rating",
-            "summary",
-            "created_at",
-            "updated_at",
-        ]
-
 class ReportSerializer(serializers.ModelSerializer):
-    references = TradeReferencesSerializer(many=True, read_only=True, source='tradereferences_report')
     credit_records = CreditRecordsSerializer(read_only=True)
-    report_summary = ReportSummarySerializer(read_only=True, source="reportsummary_report")
 
     class Meta:
         model = Report
@@ -59,18 +23,21 @@ class ReportSerializer(serializers.ModelSerializer):
             'enquiry_reference',
             'client',
             'subject',
-            'references',
+            'status',
+            'overall_risk_rating',
+            'summary',
             'credit_records',
             'report_summary',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'finalized_at'
         ]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        client_data = _content_ob_serializer(instance.client)
-        subject_data = _content_ob_serializer(instance.subject, True)
+        client_data = _content_ob_serializer(instance.client, True)
+        subject_data = _content_ob_serializer(instance.subject)
 
         data['client'] = client_data
         data['subject'] = subject_data
@@ -89,6 +56,8 @@ class ListReportSerializer(serializers.ModelSerializer):
             'enquiry_reference',
             'client',
             'subject',
+            'status',
+            'overall_risk_rating',
             'created_at',
             'updated_at'
         ]
@@ -100,31 +69,3 @@ class ListReportSerializer(serializers.ModelSerializer):
         return _content_ob_serializer(obj.subject, True)
     
 # WRITE SERIALIZERS
-class TradeReferencesWriteSerializer(serializers.ModelSerializer):
-    payment_trend = serializers.ChoiceField(
-        choices=TradeReferences.PaymentTrend.choices,
-        required=False
-    )
-
-    class Meta:
-        model = TradeReferences
-        fields = [
-            "report",
-            "name",
-            "contact_info",
-            "reference_source",
-            "position",
-            "credit_limit",
-            "credit_terms",
-            "payment_trend",
-        ]
-
-
-class ReportSummaryWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ReportSummary
-        fields = [
-            "report",
-            "overall_risk_rating",
-            "summary",
-        ]

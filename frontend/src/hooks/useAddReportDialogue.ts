@@ -7,6 +7,7 @@ import { DEFAULT_ADDRESSES } from "@/constants";
 import { useReport } from "@/contexts/ReportMutationContext";
 import useCreateReport from "./api/useCreateReport";
 import type { IndividualFormData } from "./useIndividualDetails";
+import type { EmploymentFormData } from "./useEmploymentInformation";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -22,7 +23,8 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [defaultHeader, setDefaultHeader] = useState<DefaultHeaderProps | undefined>(undefined);
   const [companyOverview, setCompanyOverview] = useState<CompanyFormData | undefined>(undefined);
   const [individualDetails, setIndividualDetails] = useState<IndividualFormData | undefined>(undefined)
-  
+  const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
+
   const {data, isLoading, error } = useGetSingleReport(
     list_report?.id,
     Boolean(list_report && open)
@@ -104,8 +106,9 @@ function useAddReportDialogue(list_report?: ListReport) {
             issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
         }, 
       })
-    }else {
+    } else {
       const individual = report.client as Individual
+      
       setIndividualDetails({
         id: individual.id,
         full_name: individual.full_name ?? "",
@@ -117,6 +120,16 @@ function useAddReportDialogue(list_report?: ListReport) {
         residential_address: formatAddressToObject(individual.residential_address),
         mobile_number: individual.mobile_number ?? "",
         email: individual.email ?? "",
+      })
+      
+      setEmploymentInformation({
+        individual_id : individual.id,
+        employer: individual.employment_information?.employer ?? "",
+        position: individual.employment_information?.position ?? "",
+        employment_status: individual.employment_information?.employment_status ?? undefined,
+        years_employed: individual.employment_information?.years_employed ?? undefined,
+        monthly_income: Number(individual.employment_information?.monthly_income ?? 0),
+        previous_employer: individual.employment_information?.previous_employer ?? "",
       })
     }
   
@@ -163,6 +176,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     report,
     companyOverview,
     individualDetails,
+    employmentInformation,
     defaultHeader,
     isLoading, 
     open, 

@@ -35,8 +35,6 @@ class CreditRecordsViewSet(RetrieveModelMixin, GenericViewSet):
         "courtjudgement_report",
         "insolvencyrecord_report",
         "publicinformation_report"
-    ).select_related(
-        "reportsummary_report"
     ).filter(is_deleted = False)
 
     def _update_record( 

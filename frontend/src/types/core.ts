@@ -176,7 +176,7 @@ export interface EmploymentInformation {
   id: number;
   employer: string | null;
   position: string | null;
-  employment_status: string | null;
+  employment_status: "employed" | "self_employed" | "unemployed" | "part_time" | "retired" | "student";
   years_employed: number | null;
   monthly_income: string | null;
   previous_employer: string | null;
@@ -245,11 +245,6 @@ export interface TradeReference {
   payment_trend: "good" | "fair" | "poor" | null;
 }
 
-export interface ReportSummary {
-  id: number;
-  overall_risk_rating: string | null;
-  summary: string | null;
-}
 
 export interface Company extends Timestamps {
   id: number;
@@ -307,7 +302,6 @@ export interface Report extends Timestamps {
   client_type : EntityValue;
   subject_type: EntityValue
   references: TradeReference[];
-  report_summary: ReportSummary | null;
   claims?: Claim[];
   absconders?: Absconder[];
   court_judgements?: CourtJudgement[];

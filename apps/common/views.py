@@ -28,17 +28,17 @@ class FinancialsViewSet(
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
         content_type_id = get_content_type_id(
-            data.get("client_object_id"),
-            data.get("client_type")
+            data.get("subject_object_id"),
+            data.get("subject_type")
         )
 
         if not content_type_id:
             return Response(
-                {"error": "Invalid client_object_id or client_type."},
+                {"error": "Invalid subject_object_id or subject_type."},
                 status=STATUS.HTTP_400_BAD_REQUEST
             )
 
-        data["client_content_type"] = content_type_id
+        data["subject_content_type"] = content_type_id
         serializer = FinancialsWriteSerializer(data=data)
         error = validate_serializer(serializer=serializer)
         if error:
@@ -62,17 +62,17 @@ class FinancialsViewSet(
             if instance.statement_of_financial_position:
                 instance.statement_of_financial_position.delete(save=False)
 
-        if client_object_id := data.get("client_object_id"):
+        if subject_object_id := data.get("subject_object_id"):
             content_type_id = get_content_type_id(
-                client_object_id,
-                data.get("client_type")
+                subject_object_id,
+                data.get("subject_type")
             )
             if not content_type_id:
                 return Response(
-                    {"error": "Invalid client_object_id or client_type."},
+                    {"error": "Invalid subject_object_id or subject_type."},
                     status=STATUS.HTTP_400_BAD_REQUEST
                 )
-            data["client_content_type"] = content_type_id
+            data["subject_content_type"] = content_type_id
 
         serializer = FinancialsWriteSerializer(
             instance,

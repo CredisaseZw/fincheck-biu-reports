@@ -7,7 +7,8 @@ from apps.common.models import (
     ProfessionalPartners,
     BankerAccounts,
     RegistrationAccounts,
-    Financials
+    Financials,
+    TradeReferences
 )
 class Individuals(BaseModel):
     class ReferType(models.TextChoices):
@@ -44,23 +45,28 @@ class Individuals(BaseModel):
 
     registration_accounts = GenericRelation(
         RegistrationAccounts,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
     ) 
     banker_accounts = GenericRelation(
         BankerAccounts,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
     )
     professional_partners = GenericRelation(
         ProfessionalPartners,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
     )
     financials = GenericRelation(
         Financials,
-        content_type_field="client_content_type",
-        object_id_field="client_object_id"
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
+    )
+    trade_references = GenericRelation(
+        TradeReferences,
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id",
     )
     class Meta:
         verbose_name = _("Individual")

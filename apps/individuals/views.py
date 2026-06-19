@@ -17,6 +17,7 @@ class IndividualsViewSet(BaseJSONViewSet):
         "banker_accounts",
         "professional_partners",
         "financials",
+        "trade_references"
     ).select_related(
         "employment_information",
         "next_of_kin"

@@ -6,6 +6,8 @@ from apps.common.serializer import (
     RegistrationAccountsWriteSerializer,
     ProfessionalPartnersSerializer,
     ProfessionalPartnersWriteSerializer,
+    TradeReferencesSerializer,
+    TradeReferencesWriteSerializer,
     FinancialsSerializer,
     BankerAccountsSerializer,
     BankerAccountsWriteSerializer,
@@ -13,6 +15,7 @@ from apps.common.serializer import (
 from django.contrib.contenttypes.models import ContentType
 from apps.common.models import (
     BankerAccounts,
+    TradeReferences,
     RegistrationAccounts,
     ProfessionalPartners,
 )
@@ -28,6 +31,7 @@ class NextOfKinSerializer(serializers.ModelSerializer):
         exclude = ["created_at", "updated_at", "individual"]
 
 class IndividualSerializer(serializers.ModelSerializer):
+    trade_references = TradeReferencesSerializer(read_only = True, many=True)
     employment_information = EmploymentInformationSerializer(read_only=True)
     next_of_kin = NextOfKinSerializer(read_only=True)
     registration_accounts = RegistrationAccountsSerializer(many = True, read_only = True)
@@ -56,11 +60,13 @@ class IndividualListSerializer(serializers.ModelSerializer):
 class IndividualCreateSerializer(serializers.ModelSerializer):
     next_of_kin = NextOfKinSerializer(required=False)
     employment_information = EmploymentInformationSerializer(required=False)
+    marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
+    refer_type = serializers.ChoiceField(choices=Individuals.ReferType.choices)
+
+    trade_references = TradeReferencesWriteSerializer(read_only = True, many=True)
     registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
     professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
-    marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
-    refer_type = serializers.ChoiceField(choices=Individuals.ReferType.choices)
 
     class Meta:
         model = Individuals
@@ -71,8 +77,8 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
         for item in data_list:
             item.pop("id", None)
             model.objects.create(
-                client_content_type=content_type,
-                client_object_id=individual.id,
+                subject_content_type=content_type,
+                subject_object_id=individual.id,
                 **item
             )
 
@@ -82,6 +88,7 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
         registration_accounts_data = validated_data.pop("registration_accounts", [])
         banker_accounts_data = validated_data.pop("banker_accounts", [])
         professional_partners_data = validated_data.pop("professional_partners", [])
+        trade_references_data = validated_data.pop("trade_references", [])
 
         with transaction.atomic():
             individual = Individuals.objects.create(**validated_data)
@@ -103,18 +110,20 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
             self._create_generic_relations(individual, registration_accounts_data, RegistrationAccounts)
             self._create_generic_relations(individual, banker_accounts_data, BankerAccounts)
             self._create_generic_relations(individual, professional_partners_data, ProfessionalPartners)
-
+            self._create_generic_relations(individual, trade_references_data, TradeReferences)
         return individual
     
 class IndividualUpdateSerializer(serializers.ModelSerializer):
     next_of_kin = NextOfKinSerializer(required=False)
     employment_information = EmploymentInformationSerializer(required=False)
-    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
-    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
-    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
     marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
     refer_type = serializers.ChoiceField(choices=Individuals.ReferType.choices)
 
+    trade_references = TradeReferencesWriteSerializer(read_only = True, many=True)
+    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
+    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
+    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
+    
     class Meta:
         model = Individuals
         fields = "__all__"
@@ -123,14 +132,14 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
         content_type = ContentType.objects.get_for_model(individual)
         for item in data_list:
             item_id = item.pop("id", None)
-            if item_id:
-                model.objects.filter(pk=item_id).update(**item)
-            else:
-                model.objects.create(
-                    client_content_type=content_type,
-                    client_object_id=individual.id,
-                    **item
-                )
+            model.objects.update_or_create(
+                pk=item_id,
+                defaults={
+                    **item,
+                    "subject_content_type": content_type,
+                    "subject_object_id": individual.id,
+                },
+            )
 
     def update(self, instance, validated_data):
         employment_information_data = validated_data.pop("employment_information", None)
@@ -138,6 +147,7 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
         registration_accounts_data = validated_data.pop("registration_accounts", [])
         banker_accounts_data = validated_data.pop("banker_accounts", [])
         professional_partners_data = validated_data.pop("professional_partners", [])
+        trade_references_data = validated_data.pop("trade_references", [])
 
         with transaction.atomic():
             for attr, value in validated_data.items():
@@ -161,5 +171,6 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
             self._update_generic_relations(instance, registration_accounts_data, RegistrationAccounts)
             self._update_generic_relations(instance, banker_accounts_data, BankerAccounts)
             self._update_generic_relations(instance, professional_partners_data, ProfessionalPartners)
-
+            self._update_generic_relations(instance, trade_references_data, TradeReferences)
         return instance
+    

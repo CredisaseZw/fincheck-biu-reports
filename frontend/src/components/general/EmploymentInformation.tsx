@@ -7,10 +7,17 @@ import Fieldset from "./FieldSet"
 import { Controller } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
-function EmploymentInformation() {
-    const { register, handleSubmit, errors, control } = useEmploymentInformation()
-
-    const onSubmit = (data: EmploymentFormData) => console.log(data)
+interface props {
+    employment_information : EmploymentFormData | undefined
+}
+function EmploymentInformation({employment_information}:props) {
+    const { 
+        onSubmit,
+        register,
+        handleSubmit,
+        errors,
+        control 
+    } = useEmploymentInformation(employment_information)
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>

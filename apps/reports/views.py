@@ -4,16 +4,15 @@ from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
-
+from .models import Report
+from rest_framework.decorators import action
 class ReportViewSet(BaseJSONViewSet):
     search_fields = ["enquiry_reference"]
     queryset = Report.objects.prefetch_related(
-        "tradereferences_report",
+        "tradereferences_report"
         "courtjudgement_report",
         "insolvencyrecord_report",
         "publicinformation_report"
-    ).select_related(
-        "reportsummary_report"
     ).filter(is_deleted=False)
 
     serializer_class = ReportSerializer
@@ -62,3 +61,11 @@ class ReportViewSet(BaseJSONViewSet):
             ReportSerializer(report).data,
             status=STATUS.HTTP_201_CREATED
         )
+    
+    @action(url_path="finalize-report", detail=True, methods=["POST"])
+    def finalize_report(self, request, *args, **kwargs):
+        report = self.get_object()
+
+        if report.status == report.StatusChoices.FINALIZED:
+            return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+        

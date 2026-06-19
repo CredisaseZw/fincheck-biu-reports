@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from apps.utils.base_models import BaseFinancialRecord, BaseModelWithReport
+from apps.utils.base_models import BaseFinancialRecord, BaseModelWithSubject
 
 # Create your models here.
 class Claims(BaseFinancialRecord):
@@ -43,7 +43,7 @@ class Absconders(BaseFinancialRecord):
         verbose_name = "Absconder Record"
         verbose_name_plural = "Absconder Records"
 
-class CourtJudgement(BaseModelWithReport):
+class CourtJudgement(BaseModelWithSubject):
     court_name = models.CharField(max_length=255)
     case_number = models.CharField(max_length=100)
     judgement_date = models.DateField()
@@ -59,7 +59,7 @@ class CourtJudgement(BaseModelWithReport):
         verbose_name = "Court Judgement"
         verbose_name_plural = "Court Judgement's"
         
-class InsolvencyRecord(BaseModelWithReport):
+class InsolvencyRecord(BaseModelWithSubject):
     class InsolvencyType(models.TextChoices):
         INSOLVENCY = "insolvency", "Insolvency"
         BANKRUPTCY = "bankruptcy", "Bankruptcy"
@@ -91,7 +91,7 @@ class InsolvencyRecord(BaseModelWithReport):
         verbose_name = "Insolvency Record"
         verbose_name_plural = "Insolvency Records"
 
-class PublicInformation(BaseModelWithReport):
+class PublicInformation(BaseModelWithSubject):
     record_date = models.DateField(_("Record Date")) 
     summary = models.TextField(blank=True, null=True)
     link = models.CharField(max_length=255, blank=True, null=True)

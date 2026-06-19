@@ -1,6 +1,7 @@
 from django.contrib import admin
 from apps.common.models import (
     BankerAccounts,
+    TradeReferences,
     Financials,
     ProfessionalPartners,
     RegistrationAccounts,
@@ -11,6 +12,7 @@ class GenericClientMixin:
         if obj.client:
             return f"{obj.client.__class__.__name__} | {str(obj.client)}"
         return "-"
+
 @admin.register(RegistrationAccounts)
 class RegistrationAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
     list_display = (
@@ -48,12 +50,10 @@ class BankerAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
     search_fields = ("bank", "branch", "account_name", "account_number")
     readonly_fields = ("created_at", "updated_at")
 
-
 @admin.register(ProfessionalPartners)
 class ProfessionalPartnersAdmin(GenericClientMixin, admin.ModelAdmin):
     list_display = ("get_client", "created_at")
     readonly_fields = ("created_at", "updated_at")
-
 
 @admin.register(Financials)
 class FinancialsAdmin(GenericClientMixin, admin.ModelAdmin):
@@ -67,4 +67,17 @@ class FinancialsAdmin(GenericClientMixin, admin.ModelAdmin):
         "created_at",
     )
     list_filter = ("financial_year",)
+    readonly_fields = ("created_at", "updated_at")
+
+@admin.register(TradeReferences)
+class TradeReferencesAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "referenced_date",
+        "payment_trend",
+        "credit_limit",
+        "credit_terms",
+    )
+    list_filter = ("payment_trend",)
+    search_fields = ("name", "contact_info", "reference_source")
     readonly_fields = ("created_at", "updated_at")

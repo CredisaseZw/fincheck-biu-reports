@@ -30,7 +30,6 @@ function CompanyDetails({company_overview} : props) {
         errors 
     } = useCompanyDetails(company_overview)
 
-    
     return (
         <div>
             <form onSubmit={handleSubmit(onSubmit)}>
