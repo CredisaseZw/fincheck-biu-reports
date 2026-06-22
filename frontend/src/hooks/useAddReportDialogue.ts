@@ -8,6 +8,7 @@ import { useReport } from "@/contexts/ReportMutationContext";
 import useCreateReport from "./api/useCreateReport";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
+import type { NextOfKinFormData } from "./useNextOfKin";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -19,12 +20,12 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [subjectType, setSubjectType] = useState<EntityValue>("company")
   const [report, setReport] =useState<Report | undefined>(undefined)
   const [headerEditMode, setHeaderEditMode ] = useState<boolean>()
-
   const [defaultHeader, setDefaultHeader] = useState<DefaultHeaderProps | undefined>(undefined);
   const [companyOverview, setCompanyOverview] = useState<CompanyFormData | undefined>(undefined);
   const [individualDetails, setIndividualDetails] = useState<IndividualFormData | undefined>(undefined)
   const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
-
+  const [nextOfKin, setNextOfKin] = useState<NextOfKinFormData | undefined>(undefined);
+  
   const {data, isLoading, error } = useGetSingleReport(
     list_report?.id,
     Boolean(list_report && open)
@@ -76,8 +77,8 @@ function useAddReportDialogue(list_report?: ListReport) {
     setClientObjectId(report.client.id); // in case of these are edited
     setSubjectObjectId(report.subject.id);
 
-    if(report.client_type === "company"){
-      const company = report.client as Company
+    if(report.subject_type === "company"){
+      const company = report.subject as Company
       setCompanyOverview({
         id: company.id,
         registered_name: company?.registered_name ?? "",
@@ -107,8 +108,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         }, 
       })
     } else {
-      const individual = report.client as Individual
-      
+      const individual = report.subject as Individual
       setIndividualDetails({
         id: individual.id,
         full_name: individual.full_name ?? "",
@@ -130,6 +130,13 @@ function useAddReportDialogue(list_report?: ListReport) {
         years_employed: individual.employment_information?.years_employed ?? undefined,
         monthly_income: Number(individual.employment_information?.monthly_income ?? 0),
         previous_employer: individual.employment_information?.previous_employer ?? "",
+      })
+      
+      setNextOfKin({
+        individual_id : individual.id,
+        name : individual.next_of_kin?.name ?? "",
+        contact_number : individual.next_of_kin?.contact_number ?? "",
+        relationship : individual.next_of_kin?.relationship ?? ""
       })
     }
   
@@ -174,6 +181,7 @@ function useAddReportDialogue(list_report?: ListReport) {
 
   return { 
     report,
+    nextOfKin,
     companyOverview,
     individualDetails,
     employmentInformation,

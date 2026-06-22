@@ -2,7 +2,6 @@ import useIndividualDetails, { type IndividualFormData } from "@/hooks/useIndivi
 import { Controller } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import {
     Select, SelectContent, SelectItem,
     SelectTrigger, SelectValue,
@@ -10,10 +9,10 @@ import {
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import AddressFieldset from "./AddressFields";
-import LoadingIndicator from "./LoadingIndicator";
+import CustomSubmitButton from "./CustomSubmitButton";
 
 interface props{
-    individual_details : IndividualFormData | undefined
+    individual_details? : IndividualFormData | undefined
 }
 
 function IndividualDetails({ individual_details } : props) {
@@ -104,22 +103,9 @@ function IndividualDetails({ individual_details } : props) {
                     showSecondary = {false}
                 />
 
-                            
-                <div className="flex justify-end">
-                    <Button
-                        className={isPending ? "cursor-not-allowed" : ""}
-                        disabled = {isPending}
-                        type="submit"
-
-                    >
-                        {
-                            isPending && 
-                            <LoadingIndicator variant="button"/>
-                        }
-                        Submit
-                    </Button>
-                </div>
-
+                <CustomSubmitButton
+                    isPending = {isPending}
+                />
             </Fieldset>
         </form>
     )

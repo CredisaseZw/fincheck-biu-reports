@@ -5,6 +5,8 @@ import SectionHeader from "@/components/general/SectionHeader";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ReportHeaders } from "@/constants";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
+import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
+import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
 import useReports from "@/hooks/useReports";
 import { getEntityName, getFormattedDate } from "@/lib/utils";
 
@@ -28,6 +30,8 @@ function Reports() {
             <div className="flex flex-col gap-3 md:flex-row md:justify-end self-center">
                 <SearchBox/>
                 <AddReportDialogue/>
+                <CreateCompanyDialogue/>
+                <CreateIndividualDialogue/>
             </div>
         </ColumnsContainer>
         <div className="mt-5">

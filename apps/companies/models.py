@@ -29,11 +29,13 @@ class Company(BaseModel):
 
     registered_name = models.CharField(
         max_length=200,
-        help_text=_("")
+        help_text=_(""),
+        unique=True
     )
     trading_name = models.CharField(
         max_length=255,
         blank=True,
+        unique=True,
         null=True,
         help_text=_(
             "The name the company trades under, if different from registration name."
@@ -60,7 +62,18 @@ class Company(BaseModel):
     )
 
     address_registered = models.TextField()
-    address_operations = models.TextField()
+    address_operations = models.TextField(  
+        blank=True, 
+        null=True
+    )
+    prev_addresses = models.JSONField(_("""
+        prev[]: address : '....',
+            field :  registered | operation
+            created_at: timestamp
+    """),
+    blank=True, 
+    null=True
+    )
 
     #contact details
     email = models.EmailField(
@@ -126,7 +139,6 @@ class Company(BaseModel):
         object_id_field="subject_object_id"
     )
 
-
     is_address_registered_verified = models.BooleanField(default=True)
     is_company_verified = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
@@ -141,6 +153,10 @@ class Company(BaseModel):
             UniqueConstraint(
                 fields=['registered_name', 'trading_name'],
                 name='unique_name_per_trading_name'
+            ),
+            UniqueConstraint(
+                fields=['registered_name'],
+                name='unique_registered_name'
             )
         ]
     

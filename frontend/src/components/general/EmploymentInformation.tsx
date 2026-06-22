@@ -1,11 +1,11 @@
 import useEmploymentInformation, { type EmploymentFormData } from "@/hooks/useEmploymentInformation"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import { Controller } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import CustomSubmitButton from "./CustomSubmitButton";
 
 interface props {
     employment_information : EmploymentFormData | undefined
@@ -16,7 +16,8 @@ function EmploymentInformation({employment_information}:props) {
         register,
         handleSubmit,
         errors,
-        control 
+        control,
+        isPending
     } = useEmploymentInformation(employment_information)
 
     return (
@@ -84,10 +85,7 @@ function EmploymentInformation({employment_information}:props) {
                         })}
                     />
                 </div>
-                <div className="flex justify-end">
-                    <Button type="submit">Submit</Button>
-                </div>
-
+                <CustomSubmitButton isPending = {isPending}/>
             </Fieldset>
         </form>
     )

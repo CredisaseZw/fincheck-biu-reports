@@ -4,6 +4,9 @@ from rest_framework import status
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
 from django.contrib.contenttypes.models import ContentType
+from apps.individuals.serializers import IndividualSerializer
+from apps.companies.serializers import CompanySerializer
+from apps.utils.mini_serializers import MiniCompanySerializer, MiniIndividualSerializer
 
 def clean_error(error):
     if isinstance(error, serializers.ValidationError):
@@ -51,3 +54,10 @@ def get_content_type_id(subject_object_id, subject_type: str) -> int | None:
         return None
 
     return ContentType.objects.get_for_model(subject).id
+
+def _content_ob_serializer( content, mini_serializer = False):
+    if not content:
+        return None
+    if hasattr(content, "next_of_kin"):
+        return IndividualSerializer(content).data if not mini_serializer else MiniIndividualSerializer(content).data
+    return CompanySerializer(content).data if not mini_serializer else MiniCompanySerializer(content).data

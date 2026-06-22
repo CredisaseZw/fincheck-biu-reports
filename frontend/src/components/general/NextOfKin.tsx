@@ -1,14 +1,21 @@
 import useNextOfKin, { type NextOfKinFormData } from "@/hooks/useNextOfKin"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function NextOfKin() {
-    const { register, handleSubmit, errors } = useNextOfKin()
+interface props {
+    next_of_kin : NextOfKinFormData | undefined
+}
 
-    const onSubmit = (data: NextOfKinFormData) => console.log(data)
+function NextOfKin({next_of_kin}: props) {
+    const { 
+        onSubmit,
+        register,
+        handleSubmit, 
+        errors
+     } = useNextOfKin(next_of_kin)
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -35,9 +42,7 @@ function NextOfKin() {
 
                 </ColumnsContainer>
 
-                <div className="flex justify-end">
-                    <Button type="submit">Submit</Button>
-                </div>
+                <CustomSubmitButton/>
             </Fieldset>
         </form>
     )

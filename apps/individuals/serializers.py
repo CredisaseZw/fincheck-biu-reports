@@ -61,8 +61,6 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
     next_of_kin = NextOfKinSerializer(required=False)
     employment_information = EmploymentInformationSerializer(required=False)
     marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
-    refer_type = serializers.ChoiceField(choices=Individuals.ReferType.choices)
-
     trade_references = TradeReferencesWriteSerializer(read_only = True, many=True)
     registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
@@ -117,8 +115,6 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
     next_of_kin = NextOfKinSerializer(required=False)
     employment_information = EmploymentInformationSerializer(required=False)
     marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
-    refer_type = serializers.ChoiceField(choices=Individuals.ReferType.choices)
-
     trade_references = TradeReferencesWriteSerializer(read_only = True, many=True)
     registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
@@ -172,5 +168,7 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
             self._update_generic_relations(instance, banker_accounts_data, BankerAccounts)
             self._update_generic_relations(instance, professional_partners_data, ProfessionalPartners)
             self._update_generic_relations(instance, trade_references_data, TradeReferences)
+        instance.refresh_from_db()
         return instance
+    
     

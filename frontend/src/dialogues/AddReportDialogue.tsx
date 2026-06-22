@@ -44,6 +44,7 @@ function AddReportDialogue({ report_item }: props) {
         employmentInformation,
         defaultHeader,
         isLoading, 
+        nextOfKin,
         report,
         open, 
         clientType,
@@ -55,107 +56,114 @@ function AddReportDialogue({ report_item }: props) {
         onSetEntityId,
         onUpdateEntityTypes,
     } = useAddReportDialogue(report_item)
-    const { reportLoading } = useReport()
+    const {
+        reportLoading,
+    } = useReport()
 
     const isUpdating = !!report_item;
     const showSkeleton = reportLoading || (isUpdating && isLoading);
-    
+
     const handleOpenChange = (isOpen: boolean) => {
         if (!isOpen) { onClear() }
         setOpen(isOpen);
     };
+
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <CustomDialogueTrigger
-                mode={isUpdating ? "update" : "create"}
-                Icon={Plus}
-                label="Add Report"
-            />
-            <DialogContent className="md:max-w-332 max-h-[95vh] overflow-y-auto">
-                <CustomDialogueHeader
-                    title={report_item ? "Edit report information" : "Create a new report"}
+        <div className="relative">
+            <Dialog open={open} onOpenChange={handleOpenChange}>
+                <CustomDialogueTrigger
+                    mode={isUpdating ? "update" : "create"}
+                    Icon={Plus}
+                    label="Add Report"
                 />
-                {
-                   headerEditMode 
-                   ? <ReportHeaderForm 
-                        default_header={defaultHeader}
-                        clientType={clientType}
-                        subjectType={subjectType}
-                        onSetEntityId={onSetEntityId}
-                        onUpdateEntityTypes={onUpdateEntityTypes}
+                <DialogContent className="md:max-w-332 max-h-[95vh] overflow-y-auto">
+                    <CustomDialogueHeader
+                        title={report_item ? "Edit report information" : "Create a new report"}
                     />
-                    : <ReportHeaderCard
-                        onEdit={onEdit}
-                        default_header={defaultHeader}
-                    />
-                }
-                
-                {showSkeleton
-                    ? <FormSkeleton />
-                    : report ? 
-                        clientType === "company"
-                        ? <>
-                            <CompanyDetails
-                                company_overview = {companyOverview}
-                            />
-                            <CompanyStructure />
-                            <CompanyOperations />
-                        </>
-                        : clientType === "individual"
+                    {
+                    headerEditMode 
+                    ? <ReportHeaderForm 
+                            default_header={defaultHeader}
+                            clientType={clientType}
+                            subjectType={subjectType}
+                            onSetEntityId={onSetEntityId}
+                            onUpdateEntityTypes={onUpdateEntityTypes}
+                        />
+                        : <ReportHeaderCard
+                            onEdit={onEdit}
+                            default_header={defaultHeader}
+                        />
+                    }
+                    
+                    {showSkeleton
+                        ? <FormSkeleton />
+                        : report ? 
+                            subjectType === "company"
                             ? <>
-                                <IndividualDetails 
-                                    individual_details={individualDetails}
+                                <CompanyDetails
+                                    company_overview = {companyOverview}
                                 />
-                                <EmploymentInformation 
-                                    employment_information = {employmentInformation}
-                                />
-                                <NextOfKin />
+                                <CompanyStructure />
+                                <CompanyOperations />
                             </>
+                            : subjectType === "individual"
+                                ? <>
+                                    <IndividualDetails 
+                                        individual_details={individualDetails}
+                                    />
+                                    <EmploymentInformation 
+                                        employment_information = {employmentInformation}
+                                    />
+                                    <NextOfKin 
+                                        next_of_kin={nextOfKin}
+                                    />
+                                </>
+                                : null
                             : null
-                        : null
-                        }
+                            }
 
-                {showSkeleton
-                    ? <FormSkeleton />
-                    : report &&
-                    <>
-                        {/* REPORT SUMMARY */}
+                    {showSkeleton
+                        ? <FormSkeleton />
+                        : report &&
+                        <>
+                            {/* REPORT SUMMARY */}
 
-                        <Fieldset legendTitle="Credit Records">
-                            <ClaimsDetails />
-                            <AbsconderDetails />
-                            <CourtDetails />
-                            <InsolvencyRecordsDetails />
-                        
-                            {/* PUBLIC INFORMATION */}
-                        
-                        </Fieldset>
-                        {
-                            clientType === "company" &&
-                            <>
-                                <DirectorDetails />             
-                                <ShareholdingDetails />
-                            </>
-                        }
-                        <FinancialsDetails />
-                        <TradeReferencesDetails />
-                        <RegistrationAccountsDetails />
-                        <BankerDetails />
-                        <ProfessionalPartnersDetails />
-                    </>    
-                }
+                            <Fieldset legendTitle="Credit Records">
+                                <ClaimsDetails />
+                                <AbsconderDetails />
+                                <CourtDetails />
+                                <InsolvencyRecordsDetails />
+                            
+                                {/* PUBLIC INFORMATION */}
+                            
+                            </Fieldset>
+                            {
+                                subjectType === "company" &&
+                                <>
+                                    <DirectorDetails />             
+                                    <ShareholdingDetails />
+                                </>
+                            }
+                            <FinancialsDetails />
+                            <TradeReferencesDetails />
+                            <RegistrationAccountsDetails />
+                            <BankerDetails />
+                            <ProfessionalPartnersDetails />
+                        </>    
+                    }
 
-                <DialogFooter>
-                    <DialogClose>
-                        <Button variant={"ghost"}>Cancel</Button>
-                    </DialogClose>
-                    <Button>
-                        <Printer />
-                        Print
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    <DialogFooter>
+                        <DialogClose>
+                            <Button variant={"ghost"}>Cancel</Button>
+                        </DialogClose>
+                        <Button>
+                            <Printer />
+                            Print
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
     )
 }
 

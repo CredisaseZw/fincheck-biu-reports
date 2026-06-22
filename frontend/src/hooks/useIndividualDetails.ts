@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
-import { formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import { cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import useInstanceMutation from "./api/useInstanceMutation";
 import { toast } from "sonner";
 
@@ -52,8 +52,12 @@ function useIndividualDetails(individual_details: IndividualFormData | undefined
         }
 
         if(!individual_details){
+            const DATA:any = cleanPayload(data)
+            if(DATA.residential_address){
+                DATA.residential_address = formatAddressToString(DATA.residential_address)
+            }
             PAYLOAD.url = "/api/individuals/"
-            PAYLOAD.data = data
+            PAYLOAD.data = DATA
         } else{
             const {id, ...initial_data} = individual_details;
             const changes = handleTrackChangedFields(initial_data, data);

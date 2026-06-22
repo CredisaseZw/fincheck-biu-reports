@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
-import { handleTrackChangedFields } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import { toast } from "sonner";
 
 const EmploymentStatus = z.enum(["employed", "self_employed", "unemployed", "part_time", "retired", "student"])
 const employmentSchema = z.object({
@@ -38,32 +39,39 @@ function useEmploymentInformation(employment_information: EmploymentFormData | u
         }
     }, [reset, employment_information])
 
-    const onSubmit = (data: EmploymentFormData) =>{
-        delete data.individual_id;
-        const PAYLOAD: InstanceMutation = {
-            url : "",
-            mode :"create",
-        }
-
+    const onSubmit = (data: EmploymentFormData) => {
         if(!employment_information){
-            PAYLOAD.url = "/api/individuals/"
-            PAYLOAD.data = data
-        } else {
-            const { individual_id, ...initial_data } = data;
-            const changes = handleTrackChangedFields(initial_data, data),
-            if(!changes) return;
-
-            PAYLOAD.url = `/api/individuals/${individual_id}/`
-            PAYLOAD.mode = "update"
-            PAYLOAD.data = changes
+            toast.error("An error occurred", {
+                description : "An individual instance is required"
+            })
+            return;
         }
+        const { individual_id, ...init }= employment_information
+        delete data.individual_id;
+
+        const PAYLOAD: InstanceMutation = {
+            url: `/api/individuals/${individual_id}/`,
+            mode: "update",
+        }
+        
+        const changes = handleTrackChangedFields(init, data);
+        if (!changes) return;
+        PAYLOAD.data = { employment_information: changes }
+    
+        mutate(PAYLOAD, {
+            onSuccess: (data) => { console.log(data) },
+            onError: (error) => handleAxiosError(error)
+        })
     }
+
     return { 
         onSubmit,
         register, 
         handleSubmit, 
         errors, 
-        control }
+        control,
+        isPending
+    }
 }
 
 export default useEmploymentInformation

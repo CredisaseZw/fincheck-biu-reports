@@ -5,13 +5,15 @@ import {
     useContext,
     type ReactNode, 
     type Dispatch, 
-    type SetStateAction 
+    type SetStateAction,
 } from "react";
 interface ReportContextProps{
-    showClientFields : boolean,
+    openCompanyFields : boolean,
     reportLoading : boolean,
-    setShowClientFields :Dispatch<SetStateAction<boolean>>
+    openIndividualFields : boolean,
+    setOpenCompanyFields :Dispatch<SetStateAction<boolean>>
     setReportLoading :Dispatch<SetStateAction<boolean>>
+    setOpenIndividualFields : Dispatch<SetStateAction<boolean>>
 }
 
 const ReportContext = createContext<ReportContextProps | undefined>(undefined);
@@ -21,13 +23,16 @@ interface ReportProviderProps {
 
 function ReportProvider({children} : ReportProviderProps){
     const [reportLoading, setReportLoading] = useState(false);
-    const [showClientFields, setShowClientFields] = useState(false)
-    
+    const [openCompanyFields, setOpenCompanyFields] = useState(false)
+    const [openIndividualFields, setOpenIndividualFields] = useState(false)
+
     return (
         <ReportContext.Provider value={{
-            showClientFields,
+            openCompanyFields,
             reportLoading,
-            setShowClientFields,
+            openIndividualFields,
+            setOpenIndividualFields,
+            setOpenCompanyFields,
             setReportLoading
         }}>
             {children}

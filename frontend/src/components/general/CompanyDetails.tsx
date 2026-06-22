@@ -1,5 +1,4 @@
 import useCompanyDetails, { type CompanyFormData } from "@/hooks/useCompanyDetails"
-import { Button } from "../ui/button";
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import ColumnsContainer from "./ColumnsContainer"
@@ -14,13 +13,17 @@ import {
 } from "@/components/ui/select"
 import AddressFieldset from "./AddressFields";
 import { numericField } from "@/constants";
-import LoadingIndicator from "./LoadingIndicator";
+import CustomSubmitButton from "./CustomSubmitButton";
 
 interface props {
-    company_overview : CompanyFormData | undefined
+    onSuccess?: (id: number) => void
+    company_overview? : CompanyFormData | undefined
 }
 
-function CompanyDetails({company_overview} : props) {
+function CompanyDetails({
+    company_overview,
+    onSuccess
+} : props) {
     const { 
         handleSubmit,
         register,
@@ -28,7 +31,9 @@ function CompanyDetails({company_overview} : props) {
         isPending,
         control,
         errors 
-    } = useCompanyDetails(company_overview)
+    } = useCompanyDetails({
+        company_overview,
+        onSuccess })
 
     return (
         <div>
@@ -196,18 +201,9 @@ function CompanyDetails({company_overview} : props) {
                         secondaryLabel="Add Operations Address"
                         initialOpen={false}
                     />
-                    <div className="flex justify-end">
-                        <Button 
-                            disabled = {isPending}
-                            className={isPending ? "cursor-not-allowed" : "cursor-pointer"}
-                            type="submit">
-                            {
-                                isPending &&
-                                <LoadingIndicator variant="button"/>
-                            }
-                            Submit
-                        </Button>
-                    </div>
+                    <CustomSubmitButton 
+                        isPending = {isPending}
+                    />
                 </Fieldset>
             </form>
         </div>

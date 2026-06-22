@@ -2,19 +2,15 @@ from rest_framework.response import Response
 from apps.utils.base_viewset import BaseJSONViewSet
 from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
+from apps.utils.helpers import _content_ob_serializer
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
 from .models import Report
 from rest_framework.decorators import action
+from django.utils import timezone
 class ReportViewSet(BaseJSONViewSet):
     search_fields = ["enquiry_reference"]
-    queryset = Report.objects.prefetch_related(
-        "tradereferences_report"
-        "courtjudgement_report",
-        "insolvencyrecord_report",
-        "publicinformation_report"
-    ).filter(is_deleted=False)
-
+    queryset = Report.objects.filter(is_deleted=False)
     serializer_class = ReportSerializer
 
     def get_serializer_class(self):
@@ -62,10 +58,56 @@ class ReportViewSet(BaseJSONViewSet):
             status=STATUS.HTTP_201_CREATED
         )
     
+    def destroy(self, request, *args, **kwargs):
+        report = self.get_object()
+        if report.status == report.StatusChoices.FINALIZED:
+            return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        if report.is_deleted:
+            return Response(
+                {"error": "Report is already deleted"},
+                status=STATUS.HTTP_400_BAD_REQUEST
+            )
+
+        report.is_deleted = True
+        report.save()
+        return Response( status=STATUS.HTTP_204_NO_CONTENT )
+
+    def partial_update(self, request, *args, **kwargs):
+        report = self.get_object()
+        if report.status == report.StatusChoices.FINALIZED:
+            return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        return super().partial_update(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        report = self.get_object()
+        if report.status == report.StatusChoices.FINALIZED:
+            return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+        return super().update(request, *args, **kwargs)
+    
     @action(url_path="finalize-report", detail=True, methods=["POST"])
     def finalize_report(self, request, *args, **kwargs):
         report = self.get_object()
 
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        snapshot: dict = {}
+        snapshot['client']= _content_ob_serializer(report.client, True)
+        snapshot['subject']= _content_ob_serializer(report.subject)
         
+        #generate url here pdf here and save url
+        report.snapshot = snapshot
+        report.status = Report.StatusChoices.FINALIZED
+        report.finalized_at = timezone.now()
+        report.save()
+
+        return Response({
+            #just return the pdf url alone,
+            "url": "....."
+        }, status=STATUS.HTTP_200_OK)
+    
+
+
+

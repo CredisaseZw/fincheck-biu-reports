@@ -7,13 +7,13 @@ import { Input } from "../ui/input";
 import type { EntityMode, EntityValue, MiniCompany, MiniIndividual } from "@/types/core";
 import useGetEntityObject from "@/hooks/api/useGetEntityObject";
 import { Button } from "../ui/button";
+import { useReport } from "@/contexts/ReportMutationContext";
 
 interface props {
     entityType: EntityValue,
     entityMode?: EntityMode,
     defaultSearch?: string,
     onSetEntityId:(entity : EntityMode, value: number | null)=> void
-    onEnterClientCreationMode?: ()=> void
     onSelectItem?: (id: number)=>void
 }
 export interface SearchEntityRef {
@@ -26,10 +26,9 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     entityMode,
     entityType,
     onSelectItem,
-    onSetEntityId,
-    onEnterClientCreationMode
+    onSetEntityId
     }, ref) => {
-    
+    const {setOpenIndividualFields, setOpenCompanyFields} = useReport()
     const [query, setQuery] = useState(defaultSearch ?? "")
     const [isOpen, setIsOpen] = useState(false)
     const [activeIndex, setActiveIndex] = useState(-1)
@@ -56,7 +55,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         return item
             ? "national_id" in item
                 ? (item as MiniIndividual).full_name
-                : (item as MiniCompany).trading_name
+                : (item as MiniCompany).registered_name
             : ""
     }
 
@@ -160,11 +159,17 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
                     No results found for "{debouncedQuery}"
                     <div className="w-full flex justify-center pt-1">
                         <Button
-                            onClick={onEnterClientCreationMode}
+                            onClick={()=>{
+                                if(entityType === "company"){
+                                    setOpenCompanyFields(true)
+                                    return;
+                                } 
+                                setOpenIndividualFields(true)
+                            }}
                             size="sm"
                             variant="outline"
                         >
-                            Create Company
+                            Create {entityType}
                         </Button>
                     </div>
                 </div>

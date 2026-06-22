@@ -3,19 +3,10 @@ from apps.utils.mini_serializers import MiniCompanySerializer, MiniIndividualSer
 from apps.companies.serializers import CompanySerializer
 from apps.individuals.serializers import IndividualSerializer
 from .models import Report
-from apps.credit_records.serializers import CreditRecordsSerializer
+from apps.utils.helpers import _content_ob_serializer
 # READ SERIALIZERS
 
-def _content_ob_serializer( content, mini_serializer = False):
-    if not content:
-        return None
-    if hasattr(content, "next_of_kin"):
-        return IndividualSerializer(content).data if not mini_serializer else MiniIndividualSerializer(content).data
-    return CompanySerializer(content).data if not mini_serializer else MiniCompanySerializer(content).data
-
 class ReportSerializer(serializers.ModelSerializer):
-    credit_records = CreditRecordsSerializer(read_only=True)
-
     class Meta:
         model = Report
         fields = [
@@ -26,8 +17,6 @@ class ReportSerializer(serializers.ModelSerializer):
             'status',
             'overall_risk_rating',
             'summary',
-            'credit_records',
-            'report_summary',
             'created_at',
             'updated_at',
             'finalized_at'

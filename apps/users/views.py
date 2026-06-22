@@ -64,4 +64,3 @@ def create_user(request, *args, **kwargs):
     
     user = User.objects.create_user(**serializer.validated_data)
     return Response(UserSerializer(user).data, status=STATUS.HTTP_201_CREATED)
-

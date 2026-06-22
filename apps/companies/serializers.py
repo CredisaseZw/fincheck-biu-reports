@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import transaction
 from rest_framework import serializers
 from apps.companies.models import (
@@ -91,7 +92,7 @@ class CompanyListSerializer(serializers.ModelSerializer):
             "email",
             "telephone_number",
             "is_active",
-            "is_verified",
+            "is_company_verified",
             "created_at",
         ]
 
@@ -180,6 +181,17 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
         banker_accounts_data = validated_data.pop("banker_accounts", [])
         professional_partners_data = validated_data.pop("professional_partners", [])
         trade_references_data = validated_data.pop("trade_references", [])
+       
+        for field in ["address_registered", "address_operating"]:
+            new_val = validated_data.get(field)
+            old_val = getattr(instance, field)
+            if new_val and new_val != old_val and old_val:
+                history = instance.prev_addresses or {"prev": []}
+                prev_list = history.get("prev", [])
+                entry = {"address": old_val, "field": field, "changed_at": timezone.now().isoformat()}
+                if entry["address"] not in [e["address"] for e in prev_list]:
+                    prev_list.append(entry)
+                instance.prev_addresses = {"prev": prev_list}
 
         with transaction.atomic():
             for attr, value in validated_data.items():
@@ -206,4 +218,5 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
             self._update_generic_relations(instance, banker_accounts_data, BankerAccounts)
             self._update_generic_relations(instance, professional_partners_data, ProfessionalPartners)
             self._update_generic_relations(instance, trade_references_data, TradeReferences)
+        instance.refresh_from_db()
         return instance

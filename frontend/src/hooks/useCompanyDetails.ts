@@ -1,7 +1,7 @@
 
 import { ADDRESS_OBJECT, OPTIONAL_ADDRESS_OBJECT } from "@/constants";
-import {  formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
-import type { Address } from "@/types/core";
+import {  cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import type { Address, Company } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { z } from "zod"
@@ -47,8 +47,11 @@ export const companySchema = z.object({
 })
 
 export type CompanyFormData = z.infer<typeof companySchema>
-
-function useCompanyDetails(company_overview: CompanyFormData | undefined) {
+interface props {
+    company_overview: CompanyFormData | undefined,
+    onSuccess? : (id: number) => void
+}
+function useCompanyDetails({company_overview}:props) {
     const {mutate, isPending } = useInstanceMutation()
 
     const {
@@ -70,15 +73,24 @@ function useCompanyDetails(company_overview: CompanyFormData | undefined) {
 
     const onSubmit = (data: CompanyFormData) => {
         delete data.id;
+        let message = "Company successfully created."
         const PAYLOAD:InstanceMutation = {
             url : "",
             mode : "create"
         }
 
         if(!company_overview){ 
+            const DATA:any = cleanPayload(data)
+            if(DATA.address_registered){
+                DATA.address_registered = formatAddressToString(DATA.address_registered)
+            }
+
+            if(DATA.address_operations){
+                DATA.address_operations = formatAddressToString(DATA.address_operations)
+            }
+
             PAYLOAD.url = "/api/companies/"
-            PAYLOAD.data = data
-            PAYLOAD.mode = "create"
+            PAYLOAD.data = DATA
         }
         else{
             const {id, ...initial_data} = company_overview;
@@ -91,16 +103,17 @@ function useCompanyDetails(company_overview: CompanyFormData | undefined) {
             if(changes.address_operations){
                 changes.address_operations = formatAddressToString(data.address_operations as Address)
             }
-
+            message = "Information successfully updated."
             PAYLOAD.url = `/api/companies/${id}/`
             PAYLOAD.mode = "update"
             PAYLOAD.data = changes;
         }
         
         mutate(PAYLOAD,{
-            onSuccess : ()=>{
+            onSuccess : (data: Company)=>{
+                console.log(data)
                 // returns company data
-                toast.info("Information Updated successfully")
+                toast.info(message)
             },
             onError:(error)=>handleAxiosError(error)
         } )

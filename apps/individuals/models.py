@@ -21,7 +21,7 @@ class Individuals(BaseModel):
         DIVORCED = "divorced", "Divorced"
         WIDOWED = "widowed", "Widowed"
     
-    full_name = models.CharField(_("Full name"), max_length=255)
+    full_name = models.CharField(_("Full name"), max_length=255, unique = True)
     national_id = models.CharField(_("National ID / Passport"), max_length=100, unique=True)
     date_of_birth = models.DateField(_("Date of birth"))
     gender = models.CharField(_("Gender"), max_length=50)

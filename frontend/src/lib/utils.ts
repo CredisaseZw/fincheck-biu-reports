@@ -110,6 +110,27 @@ export const formatAddressToObject = (addressString: string): Address => {
     postal_code: postal_code === "-" ? "" : postal_code,
   };
 };
+export function cleanPayload<T extends Record<string, unknown>>(data: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(data)
+      .map(([key, value]) => {
+          if (Array.isArray(value)) {
+              const cleaned = value
+                  .map(item => typeof item === "object" && item !== null ? cleanPayload(item as Record<string, unknown>) : item)
+                  .filter(item => item !== "" && item !== undefined)
+              return [key, cleaned.length ? cleaned : undefined]
+          }
+
+          if (typeof value === "object" && value !== null) {
+              const cleaned = cleanPayload(value as Record<string, unknown>)
+              return [key, Object.keys(cleaned).length ? cleaned : undefined]
+          }
+
+          return [key, value === "" || value === undefined ? undefined : value]
+      })
+      .filter(([, value]) => value !== undefined)
+  ) as Partial<T>
+}
 
 export const handleTrackChangedFields = (initial: any, payloadData: any, toastInfo = true): any => {
   const deepDiff = (obj1: any, obj2: any): any => {
