@@ -39,6 +39,8 @@ interface props {
 
 function AddReportDialogue({ report_item }: props) {
     const { 
+        subject_object_id,
+        subject_type,
         individualDetails,
         companyOverview,
         employmentInformation,
@@ -46,6 +48,7 @@ function AddReportDialogue({ report_item }: props) {
         isLoading, 
         nextOfKin,
         report,
+        claims,
         open, 
         clientType,
         subjectType,
@@ -127,16 +130,6 @@ function AddReportDialogue({ report_item }: props) {
                         : report &&
                         <>
                             {/* REPORT SUMMARY */}
-
-                            <Fieldset legendTitle="Credit Records">
-                                <ClaimsDetails />
-                                <AbsconderDetails />
-                                <CourtDetails />
-                                <InsolvencyRecordsDetails />
-                            
-                                {/* PUBLIC INFORMATION */}
-                            
-                            </Fieldset>
                             {
                                 subjectType === "company" &&
                                 <>
@@ -144,10 +137,22 @@ function AddReportDialogue({ report_item }: props) {
                                     <ShareholdingDetails />
                                 </>
                             }
-                            <FinancialsDetails />
-                            <TradeReferencesDetails />
-                            <RegistrationAccountsDetails />
                             <BankerDetails />
+                            <Fieldset legendTitle="Credit Records">
+                                <ClaimsDetails
+                                    claims = {claims}
+                                    subject_object_id = {subject_object_id}
+                                    subject_type = {subject_type}
+                                />
+                                <AbsconderDetails />
+                                <CourtDetails />
+                                <InsolvencyRecordsDetails />
+                                {/* PUBLIC INFORMATION */}       
+                            </Fieldset>
+
+                            <TradeReferencesDetails />
+                            <FinancialsDetails />
+                            <RegistrationAccountsDetails />
                             <ProfessionalPartnersDetails />
                         </>    
                     }

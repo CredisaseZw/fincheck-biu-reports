@@ -16,6 +16,11 @@ class CompaniesViewSet(BaseJSONViewSet):
 
     serializer_class = CompanySerializer
     queryset = Company.objects.prefetch_related(
+        "claims",
+        "absconders",
+        "court_judgements",
+        "insolvency_records",
+        "public_information",
         "directors",
         "registration_accounts",
         "banker_accounts",

@@ -22,6 +22,7 @@ export interface BaseTableProps {
   isEmpty?: boolean;
   errorMessage?: string;
   paginationName?: string;
+  innerTableClassName?: string
   paginationData?: PaginationData;
   tableClass?: string;
 }
@@ -43,6 +44,7 @@ function BaseTable({
   paginationData,
   paginationName = "page",
   errorMessage,
+  innerTableClassName
 }: BaseTableProps) {
   const colSpan = headers.length || 1;
   const showChildren = !isLoading && !isError && !isEmpty;
@@ -99,8 +101,11 @@ function BaseTable({
 
   return (
     <div className="w-full space-y-4">
-      <div className="w-full overflow-hidden rounded-md border border-border bg-card shadow-sm dark:bg-zinc-950/20">
-        <Table className={cn("h-fit w-full border-collapse", tableClass)}>
+      <div className="w-full rounded-md border border-border bg-card shadow-sm dark:bg-zinc-950/20">
+        <Table 
+          className={cn("h-fit w-full border-collapse", tableClass)}
+          innerTableClassName = {innerTableClassName}
+        >
           <TableHeader>
             <TableRow className="border-b border-border bg-muted/40 hover:bg-muted/40 dark:bg-zinc-900/50">
               {headers.map((header, index) => {

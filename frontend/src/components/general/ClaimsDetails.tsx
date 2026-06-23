@@ -1,7 +1,7 @@
 import { CLAIMS_HEADERS, numericField } from "@/constants";
 import BaseTable from "./BaseTable";
 import Fieldset from "./FieldSet";
-import useClaims from "@/hooks/useClaims";
+import useClaims, { type ClaimFormData } from "@/hooks/useClaims";
 import { TableCell, TableRow } from "../ui/table";
 import { Controller } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -10,8 +10,20 @@ import SearchEntity, { type SearchEntityRef } from "./SearchEntity";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Trash2, Plus } from "lucide-react";
+import type { EntityValue } from "@/types/core";
 
-function ClaimsDetails() {
+interface props {
+    subject_object_id?: number | null
+    subject_type?: EntityValue | null
+    claims: ClaimFormData[]
+}
+
+function ClaimsDetails({
+    claims,
+    subject_object_id,
+    subject_type
+    
+} :props) {
     const {
         append, 
         remove, 
@@ -20,16 +32,22 @@ function ClaimsDetails() {
         watch, 
         handleSubmit, 
         register,
+        onDelete,
         control, 
         errors, 
         fields, 
         refs,
-    } = useClaims()
+    } = useClaims({
+        claims_data : claims,
+        subject_object_id,
+        subject_type
+    })
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <Fieldset legendTitle="Claim Records" className="flex flex-col gap-4" >
+            <Fieldset legendTitle="Claim Records" className="flex flex-col gap-4 " >
                 <BaseTable 
+                    innerTableClassName = "overflow-visible"
                     isEmpty = {fields.length === 0}
                     headers={CLAIMS_HEADERS}
                 >
@@ -38,8 +56,8 @@ function ClaimsDetails() {
                         const setRef = (el: SearchEntityRef | null) => { refs.current[idx] = el }
 
                         return (
-                            <TableRow key={idx}>
-                                <TableCell>
+                            <TableRow key={idx} className="relative">
+                                <TableCell className="relative">
                                     <div className="flex flex-row gap-1">
                                         <Controller
                                             control={control}
@@ -57,6 +75,7 @@ function ClaimsDetails() {
                                         <SearchEntity
                                             ref={setRef}
                                             entityType={entityType}
+                                            defaultSearch={claims[idx]?.debtor_default ?? ""}
                                             onSelectItem={(id: number) => setValue(`claims.${idx}.debtor_object_id`, id)}
                                         />
                                     </div>
@@ -138,7 +157,13 @@ function ClaimsDetails() {
                                         variant="ghost"
                                         size="icon"
                                         disabled={fields.length === 1}
-                                        onClick={() => remove(idx)}
+                                        onClick={() => {
+                                            remove(idx)
+                                            const id = claims[idx].id
+                                            if(id){
+                                                onDelete(id)
+                                            } 
+                                        }}
                                     >
                                         <Trash2 size={16} className="text-destructive" />
                                     </Button>
@@ -154,7 +179,6 @@ function ClaimsDetails() {
                         type="button"
                         variant="outline"
                         onClick={() => append({
-                            id: undefined,
                             creditor_name: "",
                             currency: "USD",
                             amount: 0,

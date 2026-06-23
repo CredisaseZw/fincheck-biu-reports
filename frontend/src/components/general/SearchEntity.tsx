@@ -13,7 +13,7 @@ interface props {
     entityType: EntityValue,
     entityMode?: EntityMode,
     defaultSearch?: string,
-    onSetEntityId:(entity : EntityMode, value: number | null)=> void
+    onSetEntityId?:(entity : EntityMode, value: number | null)=> void
     onSelectItem?: (id: number)=>void
 }
 export interface SearchEntityRef {
@@ -91,7 +91,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         setActiveIndex(-1)
         inputRef.current?.blur()
         if(entityMode){
-            onSetEntityId(entityMode, entity.id)
+            onSetEntityId?.(entityMode, entity.id)
         } else{
             onSelectItem?.(entity.id)
         }
@@ -105,7 +105,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         setHasInteracted(false)
         inputRef.current?.focus()
 
-        if (entityMode) onSetEntityId(entityMode, null)
+        if (entityMode) onSetEntityId?.(entityMode, null)
     }, [onSetEntityId, entityMode])
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -206,7 +206,8 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     }))
 
     return (
-        <div ref={containerRef} className="form-group w-full relative">
+        <div ref={containerRef} 
+            className="form-group w-full relative overflow-visible">
             <div className="relative flex items-center mt-1">
 
                 {isLoading && isOpen ? (
@@ -266,7 +267,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute z-50 mt-0 w-full top-15 rounded-md">
+                <div className="absolute z-855 mt-0 w-full top-15 rounded-md">
                     <div
                         ref={listRef}
                         role="listbox"

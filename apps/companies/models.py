@@ -12,6 +12,14 @@ from apps.common.models import (
     Financials,
     TradeReferences,
 )
+from apps.credit_records.models import (
+    Claims,
+    Absconders,
+    CourtJudgement,
+    InsolvencyRecord,
+    PublicInformation
+)
+
 class Company(BaseModel):
     class ReferType(models.TextChoices):
         BIU = "biu", "BIU"
@@ -102,6 +110,31 @@ class Company(BaseModel):
     )
     
     # GENERIC RELATIONS
+    claims = GenericRelation(
+        Claims,
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
+    )
+    absconders = GenericRelation(
+        Absconders,
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
+    )
+    court_judgements = GenericRelation(
+        CourtJudgement,
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
+    )
+    insolvency_records = GenericRelation(
+        InsolvencyRecord,
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
+    )
+    public_information = GenericRelation(
+        PublicInformation,
+        content_type_field="subject_content_type",
+        object_id_field="subject_object_id"
+    )
     registration_accounts = GenericRelation(
         RegistrationAccounts,
         content_type_field="subject_content_type",

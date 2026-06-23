@@ -30,6 +30,14 @@ from apps.common.serializer import (
     BankerAccountsSerializer,
     BankerAccountsWriteSerializer,
 )
+from apps.credit_records.serializers import (
+    ClaimsSerializer,
+    AbscondersSerializer,
+    CourtJudgementSerializer,
+    InsolvencyRecordSerializer,
+    PublicInformationSerializer,
+)
+
 from django.contrib.contenttypes.models import ContentType
 from apps.directors.serializers import CompanyDirectorSerializer
 from apps.shareholding.serializers import ShareholdingsSerializers
@@ -68,6 +76,11 @@ class CompanySerializer(serializers.ModelSerializer):
     operations = CompanyOperationsSerializer(read_only=True)
     directors = CompanyDirectorSerializer(many=True, read_only = True)
     shareholdings = ShareholdingsSerializers(read_only = True)
+    claims = ClaimsSerializer(read_only= True, many = True)
+    absconders = AbscondersSerializer(read_only= True, many = True)
+    court_judgements = CourtJudgementSerializer(read_only= True, many = True)
+    insolvency_records = InsolvencyRecordSerializer(read_only= True, many = True)
+    public_information = PublicInformationSerializer(read_only= True, many = True)
     trade_references = TradeReferencesSerializer(read_only = True, many=True)
     registration_accounts = RegistrationAccountsSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsSerializer(many = True, read_only = True)
@@ -182,7 +195,7 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
         professional_partners_data = validated_data.pop("professional_partners", [])
         trade_references_data = validated_data.pop("trade_references", [])
        
-        for field in ["address_registered", "address_operating"]:
+        for field in ["address_registered", "address_operations"]:
             new_val = validated_data.get(field)
             old_val = getattr(instance, field)
             if new_val and new_val != old_val and old_val:

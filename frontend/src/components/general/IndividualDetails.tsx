@@ -12,6 +12,7 @@ import AddressFieldset from "./AddressFields";
 import CustomSubmitButton from "./CustomSubmitButton";
 
 interface props{
+    report_id?: number | undefined
     individual_details? : IndividualFormData | undefined
 }
 

@@ -18,7 +18,7 @@ function useInstanceMutation() {
             : mode === "update"
             ? api.patch(url, data)
             : api.delete(url)
-
+            
             return (await response).data;
         } 
     })

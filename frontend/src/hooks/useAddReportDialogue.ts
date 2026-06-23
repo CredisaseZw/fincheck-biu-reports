@@ -9,6 +9,7 @@ import useCreateReport from "./api/useCreateReport";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
 import type { NextOfKinFormData } from "./useNextOfKin";
+import type { ClaimFormData } from "./useClaims";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -25,7 +26,8 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [individualDetails, setIndividualDetails] = useState<IndividualFormData | undefined>(undefined)
   const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
   const [nextOfKin, setNextOfKin] = useState<NextOfKinFormData | undefined>(undefined);
-  
+  const [claims, setClaims] = useState<ClaimFormData[]>([])
+
   const {data, isLoading, error } = useGetSingleReport(
     list_report?.id,
     Boolean(list_report && open)
@@ -139,6 +141,33 @@ function useAddReportDialogue(list_report?: ListReport) {
         relationship : individual.next_of_kin?.relationship ?? ""
       })
     }
+
+    // setup common data
+    setClaims(
+      report.subject.claims.length > 0
+      ? report.subject.claims.map(item => ({
+        id: item.id,
+        creditor_name: item.creditor_name,
+        currency: item.currency,
+        amount: Number(item.amount),
+        claim_date: item.claim_date,
+        status: item.status,
+        debtor_object_id: item.debtor.extras.debtor_object_id,
+        debtor_type: item.debtor.extras.debtor_type,   
+        debtor_default : item.debtor.name
+      }))
+      : [
+        { 
+          creditor_name: "",
+          currency: "USD",
+          amount: 0,
+          claim_date: "",
+          status: "open",
+          debtor_object_id: 0,
+          debtor_type: "company",   
+        } 
+      ]
+    )
   
   }, [report])
 
@@ -180,6 +209,9 @@ function useAddReportDialogue(list_report?: ListReport) {
   };
 
   return { 
+    subject_object_id : report?.subject.id ?? null,
+    subject_type : report?.subject_type ?? null,
+    claims,
     report,
     nextOfKin,
     companyOverview,
@@ -191,11 +223,13 @@ function useAddReportDialogue(list_report?: ListReport) {
     clientType,
     subjectType,
     headerEditMode,
+    
     onClear,
     onEdit,
     setOpen,
     onSetEntityId,
     onUpdateEntityTypes,
+  
   };
 }
 

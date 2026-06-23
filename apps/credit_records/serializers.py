@@ -1,32 +1,27 @@
 from rest_framework import serializers
-from apps.reports.models import Report
-from apps.utils.mini_serializers import MiniCompanySerializer
-from apps.utils.mini_serializers import MiniIndividualSerializer
+from apps.utils.mini_serializers import MiniIndividualDebtorSerializers, MiniCompanyDebtorSerializers
 from .models import Claims, Absconders, CourtJudgement, InsolvencyRecord, PublicInformation
 
 def _get_debtor_data(debtor):
     if not debtor:
         return None
     if hasattr(debtor, "next_of_kin"):
-        return MiniIndividualSerializer(debtor).data
-    return MiniCompanySerializer(debtor).data
+        return MiniIndividualDebtorSerializers(debtor).data
+    return MiniCompanyDebtorSerializers(debtor).data
 
-#READ SERIALIZERS
+#READ SERIALIZERS 
 class ClaimsSerializer(serializers.ModelSerializer):
-    status_display = serializers.CharField(source="get_status_display", read_only=True)
     debtor = serializers.SerializerMethodField()
-
     class Meta:
         model = Claims
         fields = [
             "id",
-            "report",
             "debtor",
             "creditor_name",
             "currency",
             "amount",
             "claim_date",
-            "status_display",
+            "status",
         ]
 
     def get_debtor(self, obj):
@@ -34,18 +29,16 @@ class ClaimsSerializer(serializers.ModelSerializer):
 
 class AbscondersSerializer(serializers.ModelSerializer): 
     debtor =  serializers.SerializerMethodField()
-    status_display = serializers.CharField(source="get_status_display", read_only=True)
     class Meta:
         model = Absconders
         fields = [
             "id",
-            "report",
             "debtor",
             "creditor_name",
             "currency",
             "amount",
             "start_date",
-            "status_display",
+            "status",
         ]
     
     def get_debtor(self, obj):
@@ -56,7 +49,6 @@ class CourtJudgementSerializer(serializers.ModelSerializer):
         model = CourtJudgement
         fields = [
             "id",
-            "report",
             "court_name",
             "case_number",
             "judgement_date",
@@ -64,17 +56,14 @@ class CourtJudgementSerializer(serializers.ModelSerializer):
         ]
 
 class InsolvencyRecordSerializer(serializers.ModelSerializer):
-    insolvency_type_display = serializers.CharField(source="get_insolvency_type_display", read_only=True)
-
     class Meta:
         model = InsolvencyRecord
         fields = [
             "id",
-            "report",
             "start_date",
             "end_date",
             "court_reference",
-            "insolvency_type_display",
+            "insolvency_type",
         ]
     
 
@@ -83,49 +72,32 @@ class PublicInformationSerializer(serializers.ModelSerializer):
         model = PublicInformation
         fields = [
             "id",
-            "report",
             "summary",
             "link",
         ]
 
-class CreditRecordsSerializer(serializers.ModelSerializer):
-    claims = ClaimsSerializer(many=True, read_only=True, source="claims_report")
-    absconders = AbscondersSerializer(many=True, read_only=True, source="absconders_report")
-    court_judgements = CourtJudgementSerializer(many=True, read_only=True, source="courtjudgement_report")
-    insolvency_records = InsolvencyRecordSerializer(many=True, read_only=True, source="insolvencyrecord_report")
-    public_information = PublicInformationSerializer(many=True, read_only=True, source="publicinformation_report")
-
-    class Meta:
-        model = Report
-        fields = [
-            "claims",
-            "absconders",
-            "court_judgements",
-            "insolvency_records",
-            "public_information",
-        ]   
-
 # WRITE SERIALIZERS
 
 class ClaimsWriteSerializer(serializers.ModelSerializer):
-    status_display = serializers.ChoiceField(choices=Claims.SettlementOptions.choices, required=False)
     class Meta:
         model = Claims
         fields = [
-            "report",
+            "subject_content_type",
+            "subject_object_id",
             "debtor_content_type",
             "debtor_object_id",
             "creditor_name",
             "currency",
             "amount",
             "claim_date",
-            "status_display",
+            "status",
         ]
 class AbscondersWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Absconders
         fields = [
-            "report",
+            "subject_content_type",
+            "subject_object_id",
             "debtor_content_type",
             "debtor_object_id",
             "creditor_name",
@@ -140,7 +112,8 @@ class CourtJudgementWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourtJudgement
         fields = [
-            "report",
+            "subject_content_type",
+            "subject_object_id",
             "court_name",
             "case_number",
             "judgement_date",
@@ -149,17 +122,22 @@ class CourtJudgementWriteSerializer(serializers.ModelSerializer):
 
 
 class InsolvencyRecordWriteSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = InsolvencyRecord
-        fields = '__all__'
-
-
+        fields = [
+            "subject_content_type",
+            "subject_object_id",
+            "insolvency_type",
+            "start_date",
+            "end_date",
+            "court_reference"
+        ]
 class PublicInformationWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = PublicInformation
         fields = [
-            "report",
+            "subject_content_type",
+            "subject_object_id",
             "summary",
             "link",
         ]

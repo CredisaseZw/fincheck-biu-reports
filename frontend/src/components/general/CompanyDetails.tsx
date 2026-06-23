@@ -17,11 +17,13 @@ import CustomSubmitButton from "./CustomSubmitButton";
 
 interface props {
     onSuccess?: (id: number) => void
+    report_id?: number | undefined
     company_overview? : CompanyFormData | undefined
 }
 
 function CompanyDetails({
     company_overview,
+    report_id,
     onSuccess
 } : props) {
     const { 
@@ -33,7 +35,9 @@ function CompanyDetails({
         errors 
     } = useCompanyDetails({
         company_overview,
-        onSuccess })
+        report_id,
+        onSuccess
+    })
 
     return (
         <div>

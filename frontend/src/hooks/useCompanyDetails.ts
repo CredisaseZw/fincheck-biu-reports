@@ -1,13 +1,14 @@
 
 import { ADDRESS_OBJECT, OPTIONAL_ADDRESS_OBJECT } from "@/constants";
 import {  cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
-import type { Address, Company } from "@/types/core";
+import type { Address, Company, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import useOptimisticCacheUpdate from "./useOptimisticCacheUpdate";
 
 const TradingStatus = z.enum(["active", "inactive", "suspended"])
 const LegalForm = z.enum(["llc", "plc", "sole_trader", "partnership"])
@@ -48,12 +49,14 @@ export const companySchema = z.object({
 
 export type CompanyFormData = z.infer<typeof companySchema>
 interface props {
+    report_id?: number | undefined
     company_overview: CompanyFormData | undefined,
     onSuccess? : (id: number) => void
 }
-function useCompanyDetails({company_overview}:props) {
+function useCompanyDetails({company_overview, report_id}:props) {
     const {mutate, isPending } = useInstanceMutation()
 
+    const { updateSection } = useOptimisticCacheUpdate<Report>(["report", report_id])
     const {
         control,
         reset,
@@ -111,8 +114,7 @@ function useCompanyDetails({company_overview}:props) {
         
         mutate(PAYLOAD,{
             onSuccess : (data: Company)=>{
-                console.log(data)
-                // returns company data
+                updateSection(["subject"], data)
                 toast.info(message)
             },
             onError:(error)=>handleAxiosError(error)

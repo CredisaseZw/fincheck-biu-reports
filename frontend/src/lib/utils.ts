@@ -166,6 +166,37 @@ export const handleTrackChangedFields = (initial: any, payloadData: any, toastIn
   return changedData;
 };
 
+export const handleTrackChangedArray = (initial: any[], current: any[]): any[] => {
+  const hasChanges = (obj1: any, obj2: any): boolean => {
+    return Object.entries(obj2).some(([key, value]) => {
+      const original = obj1?.[key];
+
+      if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+        return hasChanges(original ?? {}, value);
+      } else if (Array.isArray(value)) {
+        return JSON.stringify(value) !== JSON.stringify(original);
+      } else if (typeof value === "string" && typeof original === "string") {
+        return value.trim() !== original.trim();
+      } else {
+        return value !== original;
+      }
+    });
+  };
+
+  return current.reduce((acc, item) => {
+    if (item.id) {
+      // existing row — return whole object if anything changed
+      const original = initial.find(i => i.id === item.id);
+      if (!original || hasChanges(original, item)) {
+        acc.push(item);
+      }
+    } else {
+      // new row — take it as-is
+      acc.push(item);
+    }
+    return acc;
+  }, [] as any[]);
+};
 export const getEntityName =(item :Company | Individual | MiniCompany | MiniIndividual) =>{
   return "national_id" in item
   ? item.full_name

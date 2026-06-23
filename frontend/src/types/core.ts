@@ -49,6 +49,15 @@ export interface MiniIndividual {
   mobile_number: string;
   email: string | null;
 }
+interface Extras {
+  debtor_object_id : number,
+  debtor_type : EntityValue      
+}
+export interface MiniDebtor  {
+  extras : Extras,
+  name :string
+}
+
 export interface ListReport {
   id: number;
   enquiry_reference: string;
@@ -69,6 +78,7 @@ export interface SignInResponse extends User {
       refresh: string
   }
 }
+export type Currencies = "USD" | "ZiG" | "AUD" | "CAD" | "CHF" | "ZAR" 
 export type EntityValue = "company" | "individual"
 export type EntityMode = "client" | "subject"
 export interface CompanyOverview {
@@ -191,21 +201,21 @@ export interface NextOfKin {
 export interface Claim {
   id: number;
   creditor_name: string;
-  currency: string;
+  currency: Currencies;
   amount: string;
   claim_date: string;
   status: "open" | "settled";
-  debtor: DebtorMini | null;
+  debtor : MiniDebtor
 }
 
 export interface Absconder {
   id: number;
   creditor_name: string;
-  currency: string;
+  currency: Currencies;
   amount: string;
   start_date: string;
   status: string;
-  debtor: DebtorMini | null;
+  debtor : MiniDebtor
 }
 
 export interface CourtJudgement {
@@ -219,11 +229,10 @@ export interface CourtJudgement {
 export interface InsolvencyRecord {
   id: number;
   creditor_name: string;
-  currency: string;
+  currency: Currencies;
   amount: string;
   insolvency_type: string;
   filing_date: string;
-  debtor: DebtorMini | null;
 }
 
 export interface PublicInformation {
@@ -232,7 +241,6 @@ export interface PublicInformation {
   link: string | null;
 }
 
-type DebtorMini = MiniCompany | MiniIndividual;
 export interface TradeReference {
   id: number;
   referenced_date: string;
@@ -245,8 +253,15 @@ export interface TradeReference {
   payment_trend: "good" | "fair" | "poor" | null;
 }
 
+export interface CreditRecords extends Timestamps{
+  claims: Claim[];
+  absconders: Absconder[];
+  court_judgements: CourtJudgement[];
+  insolvency_records: InsolvencyRecord[];
+  public_information: PublicInformation[];
+}
 
-export interface Company extends Timestamps {
+export interface Company extends CreditRecords{
   id: number;
   company_name: string;
   registered_name: string;
@@ -273,7 +288,7 @@ export interface Company extends Timestamps {
   financials: Financial[];
 }
 
-export interface Individual extends Timestamps {
+export interface Individual extends CreditRecords {
   id: number;
   full_name: string;
   national_id: string;
@@ -302,11 +317,6 @@ export interface Report extends Timestamps {
   client_type : EntityValue;
   subject_type: EntityValue
   references: TradeReference[];
-  claims?: Claim[];
-  absconders?: Absconder[];
-  court_judgements?: CourtJudgement[];
-  insolvency_records?: InsolvencyRecord[];
-  public_information?: PublicInformation[];
 }
 export interface Address {
   street_address: string ;

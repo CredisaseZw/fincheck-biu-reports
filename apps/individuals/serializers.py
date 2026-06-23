@@ -19,6 +19,13 @@ from apps.common.models import (
     RegistrationAccounts,
     ProfessionalPartners,
 )
+from apps.credit_records.serializers import (
+    ClaimsSerializer,
+    AbscondersSerializer,
+    CourtJudgementSerializer,
+    InsolvencyRecordSerializer,
+    PublicInformationSerializer,
+)
 
 class EmploymentInformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,6 +38,11 @@ class NextOfKinSerializer(serializers.ModelSerializer):
         exclude = ["created_at", "updated_at", "individual"]
 
 class IndividualSerializer(serializers.ModelSerializer):
+    claims = ClaimsSerializer(read_only= True, many = True)
+    absconders = AbscondersSerializer(read_only= True, many = True)
+    court_judgements = CourtJudgementSerializer(read_only= True, many = True)
+    insolvency_records = InsolvencyRecordSerializer(read_only= True, many = True)
+    public_information = PublicInformationSerializer(read_only= True, many = True)
     trade_references = TradeReferencesSerializer(read_only = True, many=True)
     employment_information = EmploymentInformationSerializer(read_only=True)
     next_of_kin = NextOfKinSerializer(read_only=True)

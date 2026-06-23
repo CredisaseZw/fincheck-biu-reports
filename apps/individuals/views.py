@@ -13,11 +13,16 @@ class IndividualsViewSet(BaseJSONViewSet):
     """
     
     queryset = Individuals.objects.prefetch_related(
+        "claims",
+        "absconders",
+        "court_judgements",
+        "insolvency_records",
+        "public_information",
         "registration_accounts",
         "banker_accounts",
         "professional_partners",
         "financials",
-        "trade_references"
+        "trade_references",
     ).select_related(
         "employment_information",
         "next_of_kin"
