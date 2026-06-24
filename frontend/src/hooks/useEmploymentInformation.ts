@@ -5,6 +5,8 @@ import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import { toast } from "sonner";
+import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import type { EntityValue, Report } from "@/types/core";
 
 const EmploymentStatus = z.enum(["employed", "self_employed", "unemployed", "part_time", "retired", "student"])
 const employmentSchema = z.object({
@@ -18,8 +20,15 @@ const employmentSchema = z.object({
 })
 
 export type EmploymentFormData = z.infer<typeof employmentSchema>
+interface props {
+    subject_type : EntityValue | null
+    employment_information: EmploymentFormData | undefined,
+    report_id : number | undefined
+}
+function useEmploymentInformation({employment_information, report_id, subject_type }:props) {
+    const {mutate, isPending} = useInstanceMutation()
+    const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
 
-function useEmploymentInformation(employment_information: EmploymentFormData | undefined) {
     const {
         reset,
         register,
@@ -30,8 +39,6 @@ function useEmploymentInformation(employment_information: EmploymentFormData | u
         resolver: zodResolver(employmentSchema),
         defaultValues: employment_information,
     })
-
-    const {mutate, isPending} = useInstanceMutation()
 
     useEffect(()=>{
         if(employment_information){
@@ -59,7 +66,10 @@ function useEmploymentInformation(employment_information: EmploymentFormData | u
         PAYLOAD.data = { employment_information: changes }
     
         mutate(PAYLOAD, {
-            onSuccess: (data) => { console.log(data) },
+            onSuccess: (data) => {
+                cache.set(["subject"], data)
+                toast.success("Information successfully updated")
+            },
             onError: (error) => handleAxiosError(error)
         })
     }

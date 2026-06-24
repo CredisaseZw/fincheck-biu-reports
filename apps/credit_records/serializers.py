@@ -52,6 +52,7 @@ class CourtJudgementSerializer(serializers.ModelSerializer):
             "court_name",
             "case_number",
             "judgement_date",
+            "currency",
             "amount",
         ]
 
@@ -117,6 +118,7 @@ class CourtJudgementWriteSerializer(serializers.ModelSerializer):
             "court_name",
             "case_number",
             "judgement_date",
+            "currency",
             "amount",
         ]
 

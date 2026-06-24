@@ -5,11 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from  "zod"
 import type { SearchEntityRef } from "@/components/general/SearchEntity";
 import { useEffect, useRef } from "react";
-import type { EntityValue } from "@/types/core";
+import type { ClaimsProps } from "@/types/core";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
+import useDetailCacheUpdate from "./useDetailCacheUpdate";
 
  
 const claim = z.object({
@@ -32,16 +33,13 @@ const claimsSchema = z.object({
 
 export type ClaimFormData = z.infer<typeof claim>
 export type ClaimsFormData = z.infer<typeof claimsSchema>
-interface props {
-  claims_data: ClaimFormData[]
-  subject_object_id?: number | null
-  subject_type?: EntityValue | null
-}
-function useClaims({claims_data, subject_object_id, subject_type}:props) {
+
+function useClaims({claims_data, subject_object_id, subject_type, report_id}:ClaimsProps) {
   const {
     handleSubmit,
     register,
     watch,
+    getValues,
     setValue,
     reset,
     control,
@@ -62,6 +60,7 @@ function useClaims({claims_data, subject_object_id, subject_type}:props) {
   }, [reset, claims_data])
 
   const {mutate, isPending} = useInstanceMutation()
+  const cache = useDetailCacheUpdate<Report>(['report', subject_type, report_id])
   const refs = useRef<(SearchEntityRef | null)[]>([])
   const {fields, append, remove} = useFieldArray({
     control,
@@ -101,7 +100,7 @@ function useClaims({claims_data, subject_object_id, subject_type}:props) {
     }
     mutate(payload, {
       onSuccess : (data) =>{
-        console.log(data)
+        cache.set(["subject", "claims"], data.claims)
         toast.success("Claims updated successfully")
       },
       onError :(error) => handleAxiosError(error)
@@ -114,6 +113,7 @@ function useClaims({claims_data, subject_object_id, subject_type}:props) {
       mode:  "deletion"
     }, {
       onSuccess:()=>{
+        cache.removeFromList(["subject", "claims"], id)
         toast.success("Claim row deleted successfully")
       },
       onError : (error) => handleAxiosError(error)
@@ -123,6 +123,7 @@ function useClaims({claims_data, subject_object_id, subject_type}:props) {
   
 
   return {
+    getValues,
     setValue,
     watch,
     append,

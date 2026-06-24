@@ -1,3 +1,7 @@
+import type { AbsconderFormData } from "@/hooks/useAbsconderDetails";
+import type { ClaimFormData } from "@/hooks/useClaims";
+import type { CourtJudgementFormData } from "@/hooks/useCourtDetails";
+import type { InsolvencyRecordFormData } from "@/hooks/useInsolvencyRecordsDetails";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -63,6 +67,8 @@ export interface ListReport {
   enquiry_reference: string;
   client: MiniCompany | MiniIndividual;
   subject: MiniCompany | MiniIndividual;
+  subject_type : EntityValue,
+  client_type :EntityValue
   created_at: string;
   updated_at: string;
 }
@@ -81,6 +87,7 @@ export interface SignInResponse extends User {
 export type Currencies = "USD" | "ZiG" | "AUD" | "CAD" | "CHF" | "ZAR" 
 export type EntityValue = "company" | "individual"
 export type EntityMode = "client" | "subject"
+type CreditRecordStatus = "open" | "settled" | "disputed" | "written_off"
 export interface CompanyOverview {
   id: number;
   trading_status: "active" | "inactive" | "suspended";
@@ -204,7 +211,7 @@ export interface Claim {
   currency: Currencies;
   amount: string;
   claim_date: string;
-  status: "open" | "settled";
+  status: CreditRecordStatus;
   debtor : MiniDebtor
 }
 
@@ -214,7 +221,7 @@ export interface Absconder {
   currency: Currencies;
   amount: string;
   start_date: string;
-  status: string;
+  status: CreditRecordStatus;
   debtor : MiniDebtor
 }
 
@@ -222,17 +229,17 @@ export interface CourtJudgement {
   id: number;
   court_name: string;
   case_number: string;
+  currency: Currencies;
   judgement_date: string;
   amount: string;
 }
 
 export interface InsolvencyRecord {
   id: number;
-  creditor_name: string;
-  currency: Currencies;
-  amount: string;
-  insolvency_type: string;
-  filing_date: string;
+  start_date : string,
+  end_date:string,
+  court_reference: string;
+  insolvency_type: "insolvency" | "bankruptcy" | "judicial_management";
 }
 
 export interface PublicInformation {
@@ -332,4 +339,22 @@ export interface DefaultHeaderProps{
   subject_default_search : string,
   enquiry_reference : string,
   created_at : string
+}
+interface CreditRecordProps {
+  subject_object_id?: number | null
+  subject_type?: EntityValue | null
+  report_id : number | undefined
+}
+
+export interface AbsconderProps extends CreditRecordProps{
+  absconders_data: AbsconderFormData[]
+}
+export interface ClaimsProps extends CreditRecordProps{
+  claims_data: ClaimFormData[]
+}
+export interface CourtJudgementsProps extends CreditRecordProps{
+  court_judgements_data: CourtJudgementFormData[]
+}
+export interface InsolvencyRecordsProps extends CreditRecordProps{
+  insolvency_data : InsolvencyRecordFormData[]
 }

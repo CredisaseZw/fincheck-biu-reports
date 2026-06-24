@@ -8,18 +8,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Trash2, Plus } from "lucide-react";
+import type { InsolvencyRecordsProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function InsolvencyRecordsDetails() {
+function InsolvencyRecordsDetails({
+    report_id,
+    subject_object_id,
+    subject_type,
+    insolvency_data
+}: InsolvencyRecordsProps) {
     const {
         register,
         append,
         remove,
+        getValues,
         handleSubmit,
         onSubmit,
+        onDelete,
         errors,
+        isPending,
         control,
         fields,
-    } = useInsolvencyRecordsDetails()
+    } = useInsolvencyRecordsDetails({
+        report_id,
+        subject_object_id,
+        subject_type,
+        insolvency_data
+    })
     return (
     <form onSubmit={handleSubmit(onSubmit)}>
         <Fieldset legendTitle="Insolvency Details">
@@ -27,31 +42,33 @@ function InsolvencyRecordsDetails() {
                 isEmpty = {fields.length === 0}
                 headers={INSOLVENCY_HEADERS}>
                     {
-                        fields.map((_, idx)=>(
-                            <TableRow key= {idx}>
+                        fields.map((field, idx)=>(
+                            <TableRow key= {field.id}>
                                 <TableCell>
                                     <Controller
                                         control={control}
                                         name={`insolvency_records.${idx}.insolvency_type`}
-                                        render={({field})=>
-                                        <Select
-                                            defaultValue= {field.value}
-                                            onOpenChange={field.onChange}
-                                        >
-                                            <SelectTrigger size="sm">
-                                                <SelectValue placeholder = "Please Select..."/>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="insolvency">Insolvency</SelectItem>
-                                                <SelectItem value="bankruptcy">Bankruptcy</SelectItem>
-                                                <SelectItem value="judicial_management">Judicial Management</SelectItem>
-                                            </SelectContent>
-                                        </Select>}
+                                        render={({ field }) =>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger size="sm">
+                                                    <SelectValue placeholder="Please Select..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="insolvency">Insolvency</SelectItem>
+                                                    <SelectItem value="bankruptcy">Bankruptcy</SelectItem>
+                                                    <SelectItem value="judicial_management">Judicial Management</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        }
                                     />
-                                    {
-                                        errors.insolvency_records?.[idx]?.insolvency_type &&
-                                        <p className="text-destructive text-sm">{errors.insolvency_records?.[idx]?.message}</p>
-                                    }
+                                    {errors.insolvency_records?.[idx]?.insolvency_type && (
+                                        <p className="text-destructive text-sm">
+                                            {errors.insolvency_records?.[idx]?.insolvency_type?.message}
+                                        </p>
+                                    )}
                                 </TableCell>
                                 <TableCell>
                                     <Input
@@ -87,8 +104,13 @@ function InsolvencyRecordsDetails() {
                                         type="button"
                                         variant="ghost"
                                         size="icon"
-                                        disabled={fields.length === 1}
-                                        onClick={() => remove(idx)}
+                                        onClick={() => {
+                                            const id = getValues(`insolvency_records.${idx}.id`)
+                                            remove(idx)
+                                            if(id){
+                                                onDelete(id)
+                                            }
+                                        }}
                                     >
                                         <Trash2 size={16} className="text-destructive" />
                                     </Button>
@@ -111,8 +133,7 @@ function InsolvencyRecordsDetails() {
                 >
                     <Plus size={16} className="mr-2" /> Add Row
                 </Button>
-
-                <Button type="submit">Submit</Button>
+                <CustomSubmitButton isPending = {isPending}/>
             </div>
         </Fieldset>
     </form>

@@ -44,9 +44,12 @@ function AddReportDialogue({ report_item }: props) {
         individualDetails,
         companyOverview,
         employmentInformation,
+        courtJudgements,
         defaultHeader,
         isLoading, 
         nextOfKin,
+        absconders,
+        insolvencyRecords,
         report,
         claims,
         open, 
@@ -104,7 +107,9 @@ function AddReportDialogue({ report_item }: props) {
                             subjectType === "company"
                             ? <>
                                 <CompanyDetails
+                                    subject_type= {subject_type}
                                     company_overview = {companyOverview}
+                                    report_id={report.id}
                                 />
                                 <CompanyStructure />
                                 <CompanyOperations />
@@ -112,13 +117,18 @@ function AddReportDialogue({ report_item }: props) {
                             : subjectType === "individual"
                                 ? <>
                                     <IndividualDetails 
+                                        report_id={report.id}
                                         individual_details={individualDetails}
                                     />
                                     <EmploymentInformation 
                                         employment_information = {employmentInformation}
+                                        report_id={report.id}
+                                        subject_type= {subject_type}
                                     />
                                     <NextOfKin 
+                                        subject_type={subject_type}
                                         next_of_kin={nextOfKin}
+                                        report_id={report.id}
                                     />
                                 </>
                                 : null
@@ -140,13 +150,29 @@ function AddReportDialogue({ report_item }: props) {
                             <BankerDetails />
                             <Fieldset legendTitle="Credit Records">
                                 <ClaimsDetails
-                                    claims = {claims}
+                                    claims_data = {claims}
+                                    report_id={report.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
-                                <AbsconderDetails />
-                                <CourtDetails />
-                                <InsolvencyRecordsDetails />
+                                <AbsconderDetails
+                                    absconders_data={absconders}
+                                    report_id={report.id}
+                                    subject_object_id = {subject_object_id}
+                                    subject_type = {subject_type}
+                                />
+                                <CourtDetails
+                                    court_judgements_data={courtJudgements}
+                                    report_id={report.id}
+                                    subject_object_id = {subject_object_id}
+                                    subject_type = {subject_type}
+                                />
+                                <InsolvencyRecordsDetails
+                                    insolvency_data={insolvencyRecords} 
+                                    report_id={report.id}
+                                    subject_object_id = {subject_object_id}
+                                    subject_type = {subject_type}
+                                />
                                 {/* PUBLIC INFORMATION */}       
                             </Fieldset>
 

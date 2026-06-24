@@ -6,6 +6,8 @@ import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import { toast } from "sonner";
+import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import type { EntityValue, Report } from "@/types/core";
 
 const nextOfKinSchema = z.object({
     individual_id : z.number().optional(),
@@ -15,8 +17,12 @@ const nextOfKinSchema = z.object({
 })
 
 export type NextOfKinFormData = z.infer<typeof nextOfKinSchema>
-
-function useNextOfKin(next_of_kin: NextOfKinFormData | undefined) {
+interface props {
+    subject_type : EntityValue | null
+    next_of_kin: NextOfKinFormData | undefined
+    report_id : number | undefined
+}
+function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
     const {
         reset,
         register,
@@ -32,8 +38,9 @@ function useNextOfKin(next_of_kin: NextOfKinFormData | undefined) {
             reset(next_of_kin)
         }
     },[reset, next_of_kin])
-    
+    const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const {mutate, isPending} = useInstanceMutation()
+
     const onSubmit = (data: NextOfKinFormData) => {
         if(!next_of_kin){
             toast.error("An error occurred", {
@@ -54,7 +61,10 @@ function useNextOfKin(next_of_kin: NextOfKinFormData | undefined) {
         PAYLOAD.data = { next_of_kin: changes }
     
         mutate(PAYLOAD, {
-            onSuccess: (data) => { console.log(data) },
+            onSuccess: (data) => {
+                cache.set(["subject"], data)
+                toast.success("Information successfully updated")
+            },
             onError: (error) => handleAxiosError(error)
         })
     }

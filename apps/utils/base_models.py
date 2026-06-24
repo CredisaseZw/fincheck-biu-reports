@@ -43,8 +43,19 @@ class BaseModelWithDebtor(BaseModelWithSubject):
         abstract = True
         
 class BaseFinancialRecord(BaseModelWithDebtor):
+    class Currency(models.TextChoices):
+        USD = "USD", "US Dollar"
+        ZIG = "ZiG", "Zimbabwe Gold"
+        AUD = "AUD", "Australian Dollar"
+        CAD = "CAD", "Canadian Dollar"
+        CHF = "CHF", "Swiss Franc"
+        ZAR = "ZAR", "South African Rand"
     creditor_name = models.CharField(max_length=255)
-    currency = models.CharField(max_length=10)
+    currency = models.CharField(
+        max_length=5,
+        choices=Currency.choices,
+        default=Currency.USD
+    )
     amount = models.DecimalField(max_digits=18, decimal_places=2)
 
     class Meta:

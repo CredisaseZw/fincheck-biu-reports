@@ -4,18 +4,21 @@ import { Label } from "@/components/ui/label"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import CustomSubmitButton from "./CustomSubmitButton";
+import type { EntityValue } from "@/types/core";
 
 interface props {
     next_of_kin : NextOfKinFormData | undefined
+    report_id : number | undefined
+    subject_type : EntityValue | null
 }
 
-function NextOfKin({next_of_kin}: props) {
+function NextOfKin({next_of_kin, report_id, subject_type}: props) {
     const { 
         onSubmit,
         register,
         handleSubmit, 
         errors
-     } = useNextOfKin(next_of_kin)
+     } = useNextOfKin({next_of_kin, report_id, subject_type})
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>

@@ -27,10 +27,12 @@ class Absconders(BaseFinancialRecord):
     class SettlementOptions(models.TextChoices):
         OPEN = "open", "Open"
         SETTLED = "settled", "Settled"
+        DISPUTED = "disputed", "Disputed"
+        WRITTEN_OFF = "written_off", "Written Off"
 
     start_date = models.DateField()
     status = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=SettlementOptions.choices,
         default=SettlementOptions.OPEN
     )
@@ -44,9 +46,22 @@ class Absconders(BaseFinancialRecord):
         verbose_name_plural = "Absconder Records"
 
 class CourtJudgement(BaseModelWithSubject):
+    class Currency(models.TextChoices):
+        USD = "USD", "US Dollar"
+        ZIG = "ZiG", "Zimbabwe Gold"
+        AUD = "AUD", "Australian Dollar"
+        CAD = "CAD", "Canadian Dollar"
+        CHF = "CHF", "Swiss Franc"
+        ZAR = "ZAR", "South African Rand"
+        
     court_name = models.CharField(max_length=255)
     case_number = models.CharField(max_length=100)
     judgement_date = models.DateField()
+    currency = models.CharField(
+        max_length=3,
+        choices=Currency.choices,
+        default=Currency.USD
+    )
     amount = models.DecimalField(
         max_digits=18,
         decimal_places=2

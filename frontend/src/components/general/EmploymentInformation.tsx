@@ -6,11 +6,18 @@ import Fieldset from "./FieldSet"
 import { Controller } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import CustomSubmitButton from "./CustomSubmitButton";
+import type { EntityValue } from "@/types/core";
 
 interface props {
+    subject_type : EntityValue | null
     employment_information : EmploymentFormData | undefined
+    report_id : number | undefined
 }
-function EmploymentInformation({employment_information}:props) {
+function EmploymentInformation({
+    employment_information, 
+    report_id,
+    subject_type
+}:props) {
     const { 
         onSubmit,
         register,
@@ -18,7 +25,7 @@ function EmploymentInformation({employment_information}:props) {
         errors,
         control,
         isPending
-    } = useEmploymentInformation(employment_information)
+    } = useEmploymentInformation({employment_information, report_id, subject_type})
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>

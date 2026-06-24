@@ -1,7 +1,7 @@
-import { CLAIMS_HEADERS, numericField } from "@/constants";
+import { CLAIMS_HEADERS, CURRENCY_OPTIONS, numericField } from "@/constants";
 import BaseTable from "./BaseTable";
 import Fieldset from "./FieldSet";
-import useClaims, { type ClaimFormData } from "@/hooks/useClaims";
+import useClaims from "@/hooks/useClaims";
 import { TableCell, TableRow } from "../ui/table";
 import { Controller } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -10,21 +10,17 @@ import SearchEntity, { type SearchEntityRef } from "./SearchEntity";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Trash2, Plus } from "lucide-react";
-import type { EntityValue } from "@/types/core";
-
-interface props {
-    subject_object_id?: number | null
-    subject_type?: EntityValue | null
-    claims: ClaimFormData[]
-}
+import type { ClaimsProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
 function ClaimsDetails({
-    claims,
+    claims_data,
     subject_object_id,
-    subject_type
-    
-} :props) {
+    subject_type,
+    report_id
+}:ClaimsProps) {
     const {
+        getValues,
         append, 
         remove, 
         setValue, 
@@ -33,14 +29,16 @@ function ClaimsDetails({
         handleSubmit, 
         register,
         onDelete,
-        control, 
+        control,
+        isPending, 
         errors, 
         fields, 
         refs,
     } = useClaims({
-        claims_data : claims,
+        claims_data,
         subject_object_id,
-        subject_type
+        subject_type,
+        report_id
     })
 
     return (
@@ -51,12 +49,13 @@ function ClaimsDetails({
                     isEmpty = {fields.length === 0}
                     headers={CLAIMS_HEADERS}
                 >
-                    {fields.map((_, idx) => {
-                        const entityType = watch(`claims.${idx}.debtor_type`)
+                    {fields.map((f, idx) => {
                         const setRef = (el: SearchEntityRef | null) => { refs.current[idx] = el }
+                        const entityType = watch(`claims.${idx}.debtor_type`)
+                        const ds = watch(`claims.${idx}.debtor_default`)
 
                         return (
-                            <TableRow key={idx} className="relative">
+                            <TableRow key={f.id} className="relative">
                                 <TableCell className="relative">
                                     <div className="flex flex-row gap-1">
                                         <Controller
@@ -75,7 +74,7 @@ function ClaimsDetails({
                                         <SearchEntity
                                             ref={setRef}
                                             entityType={entityType}
-                                            defaultSearch={claims[idx]?.debtor_default ?? ""}
+                                            defaultSearch={ds}
                                             onSelectItem={(id: number) => setValue(`claims.${idx}.debtor_object_id`, id)}
                                         />
                                     </div>
@@ -101,10 +100,9 @@ function ClaimsDetails({
                                                     <SelectValue placeholder="Currency" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="USD">USD</SelectItem>
-                                                    <SelectItem value="ZWL">ZWL</SelectItem>
-                                                    <SelectItem value="ZAR">ZAR</SelectItem>
-                                                    <SelectItem value="GBP">GBP</SelectItem>
+                                                    {CURRENCY_OPTIONS.map(currency => (
+                                                        <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         )}
@@ -156,10 +154,9 @@ function ClaimsDetails({
                                         type="button"
                                         variant="ghost"
                                         size="icon"
-                                        disabled={fields.length === 1}
                                         onClick={() => {
+                                            const id = getValues(`claims.${idx}.id`)
                                             remove(idx)
-                                            const id = claims[idx].id
                                             if(id){
                                                 onDelete(id)
                                             } 
@@ -190,8 +187,7 @@ function ClaimsDetails({
                     >
                         <Plus size={16} className="mr-2" /> Add Row
                     </Button>
-
-                    <Button type="submit">Submit</Button>
+                    <CustomSubmitButton isPending = {isPending}/>
                 </div>
 
             </Fieldset>

@@ -35,9 +35,6 @@ class ReportSerializer(serializers.ModelSerializer):
 
         return data
 class ListReportSerializer(serializers.ModelSerializer):
-    client = serializers.SerializerMethodField()
-    subject = serializers.SerializerMethodField()
-
     class Meta:
         model = Report
         fields = [
@@ -50,11 +47,15 @@ class ListReportSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
-
-    def get_client(self, obj):
-        return _content_ob_serializer(obj.client, True)
-
-    def get_subject(self, obj):
-        return _content_ob_serializer(obj.subject, True)
     
-# WRITE SERIALIZERS
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        client_data = _content_ob_serializer(instance.client, True)
+        subject_data = _content_ob_serializer(instance.subject)
+
+        data['client'] = client_data
+        data['subject'] = subject_data
+        data['client_type'] = 'individual' if client_data and 'national_id' in client_data else 'company'
+        data['subject_type'] = 'individual' if subject_data and 'national_id' in subject_data else 'company'
+
+        return data

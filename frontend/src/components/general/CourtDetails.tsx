@@ -1,22 +1,40 @@
 import useCourtDetails from "@/hooks/useCourtDetails";
 import Fieldset from "./FieldSet";
-import { COURT_HEADERS, numericField } from "@/constants";
+import { COURT_HEADERS, CURRENCY_OPTIONS, numericField } from "@/constants";
 import { TableCell, TableRow } from "../ui/table";
 import BaseTable from "./BaseTable";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Plus, Trash2 } from "lucide-react";
+import type { CourtJudgementsProps } from "@/types/core";
+import { Controller } from "react-hook-form";
+import { Select,SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function CourtDetails() {
+function CourtDetails({
+  report_id,
+  subject_object_id,
+  subject_type,
+  court_judgements_data
+}:CourtJudgementsProps) {
   const {
     fields,
     errors,
+    control,
+    isPending,
     handleSubmit,
     append,
+    getValues,
+    onDelete,
     register,
     remove,
     onSubmit
-  } = useCourtDetails()
+  } = useCourtDetails({
+    report_id,
+    subject_object_id,
+    subject_type,
+    court_judgements_data
+  })
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -26,8 +44,8 @@ function CourtDetails() {
           headers = {COURT_HEADERS}
         >
             {
-              fields.map((_, idx)=>(
-              <TableRow key={idx}>
+              fields.map((f, idx)=>(
+              <TableRow key={f.id}>
                 <TableCell>
                   <Input
                     variant="sm"  
@@ -46,6 +64,25 @@ function CourtDetails() {
                       <p className="text-destructive text-sm">{errors.court_judgements[idx].case_number.message}</p>
                   )}
                 </TableCell>
+                <TableCell>
+                  <Controller
+                      control={control}
+                      name={`court_judgements.${idx}.currency`}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger className="w-full" size="sm">
+                                <SelectValue placeholder="Currency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {CURRENCY_OPTIONS.map(currency => (
+                                    <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                      )}
+                  />
+              </TableCell>
+
                 <TableCell>
                   <Input
                     variant="sm"  
@@ -72,8 +109,13 @@ function CourtDetails() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    disabled={fields.length === 1}
-                    onClick={() => remove(idx)}
+                    onClick={() => {
+                      const id = getValues(`court_judgements.${idx}.id`)
+                      remove(idx)
+                      if(id){
+                        onDelete(id)
+                      }
+                    }}
                   >
                     <Trash2 size={16} className="text-destructive" />
                 </Button>
@@ -87,17 +129,16 @@ function CourtDetails() {
               type="button"
               variant="outline"
               onClick={() => append({
-                  id: undefined,
                   court_name :"",
                   case_number: "",
+                  currency :"USD",
                   amount: 0,
                   judgement_date: "",
               })}
           >
               <Plus size={16} className="mr-2" /> Add Row
           </Button>
-
-          <Button type="submit">Submit</Button>
+          <CustomSubmitButton isPending = {isPending}/>
       </div>
       </Fieldset>
     </form>

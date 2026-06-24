@@ -10,6 +10,9 @@ import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
 import type { NextOfKinFormData } from "./useNextOfKin";
 import type { ClaimFormData } from "./useClaims";
+import type { AbsconderFormData } from "./useAbsconderDetails";
+import type { CourtJudgementFormData } from "./useCourtDetails";
+import type { InsolvencyRecordFormData } from "./useInsolvencyRecordsDetails";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -27,11 +30,15 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
   const [nextOfKin, setNextOfKin] = useState<NextOfKinFormData | undefined>(undefined);
   const [claims, setClaims] = useState<ClaimFormData[]>([])
+  const [absconders, setAbsconders] = useState<AbsconderFormData[]>([])
+  const [courtJudgements, setCourtJudgements] = useState<CourtJudgementFormData[]>([])
+  const [insolvencyRecords, setInsolvencyRecords] = useState<InsolvencyRecordFormData[]>([])
 
-  const {data, isLoading, error } = useGetSingleReport(
-    list_report?.id,
-    Boolean(list_report && open)
-  );
+  const {data, isLoading, error } = useGetSingleReport({
+    id : list_report?.id,
+    subject_type :list_report?.subject_type,
+    enabled :Boolean(list_report && open)
+  });
 
   const onEdit = () => setHeaderEditMode(true)
 
@@ -168,7 +175,66 @@ function useAddReportDialogue(list_report?: ListReport) {
         } 
       ]
     )
-  
+
+    setAbsconders(
+      report.subject.absconders.length > 0
+      ? report.subject.absconders.map(item => ({
+        id: item.id,
+        creditor_name : item.creditor_name ?? "",
+        currency : item.currency ?? "USD",
+        amount : Number(item.amount),
+        start_date: item.start_date,
+        status : item.status,
+        default_search : item.debtor.name,
+        debtor_object_id: item.debtor.extras.debtor_object_id,
+        debtor_type: item.debtor.extras.debtor_type, 
+      }))
+      : [{
+        creditor_name : "",
+        currency :"USD",
+        amount : 0,
+        start_date :"",
+        status :"open",
+        debtor_object_id: 0,
+        debtor_type: "company", 
+      }]
+    )
+
+    setCourtJudgements(
+      report.subject.court_judgements.length > 0
+      ? report.subject.court_judgements.map(item => ({
+        id : item.id,
+        case_number: item.case_number,
+        court_name: item.court_name,
+        currency : item.currency,
+        amount : Number(item.amount),
+        judgement_date : item.judgement_date
+      }))
+      : [{
+        case_number: "",
+        court_name: "",
+        currency : "USD",
+        amount : 0,
+        judgement_date : ""
+      }]
+    )
+    
+    setInsolvencyRecords(
+      report.subject.insolvency_records.length > 0
+      ? report.subject.insolvency_records.map(item =>({
+        id :item.id,
+        insolvency_type : item.insolvency_type,
+        start_date :item.start_date,
+        end_date :item.end_date,
+        court_reference:item.court_reference
+      }))
+      : [{
+        insolvency_type : "insolvency",
+        start_date :"",
+        end_date :"",
+        court_reference:""
+      }]
+    )
   }, [report])
 
   useEffect(()=>{
@@ -217,13 +283,15 @@ function useAddReportDialogue(list_report?: ListReport) {
     companyOverview,
     individualDetails,
     employmentInformation,
+    courtJudgements,
     defaultHeader,
     isLoading, 
     open, 
     clientType,
     subjectType,
     headerEditMode,
-    
+    absconders,
+    insolvencyRecords,
     onClear,
     onEdit,
     setOpen,

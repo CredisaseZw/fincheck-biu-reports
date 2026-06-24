@@ -16,7 +16,7 @@ interface props{
     individual_details? : IndividualFormData | undefined
 }
 
-function IndividualDetails({ individual_details } : props) {
+function IndividualDetails({ individual_details, report_id } : props) {
     const { 
         isPending,
         errors,
@@ -24,7 +24,10 @@ function IndividualDetails({ individual_details } : props) {
         onSubmit,
         register,
         handleSubmit,
-     } = useIndividualDetails(individual_details)
+     } = useIndividualDetails({
+        individual_details,
+        report_id
+     })
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <Fieldset legendTitle="Individual Details" className="flex flex-col gap-4">

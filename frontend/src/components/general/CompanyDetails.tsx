@@ -14,8 +14,10 @@ import {
 import AddressFieldset from "./AddressFields";
 import { numericField } from "@/constants";
 import CustomSubmitButton from "./CustomSubmitButton";
+import type { EntityValue } from "@/types/core";
 
 interface props {
+    subject_type : EntityValue | null
     onSuccess?: (id: number) => void
     report_id?: number | undefined
     company_overview? : CompanyFormData | undefined
@@ -24,6 +26,7 @@ interface props {
 function CompanyDetails({
     company_overview,
     report_id,
+    subject_type,
     onSuccess
 } : props) {
     const { 
@@ -35,6 +38,7 @@ function CompanyDetails({
         errors 
     } = useCompanyDetails({
         company_overview,
+        subject_type,
         report_id,
         onSuccess
     })

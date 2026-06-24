@@ -77,6 +77,12 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
     registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
     professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
+    claims = ClaimsSerializer(read_only=True, many=True, required=False)
+    absconders = AbscondersSerializer(read_only=True, many=True, required=False)
+    court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
+    insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
+    public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
+    trade_references = TradeReferencesSerializer(read_only=True, many=True, required=False)
 
     class Meta:
         model = Individuals
@@ -131,7 +137,13 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
     registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
     professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
-    
+    claims = ClaimsSerializer(read_only=True, many=True, required=False)
+    absconders = AbscondersSerializer(read_only=True, many=True, required=False)
+    court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
+    insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
+    public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
+    trade_references = TradeReferencesSerializer(read_only=True, many=True, required=False)
+   
     class Meta:
         model = Individuals
         fields = "__all__"

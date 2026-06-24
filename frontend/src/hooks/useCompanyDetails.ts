@@ -1,14 +1,15 @@
 
 import { ADDRESS_OBJECT, OPTIONAL_ADDRESS_OBJECT } from "@/constants";
 import {  cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
-import type { Address, Company, Report } from "@/types/core";
+import type { Address, Company, EntityValue, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import useOptimisticCacheUpdate from "./useOptimisticCacheUpdate";
+import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import { useQueryClient } from "@tanstack/react-query";
 
 const TradingStatus = z.enum(["active", "inactive", "suspended"])
 const LegalForm = z.enum(["llc", "plc", "sole_trader", "partnership"])
@@ -49,14 +50,17 @@ export const companySchema = z.object({
 
 export type CompanyFormData = z.infer<typeof companySchema>
 interface props {
+    subject_type: EntityValue | null
     report_id?: number | undefined
     company_overview: CompanyFormData | undefined,
     onSuccess? : (id: number) => void
 }
-function useCompanyDetails({company_overview, report_id}:props) {
+function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     const {mutate, isPending } = useInstanceMutation()
+    const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const client = useQueryClient()
 
-    const { updateSection } = useOptimisticCacheUpdate<Report>(["report", report_id])
+
     const {
         control,
         reset,
@@ -114,7 +118,10 @@ function useCompanyDetails({company_overview, report_id}:props) {
         
         mutate(PAYLOAD,{
             onSuccess : (data: Company)=>{
-                updateSection(["subject"], data)
+                client.invalidateQueries({
+                    queryKey : ["reports"]
+                })
+                cache.set(["subject"], data)
                 toast.info(message)
             },
             onError:(error)=>handleAxiosError(error)

@@ -7,6 +7,9 @@ import type { InstanceMutation } from "./api/useInstanceMutation";
 import { cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import useInstanceMutation from "./api/useInstanceMutation";
 import { toast } from "sonner";
+import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import type { Report } from "@/types/core";
+import { useQueryClient } from "@tanstack/react-query";
 
 const MaritalStatus = z.enum(["single", "married", "divorced", "widowed"], {message : "Marital Status is required"})
 
@@ -25,8 +28,16 @@ export const individualSchema = z.object({
 
 export type IndividualFormData = z.infer<typeof individualSchema>
 
-function useIndividualDetails(individual_details: IndividualFormData | undefined) {
+interface props {
+    individual_details: IndividualFormData | undefined,
+    report_id: number | undefined
+}
+
+function useIndividualDetails({individual_details, report_id}:props) {
     const {mutate, isPending} = useInstanceMutation()
+    const cache = useDetailCacheUpdate<Report>(["report", report_id])
+    const client = useQueryClient()
+
     const {
         control,
         reset,
@@ -75,7 +86,10 @@ function useIndividualDetails(individual_details: IndividualFormData | undefined
         console.log(PAYLOAD)
         mutate(PAYLOAD, {
             onSuccess : (data) =>{
-                console.log(data) // return Individual as a whole
+                cache.set(["subject"], data)
+                client.invalidateQueries({
+                    queryKey : ["reports"]
+                })
                 toast.success("Information successfully updated")
             },
             onError: (error) => handleAxiosError(error)

@@ -110,7 +110,13 @@ class CompanyListSerializer(serializers.ModelSerializer):
         ]
 
 #WRITE OPERATIONS
-class CompanyCreateSerializer(serializers.ModelSerializer):
+class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
+    claims = ClaimsSerializer(read_only=True, many=True, required=False)
+    absconders = AbscondersSerializer(read_only=True, many=True, required=False)
+    court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
+    insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
+    public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
+    trade_references = TradeReferencesSerializer(read_only=True, many=True, required=False)
     overview = CompanyOverviewSerializer(required=False)
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)
@@ -160,6 +166,12 @@ class CompanyCreateSerializer(serializers.ModelSerializer):
 
 
 class CompanyUpdateSerializer(serializers.ModelSerializer):
+    claims = ClaimsSerializer(read_only=True, many=True, required=False)
+    absconders = AbscondersSerializer(read_only=True, many=True, required=False)
+    court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
+    insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
+    public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
+    trade_references = TradeReferencesSerializer(read_only=True, many=True, required=False)
     overview = CompanyOverviewSerializer(required=False)
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)

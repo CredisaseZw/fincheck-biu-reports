@@ -1,10 +1,19 @@
 import { api } from "@/axios/api";
-import type { Report } from "@/types/core";
+import type { EntityValue, Report } from "@/types/core";
 import { useQuery } from "@tanstack/react-query";
 
-function useGetSingleReport(id: number | undefined, enabled : boolean) {
+interface props {
+    id: number | undefined, 
+    enabled : boolean,
+    subject_type? : EntityValue
+}
+function useGetSingleReport({
+    id,
+    enabled,
+    subject_type
+}:props) {
     const {data, isLoading, error} = useQuery({
-        queryKey: ["report", id],
+        queryKey: ["report", subject_type, id],
         queryFn : async()=>{
             const response = await api.get<Report>(`/api/reports/${id}/`);
             return response.data;

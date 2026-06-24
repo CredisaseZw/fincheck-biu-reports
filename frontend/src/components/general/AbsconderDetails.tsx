@@ -1,4 +1,4 @@
-import { ABSCONDERS_HEADERS, numericField } from "@/constants";
+import { ABSCONDERS_HEADERS, CURRENCY_OPTIONS, numericField } from "@/constants";
 import BaseTable from "./BaseTable";
 import Fieldset from "./FieldSet";
 import useAbsconderDetails from "@/hooks/useAbsconderDetails";
@@ -10,21 +10,36 @@ import SearchEntity, { type SearchEntityRef } from "./SearchEntity";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Trash2, Plus } from "lucide-react";
+import type { AbsconderProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function AbsconderDetails() {
+function AbsconderDetails({
+  absconders_data,
+  subject_object_id,
+  subject_type,
+  report_id
+}:AbsconderProps) {
     const {
         append, 
         remove, 
         setValue, 
         onSubmit,
         watch, 
+        onDelete,
         handleSubmit, 
         register,
+        getValues,
+        isPending,
         control, 
         errors, 
         fields, 
         refs,
-    } = useAbsconderDetails()
+    } = useAbsconderDetails({
+        absconders_data,
+        subject_object_id,
+        subject_type,
+        report_id
+    })
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -34,12 +49,13 @@ function AbsconderDetails() {
                     isEmpty = {fields.length === 0}
                     headers={ABSCONDERS_HEADERS}
                 >
-                    {fields.map((_, idx) => {
-                        const entityType = watch(`absconders.${idx}.debtor_type`)
+                    {fields.map((field, idx) => {
                         const setRef = (el: SearchEntityRef | null) => { refs.current[idx] = el }
+                        const entityType = watch(`absconders.${idx}.debtor_type`)
+                        const ds = watch(`absconders.${idx}.default_search`)
 
                         return (
-                            <TableRow key={idx}>
+                            <TableRow key={field.id}>
                                 <TableCell>
                                     <div className="flex flex-row gap-1">
                                         <Controller
@@ -58,6 +74,7 @@ function AbsconderDetails() {
                                         <SearchEntity
                                             ref={setRef}
                                             entityType={entityType}
+                                            defaultSearch={ds}
                                             onSelectItem={(id: number) => setValue(`absconders.${idx}.debtor_object_id`, id)}
                                         />
                                     </div>
@@ -83,10 +100,9 @@ function AbsconderDetails() {
                                                     <SelectValue placeholder="Currency" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="USD">USD</SelectItem>
-                                                    <SelectItem value="ZWL">ZWL</SelectItem>
-                                                    <SelectItem value="ZAR">ZAR</SelectItem>
-                                                    <SelectItem value="GBP">GBP</SelectItem>
+                                                    {CURRENCY_OPTIONS.map(currency => (
+                                                        <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         )}
@@ -138,13 +154,17 @@ function AbsconderDetails() {
                                         type="button"
                                         variant="ghost"
                                         size="icon"
-                                        disabled={fields.length === 1}
-                                        onClick={() => remove(idx)}
+                                        onClick={() =>{
+                                            const id = getValues(`absconders.${idx}.id`)
+                                            remove(idx)
+                                            if(typeof id  === "number"){
+                                                onDelete(id)
+                                            }
+                                        }}
                                     >
                                         <Trash2 size={16} className="text-destructive" />
                                     </Button>
                                 </TableCell>
-
                             </TableRow>
                         )
                     })}
@@ -155,7 +175,6 @@ function AbsconderDetails() {
                         type="button"
                         variant="outline"
                         onClick={() => append({
-                            id: undefined,
                             creditor_name: "",
                             currency: "USD",
                             amount: 0,
@@ -167,8 +186,9 @@ function AbsconderDetails() {
                     >
                         <Plus size={16} className="mr-2" /> Add Row
                     </Button>
-
-                    <Button type="submit">Submit</Button>
+                    <CustomSubmitButton
+                        isPending = {isPending}
+                    />
                 </div>
 
             </Fieldset>

@@ -74,14 +74,15 @@ export const ABSCONDERS_HEADERS:Header [] = [
 export const COURT_HEADERS:Header[] = [
     {name : "Court Name", textAlign : "end"},
     {name : "Case Number", textAlign : "end"},
+    {name : "Currency" },
     {name : "Amount",},
     {name : "Judgement Date", textAlign : "end"},
 ]
 
 export const INSOLVENCY_HEADERS:Header[] = [
     {name : "Insolvency Type", textAlign : "end"},
-    {name : "Start Date", },
-    {name : "End Date",},
+    {name : "Start Date", textAlign : "end"},
+    {name : "End Date",textAlign : "end"},
     {name : "Court Reference", textAlign : "end"},
 ]
 
@@ -99,9 +100,10 @@ export const TRADE_REFERENCES_HEADERS: Header[] = [
 
 export const DEBTOR_TYPE = z.enum(["company", "individual"])
 
-export const SETTLEMENT_OPTIONS = z.enum(["open", "settled"])
+export const SETTLEMENT_OPTIONS = z.enum(["open", "settled", "disputed", "written_off"])
 
 export const CURRENCY = z.enum(["USD", "ZiG", "AUD", "CAD", "CHF", "ZAR"])
+export const CURRENCY_OPTIONS = CURRENCY.options
 
 export const numericField = { setValueAs: (v: string) => v === "" ? undefined : Number(v) }
 
