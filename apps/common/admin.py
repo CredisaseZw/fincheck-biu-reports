@@ -6,17 +6,17 @@ from apps.common.models import (
     ProfessionalPartners,
     RegistrationAccounts,
 )
-class GenericClientMixin:
-    @admin.display(description="Client")
-    def get_client(self, obj):
-        if obj.client:
-            return f"{obj.client.__class__.__name__} | {str(obj.client)}"
+class GenericSubjectMixin:
+    @admin.display(description="Subject")
+    def get_subject(self, obj):
+        if getattr(obj, "subject", None):
+            return f"{obj.subject.__class__.__name__} | {str(obj.subject)}"
         return "-"
 
 @admin.register(RegistrationAccounts)
-class RegistrationAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
+class RegistrationAccountsAdmin(GenericSubjectMixin, admin.ModelAdmin):
     list_display = (
-        "get_client",
+        "get_subject",
         "tin_number",
         "vat_number",
         "nssa_number",
@@ -36,9 +36,9 @@ class RegistrationAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
 
 
 @admin.register(BankerAccounts)
-class BankerAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
+class BankerAccountsAdmin(GenericSubjectMixin, admin.ModelAdmin):
     list_display = (
-        "get_client",
+        "get_subject",
         "bank",
         "branch",
         "account_name",
@@ -51,19 +51,20 @@ class BankerAccountsAdmin(GenericClientMixin, admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
 
 @admin.register(ProfessionalPartners)
-class ProfessionalPartnersAdmin(GenericClientMixin, admin.ModelAdmin):
-    list_display = ("get_client", "created_at")
+class ProfessionalPartnersAdmin(GenericSubjectMixin, admin.ModelAdmin):
+    list_display = ("get_subject", "created_at")
     readonly_fields = ("created_at", "updated_at")
 
 @admin.register(Financials)
-class FinancialsAdmin(GenericClientMixin, admin.ModelAdmin):
+class FinancialsAdmin(GenericSubjectMixin, admin.ModelAdmin):
     list_display = (
-        "get_client",
+        "get_subject",
         "financial_year",
         "total_assets",
         "net_profit",
         "net_worth",
         "total_revenue",
+        "financials_file",
         "created_at",
     )
     list_filter = ("financial_year",)

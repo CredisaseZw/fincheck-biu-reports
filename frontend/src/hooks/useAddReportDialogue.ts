@@ -13,6 +13,8 @@ import type { ClaimFormData } from "./useClaims";
 import type { AbsconderFormData } from "./useAbsconderDetails";
 import type { CourtJudgementFormData } from "./useCourtDetails";
 import type { InsolvencyRecordFormData } from "./useInsolvencyRecordsDetails";
+import type { PublicInformationFormData } from "./usePublicInformation";
+import type { FinancialEntryFormData } from "./useFinancialsDetails";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -33,6 +35,8 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [absconders, setAbsconders] = useState<AbsconderFormData[]>([])
   const [courtJudgements, setCourtJudgements] = useState<CourtJudgementFormData[]>([])
   const [insolvencyRecords, setInsolvencyRecords] = useState<InsolvencyRecordFormData[]>([])
+  const [publicInformation, setPublicInformation] = useState<PublicInformationFormData[]>([])
+  const [financials, setFinancials] = useState<FinancialEntryFormData | undefined>(undefined)
 
   const {data, isLoading, error } = useGetSingleReport({
     id : list_report?.id,
@@ -235,6 +239,38 @@ function useAddReportDialogue(list_report?: ListReport) {
         court_reference:""
       }]
     )
+
+    setPublicInformation(
+      report.subject.public_information.length > 0
+      ? report.subject.public_information.map(item => ({
+        id: item.id,
+        summary: item.summary,
+        link: item.link ?? "",
+        record_date : item.record_date
+      }))
+      : [{
+        summary: "",
+        link: "",
+        record_date: ""
+      }]
+    )
+
+    setFinancials(
+      report.subject.financials
+      ? {
+        id: report.subject.financials.id,
+        total_assets: report.subject.financials.total_assets ? Number(report.subject.financials.total_assets) : undefined,
+        net_profit: report.subject.financials.net_profit ? Number(report.subject.financials.net_profit) : undefined,
+        net_worth: report.subject.financials.net_worth ? Number(report.subject.financials.net_worth) : undefined,
+        total_revenue: report.subject.financials.total_revenue ? Number(report.subject.financials.total_revenue) : undefined,
+        paid_up_capital: report.subject.financials.paid_up_capital ? Number(report.subject.financials.paid_up_capital) : undefined,
+        authorized_capital: report.subject.financials.authorized_capital ? Number(report.subject.financials.authorized_capital) : undefined,
+        financial_year: report.subject.financials.financial_year ?? undefined,
+        financials_file: undefined,
+      }
+      : undefined
+    )
+    
   }, [report])
 
   useEffect(()=>{
@@ -292,6 +328,8 @@ function useAddReportDialogue(list_report?: ListReport) {
     headerEditMode,
     absconders,
     insolvencyRecords,
+    publicInformation,
+    financials,
     onClear,
     onEdit,
     setOpen,

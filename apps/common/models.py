@@ -40,7 +40,7 @@ class RegistrationAccounts(BaseModelWithSubject):
         verbose_name_plural = "Registration Accounts"
 
     def __str__(self):
-        return f"{self.client} | {self.tin_number}"
+        return f"{self.subject} | {self.tin_number}"
 
 class BankerAccounts(BaseModelWithSubject):
     class AccountType(models.TextChoices):
@@ -62,7 +62,7 @@ class BankerAccounts(BaseModelWithSubject):
         verbose_name_plural = "Banker Accounts"
 
     def __str__(self):
-        return f"{self.client} | {self.account_name} ({self.account_number})"
+        return f"{self.subject} | {self.account_name} ({self.account_number})"
 
 class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON 
     auditors = models.TextField()
@@ -76,13 +76,9 @@ class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON
         ordering = ["-created_at"]
 
 class Financials(BaseModelWithSubject):
-    def profit_and_loss_path(instance, filename):
+    def financials_file_path(instance, filename):
         ext = os.path.splitext(filename)[1]
-        return f"financials/profit_and_loss/{uuid.uuid4()}{ext}"
-
-    def statement_of_financial_position_path(instance, filename):
-        ext = os.path.splitext(filename)[1]
-        return f"financials/statement_of_financial_position/{uuid.uuid4()}{ext}"
+        return f"financials/financials_file/{uuid.uuid4()}{ext}"
     
     total_assets = models.DecimalField(
         _("Total Assets"),
@@ -126,15 +122,9 @@ class Financials(BaseModelWithSubject):
         null=True,
         blank=True
     )
-    profit_and_loss = models.FileField(
-        _("Profit and Loss Statement"),
-        upload_to=profit_and_loss_path,
-        null=True,
-        blank=True
-    )
-    statement_of_financial_position = models.FileField(
-        _("Statement of Financial Position"),
-        upload_to=statement_of_financial_position_path,
+    financials_file = models.FileField(
+        _("Financials File"),
+        upload_to=financials_file_path,
         null=True,
         blank=True
     )
@@ -151,7 +141,7 @@ class Financials(BaseModelWithSubject):
         verbose_name_plural = _("Financials")
 
     def __str__(self):
-        return f"{self.client} - {self.financial_year}"
+        return f"{self.subject} - {self.financial_year}"
     
 class TradeReferences(BaseModelWithSubject):
     class PaymentTrend(models.TextChoices):

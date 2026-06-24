@@ -2,6 +2,8 @@ import type { AbsconderFormData } from "@/hooks/useAbsconderDetails";
 import type { ClaimFormData } from "@/hooks/useClaims";
 import type { CourtJudgementFormData } from "@/hooks/useCourtDetails";
 import type { InsolvencyRecordFormData } from "@/hooks/useInsolvencyRecordsDetails";
+import type { PublicInformationFormData } from "@/hooks/usePublicInformation";
+import type { FinancialEntryFormData } from "@/hooks/useFinancialsDetails";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -183,8 +185,7 @@ export interface Financial {
   total_revenue: string | null;
   paid_up_capital: string | null;
   authorized_capital: string | null;
-  profit_and_loss: string | null;
-  statement_of_financial_position: string | null;
+  financials_file : string | null
   financial_year: number | null;
 }
 
@@ -245,6 +246,7 @@ export interface InsolvencyRecord {
 export interface PublicInformation {
   id: number;
   summary: string;
+  record_date: string
   link: string | null;
 }
 
@@ -292,7 +294,7 @@ export interface Company extends CreditRecords{
   registration_accounts: RegistrationAccount[];
   banker_accounts: BankerAccount[];
   professional_partners: ProfessionalPartner[];
-  financials: Financial[];
+  financials: Financial;
 }
 
 export interface Individual extends CreditRecords {
@@ -313,7 +315,7 @@ export interface Individual extends CreditRecords {
   registration_accounts: RegistrationAccount[];
   banker_accounts: BankerAccount[];
   professional_partners: ProfessionalPartner[];
-  financials: Financial[];
+  financials: Financial;
 }
 
 export interface Report extends Timestamps {
@@ -357,4 +359,10 @@ export interface CourtJudgementsProps extends CreditRecordProps{
 }
 export interface InsolvencyRecordsProps extends CreditRecordProps{
   insolvency_data : InsolvencyRecordFormData[]
+}
+export interface PublicInformationProps extends CreditRecordProps{
+  public_information_data: PublicInformationFormData[]
+}
+export interface FinancialsProps extends CreditRecordProps{
+  financials_data?: FinancialEntryFormData
 }

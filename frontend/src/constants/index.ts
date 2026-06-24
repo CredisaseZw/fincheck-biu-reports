@@ -86,6 +86,12 @@ export const INSOLVENCY_HEADERS:Header[] = [
     {name : "Court Reference", textAlign : "end"},
 ]
 
+export const PUBLIC_INFORMATION_HEADERS: Header[] = [
+    {name : "Record Date", textAlign : "end"},
+    {name : "Summary", textAlign : "end"},
+    {name : "Link", textAlign : "end"},
+]
+
 export const TRADE_REFERENCES_HEADERS: Header[] = [
     {name : "Name", textAlign: "end"},
     {name : "Contact Info", textAlign: "end"},

@@ -49,7 +49,13 @@ class IndividualSerializer(serializers.ModelSerializer):
     registration_accounts = RegistrationAccountsSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsSerializer(many = True, read_only = True,)
     professional_partners = ProfessionalPartnersSerializer(many = True, read_only = True)
-    financials = FinancialsSerializer(many = True, read_only = True)
+    financials = serializers.SerializerMethodField()
+
+    def get_financials(self, obj):
+        financial = obj.financials.first()
+        if financial:
+            return FinancialsSerializer(financial).data
+        return None
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
 
     class Meta:

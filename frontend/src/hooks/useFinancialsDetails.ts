@@ -1,7 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ACCEPTED_TYPES, MAX_SIZE } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { file_api } from "@/axios/api"
+import { useMutation } from "@tanstack/react-query"
+import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils"
+import { toast } from "sonner"
+import useDetailCacheUpdate from "./useDetailCacheUpdate"
+import type { FinancialsProps, Report } from "@/types/core"
 
 const fileSchema = z.custom<FileList>()
     .refine(
@@ -15,6 +23,7 @@ const fileSchema = z.custom<FileList>()
     .optional()
 
 const financialsSchema = z.object({
+    id: z.number().optional(),
     total_assets: z.number().optional(),
     net_profit: z.number().optional(),
     net_worth: z.number().optional(),
@@ -22,23 +31,29 @@ const financialsSchema = z.object({
     paid_up_capital: z.number().optional(),
     authorized_capital: z.number().optional(),
     financial_year: z.number().int().positive().optional(),
-    profit_and_loss: fileSchema,
-    statement_of_financial_position: fileSchema,
+    financials_file: fileSchema,
 })
 
-export type FinancialsFormData = z.infer<typeof financialsSchema>
+export type FinancialEntryFormData = z.infer<typeof financialsSchema>
 
-const numericField = { setValueAs: (v: string) => v === "" ? undefined : Number(v) }
+export const numericField = { setValueAs: (v: string) => v === "" ? undefined : Number(v) }
 
-function useFinancials() {
+function useFinancialsDetails({
+    financials_data,
+    subject_object_id,
+    subject_type,
+    report_id,
+}: FinancialsProps) {
     const {
         register,
         handleSubmit,
         watch,
+        reset,
+        control,
         formState: { errors },
-    } = useForm<FinancialsFormData>({
+    } = useForm<FinancialEntryFormData>({
         resolver: zodResolver(financialsSchema),
-        defaultValues: {
+        defaultValues: financials_data || {
             total_assets: undefined,
             net_profit: undefined,
             net_worth: undefined,
@@ -46,24 +61,127 @@ function useFinancials() {
             paid_up_capital: undefined,
             authorized_capital: undefined,
             financial_year: undefined,
-            profit_and_loss: undefined,
-            statement_of_financial_position: undefined,
+            financials_file: undefined,
         },
     })
 
-    const onSubmit = (data: FinancialsFormData) => {
+    useEffect(() => {
+        if (financials_data) {
+            reset(financials_data)
+        }
+    }, [reset, financials_data])
+
+    const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+
+    const { mutate: save, isPending } = useMutation({
+        mutationFn: async (formData: FormData) => {
+            const id = formData.get("__id")
+            formData.delete("__id")
+            if (id) {
+                const res = await file_api.patch(`/api/financials/${id}/`, formData)
+                return { data: res.data, id: Number(id) }
+            }
+            const res = await file_api.post(`/api/financials/`, formData)
+            return { data: res.data, id: null }
+        }
+    })
+
+    const buildFormData = (
+        entry: Partial<FinancialEntryFormData>,
+    ): FormData => {
         const formData = new FormData()
-        Object.entries(data).forEach(([key, value]) => {
-            if (value instanceof FileList && value.length > 0) {
-                formData.append(key, value[0])
-            } else if (value !== undefined) {
-                formData.append(key, String(value))
+
+        formData.append("subject_object_id", String(subject_object_id))
+        formData.append("subject_type", subject_type!)
+
+        if (entry.id) {
+            formData.append("__id", String(entry.id))
+        }
+
+        const numericKeys = [
+            "total_assets", "net_profit", "net_worth",
+            "total_revenue", "paid_up_capital", "authorized_capital", "financial_year"
+        ] as const
+
+        numericKeys.forEach((key) => {
+            if (key in entry) {
+                const val = entry[key]
+                if (val !== undefined && val !== null && !isNaN(val as any)) {
+                    formData.append(key, String(val))
+                } else if (entry.id) {
+                    formData.append(key, "")
+                }
             }
         })
-        console.log(formData)
+
+        if (entry.financials_file instanceof FileList && entry.financials_file.length > 0) {
+            formData.append("financials_file", entry.financials_file[0])
+        }
+
+        return formData
     }
 
-    return { register, handleSubmit, onSubmit, watch, errors, numericField }
+    const onSubmit = (data: FinancialEntryFormData) => {
+        if (!subject_object_id || !subject_type) {
+            toast.error("No working report loaded.")
+            return
+        }
+
+        let changes: Partial<FinancialEntryFormData> = data;
+
+        if (financials_data && data.id) {
+            const { id, financials_file, ...initialData } = financials_data;
+            const { financials_file: currentFile, ...currentData } = data;
+            
+            const trackedChanges = handleTrackChangedFields(initialData, currentData, false);
+            const hasNewFile = currentFile && currentFile.length > 0;
+            
+            if (!trackedChanges && !hasNewFile) {
+                toast.info("No changes made.");
+                return;
+            }
+
+            changes = trackedChanges || {};
+            changes.id = data.id;
+            if (hasNewFile) {
+                changes.financials_file = currentFile;
+            }
+        }
+
+        const formData = buildFormData(changes)
+        save(formData, {
+            onSuccess: ({ data: savedEntry, id }) => {
+                if (id) {
+                    cache.updateInList(["subject", "financials"], id, savedEntry)
+                } else {
+                    cache.addToList(["subject", "financials"], savedEntry, "end")
+                }
+                toast.success(id ? "Financials updated successfully" : "Financials saved successfully")
+                reset({
+                  ...savedEntry,
+                  total_assets: savedEntry.total_assets ? Number(savedEntry.total_assets) : undefined,
+                  net_profit: savedEntry.net_profit ? Number(savedEntry.net_profit) : undefined,
+                  net_worth: savedEntry.net_worth ? Number(savedEntry.net_worth) : undefined,
+                  total_revenue: savedEntry.total_revenue ? Number(savedEntry.total_revenue) : undefined,
+                  paid_up_capital: savedEntry.paid_up_capital ? Number(savedEntry.paid_up_capital) : undefined,
+                  authorized_capital: savedEntry.authorized_capital ? Number(savedEntry.authorized_capital) : undefined,
+                  financials_file: undefined,
+                }) 
+            },
+            onError: (error) => handleAxiosError(error),
+        })
+    }
+
+    return {
+        register,
+        handleSubmit,
+        onSubmit,
+        watch,
+        errors,
+        numericField,
+        isPending,
+        control,
+    }
 }
 
-export default useFinancials
+export default useFinancialsDetails

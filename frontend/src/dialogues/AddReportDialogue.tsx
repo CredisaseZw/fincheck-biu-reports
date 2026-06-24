@@ -25,6 +25,7 @@ import ClaimsDetails from "@/components/general/ClaimsDetails";
 import CourtDetails from "@/components/general/CourtDetails";
 import AbsconderDetails from "@/components/general/AbsconderDetails"
 import InsolvencyRecordsDetails from "@/components/general/InsolvencyRecordsDetails";
+import PublicInformationDetails from "@/components/general/PublicInformationDetails";
 import TradeReferencesDetails from "@/components/general/TradeReferencesDetails";
 import useAddReportDialogue from "@/hooks/useAddReportDialogue";
 import type { ListReport } from "@/types/core";
@@ -50,11 +51,13 @@ function AddReportDialogue({ report_item }: props) {
         nextOfKin,
         absconders,
         insolvencyRecords,
+        publicInformation,
         report,
         claims,
         open, 
         clientType,
         subjectType,
+        financials,
         headerEditMode,
         onClear,
         onEdit,
@@ -173,11 +176,21 @@ function AddReportDialogue({ report_item }: props) {
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
-                                {/* PUBLIC INFORMATION */}       
+                                <PublicInformationDetails
+                                    public_information_data={publicInformation}
+                                    report_id={report.id}
+                                    subject_object_id={subject_object_id}
+                                    subject_type={subject_type}
+                                />
                             </Fieldset>
 
                             <TradeReferencesDetails />
-                            <FinancialsDetails />
+                            <FinancialsDetails 
+                                financials_data={financials}
+                                report_id={report.id}
+                                subject_object_id={subject_object_id}
+                                subject_type={subject_type}
+                            />
                             <RegistrationAccountsDetails />
                             <ProfessionalPartnersDetails />
                         </>    

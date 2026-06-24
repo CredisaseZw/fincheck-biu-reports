@@ -73,6 +73,7 @@ class PublicInformationSerializer(serializers.ModelSerializer):
         model = PublicInformation
         fields = [
             "id",
+            'record_date',
             "summary",
             "link",
         ]
@@ -140,6 +141,7 @@ class PublicInformationWriteSerializer(serializers.ModelSerializer):
         fields = [
             "subject_content_type",
             "subject_object_id",
+            'record_date',
             "summary",
             "link",
         ]

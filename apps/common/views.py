@@ -54,13 +54,9 @@ class FinancialsViewSet(
         instance = self.get_object()
         data = request.data.copy()
 
-        if "profit_and_loss" in request.FILES:
-            if instance.profit_and_loss:
-                instance.profit_and_loss.delete(save=False)
-
-        if "statement_of_financial_position" in request.FILES:
-            if instance.statement_of_financial_position:
-                instance.statement_of_financial_position.delete(save=False)
+        if "financials_file" in request.FILES:
+            if instance.financials_file:
+                instance.financials_file.delete(save=False)
 
         if subject_object_id := data.get("subject_object_id"):
             content_type_id = get_content_type_id(
