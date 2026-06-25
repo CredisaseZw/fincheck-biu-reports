@@ -5,10 +5,21 @@ import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Controller } from "react-hook-form"
 import { Checkbox } from "../ui/checkbox"
-import { Button } from "../ui/button"
+import type { RegistrationsAccountsProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function RegistrationAccountsDetails() {
-    const { register, onSubmit, handleSubmit, control } = useRegistrationAccounts()
+function RegistrationAccountsDetails({
+    subject_object_id,
+    subject_type,
+    report_id,
+    accounts_data
+}:RegistrationsAccountsProps) {
+    const { register, onSubmit, handleSubmit, control, isPending } = useRegistrationAccounts({
+        subject_object_id,
+        subject_type,
+        report_id,
+        accounts_data
+    })
     const fields = [
         { name: "tin_number", verifiedName: "is_tin_verified",label: "TIN Number"  },
         { name: "vat_number", verifiedName: "is_vat_verified",label: "VAT Number"  },
@@ -27,9 +38,7 @@ function RegistrationAccountsDetails() {
                                 <Input
                                     type="number"
                                     className="flex-1"
-                                    {...register(name, {
-                                        setValueAs: (v: string) => v === "" ? undefined : Number(v),
-                                    })}
+                                    {...register(name)}
                                 />
                                 <Controller
                                     control={control}
@@ -37,6 +46,7 @@ function RegistrationAccountsDetails() {
                                     render={({ field }) => (
                                         <div className="flex items-center gap-1 shrink-0">
                                             <Checkbox
+                                                key={`${verifiedName}_${field.value}`}
                                                 checked={field.value}
                                                 onCheckedChange={field.onChange}
                                             />
@@ -50,10 +60,7 @@ function RegistrationAccountsDetails() {
                         </div>
                     ))}
                 </ColumnsContainer>
-
-                <div className="flex justify-end">
-                    <Button type="submit">Submit</Button>
-                </div>
+                <CustomSubmitButton isPending ={isPending}/>
             </Fieldset>
         </form>
     )

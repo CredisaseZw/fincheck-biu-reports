@@ -3,14 +3,26 @@ import Fieldset from "./FieldSet";
 import { Label } from "../ui/label";
 import ColumnsContainer from "./ColumnsContainer";
 import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
+import type { ProfessionalsProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function ProfessionalPartnersDetails() {
+function ProfessionalPartnersDetails({
+    report_id,
+    subject_object_id,
+    subject_type,
+    professionals_data
+}:ProfessionalsProps) {
     const {
         handleSubmit,
         onSubmit,
         register,
-    } = useProfessionalPartners()
+        isPending
+    } = useProfessionalPartners({
+        report_id,
+        subject_object_id,
+        subject_type,
+        professionals_data
+    })
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Professional Partners">
@@ -28,9 +40,7 @@ function ProfessionalPartnersDetails() {
                         />
                     </div>
                 </ColumnsContainer>
-                <Button className="self-end">
-                    Submit
-                </Button>
+                <CustomSubmitButton isPending = {isPending}/>
             </Fieldset>
         </form>
     )

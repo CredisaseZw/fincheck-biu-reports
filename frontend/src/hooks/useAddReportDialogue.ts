@@ -15,6 +15,9 @@ import type { CourtJudgementFormData } from "./useCourtDetails";
 import type { InsolvencyRecordFormData } from "./useInsolvencyRecordsDetails";
 import type { PublicInformationFormData } from "./usePublicInformation";
 import type { FinancialEntryFormData } from "./useFinancialsDetails";
+import type { ProfessionalsFormData } from "./useProfessionalPartners";
+import type { RegistrationAccountsFormData } from "./useRegistrationAccounts";
+import type { TradeReferenceFormData } from "./useTradeRefences";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -37,6 +40,9 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [insolvencyRecords, setInsolvencyRecords] = useState<InsolvencyRecordFormData[]>([])
   const [publicInformation, setPublicInformation] = useState<PublicInformationFormData[]>([])
   const [financials, setFinancials] = useState<FinancialEntryFormData | undefined>(undefined)
+  const [professionals, setProfessionals] = useState<ProfessionalsFormData | undefined>(undefined)
+  const [accounts, setAccounts] = useState<RegistrationAccountsFormData | undefined>(undefined)
+  const [tradeReferences, setTradeReferences] = useState<TradeReferenceFormData[]>([])
 
   const {data, isLoading, error } = useGetSingleReport({
     id : list_report?.id,
@@ -265,12 +271,52 @@ function useAddReportDialogue(list_report?: ListReport) {
         total_revenue: report.subject.financials.total_revenue ? Number(report.subject.financials.total_revenue) : undefined,
         paid_up_capital: report.subject.financials.paid_up_capital ? Number(report.subject.financials.paid_up_capital) : undefined,
         authorized_capital: report.subject.financials.authorized_capital ? Number(report.subject.financials.authorized_capital) : undefined,
-        financial_year: report.subject.financials.financial_year ?? undefined,
-        financials_file: undefined,
+        financial_year: report.subject.financials.financial_year,
+        default_file :report.subject.financials.financials_file ?? undefined,
       }
       : undefined
     )
+
+    setProfessionals(
+      report.subject.professional_partners ?
+      { 
+        id: report.subject.professional_partners.id,
+        lawyers : report.subject.professional_partners.lawyers,
+        auditors : report.subject.professional_partners.auditors
+      }: undefined)
     
+      setAccounts(
+        report.subject.registration_accounts ?
+        {
+          is_nssa_verified :report.subject.registration_accounts.is_nssa_verified,
+          is_praz_verified : report.subject.registration_accounts.is_praz_verified,
+          is_tin_verified : report.subject.registration_accounts.is_tin_verified,
+          is_vat_verified : report.subject.registration_accounts.is_vat_verified,
+          nssa_number : report.subject.registration_accounts.nssa_number ?? undefined,
+          praz_number : report.subject.registration_accounts.praz_number ?? undefined,
+          tin_number :report.subject.registration_accounts.tin_number ?? undefined,
+          vat_number : report.subject.registration_accounts.vat_number?? undefined
+        } : undefined
+      )
+
+      setTradeReferences(
+        report.subject.trade_references.length > 0
+        ? report.subject.trade_references.map(item => ({
+          id : item.id ?? undefined,
+          referenced_date : item.referenced_date,
+          name : item.name ?? "",
+          contact_info :item.contact_info ?? undefined,
+          reference_source : item.reference_source ?? undefined,
+          position : item.position ?? undefined,
+          credit_limit : item.credit_limit ?? undefined,
+          credit_terms : item.credit_terms ?? undefined,
+          payment_trend : item.payment_trend ?? undefined
+        }))
+        : [{
+          referenced_date : "",
+          name : "",
+        }]
+      )
   }, [report])
 
   useEffect(()=>{
@@ -314,9 +360,11 @@ function useAddReportDialogue(list_report?: ListReport) {
     subject_object_id : report?.subject.id ?? null,
     subject_type : report?.subject_type ?? null,
     claims,
+    professionals,
     report,
     nextOfKin,
     companyOverview,
+    tradeReferences,
     individualDetails,
     employmentInformation,
     courtJudgements,
@@ -330,6 +378,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     insolvencyRecords,
     publicInformation,
     financials,
+    accounts,
     onClear,
     onEdit,
     setOpen,

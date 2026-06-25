@@ -6,6 +6,9 @@ import type { PublicInformationFormData } from "@/hooks/usePublicInformation";
 import type { FinancialEntryFormData } from "@/hooks/useFinancialsDetails";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
+import type { ProfessionalsFormData } from "@/hooks/useProfessionalPartners";
+import type { RegistrationAccountsFormData } from "@/hooks/useRegistrationAccounts";
+import type { TradeReferenceFormData } from "@/hooks/useTradeRefences";
 
 export interface RouteItem  {
     name: string;
@@ -186,7 +189,7 @@ export interface Financial {
   paid_up_capital: string | null;
   authorized_capital: string | null;
   financials_file : string | null
-  financial_year: number | null;
+  financial_year: number;
 }
 
 // Subject (Individual)
@@ -262,23 +265,28 @@ export interface TradeReference {
   payment_trend: "good" | "fair" | "poor" | null;
 }
 
-export interface CreditRecords extends Timestamps{
+export interface CommonFields extends Timestamps{
+  id: number;
+  email: string | null;
   claims: Claim[];
   absconders: Absconder[];
   court_judgements: CourtJudgement[];
   insolvency_records: InsolvencyRecord[];
   public_information: PublicInformation[];
+  banker_accounts: BankerAccount[];
+  trade_references : TradeReference[];
+  registration_accounts: RegistrationAccount;
+  professional_partners: ProfessionalPartner;
+  financials: Financial;
 }
 
-export interface Company extends CreditRecords{
-  id: number;
+export interface Company extends CommonFields{
   company_name: string;
   registered_name: string;
   trading_name: string | null;
   refer_type: string;
   address_registered: string;
   address_operations: string;
-  email: string | null;
   telephone_number: string | null;
   mobile_number: string | null;
   website: string | null;
@@ -291,14 +299,9 @@ export interface Company extends CreditRecords{
   operations: CompanyOperations | null;
   directors: Director[];
   shareholdings: Shareholding | null;
-  registration_accounts: RegistrationAccount[];
-  banker_accounts: BankerAccount[];
-  professional_partners: ProfessionalPartner[];
-  financials: Financial;
 }
 
-export interface Individual extends CreditRecords {
-  id: number;
+export interface Individual extends CommonFields {
   full_name: string;
   national_id: string;
   date_of_birth: string;
@@ -307,15 +310,10 @@ export interface Individual extends CreditRecords {
   nationality: string;
   residential_address: string;
   mobile_number: string;
-  email: string | null;
   status: string | null;
   refer_type: string;
   employment_information: EmploymentInformation | null;
   next_of_kin: NextOfKin | null;
-  registration_accounts: RegistrationAccount[];
-  banker_accounts: BankerAccount[];
-  professional_partners: ProfessionalPartner[];
-  financials: Financial;
 }
 
 export interface Report extends Timestamps {
@@ -342,27 +340,37 @@ export interface DefaultHeaderProps{
   enquiry_reference : string,
   created_at : string
 }
-interface CreditRecordProps {
+interface ReportEntityProps {
   subject_object_id?: number | null
   subject_type?: EntityValue | null
   report_id : number | undefined
 }
 
-export interface AbsconderProps extends CreditRecordProps{
+export interface AbsconderProps extends ReportEntityProps{
   absconders_data: AbsconderFormData[]
 }
-export interface ClaimsProps extends CreditRecordProps{
+export interface ClaimsProps extends ReportEntityProps{
   claims_data: ClaimFormData[]
 }
-export interface CourtJudgementsProps extends CreditRecordProps{
+export interface CourtJudgementsProps extends ReportEntityProps{
   court_judgements_data: CourtJudgementFormData[]
 }
-export interface InsolvencyRecordsProps extends CreditRecordProps{
+export interface InsolvencyRecordsProps extends ReportEntityProps{
   insolvency_data : InsolvencyRecordFormData[]
 }
-export interface PublicInformationProps extends CreditRecordProps{
+export interface PublicInformationProps extends ReportEntityProps{
   public_information_data: PublicInformationFormData[]
 }
-export interface FinancialsProps extends CreditRecordProps{
+export interface FinancialsProps extends ReportEntityProps{
   financials_data?: FinancialEntryFormData
+}
+export interface ProfessionalsProps extends ReportEntityProps{
+  professionals_data: ProfessionalsFormData | undefined
+}
+
+export interface RegistrationsAccountsProps extends ReportEntityProps{
+  accounts_data : RegistrationAccountsFormData | undefined
+}
+export interface TradeReferencesProps extends ReportEntityProps{
+  trade_references_data: TradeReferenceFormData[] 
 }

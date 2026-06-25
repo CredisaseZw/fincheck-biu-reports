@@ -18,11 +18,11 @@ class IndividualsViewSet(BaseJSONViewSet):
         "court_judgements",
         "insolvency_records",
         "public_information",
-        "registration_accounts",
         "banker_accounts",
-        "professional_partners",
-        "financials",
         "trade_references",
+        "financials",
+        "registration_accounts",
+        "professional_partners",
     ).select_related(
         "employment_information",
         "next_of_kin"

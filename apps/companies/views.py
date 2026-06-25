@@ -8,7 +8,6 @@ from .serializers import (
     CompanySerializer,
     CompanyUpdateSerializer,
 )
-
 class CompaniesViewSet(BaseJSONViewSet):
     filterset_fields = ["refer_type"]
     search_fields = ["registered_name", "trading_name"]   
@@ -22,11 +21,11 @@ class CompaniesViewSet(BaseJSONViewSet):
         "insolvency_records",
         "public_information",
         "directors",
-        "registration_accounts",
         "banker_accounts",
-        "professional_partners",
+        "trade_references",
         "financials",
-        "trade_references"
+        "registration_accounts",
+        "professional_partners"
     ).select_related(
         "structure",
         "operations",

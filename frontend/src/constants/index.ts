@@ -126,3 +126,17 @@ export const ACCEPTED_TYPES = [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ]
 
+export const ACCOUNT_TYPES = [
+    { value: "current", label: "Current" },
+    { value: "savings", label: "Savings" },
+    { value: "loan", label: "Loan" },
+    { value: "fixed_deposit", label: "Fixed Deposit" },
+]
+
+export const NARRATIONS = [
+    { value: "A", label: "A - Very Good Credit Worthiness (Lowest Risk)" },
+    { value: "B", label: "B - Good Credit Worthiness (Low Risk)" },
+    { value: "C", label: "C - Satisfactory Credit Worthiness (Moderate Risk)" },
+    { value: "D", label: "D - No Credit Worthy" },
+    { value: "E", label: "E - Rating Suspended" },
+]

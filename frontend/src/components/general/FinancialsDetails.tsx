@@ -29,11 +29,11 @@ function FinancialsDetails({
     })
 
     const numberFields = [
-        { name: "total_assets",       label: "Total Assets" },
-        { name: "net_profit",         label: "Net Profit" },
-        { name: "net_worth",          label: "Net Worth" },
-        { name: "total_revenue",      label: "Total Revenue" },
-        { name: "paid_up_capital",    label: "Paid Up Capital" },
+        { name: "total_assets", label: "Total Assets" },
+        { name: "net_profit", label: "Net Profit" },
+        { name: "net_worth", label: "Net Worth" },
+        { name: "total_revenue", label: "Total Revenue" },
+        { name: "paid_up_capital", label: "Paid Up Capital" },
         { name: "authorized_capital", label: "Authorized Capital" },
     ] as const
 
@@ -78,6 +78,7 @@ function FinancialsDetails({
                         error={errors.financials_file?.message as string}
                         preview={watch("financials_file")}
                         inputProps={register("financials_file")}
+                        default_file={watch("default_file")}
                     />
                 </div>
 

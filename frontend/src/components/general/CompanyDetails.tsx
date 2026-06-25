@@ -30,6 +30,7 @@ function CompanyDetails({
     onSuccess
 } : props) {
     const { 
+        getValues,
         handleSubmit,
         register,
         onSubmit,
@@ -122,6 +123,7 @@ function CompanyDetails({
                             <Label>Trading Status</Label>
                             <Controller
                                 control={control}
+                                key = {getValues(`overview.trading_status`)}
                                 name="overview.trading_status"
                                 render={({ field }) => (
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -142,6 +144,7 @@ function CompanyDetails({
                             <Label>Legal Form</Label>
                             <Controller
                                 control={control}
+                                key = {getValues(`overview.legal_form`)}
                                 name="overview.legal_form"
                                 render={({ field }) => (
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -163,6 +166,7 @@ function CompanyDetails({
                             <Label>Condition</Label>
                             <Controller
                                 control={control}
+                                key = {getValues(`overview.condition`)}
                                 name="overview.condition"
                                 render={({ field }) => (
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -183,6 +187,7 @@ function CompanyDetails({
                             <Label>Trend</Label>
                             <Controller
                                 control={control}
+                                key = {getValues(`overview.trend`)}
                                 name="overview.trend"
                                 render={({ field }) => (
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>

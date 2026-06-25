@@ -14,8 +14,6 @@ class RegistrationAccountsSerializer(serializers.ModelSerializer):
         exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
 
 class BankerAccountsSerializer(serializers.ModelSerializer):
-    account_type_display = serializers.CharField(source="get_account_type_display", read_only=True)
-
     class Meta:
         model = BankerAccounts
         exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
@@ -41,8 +39,6 @@ class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationAccounts
         fields = [
-            "subject_content_type",
-            "subject_object_id",
             "tin_number",
             "vat_number",
             "nssa_number",
@@ -60,13 +56,15 @@ class BankerAccountsWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankerAccounts
         fields = [
-            "subject_content_type",
-            "subject_object_id",
             "bank",
             "branch",
             "account_name",
+            "account_currency",
             "account_type",
             "account_number",
+            "date_of_acquirement",
+            "bank_code",
+            "narration",
         ]
 
 
@@ -74,12 +72,9 @@ class ProfessionalPartnersWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfessionalPartners
         fields = [
-            "subject_content_type",
-            "subject_object_id",
             "auditors",
             "lawyers",
         ]
-
 
 class FinancialsWriteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -99,7 +94,6 @@ class FinancialsWriteSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "financials_file": {"required": False},
         }
-
 
 class TradeReferencesWriteSerializer(serializers.ModelSerializer):
     payment_trend = serializers.ChoiceField(

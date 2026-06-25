@@ -62,11 +62,12 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
 
 
     const {
-        control,
         reset,
+        getValues,
         register,
         handleSubmit,
-        formState : { errors }
+        formState : { errors },
+        control,
     } = useForm<CompanyFormData>({
         resolver : zodResolver(companySchema),
         defaultValues : company_overview
@@ -131,6 +132,7 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     return {
         onSubmit,
         register,
+        getValues,
         handleSubmit,
         isPending,
         control,

@@ -46,8 +46,10 @@ function AddReportDialogue({ report_item }: props) {
         companyOverview,
         employmentInformation,
         courtJudgements,
+        tradeReferences,
         defaultHeader,
         isLoading, 
+        professionals,
         nextOfKin,
         absconders,
         insolvencyRecords,
@@ -56,6 +58,7 @@ function AddReportDialogue({ report_item }: props) {
         claims,
         open, 
         clientType,
+        accounts,
         subjectType,
         financials,
         headerEditMode,
@@ -184,15 +187,30 @@ function AddReportDialogue({ report_item }: props) {
                                 />
                             </Fieldset>
 
-                            <TradeReferencesDetails />
+                            <TradeReferencesDetails 
+                                trade_references_data={tradeReferences}
+                                report_id={report.id}
+                                subject_object_id={subject_object_id}
+                                subject_type={subject_type}
+                            />
                             <FinancialsDetails 
                                 financials_data={financials}
                                 report_id={report.id}
                                 subject_object_id={subject_object_id}
                                 subject_type={subject_type}
                             />
-                            <RegistrationAccountsDetails />
-                            <ProfessionalPartnersDetails />
+                            <RegistrationAccountsDetails
+                                accounts_data={accounts}
+                                report_id={report.id}
+                                subject_object_id={subject_object_id}
+                                subject_type={subject_type} 
+                            />
+                            <ProfessionalPartnersDetails
+                                professionals_data={professionals}
+                                report_id={report.id}
+                                subject_object_id={subject_object_id}
+                                subject_type={subject_type}
+                            />
                         </>    
                     }
 

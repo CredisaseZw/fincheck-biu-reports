@@ -30,8 +30,9 @@ const financialsSchema = z.object({
     total_revenue: z.number().optional(),
     paid_up_capital: z.number().optional(),
     authorized_capital: z.number().optional(),
-    financial_year: z.number().int().positive().optional(),
+    financial_year: z.number().int().positive().min(2000).max(new Date().getFullYear()),
     financials_file: fileSchema,
+    default_file :z.string().optional()
 })
 
 export type FinancialEntryFormData = z.infer<typeof financialsSchema>
@@ -130,8 +131,18 @@ function useFinancialsDetails({
         let changes: Partial<FinancialEntryFormData> = data;
 
         if (financials_data && data.id) {
-            const { id, financials_file, ...initialData } = financials_data;
-            const { financials_file: currentFile, ...currentData } = data;
+            const { 
+                id, 
+                financials_file, 
+                default_file,
+                ...initialData 
+            } = financials_data;
+            const { 
+                id: current_id,
+                financials_file: currentFile, 
+                default_file: current_default_file,
+                ...currentData
+            } = data;
             
             const trackedChanges = handleTrackChangedFields(initialData, currentData, false);
             const hasNewFile = currentFile && currentFile.length > 0;
@@ -147,25 +158,22 @@ function useFinancialsDetails({
                 changes.financials_file = currentFile;
             }
         }
-
+        console.log(changes)
         const formData = buildFormData(changes)
         save(formData, {
-            onSuccess: ({ data: savedEntry, id }) => {
-                if (id) {
-                    cache.updateInList(["subject", "financials"], id, savedEntry)
-                } else {
-                    cache.addToList(["subject", "financials"], savedEntry, "end")
-                }
-                toast.success(id ? "Financials updated successfully" : "Financials saved successfully")
+            onSuccess: ({ data: savedEntry }) => {
+                cache.set(["subject", "financials"], savedEntry)
+                toast.success("Financials updated successfully")
                 reset({
-                  ...savedEntry,
-                  total_assets: savedEntry.total_assets ? Number(savedEntry.total_assets) : undefined,
-                  net_profit: savedEntry.net_profit ? Number(savedEntry.net_profit) : undefined,
-                  net_worth: savedEntry.net_worth ? Number(savedEntry.net_worth) : undefined,
-                  total_revenue: savedEntry.total_revenue ? Number(savedEntry.total_revenue) : undefined,
-                  paid_up_capital: savedEntry.paid_up_capital ? Number(savedEntry.paid_up_capital) : undefined,
-                  authorized_capital: savedEntry.authorized_capital ? Number(savedEntry.authorized_capital) : undefined,
-                  financials_file: undefined,
+                    ...savedEntry,
+                    total_assets: savedEntry.total_assets ? Number(savedEntry.total_assets) : undefined,
+                    net_profit: savedEntry.net_profit ? Number(savedEntry.net_profit) : undefined,
+                    net_worth: savedEntry.net_worth ? Number(savedEntry.net_worth) : undefined,
+                    total_revenue: savedEntry.total_revenue ? Number(savedEntry.total_revenue) : undefined,
+                    paid_up_capital: savedEntry.paid_up_capital ? Number(savedEntry.paid_up_capital) : undefined,
+                    authorized_capital: savedEntry.authorized_capital ? Number(savedEntry.authorized_capital) : undefined,
+                    default_file:  savedEntry.financials_file ?? undefined,
+                    financials_file:  undefined,
                 }) 
             },
             onError: (error) => handleAxiosError(error),

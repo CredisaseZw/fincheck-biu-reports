@@ -176,6 +176,10 @@ REST_FRAMEWORK = {
     ]
 }
 
+#STORAGE SETTING 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 #USER MODEL
 AUTH_USER_MODEL = "users.User"
 

@@ -29,15 +29,22 @@ class RegistrationAccounts(BaseModelWithSubject):
         null = True,
         help_text=_("Account praz number")   
     )
-    is_praz_verified = models.BooleanField(default=True)
-    is_nssa_verified = models.BooleanField(default=True)
-    is_vat_verified = models.BooleanField(default=True)
-    is_tin_verified = models.BooleanField(default=True)
+    is_praz_verified = models.BooleanField(default=False)
+    is_nssa_verified = models.BooleanField(default=False)
+    is_vat_verified = models.BooleanField(default=False)
+    is_tin_verified = models.BooleanField(default=False)
 
     class Meta:
         db_table = "registration_accounts"
         verbose_name = "Registration Account"
         verbose_name_plural = "Registration Accounts"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subject_content_type", "subject_object_id"],
+                name="unique_registration_accounts_per_subject"
+            )
+        ]
+
 
     def __str__(self):
         return f"{self.subject} | {self.tin_number}"
@@ -48,12 +55,44 @@ class BankerAccounts(BaseModelWithSubject):
         SAVINGS = "savings", "Savings"
         LOAN = "loan", "Loan"
         FIXED_DEPOSIT = "fixed_deposit", "Fixed Deposit"
-
+    class Narrations(models.TextChoices):
+        A = "A", "Very Good Credit Worthiness (Lowest Risk)"
+        B = "B", "Good Credit Worthiness (Low Risk)"
+        C = "C", "Satisfactory Credit Worthiness (Moderate Risk)"
+        D = "D", "No Credit Worthy"
+        E = "E", "Rating Suspended"
+    class Currency(models.TextChoices):
+        USD = "USD", "US Dollar"
+        ZIG = "ZiG", "Zimbabwe Gold"
+        AUD = "AUD", "Australian Dollar"
+        CAD = "CAD", "Canadian Dollar"
+        CHF = "CHF", "Swiss Franc"
+        ZAR = "ZAR", "South African Rand"
+    
     bank = models.CharField(max_length=255)
     branch = models.CharField(max_length=255, blank=True)
     account_name = models.CharField(max_length=255)
-    account_type = models.CharField(max_length=20, choices=AccountType.choices)
+    account_currency = models.CharField(
+        max_length=5,
+        choices=Currency.choices,
+        default=Currency.USD
+    )
+    account_type = models.CharField(
+        max_length=20,
+        choices=AccountType.choices,
+    )
     account_number = models.CharField(max_length=50)
+    date_of_acquirement = models.DateField(auto_now=True)
+    bank_code = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True
+    )
+    narration = models.CharField(
+        max_length=2,
+        choices=Narrations.choices,
+        default=Narrations.C
+    )
 
     class Meta:
 
@@ -74,6 +113,13 @@ class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON
         verbose_name = _("Professional Partner")
         verbose_name_plural = _("Professional Partners")
         ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subject_content_type", "subject_object_id"],
+                name="unique_professional_partners_per_subject"
+            )
+        ]
+
 
 class Financials(BaseModelWithSubject):
     def financials_file_path(instance, filename):
@@ -139,6 +185,12 @@ class Financials(BaseModelWithSubject):
         db_table = "financials"
         verbose_name = _("Financials")
         verbose_name_plural = _("Financials")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subject_content_type", "subject_object_id"],
+                name="unique_financials_per_subject"
+            )
+        ]
 
     def __str__(self):
         return f"{self.subject} - {self.financial_year}"

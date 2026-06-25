@@ -1,50 +1,91 @@
 import { useForm } from "react-hook-form" 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { useEffect } from "react";
+import type { RegistrationsAccountsProps, Report } from "@/types/core";
+import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
+import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import { toast } from "sonner";
+import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 
 const schema = z.object({
-    tin_number : z.number().optional(),
-    vat_number : z.number().optional(),
-    nssa_number : z.number().optional(),
-    praz_number : z.number().optional(),
-    is_praz_verified : z.boolean(),
-    is_nssa_verified : z.boolean(),
-    is_vat_verified : z.boolean(),
-    is_tin_verified : z.boolean(),
+    id : z.number().optional(),
+    tin_number : z.string().optional(),
+    vat_number : z.string().optional(),
+    nssa_number : z.string().optional(),
+    praz_number : z.string().optional(),
+    is_praz_verified : z.boolean().optional(),
+    is_nssa_verified : z.boolean().optional(),
+    is_vat_verified : z.boolean().optional(),
+    is_tin_verified : z.boolean().optional(),
 })
 
-type RegistrationAccountsFormData = z.infer<typeof schema>;
+export type RegistrationAccountsFormData = z.infer<typeof schema>;
 
-function useRegistrationAccounts() {
+function useRegistrationAccounts({
+    report_id,
+    subject_object_id,
+    subject_type,
+    accounts_data
+}:RegistrationsAccountsProps) {
     const {
         handleSubmit,
         register,
+        reset,
         control,
         formState : { errors }
     } = useForm<RegistrationAccountsFormData>({
         resolver: zodResolver(schema),
-        defaultValues : {
-            tin_number : undefined,
-            vat_number : undefined,
-            nssa_number: undefined,
-            praz_number : undefined,
-            is_nssa_verified : true,
-            is_praz_verified : true,
-            is_tin_verified : true,
-            is_vat_verified : true
-        }
+        defaultValues : accounts_data
     })
+    useEffect(()=>{
+        if(accounts_data){
+            reset(accounts_data)
+        }
+    }, [reset, accounts_data])
 
-    const onSubmit = (data: RegistrationAccountsFormData) => {
-        console.log(data)
+    const {mutate, isPending} = useInstanceMutation();
+    const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+
+    const onSubmit = (data : RegistrationAccountsFormData) =>{
+        if(!subject_object_id || !subject_type){
+            toast.error("No working report loaded.")
+            return;
+        }
+        
+        const changes = handleTrackChangedFields(accounts_data, data);
+        if(!changes){
+            toast.info("No changes made.")
+            return;
+        }
+
+        const PAYLOAD:InstanceMutation ={
+            url : subject_type === "company"
+            ? `/api/companies/${subject_object_id}/`
+            : `/api/individuals/${subject_object_id}/`,
+            mode : "update",
+            data : {
+                registration_accounts:  changes
+            }
+        }
+        mutate(PAYLOAD, {
+            onSuccess:(data)=>{
+                cache.set(["subject"], data)
+                toast.success("Registration accounts Updated successfully.")
+            },
+            onError : (error) => handleAxiosError(error)
+        })
+
     }
+
 
     return {
         handleSubmit,
         onSubmit,
         register,
         control,
-        errors 
+        errors,
+        isPending, 
   }
 }
 

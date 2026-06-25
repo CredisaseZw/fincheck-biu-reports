@@ -82,18 +82,20 @@ class CompanySerializer(serializers.ModelSerializer):
     insolvency_records = InsolvencyRecordSerializer(read_only= True, many = True)
     public_information = PublicInformationSerializer(read_only= True, many = True)
     trade_references = TradeReferencesSerializer(read_only = True, many=True)
-    registration_accounts = RegistrationAccountsSerializer(many = True, read_only = True)
     banker_accounts = BankerAccountsSerializer(many = True, read_only = True)
-    professional_partners = ProfessionalPartnersSerializer(many = True, read_only = True)
-    financials = serializers.SerializerMethodField()
-
-    def get_financials(self, obj):
-        financial = obj.financials.first()
-        if financial:
-            return FinancialsSerializer(financial).data
-        return None
     company_name = serializers.CharField(read_only=True)
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
+   
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+    
+        professional_partners = instance.professional_partners.first()
+        registration_accounts = instance.registration_accounts.first()
+        financials = instance.financials.first()
+        data['professional_partners'] = ProfessionalPartnersSerializer(professional_partners).data if professional_partners else None
+        data['registration_accounts'] = RegistrationAccountsSerializer(registration_accounts).data if registration_accounts else None
+        data['financials'] = FinancialsSerializer(financials).data if financials else None
+        return data
     class Meta:
         model = Company
         fields = "__all__"
@@ -122,40 +124,62 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
     court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
     insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
     public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
-    trade_references = TradeReferencesSerializer(read_only=True, many=True, required=False)
+    trade_references = TradeReferencesWriteSerializer(many=True, write_only=True)
     overview = CompanyOverviewSerializer(required=False)
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)
-    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
-    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
-    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
-    trade_references = TradeReferencesWriteSerializer(read_only = True, many=True)
-
+    banker_accounts = BankerAccountsWriteSerializer(many = True, write_only=True)
+    registration_accounts = RegistrationAccountsWriteSerializer(required=False, write_only=True)
+    professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
+    
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+    
+        professional_partners = instance.professional_partners.first()
+        registration_accounts = instance.registration_accounts.first()
+        data['professional_partners'] = ProfessionalPartnersSerializer(professional_partners).data if professional_partners else None
+        data['registration_accounts'] = RegistrationAccountsSerializer(registration_accounts).data if registration_accounts else None
+        data['trade_references'] = TradeReferencesSerializer(instance.trade_references.all(), many=True).data
+        data['banker_accounts'] = BankerAccountsSerializer(instance.banker_accounts.all(), many=True).data
+        
+        return data
     class Meta:
         model = Company
         fields = "__all__"
 
-    def _create_generic_relations(self, company, data_list, model):
-        content_type = ContentType.objects.get_for_model(company)
+    def _create_generic_relations(self, company, data_list, model,content_type):
         for item in data_list:
             item.pop("id", None)
             model.objects.create(
                 subject_content_type=content_type,
-                subject_object_id=company.id,
+            subject_object_id=company.id,
                 **item
             )
+
+    def _create_oto_generic(self, instance, data, model, content_type):
+        if not data:
+            return
+        data = data.copy()
+        data.pop("id", None)
+        model.objects.create(
+            subject_content_type=content_type,
+            subject_object_id=instance.id,
+            **data
+        )
+
 
     def create(self, validated_data):
         overview_data = validated_data.pop("overview", None)
         structure_data = validated_data.pop("structure", None)
         operations_data = validated_data.pop("operations", None)
+        professional_partners_data = validated_data.pop("professional_partners", None)
         registration_accounts_data = validated_data.pop("registration_accounts", [])
         banker_accounts_data = validated_data.pop("banker_accounts", [])
-        professional_partners_data = validated_data.pop("professional_partners", [])
         trade_references_data = validated_data.pop("trade_references", [])
 
         with transaction.atomic():
             company = Company.objects.create(**validated_data)
+            content_type = ContentType.objects.get_for_model(company)
 
             if overview_data:
                 CompanyOverview.objects.create(company=company, **overview_data)
@@ -164,10 +188,10 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
             if operations_data:
                 CompanyOperations.objects.create(company=company, **operations_data)
 
-            self._create_generic_relations(company, registration_accounts_data, RegistrationAccounts)
-            self._create_generic_relations(company, banker_accounts_data, BankerAccounts)
-            self._create_generic_relations(company, professional_partners_data, ProfessionalPartners)
-            self._create_generic_relations(company, trade_references_data, TradeReferences)
+            self._create_oto_generic(company, registration_accounts_data, RegistrationAccounts, content_type)
+            self._create_generic_relations(company, banker_accounts_data, BankerAccounts,content_type)
+            self._create_oto_generic(company, professional_partners_data, ProfessionalPartners, content_type)
+            self._create_generic_relations(company, trade_references_data, TradeReferences,content_type)
         return company
 
 
@@ -177,22 +201,31 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
     court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
     insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
     public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
-    trade_references = TradeReferencesSerializer(read_only=True, many=True, required=False)
     overview = CompanyOverviewSerializer(required=False)
     structure = CompanyStructureSerializer(required=False)
     operations = CompanyOperationsSerializer(required=False)
-    registration_accounts = RegistrationAccountsWriteSerializer(many = True, read_only = True)
-    banker_accounts = BankerAccountsWriteSerializer(many = True, read_only = True)
-    professional_partners = ProfessionalPartnersWriteSerializer(many = True, read_only = True)
-    trade_references = TradeReferencesWriteSerializer(read_only = True, many=True)
     company_name = serializers.CharField(required=False)
+    banker_accounts = BankerAccountsWriteSerializer(many = True, write_only=True)
+    trade_references = TradeReferencesWriteSerializer(many=True, write_only=True)
+    registration_accounts = RegistrationAccountsWriteSerializer(required=False, write_only=True)
+    professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
+   
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+    
+        professional_partners = instance.professional_partners.first()
+        registration_accounts = instance.registration_accounts.first()
+        data['professional_partners'] = ProfessionalPartnersSerializer(professional_partners).data if professional_partners else None
+        data['registration_accounts'] = RegistrationAccountsSerializer(registration_accounts).data if registration_accounts else None
+        data['trade_references'] = TradeReferencesSerializer(instance.trade_references.all(), many=True).data
+        data['banker_accounts'] = BankerAccountsSerializer(instance.banker_accounts.all(), many=True).data
 
+        return data
     class Meta:
         model = Company
         fields = "__all__"
     
-    def _update_generic_relations(self, company, data_list, model):
-        content_type = ContentType.objects.get_for_model(company)
+    def _update_generic_relations(self, company, data_list, model, content_type):
         for item in data_list:
             item_id = item.pop("id", None)
             model.objects.update_or_create(
@@ -203,14 +236,25 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
                     "subject_object_id": company.id,
                 },
             )
-        
+
+    def _update_oto_generic(self, instance, data, model, content_type):
+        if not data:
+            return
+        data = data.copy()
+        data.pop("id", None)
+        model.objects.update_or_create(
+            subject_content_type=content_type,
+            subject_object_id=instance.id,
+            defaults=data
+        )
+
     def update(self, instance, validated_data):
         overview_data = validated_data.pop("overview", None)
         structure_data = validated_data.pop("structure", None)
         operations_data = validated_data.pop("operations", None)
+        professional_partners_data = validated_data.pop("professional_partners", None)
         registration_accounts_data = validated_data.pop("registration_accounts", [])
         banker_accounts_data = validated_data.pop("banker_accounts", [])
-        professional_partners_data = validated_data.pop("professional_partners", [])
         trade_references_data = validated_data.pop("trade_references", [])
        
         for field in ["address_registered", "address_operations"]:
@@ -228,6 +272,7 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
             for attr, value in validated_data.items():
                 setattr(instance, attr, value)
             instance.save()
+            content_type = ContentType.objects.get_for_model(instance)
 
             if overview_data:
                 overview_data.pop("id", None)
@@ -245,9 +290,9 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
                     company=instance, defaults=operations_data
                 )
 
-            self._update_generic_relations(instance, registration_accounts_data, RegistrationAccounts)
-            self._update_generic_relations(instance, banker_accounts_data, BankerAccounts)
-            self._update_generic_relations(instance, professional_partners_data, ProfessionalPartners)
-            self._update_generic_relations(instance, trade_references_data, TradeReferences)
+            self._update_oto_generic(instance, professional_partners_data, ProfessionalPartners, content_type)
+            self._update_oto_generic(instance, registration_accounts_data, RegistrationAccounts, content_type)
+            self._update_generic_relations(instance, banker_accounts_data, BankerAccounts, content_type)
+            self._update_generic_relations(instance, trade_references_data, TradeReferences,content_type)
         instance.refresh_from_db()
         return instance

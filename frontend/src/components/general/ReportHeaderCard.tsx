@@ -30,7 +30,7 @@ export default function ReportHeaderCard({
                         <p className="text-sm font-medium opacity-80">
                             Client Name
                         </p>
-                        <h2 className="mt-1 text-3xl font-extrabold tracking-tight uppercase">
+                        <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
                             {
                                 default_header?.client_default_search ?? 
                                 <LoadingIndicator variant="button"/> 
@@ -42,7 +42,7 @@ export default function ReportHeaderCard({
                         <p className="text-sm font-medium opacity-80">
                             Subject Name
                         </p>
-                        <h2 className="mt-1 text-3xl font-extrabold tracking-tight uppercase">
+                        <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
                             {
                                 default_header?.subject_default_search ??
                                 <LoadingIndicator variant="button"/> 

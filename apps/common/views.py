@@ -1,19 +1,17 @@
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status as STATUS
 from apps.utils.permissions import IsStaffUser
 from apps.utils.helpers import validate_serializer, get_content_type_id
-from .models import Financials
+from .models import Financials, TradeReferences
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
 
 class FinancialsViewSet(
     GenericViewSet,
-    RetrieveModelMixin,
     CreateModelMixin,
     UpdateModelMixin,
-    DestroyModelMixin,
 ):
     permission_classes = [IsStaffUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -85,3 +83,7 @@ class FinancialsViewSet(
             FinancialsSerializer(serializer.instance).data,
             status=STATUS.HTTP_200_OK
         )
+    
+class DeleteTradeReferenceViewSet(GenericViewSet, DestroyModelMixin):
+    queryset =  TradeReferences.objects.all()
+    permission_classes = [IsStaffUser]

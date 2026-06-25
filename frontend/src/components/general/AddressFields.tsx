@@ -57,6 +57,7 @@ function AddressFields({
                         control={control}
                         render={({field})=>(
                           <Select
+                            key = {field.value}
                             defaultValue= {field.value}
                             onValueChange={field.onChange}
                           >
