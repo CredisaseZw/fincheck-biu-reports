@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status as STATUS
 from apps.utils.permissions import IsStaffUser
 from apps.utils.helpers import validate_serializer, get_content_type_id
-from .models import Financials, TradeReferences
+from .models import Financials, TradeReferences, BankerAccounts
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
 
 class FinancialsViewSet(
@@ -86,4 +86,8 @@ class FinancialsViewSet(
     
 class DeleteTradeReferenceViewSet(GenericViewSet, DestroyModelMixin):
     queryset =  TradeReferences.objects.all()
+    permission_classes = [IsStaffUser]
+
+class DeleteBankerAccounts(GenericViewSet, DestroyModelMixin):
+    queryset = BankerAccounts.objects.all()
     permission_classes = [IsStaffUser]

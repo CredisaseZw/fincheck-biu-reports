@@ -296,11 +296,11 @@ class CompanyStructure(BaseModel):
         on_delete=models.CASCADE,
         related_name="structure"
     )
-    holding_company = models.TextField(blank=True, help_text=_("Holding company name"))
-    subsidiaries = models.TextField(blank=True, help_text=_("List of subsidiaries"))
-    associated_companies = models.TextField(blank=True, help_text=_("List of associated companies"))
-    divisions = models.TextField(blank=True, help_text=_("List of divisions"))
-    branches = models.TextField(blank=True, help_text=_("List of branches"))
+    holding_company = models.TextField(blank=True,null=True, help_text=_("Holding company name"))
+    subsidiaries = models.TextField(blank=True,null=True, help_text=_("List of subsidiaries"))
+    associated_companies = models.TextField(blank=True,null=True, help_text=_("List of associated companies"))
+    divisions = models.TextField(blank=True,null=True, help_text=_("List of divisions"))
+    branches = models.TextField(blank=True,null=True, help_text=_("List of branches"))
 
     class Meta:
         verbose_name = "Company Structure"
@@ -327,25 +327,3 @@ class CompanyOperations(BaseModel):
 
     def __str__(self):
         return f"Operations of {self.company}"
-
-
-class CompanyPrincipals(BaseModel):
-    company = models.ForeignKey(
-        Company,
-        on_delete=models.CASCADE,
-        related_name ="principals"
-    )
-    full_name = models.CharField(max_length=255)
-    national_id = models.CharField(
-        max_length = 200,
-        blank= True,
-        null = True
-    )
-    address = models.TextField()
-    
-    class Meta:
-        verbose_name = "company_principals"
-        verbose_name_plural = "Company Principals"
-
-    def __str__(self):
-        return f"{self.company.registered_name} | {self.full_name}"

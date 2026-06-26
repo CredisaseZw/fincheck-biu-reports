@@ -9,6 +9,9 @@ import type { ComponentType } from "react";
 import type { ProfessionalsFormData } from "@/hooks/useProfessionalPartners";
 import type { RegistrationAccountsFormData } from "@/hooks/useRegistrationAccounts";
 import type { TradeReferenceFormData } from "@/hooks/useTradeRefences";
+import type { BankerAccountFormData } from "@/hooks/useBankersDetails";
+import type { CompanyStructureFormData } from "@/hooks/useCompanyStructure";
+import type { CompanyOperationsFormData } from "@/hooks/useCompanyOperations";
 
 export interface RouteItem  {
     name: string;
@@ -170,8 +173,12 @@ export interface BankerAccount {
   bank: string;
   branch: string;
   account_name: string;
+  account_currency : Currencies
   account_type: "current" | "savings" | "loan" | "fixed_deposit";
   account_number: string;
+  date_of_acquirement : string,
+  bank_code : string
+  narration : "A" | "B" | "C" | "D" | "E"
 }
 
 export interface ProfessionalPartner {
@@ -367,10 +374,18 @@ export interface FinancialsProps extends ReportEntityProps{
 export interface ProfessionalsProps extends ReportEntityProps{
   professionals_data: ProfessionalsFormData | undefined
 }
-
 export interface RegistrationsAccountsProps extends ReportEntityProps{
   accounts_data : RegistrationAccountsFormData | undefined
 }
 export interface TradeReferencesProps extends ReportEntityProps{
   trade_references_data: TradeReferenceFormData[] 
+}
+export interface BankerDetailsProps extends ReportEntityProps{
+  banker_accounts : BankerAccountFormData[]
+}
+export interface CompanyStructureProps extends ReportEntityProps{
+  structure_data : CompanyStructureFormData | undefined
+}
+export interface CompanyOperationsProps extends ReportEntityProps{
+  operations_data : CompanyOperationsFormData | undefined
 }

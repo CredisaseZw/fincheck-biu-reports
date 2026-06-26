@@ -18,6 +18,9 @@ import type { FinancialEntryFormData } from "./useFinancialsDetails";
 import type { ProfessionalsFormData } from "./useProfessionalPartners";
 import type { RegistrationAccountsFormData } from "./useRegistrationAccounts";
 import type { TradeReferenceFormData } from "./useTradeRefences";
+import type { BankerAccountFormData } from "./useBankersDetails";
+import type { CompanyStructureFormData } from "./useCompanyStructure";
+import type { CompanyOperationsFormData } from "./useCompanyOperations";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -43,6 +46,9 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [professionals, setProfessionals] = useState<ProfessionalsFormData | undefined>(undefined)
   const [accounts, setAccounts] = useState<RegistrationAccountsFormData | undefined>(undefined)
   const [tradeReferences, setTradeReferences] = useState<TradeReferenceFormData[]>([])
+  const [bankerDetails, setBankerDetails] = useState<BankerAccountFormData[]>([])
+  const [companyStructure, setCompanyStructure] = useState<CompanyStructureFormData | undefined>(undefined);
+  const [companyOperations, setCompanyOperations] = useState<CompanyOperationsFormData | undefined>(undefined)
 
   const {data, isLoading, error } = useGetSingleReport({
     id : list_report?.id,
@@ -125,6 +131,21 @@ function useAddReportDialogue(list_report?: ListReport) {
             authorized_share_capital: company?.overview?.authorized_share_capital ?? undefined,
             issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
         }, 
+      })
+
+      setCompanyStructure({
+        holding_company : company.structure?.holding_company,
+        subsidiaries : company.structure?.subsidiaries,
+        associated_companies : company.structure?.associated_companies,
+        divisions : company.structure?.divisions,
+        branches : company.structure?.branches 
+      })
+      setCompanyOperations({
+        industry : company.operations?.industry,
+        target_markets :company.operations?.target_markets,
+        operational_areas : company.operations?.operational_areas,
+        operations_territories : company.operations?.operations_territories,
+        property_ownership :company.operations?.property_ownership
       })
     } else {
       const individual = report.subject as Individual
@@ -276,47 +297,75 @@ function useAddReportDialogue(list_report?: ListReport) {
       }
       : undefined
     )
-
+     
     setProfessionals(
       report.subject.professional_partners ?
       { 
         id: report.subject.professional_partners.id,
         lawyers : report.subject.professional_partners.lawyers,
         auditors : report.subject.professional_partners.auditors
-      }: undefined)
-    
-      setAccounts(
-        report.subject.registration_accounts ?
-        {
-          is_nssa_verified :report.subject.registration_accounts.is_nssa_verified,
-          is_praz_verified : report.subject.registration_accounts.is_praz_verified,
-          is_tin_verified : report.subject.registration_accounts.is_tin_verified,
-          is_vat_verified : report.subject.registration_accounts.is_vat_verified,
-          nssa_number : report.subject.registration_accounts.nssa_number ?? undefined,
-          praz_number : report.subject.registration_accounts.praz_number ?? undefined,
-          tin_number :report.subject.registration_accounts.tin_number ?? undefined,
-          vat_number : report.subject.registration_accounts.vat_number?? undefined
-        } : undefined
-      )
+      }: undefined
+    )
 
-      setTradeReferences(
-        report.subject.trade_references.length > 0
-        ? report.subject.trade_references.map(item => ({
-          id : item.id ?? undefined,
-          referenced_date : item.referenced_date,
-          name : item.name ?? "",
-          contact_info :item.contact_info ?? undefined,
-          reference_source : item.reference_source ?? undefined,
-          position : item.position ?? undefined,
-          credit_limit : item.credit_limit ?? undefined,
-          credit_terms : item.credit_terms ?? undefined,
-          payment_trend : item.payment_trend ?? undefined
-        }))
-        : [{
-          referenced_date : "",
-          name : "",
+    setAccounts(
+      report.subject.registration_accounts ?
+      {
+        is_nssa_verified :report.subject.registration_accounts.is_nssa_verified,
+        is_praz_verified : report.subject.registration_accounts.is_praz_verified,
+        is_tin_verified : report.subject.registration_accounts.is_tin_verified,
+        is_vat_verified : report.subject.registration_accounts.is_vat_verified,
+        nssa_number : report.subject.registration_accounts.nssa_number ?? undefined,
+        praz_number : report.subject.registration_accounts.praz_number ?? undefined,
+        tin_number :report.subject.registration_accounts.tin_number ?? undefined,
+        vat_number : report.subject.registration_accounts.vat_number?? undefined
+      } : undefined
+    )
+
+    setTradeReferences(
+      report.subject.trade_references.length > 0
+      ? report.subject.trade_references.map(item => ({
+        id : item.id ?? undefined,
+        referenced_date : item.referenced_date,
+        name : item.name ?? "",
+        contact_info :item.contact_info ?? undefined,
+        reference_source : item.reference_source ?? undefined,
+        position : item.position ?? undefined,
+        credit_limit : item.credit_limit ?? undefined,
+        credit_terms : item.credit_terms ?? undefined,
+        payment_trend : item.payment_trend ?? undefined
+      }))
+      : [{
+        referenced_date : "",
+        name : "",
+      }]
+    )
+
+    setBankerDetails(
+      report.subject.banker_accounts.length > 0
+      ? report.subject.banker_accounts.map(item => ({
+          id : item.id,
+          bank: item.bank,
+          branch: item.branch,
+          account_name: item.account_name,
+          account_type: item.account_type,
+          account_currency: item.account_currency,  
+          account_number: item.account_number,
+          date_of_acquirement: item.date_of_acquirement,  
+          bank_code: item.bank_code,            
+          narration: item.narration,
+      }))
+      : [{
+            bank: "",
+            account_name: "",
+            account_type: "current",
+            account_currency: "ZiG",  
+            account_number: "",
+            date_of_acquirement: "",  
+            bank_code: "",            
+            narration: "C",
         }]
-      )
+    )
+
   }, [report])
 
   useEffect(()=>{
@@ -367,6 +416,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     companyOverview,
     tradeReferences,
     individualDetails,
+    companyStructure,
     employmentInformation,
     courtJudgements,
     defaultHeader,
@@ -378,8 +428,10 @@ function useAddReportDialogue(list_report?: ListReport) {
     absconders,
     insolvencyRecords,
     publicInformation,
+    bankerDetails,
     financials,
     accounts,
+    companyOperations,
     onClear,
     onEdit,
     setOpen,

@@ -6,10 +6,11 @@ from apps.utils.helpers import _content_ob_serializer
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
 from .models import Report
+from .filters import ReportSearchFilter
 from rest_framework.decorators import action
 from django.utils import timezone
 class ReportViewSet(BaseJSONViewSet):
-    search_fields = ["enquiry_reference"]
+    filter_backends = [ReportSearchFilter]
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
 

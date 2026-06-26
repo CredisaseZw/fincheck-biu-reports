@@ -1,15 +1,24 @@
-import useCompanyOperations, { type CompanyOperationsFormData } from "@/hooks/useCompanyOperations"
+import useCompanyOperations from "@/hooks/useCompanyOperations"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import { Button } from "../ui/button";
+import type { CompanyOperationsProps } from "@/types/core";
 
-function CompanyOperations() {
-    const { register, handleSubmit } = useCompanyOperations()
-
-    const onSubmit = (data: CompanyOperationsFormData) => console.log(data)
+function CompanyOperations({
+    report_id,
+    subject_object_id,
+    operations_data,
+    subject_type
+}:CompanyOperationsProps) {
+    const { register, handleSubmit, onSubmit } = useCompanyOperations({
+        report_id,
+        subject_object_id,
+        operations_data,
+        subject_type
+    })
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>

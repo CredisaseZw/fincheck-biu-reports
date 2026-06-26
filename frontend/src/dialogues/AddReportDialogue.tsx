@@ -46,15 +46,18 @@ function AddReportDialogue({ report_item }: props) {
         companyOverview,
         employmentInformation,
         courtJudgements,
+        companyStructure,
         tradeReferences,
         defaultHeader,
         isLoading, 
+        companyOperations,
         professionals,
         nextOfKin,
         absconders,
         insolvencyRecords,
         publicInformation,
         report,
+        bankerDetails,
         claims,
         open, 
         clientType,
@@ -117,8 +120,18 @@ function AddReportDialogue({ report_item }: props) {
                                     company_overview = {companyOverview}
                                     report_id={report.id}
                                 />
-                                <CompanyStructure />
-                                <CompanyOperations />
+                                <CompanyStructure 
+                                    structure_data = {companyStructure}
+                                    report_id={report.id}
+                                    subject_object_id = {subject_object_id}
+                                    subject_type = {subject_type}
+                                />
+                                <CompanyOperations 
+                                    operations_data = {companyOperations}
+                                    report_id={report.id}
+                                    subject_object_id = {subject_object_id}
+                                    subject_type = {subject_type}
+                                />
                             </>
                             : subjectType === "individual"
                                 ? <>
@@ -153,7 +166,12 @@ function AddReportDialogue({ report_item }: props) {
                                     <ShareholdingDetails />
                                 </>
                             }
-                            <BankerDetails />
+                            <BankerDetails 
+                                banker_accounts={bankerDetails}
+                                report_id={report.id}
+                                subject_object_id = {subject_object_id}
+                                subject_type = {subject_type}
+                            />
                             <Fieldset legendTitle="Credit Records">
                                 <ClaimsDetails
                                     claims_data = {claims}

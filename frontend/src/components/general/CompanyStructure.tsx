@@ -3,16 +3,27 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
 import ColumnsContainer from "./ColumnsContainer";
 import Fieldset from "./FieldSet";
-import {type CompanyStructureFormData} from "@/hooks/useCompanyStructure"
-import { Button } from "../ui/button";
+import type { CompanyStructureProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function CompanyStructure() {
+function CompanyStructure({
+    report_id,
+    subject_object_id,
+    structure_data,
+    subject_type
+}:CompanyStructureProps) {
     const { 
+        onSubmit,
         handleSubmit,
         register,
-    } = useCompanyStructure()
+        isPending
+    } = useCompanyStructure({
+        report_id,
+        subject_object_id,
+        structure_data,
+        subject_type
+    })
 
-    const onSubmit = (data: CompanyStructureFormData) =>{console.log(data)}
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -65,9 +76,7 @@ function CompanyStructure() {
                     </div>
 
                 </ColumnsContainer>
-                <div className="flex justify-end">
-                    <Button type="submit">Submit</Button>
-                </div>
+                <CustomSubmitButton isPending = {isPending}/>
             </Fieldset>
         </form>
     )
