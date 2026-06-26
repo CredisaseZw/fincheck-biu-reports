@@ -134,9 +134,9 @@ export const ACCOUNT_TYPES = [
 ]
 
 export const NARRATIONS = [
-    { value: "A", label: "A - Very Good Credit Worthiness (Lowest Risk)" },
-    { value: "B", label: "B - Good Credit Worthiness (Low Risk)" },
-    { value: "C", label: "C - Satisfactory Credit Worthiness (Moderate Risk)" },
-    { value: "D", label: "D - No Credit Worthy" },
-    { value: "E", label: "E - Rating Suspended" },
+    { value: "A", label: "Very Good Credit Worthiness (Lowest Risk)" },
+    { value: "B", label: "Good Credit Worthiness (Low Risk)" },
+    { value: "C", label: "Satisfactory Credit Worthiness (Moderate Risk)" },
+    { value: "D", label: "No Credit Worthy" },
+    { value: "E", label: "Rating Suspended" },
 ]

@@ -320,7 +320,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   }, [report])
 
   useEffect(()=>{
-    if(list_report) return;
+    if(list_report && report) return;
     if(clientObjectId && subjectObjectId){
         setReportLoading(true);
         mutate({
@@ -339,6 +339,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         })
     }
     }, [
+      report,
       list_report,
       clientObjectId, 
       clientType, 

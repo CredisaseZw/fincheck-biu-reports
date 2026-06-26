@@ -52,10 +52,11 @@ class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):
 
 class BankerAccountsWriteSerializer(serializers.ModelSerializer):
     account_type = serializers.ChoiceField(choices=BankerAccounts.AccountType.choices)
-
+    id = serializers.IntegerField(required=False)
     class Meta:
         model = BankerAccounts
         fields = [
+            "id",
             "bank",
             "branch",
             "account_name",
@@ -100,9 +101,12 @@ class TradeReferencesWriteSerializer(serializers.ModelSerializer):
         choices=TradeReferences.PaymentTrend.choices,
         required=False
     )
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = TradeReferences
         fields = [
+            "id",
             "subject_content_type",
             "subject_object_id",
             "name",

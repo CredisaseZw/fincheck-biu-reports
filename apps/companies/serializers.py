@@ -194,7 +194,6 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
             self._create_generic_relations(company, trade_references_data, TradeReferences,content_type)
         return company
 
-
 class CompanyUpdateSerializer(serializers.ModelSerializer):
     claims = ClaimsSerializer(read_only=True, many=True, required=False)
     absconders = AbscondersSerializer(read_only=True, many=True, required=False)

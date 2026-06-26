@@ -1,5 +1,3 @@
-import { Pencil } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { DefaultHeaderProps } from "@/types/core";
 import LoadingIndicator from "./LoadingIndicator";
 import { getCurrentDateFormatted, getFormattedDate } from "@/lib/utils";
@@ -11,18 +9,10 @@ interface ReportHeaderCardProps {
 
 export default function ReportHeaderCard({
     default_header,
-    onEdit,
 }: ReportHeaderCardProps) {
     return (
         <div className="relative w-full rounded-xl border border-border bg-primary text-primary-foreground shadow-sm overflow-hidden dark:bg-gray-900 dark:text-gray-200">
-            <Button
-                className="rounded cursor-pointer z-40 absolute top-4 right-4 gap-2"
-                onClick={onEdit}
-            >
-                <Pencil className="h-4 w-4" />
-                Edit
-            </Button>
-        
+           
 
             <div className="p-6 md:p-7">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

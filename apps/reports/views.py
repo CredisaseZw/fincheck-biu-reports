@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from django.utils import timezone
 class ReportViewSet(BaseJSONViewSet):
     search_fields = ["enquiry_reference"]
-    queryset = Report.objects.filter(is_deleted=False)
+    queryset = Report.objects.all()
     serializer_class = ReportSerializer
 
     def get_serializer_class(self):
@@ -62,20 +62,11 @@ class ReportViewSet(BaseJSONViewSet):
         report = self.get_object()
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
-
-        if report.is_deleted:
-            return Response(
-                {"error": "Report is already deleted"},
-                status=STATUS.HTTP_400_BAD_REQUEST
-            )
-
-        report.is_deleted = True
-        report.save()
-        return Response( status=STATUS.HTTP_204_NO_CONTENT )
+        return super().destroy(request, *args, **kwargs) 
 
     def partial_update(self, request, *args, **kwargs):
         report = self.get_object()
-        if report.status == report.StatusChoices.FINALIZED:
+        if report.status == report.StatusChoicAdes.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
 
         return super().partial_update(request, *args, **kwargs)
@@ -104,7 +95,7 @@ class ReportViewSet(BaseJSONViewSet):
         report.save()
 
         return Response({
-            #just return the pdf url alone,
+            #return the pdf url alone,
             "url": "....."
         }, status=STATUS.HTTP_200_OK)
     
