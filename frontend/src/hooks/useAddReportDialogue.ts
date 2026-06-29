@@ -21,6 +21,8 @@ import type { TradeReferenceFormData } from "./useTradeRefences";
 import type { BankerAccountFormData } from "./useBankersDetails";
 import type { CompanyStructureFormData } from "./useCompanyStructure";
 import type { CompanyOperationsFormData } from "./useCompanyOperations";
+import type { ShareholdingsFormData } from "./useShareholdingDetails";
+import type { DirectorFormData } from "./useDirectors";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -49,7 +51,8 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [bankerDetails, setBankerDetails] = useState<BankerAccountFormData[]>([])
   const [companyStructure, setCompanyStructure] = useState<CompanyStructureFormData | undefined>(undefined);
   const [companyOperations, setCompanyOperations] = useState<CompanyOperationsFormData | undefined>(undefined)
-
+  const [shareholding, setShareholding] = useState<ShareholdingsFormData | undefined>();
+  const [directors, setDirectors] = useState<DirectorFormData[]>([])
   const {data, isLoading, error } = useGetSingleReport({
     id : list_report?.id,
     subject_type :list_report?.subject_type,
@@ -97,11 +100,6 @@ function useAddReportDialogue(list_report?: ListReport) {
       created_at : report.created_at
     })
 
-    setClientType(report.client_type);
-    setSubjectType(report.subject_type);
-    setClientObjectId(report.client.id); // in case of these are edited
-    setSubjectObjectId(report.subject.id);
-
     if(report.subject_type === "company"){
       const company = report.subject as Company
       setCompanyOverview({
@@ -147,7 +145,55 @@ function useAddReportDialogue(list_report?: ListReport) {
         operations_territories : company.operations?.operations_territories,
         property_ownership :company.operations?.property_ownership
       })
+      setShareholding({
+        id :  company.shareholdings?.id,
+        numbers_of_shareholders : company.shareholdings?.numbers_of_shareholders ?? 0,
+        numbers_of_shares : company.shareholdings?.numbers_of_shares ?? 0,
+        shareholders: 
+        company.shareholdings &&
+        company.shareholdings.shareholders.length > 0 
+        ? company.shareholdings?.shareholders.map(item => ({
+          id : item.id,
+          full_name :item.full_name,
+          address  :item.address,
+          number_of_shares :item.number_of_shares,
+          percentage_ownership :Number(item.percentage_ownership)
+        }))
+        : [{
+            full_name : "",
+            address : "",
+            number_of_shares: 0,   
+          percentage_ownership: 0,    
+        }]
+      })
+      setDirectors(
+        company.directors&&
+        company.directors.length > 0
+        ? company.directors.map(item=>({
+          id : item.id,
+          full_name : item.full_name,
+          gender : item.gender ?? "",
+          dob : item.dob ?? "",
+          position : item.position,
+          address_latest :  item.address_latest ?? "",
+          address_prev : item.address_prev ?? "",
+          national_id : item.national_id ?? "",
+          email : item.national_id ?? "",
+          mobile_phone_number : item.mobile_phone_number ?? "",
+          insolvencies_judgements : item.insolvencies_judgements ?? ""
+        }))
+        : [{
+            full_name :"",
+            gender: "male",
+            position : "director",
+            national_id : "",
+            address_latest : "",
+            email :"",
+        }]
+      )
+
     } else {
+      
       const individual = report.subject as Individual
       setIndividualDetails({
         id: individual.id,
@@ -365,6 +411,12 @@ function useAddReportDialogue(list_report?: ListReport) {
             narration: "C",
         }]
     )
+    
+    setClientType(report.client_type);
+    setSubjectType(report.subject_type);
+    setClientObjectId(report.client.id); // in case of these are edited
+    setSubjectObjectId(report.subject.id);
+
 
   }, [report])
 
@@ -414,6 +466,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     report,
     nextOfKin,
     companyOverview,
+    directors,
     tradeReferences,
     individualDetails,
     companyStructure,
@@ -425,6 +478,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     clientType,
     subjectType,
     headerEditMode,
+    shareholding,
     absconders,
     insolvencyRecords,
     publicInformation,

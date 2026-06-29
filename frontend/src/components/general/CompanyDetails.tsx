@@ -15,6 +15,7 @@ import AddressFieldset from "./AddressFields";
 import { numericField } from "@/constants";
 import CustomSubmitButton from "./CustomSubmitButton";
 import type { EntityValue } from "@/types/core";
+import { Switch } from "../ui/switch";
 
 interface props {
     subject_type : EntityValue | null
@@ -213,6 +214,26 @@ function CompanyDetails({
                         secondaryPrefix="address_operations"
                         secondaryLabel="Add Operations Address"
                         initialOpen={false}
+                    />
+                    <Controller
+                        control={control}
+                        name={"is_address_registered_verified"}
+                        render={({field})=>(
+                            <div className="p-5 rounded border bg-card">
+                                <div className="flex flex-row justify-between cursor-pointer">
+                                    <label className="flex flex-col gap-1" htmlFor="is_verified">
+                                        <span className="font-semibold text-[1rem]">Address Verification</span>
+                                        <span className="text-muted-foreground">Was the registered address visited</span>
+                                    </label>
+                                    <Switch
+                                        className="self-center"
+                                        id="is_verified"
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                </div>          
+                            </div>
+                        )}
                     />
                     <CustomSubmitButton 
                         isPending = {isPending}

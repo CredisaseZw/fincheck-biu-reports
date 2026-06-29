@@ -3,7 +3,7 @@ from rest_framework.routers import SimpleRouter
 from .views import CompanyShareHoldersViewSet
 
 router = SimpleRouter()
-router.register(r"shareholdings", CompanyShareHoldersViewSet, basename="shareholdings")
+router.register(r"shareholders", CompanyShareHoldersViewSet, basename="shareholders")
 
 urlpatterns = [
     path("", include(router.urls)),

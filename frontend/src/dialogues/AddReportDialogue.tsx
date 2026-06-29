@@ -50,6 +50,7 @@ function AddReportDialogue({ report_item }: props) {
         tradeReferences,
         defaultHeader,
         isLoading, 
+        directors,
         companyOperations,
         professionals,
         nextOfKin,
@@ -65,6 +66,7 @@ function AddReportDialogue({ report_item }: props) {
         subjectType,
         financials,
         headerEditMode,
+        shareholding,
         onClear,
         onEdit,
         setOpen,
@@ -162,8 +164,18 @@ function AddReportDialogue({ report_item }: props) {
                             {
                                 subjectType === "company" &&
                                 <>
-                                    <DirectorDetails />             
-                                    <ShareholdingDetails />
+                                    <DirectorDetails 
+                                        directors_data={directors}
+                                        report_id={report.id}
+                                        subject_object_id = {subject_object_id}
+                                        subject_type = {subject_type}
+                                    />             
+                                    <ShareholdingDetails
+                                        shareholdings_data = {shareholding}
+                                        report_id={report.id}
+                                        subject_object_id = {subject_object_id}
+                                        subject_type = {subject_type}
+                                    />
                                 </>
                             }
                             <BankerDetails 
@@ -229,6 +241,8 @@ function AddReportDialogue({ report_item }: props) {
                                 subject_object_id={subject_object_id}
                                 subject_type={subject_type}
                             />
+                            
+                            {/* RATINGS HERE */}
                         </>    
                     }
 

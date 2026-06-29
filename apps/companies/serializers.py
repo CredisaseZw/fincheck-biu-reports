@@ -39,7 +39,7 @@ from apps.credit_records.serializers import (
 )
 
 from django.contrib.contenttypes.models import ContentType
-from apps.directors.serializers import CompanyDirectorSerializer
+from apps.directors.serializers import DirectorSerializer
 from apps.shareholding.serializers import ShareholdingsSerializers
 # GET OPERATIONS
 class CompanyOverviewSerializer(serializers.ModelSerializer):
@@ -74,7 +74,7 @@ class CompanySerializer(serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)
     structure = CompanyStructureSerializer(read_only=True)
     operations = CompanyOperationsSerializer(read_only=True)
-    directors = CompanyDirectorSerializer(many=True, read_only = True)
+    directors = DirectorSerializer(many=True, read_only = True)
     shareholdings = ShareholdingsSerializers(read_only = True)
     claims = ClaimsSerializer(read_only= True, many = True)
     absconders = AbscondersSerializer(read_only= True, many = True)

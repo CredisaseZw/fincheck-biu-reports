@@ -6,9 +6,32 @@ import { Trash2, Plus } from "lucide-react"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import { numericField } from "@/constants";
+import type { CompanyShareholdingProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function ShareholdingDetails() {
-    const { register, handleSubmit, onSubmit, errors, fields, append, remove } = useShareholdingDetails()
+function ShareholdingDetails({
+    subject_object_id,
+    subject_type,
+    report_id,
+    shareholdings_data
+}:CompanyShareholdingProps) {
+    const { 
+        isPending,
+        errors,
+        fields, 
+        register, 
+        handleSubmit, 
+        onSubmit,
+        append, 
+        remove, 
+        onDelete,
+        getValues,
+        } = useShareholdingDetails({
+            subject_object_id,
+            subject_type,
+            report_id,
+            shareholdings_data
+        })
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -39,16 +62,21 @@ function ShareholdingDetails() {
                             <p className="text-sm font-semibold text-muted-foreground">
                                 Shareholder {index + 1}
                             </p>
-                            {fields.length > 1 && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => remove(index)}
-                                >
-                                    <Trash2 size={16} className="text-destructive" />
-                                </Button>
-                            )}
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                    const id = getValues(`shareholders.${index}.id`)
+                                    remove(index)
+                                    if(id){
+                                        onDelete(id)
+                                    }
+                                }}
+                            >
+                                <Trash2 size={16} className="text-destructive" />
+                            </Button>
+                        
                         </div>
 
                         <ColumnsContainer numberOfCols={2} gapClass="gap-4">
@@ -108,7 +136,7 @@ function ShareholdingDetails() {
                     >
                         <Plus size={16} className="mr-2" /> Add Shareholder
                     </Button>
-                    <Button type="submit">Submit</Button>
+                    <CustomSubmitButton isPending ={isPending}/>
                 </div>
 
             </Fieldset>

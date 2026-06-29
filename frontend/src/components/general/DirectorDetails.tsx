@@ -11,9 +11,33 @@ import { Trash2, Plus } from "lucide-react"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import { Textarea } from "../ui/textarea";
+import type { CompanyDirectorsProps } from "@/types/core";
+import CustomSubmitButton from "./CustomSubmitButton";
 
-function DirectorDetails() {
-    const { register, control, handleSubmit, onSubmit, errors, fields, append, remove } = useDirectors()
+function DirectorDetails({
+    directors_data,
+    subject_object_id,
+    subject_type,
+    report_id
+}: CompanyDirectorsProps) {
+    const { 
+        errors,
+        fields,
+        control,
+        isPending, 
+        onDelete,    
+        getValues,
+        register, 
+        handleSubmit,
+        onSubmit,
+        append,
+        remove 
+    } = useDirectors({
+        directors_data,
+        subject_object_id,
+        subject_type,
+        report_id
+    })
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -26,16 +50,20 @@ function DirectorDetails() {
                             <p className="text-sm font-semibold text-muted-foreground">
                                 Director {index + 1}
                             </p>
-                            {fields.length > 1 && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => remove(index)}
-                                >
-                                    <Trash2 size={16} className="text-destructive" />
-                                </Button>
-                            )}
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                    const id = getValues(`directors.${index}.id`)
+                                    remove(index)
+                                    if(id){
+                                        onDelete(id)
+                                    }
+                                }}
+                            >
+                                <Trash2 size={16} className="text-destructive" />
+                            </Button>
                         </div>
 
                         <ColumnsContainer numberOfCols={3} gapClass="gap-4">
@@ -105,15 +133,21 @@ function DirectorDetails() {
                                 <Input type="date" {...register(`directors.${index}.dob`)} />
                             </div>
                             <div className="form-group">
-                                <Label>National ID / Passport ID</Label>
-                                <Input type="date" {...register(`directors.${index}.national_id`)} placeholder="69235489C67 or ZN1234567" />
+                                <Label className="required">National ID / Passport ID</Label>
+                                <Input {...register(`directors.${index}.national_id`)} placeholder="69235489C67 or ZN1234567" />
+                                {errors.directors?.[index]?.national_id && (
+                                    <p className="text-destructive text-sm">{errors.directors[index].national_id.message}</p>
+                                )}
                             </div>
                         </ColumnsContainer>
                     
                         <ColumnsContainer>
                             <div className="form-group">
-                                <Label>Latest Address</Label>
+                                <Label className="required">Latest Address</Label>
                                 <Textarea {...register(`directors.${index}.address_latest`)} />
+                                {errors.directors?.[index]?.address_latest && (
+                                    <p className="text-destructive text-sm">{errors.directors[index].address_latest.message}</p>
+                                )}
                             </div>
 
                             <div className="form-group">
@@ -127,7 +161,10 @@ function DirectorDetails() {
                         </div>
                     </div>
                 ))}
-
+                {
+                    fields.length === 0 &&
+                    <span className="text-muted-foreground text-center">No directors added.</span>
+                }
                 <div className="flex justify-between">
                     <Button
                         type="button"
@@ -138,6 +175,7 @@ function DirectorDetails() {
                             position: "director",
                             gender: "male",
                             dob: "",
+                            national_id : "",
                             address_latest: "",
                             address_prev: "",
                             email: "",
@@ -146,7 +184,8 @@ function DirectorDetails() {
                     >
                         <Plus size={16} className="mr-2" /> Add Director
                     </Button>
-                    <Button type="submit">Submit</Button>
+                    <CustomSubmitButton 
+                        isPending = {isPending}/>
                 </div>
 
             </Fieldset>

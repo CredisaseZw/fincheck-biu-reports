@@ -12,7 +12,8 @@ import type { TradeReferenceFormData } from "@/hooks/useTradeRefences";
 import type { BankerAccountFormData } from "@/hooks/useBankersDetails";
 import type { CompanyStructureFormData } from "@/hooks/useCompanyStructure";
 import type { CompanyOperationsFormData } from "@/hooks/useCompanyOperations";
-
+import type { ShareholdingsFormData } from "@/hooks/useShareholdingDetails";
+import type { DirectorFormData } from "@/hooks/useDirectors"
 export interface RouteItem  {
     name: string;
     link: string;
@@ -127,19 +128,22 @@ export interface CompanyOperations {
   operational_areas: string;
 }
 
-export interface Director {
+export interface  CompanyDirector {
   id: number;
-  first_name: string;
-  last_name: string;
-  gender: "male" | "female";
+  full_name: string;
   position: "director" | "secretary" | "other";
-  date_of_birth: string;
+  gender: "male" | "female";
   national_id: string;
+  insolvencies_judgements: string | null;
+  dob: string;
+  address_latest: string;
+  address_prev: string | null;
   email: string | null;
-  mobile_number: string | null;
-  address_latest: string | null;
-  address_previous: string | null;
+  mobile_phone_number: string | null;
+  created_at: string;
+  updated_at: string;
 }
+
 
 export interface Shareholding {
   id: number;
@@ -150,10 +154,10 @@ export interface Shareholding {
 
 export interface Shareholder {
   id: number;
-  name: string;
+  full_name: string;
   address: string;
   number_of_shares: number;
-  percentage: string;
+  percentage_ownership: string;
 }
 
 export interface RegistrationAccount {
@@ -304,7 +308,7 @@ export interface Company extends CommonFields{
   overview: CompanyOverview | null;
   structure: CompanyStructure | null;
   operations: CompanyOperations | null;
-  directors: Director[];
+  directors: CompanyDirector[];
   shareholdings: Shareholding | null;
 }
 
@@ -388,4 +392,10 @@ export interface CompanyStructureProps extends ReportEntityProps{
 }
 export interface CompanyOperationsProps extends ReportEntityProps{
   operations_data : CompanyOperationsFormData | undefined
+}
+export interface CompanyShareholdingProps extends ReportEntityProps{
+  shareholdings_data : ShareholdingsFormData | undefined
+}
+export interface CompanyDirectorsProps extends ReportEntityProps{
+  directors_data : DirectorFormData[]  
 }
