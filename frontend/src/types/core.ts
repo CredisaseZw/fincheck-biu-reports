@@ -14,6 +14,7 @@ import type { CompanyStructureFormData } from "@/hooks/useCompanyStructure";
 import type { CompanyOperationsFormData } from "@/hooks/useCompanyOperations";
 import type { ShareholdingsFormData } from "@/hooks/useShareholdingDetails";
 import type { DirectorFormData } from "@/hooks/useDirectors"
+import type { ReportDetailsFormData } from "@/hooks/useReportDetails";
 export interface RouteItem  {
     name: string;
     link: string;
@@ -334,6 +335,9 @@ export interface Report extends Timestamps {
   subject: Individual | Company;
   client_type : EntityValue;
   subject_type: EntityValue
+  overall_risk_rating : number | null,
+  summary : string | null
+  status : "draft" | "finalized"
   references: TradeReference[];
 }
 export interface Address {
@@ -398,4 +402,7 @@ export interface CompanyShareholdingProps extends ReportEntityProps{
 }
 export interface CompanyDirectorsProps extends ReportEntityProps{
   directors_data : DirectorFormData[]  
+}
+export interface ReportDetailsProps extends ReportEntityProps{
+  report_data : ReportDetailsFormData | undefined
 }

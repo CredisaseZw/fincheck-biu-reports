@@ -23,6 +23,8 @@ import type { CompanyStructureFormData } from "./useCompanyStructure";
 import type { CompanyOperationsFormData } from "./useCompanyOperations";
 import type { ShareholdingsFormData } from "./useShareholdingDetails";
 import type { DirectorFormData } from "./useDirectors";
+import { useQueryClient } from "@tanstack/react-query";
+import type { ReportDetailsFormData } from "./useReportDetails";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const [open, setOpen] = useState(false);  
@@ -53,6 +55,8 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [companyOperations, setCompanyOperations] = useState<CompanyOperationsFormData | undefined>(undefined)
   const [shareholding, setShareholding] = useState<ShareholdingsFormData | undefined>();
   const [directors, setDirectors] = useState<DirectorFormData[]>([])
+  const [reportDetails, setReportDetails] = useState<ReportDetailsFormData | undefined>(undefined);
+
   const {data, isLoading, error } = useGetSingleReport({
     id : list_report?.id,
     subject_type :list_report?.subject_type,
@@ -60,6 +64,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   });
 
   const onEdit = () => setHeaderEditMode(true)
+  const queryClient =  useQueryClient()
 
   const onUpdateEntityTypes = ( entity :EntityMode, value: EntityValue)=>{
     if (entity === "client") {
@@ -130,7 +135,6 @@ function useAddReportDialogue(list_report?: ListReport) {
             issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
         }, 
       })
-
       setCompanyStructure({
         holding_company : company.structure?.holding_company,
         subsidiaries : company.structure?.subsidiaries,
@@ -191,7 +195,7 @@ function useAddReportDialogue(list_report?: ListReport) {
             email :"",
         }]
       )
-
+      
     } else {
       
       const individual = report.subject as Individual
@@ -411,44 +415,42 @@ function useAddReportDialogue(list_report?: ListReport) {
             narration: "C",
         }]
     )
-    
+
+    setReportDetails({
+      overall_risk_rating : Number(report.overall_risk_rating),
+      summary  :report.summary ?? ""
+    })
+  
     setClientType(report.client_type);
     setSubjectType(report.subject_type);
-    setClientObjectId(report.client.id); // in case of these are edited
+    setClientObjectId(report.client.id);
     setSubjectObjectId(report.subject.id);
 
 
   }, [report])
 
-  useEffect(()=>{
-    if(list_report && report) return;
-    if(clientObjectId && subjectObjectId){
-        setReportLoading(true);
-        mutate({
-            client_object_id : clientObjectId,
-            client_type :  clientType,
-            subject_object_id : subjectObjectId,
-            subject_type : subjectType
-        }, {
-            onSuccess : (data: Report) => {
-              setReport(data)   
-              setHeaderEditMode(false)
-            },
-            onError : (error) => handleAxiosError(error),
-            onSettled :()=> setReportLoading(false)
+  const generateReport = ()=>{
+    if(list_report) return
+    if(!clientObjectId || !subjectObjectId) return;
+    setReportLoading(true);
+    mutate({
+        client_object_id : clientObjectId,
+        client_type :  clientType,
+        subject_object_id : subjectObjectId,
+        subject_type : subjectType
+    }, {
+        onSuccess : (data: Report) => {
+          setReport(data)   
+          setHeaderEditMode(false)
+          queryClient.invalidateQueries({
+            queryKey : ["reports"]
+          })
+        },
+        onError : (error) => handleAxiosError(error),
+        onSettled :()=> setReportLoading(false)
 
-        })
-    }
-    }, [
-      report,
-      list_report,
-      clientObjectId, 
-      clientType, 
-      subjectObjectId,
-      subjectType,
-      mutate, 
-      setReportLoading
-  ])
+    })
+  }
 
   const onClear = () => {
     setReport(undefined);
@@ -476,6 +478,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     isLoading, 
     open, 
     clientType,
+    reportDetails,
     subjectType,
     headerEditMode,
     shareholding,
@@ -491,7 +494,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     setOpen,
     onSetEntityId,
     onUpdateEntityTypes,
-  
+    generateReport
   };
 }
 

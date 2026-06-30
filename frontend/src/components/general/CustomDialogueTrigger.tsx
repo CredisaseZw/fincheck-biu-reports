@@ -18,6 +18,8 @@ function CustomDialogueTrigger({Icon, label, mode}: props) {
                 {label}
             </Button>
             : <OptionButton
+                fullWidth
+                variant={"ghost"}
                 Icon={Edit}
                 label= {"Edit Report"}
             />

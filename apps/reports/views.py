@@ -67,7 +67,7 @@ class ReportViewSet(BaseJSONViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         report = self.get_object()
-        if report.status == report.StatusChoicAdes.FINALIZED:
+        if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
 
         return super().partial_update(request, *args, **kwargs)

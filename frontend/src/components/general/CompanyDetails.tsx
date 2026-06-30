@@ -219,10 +219,10 @@ function CompanyDetails({
                         control={control}
                         name={"is_address_registered_verified"}
                         render={({field})=>(
-                            <div className="p-5 rounded border bg-card">
+                            <div className="p-5 dark:bg-[#1A2330]/10 bg-gray-50 rounded border">
                                 <div className="flex flex-row justify-between cursor-pointer">
                                     <label className="flex flex-col gap-1" htmlFor="is_verified">
-                                        <span className="font-semibold text-[1rem]">Address Verification</span>
+                                        <span className="font-semibold text-[1rem] text-gray-800 dark:text-gray-200">Address Verification</span>
                                         <span className="text-muted-foreground">Was the registered address visited</span>
                                     </label>
                                     <Switch

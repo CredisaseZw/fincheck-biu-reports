@@ -14,7 +14,7 @@ import {
     DialogContent,
     DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Printer } from "lucide-react";
+import { Plus } from "lucide-react";
 import BankerDetails from "@/components/general/BankersDetails";
 import ProfessionalPartnersDetails from "@/components/general/ProfessionalPartnersDetails";
 import RegistrationAccountsDetails from "@/components/general/RegistrationAccountsDetails";
@@ -33,6 +33,8 @@ import { useReport } from "@/contexts/ReportMutationContext";
 import { FormSkeleton } from "@/components/general/Skeletons";
 import Fieldset from "@/components/general/FieldSet";
 import ReportHeaderCard from "@/components/general/ReportHeaderCard";
+import LoadingIndicator from "@/components/general/LoadingIndicator";
+import ReportDetails from "@/components/general/ReportDetails";
 
 interface props {
     report_item?: ListReport
@@ -42,6 +44,7 @@ function AddReportDialogue({ report_item }: props) {
     const { 
         subject_object_id,
         subject_type,
+        reportDetails,
         individualDetails,
         companyOverview,
         employmentInformation,
@@ -69,6 +72,7 @@ function AddReportDialogue({ report_item }: props) {
         shareholding,
         onClear,
         onEdit,
+        generateReport,
         setOpen,
         onSetEntityId,
         onUpdateEntityTypes,
@@ -120,17 +124,17 @@ function AddReportDialogue({ report_item }: props) {
                                 <CompanyDetails
                                     subject_type= {subject_type}
                                     company_overview = {companyOverview}
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                 />
                                 <CompanyStructure 
                                     structure_data = {companyStructure}
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
                                 <CompanyOperations 
                                     operations_data = {companyOperations}
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
@@ -138,18 +142,18 @@ function AddReportDialogue({ report_item }: props) {
                             : subjectType === "individual"
                                 ? <>
                                     <IndividualDetails 
-                                        report_id={report.id}
+                                        report_id={report_item?.id}
                                         individual_details={individualDetails}
                                     />
                                     <EmploymentInformation 
                                         employment_information = {employmentInformation}
-                                        report_id={report.id}
+                                        report_id={report_item?.id}
                                         subject_type= {subject_type}
                                     />
                                     <NextOfKin 
                                         subject_type={subject_type}
                                         next_of_kin={nextOfKin}
-                                        report_id={report.id}
+                                        report_id={report_item?.id}
                                     />
                                 </>
                                 : null
@@ -166,13 +170,13 @@ function AddReportDialogue({ report_item }: props) {
                                 <>
                                     <DirectorDetails 
                                         directors_data={directors}
-                                        report_id={report.id}
+                                        report_id={report_item?.id}
                                         subject_object_id = {subject_object_id}
                                         subject_type = {subject_type}
                                     />             
                                     <ShareholdingDetails
                                         shareholdings_data = {shareholding}
-                                        report_id={report.id}
+                                        report_id={report_item?.id}
                                         subject_object_id = {subject_object_id}
                                         subject_type = {subject_type}
                                     />
@@ -180,38 +184,38 @@ function AddReportDialogue({ report_item }: props) {
                             }
                             <BankerDetails 
                                 banker_accounts={bankerDetails}
-                                report_id={report.id}
+                                report_id={report_item?.id}
                                 subject_object_id = {subject_object_id}
                                 subject_type = {subject_type}
                             />
                             <Fieldset legendTitle="Credit Records">
                                 <ClaimsDetails
                                     claims_data = {claims}
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
                                 <AbsconderDetails
                                     absconders_data={absconders}
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
                                 <CourtDetails
                                     court_judgements_data={courtJudgements}
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
                                 <InsolvencyRecordsDetails
                                     insolvency_data={insolvencyRecords} 
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
                                 <PublicInformationDetails
                                     public_information_data={publicInformation}
-                                    report_id={report.id}
+                                    report_id={report_item?.id}
                                     subject_object_id={subject_object_id}
                                     subject_type={subject_type}
                                 />
@@ -219,30 +223,34 @@ function AddReportDialogue({ report_item }: props) {
 
                             <TradeReferencesDetails 
                                 trade_references_data={tradeReferences}
-                                report_id={report.id}
+                                report_id={report_item?.id}
                                 subject_object_id={subject_object_id}
                                 subject_type={subject_type}
                             />
                             <FinancialsDetails 
                                 financials_data={financials}
-                                report_id={report.id}
+                                report_id={report_item?.id}
                                 subject_object_id={subject_object_id}
                                 subject_type={subject_type}
                             />
                             <RegistrationAccountsDetails
                                 accounts_data={accounts}
-                                report_id={report.id}
+                                report_id={report_item?.id}
                                 subject_object_id={subject_object_id}
                                 subject_type={subject_type} 
                             />
                             <ProfessionalPartnersDetails
                                 professionals_data={professionals}
-                                report_id={report.id}
+                                report_id={report_item?.id}
                                 subject_object_id={subject_object_id}
                                 subject_type={subject_type}
                             />
-                            
-                            {/* RATINGS HERE */}
+                            <ReportDetails
+                                report_data={reportDetails}
+                                report_id={report_item?.id}
+                                subject_object_id = {subject_object_id}
+                                subject_type = {subject_type}
+                            />
                         </>    
                     }
 
@@ -250,10 +258,23 @@ function AddReportDialogue({ report_item }: props) {
                         <DialogClose>
                             <Button variant={"ghost"}>Cancel</Button>
                         </DialogClose>
-                        <Button>
-                            <Printer />
-                            Print
-                        </Button>
+                        {
+                            !report &&
+                            !report_item &&
+                            headerEditMode &&
+                            <Button 
+                                className={reportLoading ? "cursor-not-allowed" : "cursor-pointer"}
+                                disabled = {reportLoading}
+                                onClick={generateReport}
+                            >
+                                {
+                                    reportLoading 
+                                    ? <LoadingIndicator variant="button"/>
+                                    : <Plus/>
+                                }   
+                                Generate Report
+                            </Button>
+                        }
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -167,7 +167,7 @@ class Financials(BaseModelWithSubject):
         decimal_places=2,
         null=True,
         blank=True
-    )
+    ) #add doc key (url)
     financials_file = models.FileField(
         _("Financials File"),
         upload_to=financials_file_path,

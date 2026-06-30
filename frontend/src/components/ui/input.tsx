@@ -33,6 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <input
+        onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
         ref={ref}
         type={type}
         className={cn(base, variants[variant], edges, className)}
