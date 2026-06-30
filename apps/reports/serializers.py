@@ -19,7 +19,8 @@ class ReportSerializer(serializers.ModelSerializer):
             'summary',
             'created_at',
             'updated_at',
-            'finalized_at'
+            'finalized_at',
+            'report_pdf',
         ]
 
     def to_representation(self, instance):

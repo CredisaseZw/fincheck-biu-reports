@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "weasyprint-pdf-creation": {
+      "source": "slapash/weasyprint-pdf-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "aff272d963ca698e91c4acefb01d54030c5ce9237f4917549b7f90498326611f"
+    }
+  }
+}

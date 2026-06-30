@@ -1,11 +1,8 @@
 from apps.utils.user_manager import UserManager   
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-import uuid
-
 class User(AbstractUser):
     username = None
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
         

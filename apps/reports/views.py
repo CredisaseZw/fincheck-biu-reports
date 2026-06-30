@@ -2,13 +2,12 @@ from rest_framework.response import Response
 from apps.utils.base_viewset import BaseJSONViewSet
 from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
-from apps.utils.helpers import _content_ob_serializer
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
-from .models import Report
 from .filters import ReportSearchFilter
 from rest_framework.decorators import action
 from django.utils import timezone
+from apps.reports.GenerateReport import FincheckReportPDF
 class ReportViewSet(BaseJSONViewSet):
     filter_backends = [ReportSearchFilter]
     queryset = Report.objects.all()
@@ -85,20 +84,15 @@ class ReportViewSet(BaseJSONViewSet):
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
 
-        snapshot: dict = {}
-        snapshot['client']= _content_ob_serializer(report.client, True)
-        snapshot['subject']= _content_ob_serializer(report.subject)
-        
-        #generate url here pdf here and save url
-        report.snapshot = snapshot
         report.status = Report.StatusChoices.FINALIZED
         report.finalized_at = timezone.now()
+        report.snapshot = ReportSerializer(report).data
         report.save()
 
-        return Response({
-            #return the pdf url alone,
-            "url": "....."
-        }, status=STATUS.HTTP_200_OK)
+        pdf_url = FincheckReportPDF(report).save_to_report(report)
+        report.save(update_fields=["report_pdf"])
+
+        return Response({"url": pdf_url}, status=STATUS.HTTP_200_OK)
     
 
 

@@ -91,7 +91,7 @@ class BankerAccounts(BaseModelWithSubject):
     narration = models.CharField(
         max_length=2,
         choices=Narrations.choices,
-        default=Narrations.C
+        default=Narrations.A
     )
 
     class Meta:
@@ -124,7 +124,7 @@ class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON
 class Financials(BaseModelWithSubject):
     def financials_file_path(instance, filename):
         ext = os.path.splitext(filename)[1]
-        return f"financials/financials_file/{uuid.uuid4()}{ext}"
+        return f"financials/financials_file/{uuid.uuid4().hex}{ext}"
     
     total_assets = models.DecimalField(
         _("Total Assets"),

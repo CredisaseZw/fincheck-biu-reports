@@ -1,3 +1,5 @@
+import secrets
+
 from django.db import models
 from apps.utils.base_models import BaseModelWithSubject
 from django.contrib.contenttypes.models import ContentType
@@ -6,6 +8,12 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models import UniqueConstraint
 from django.db import transaction
 from django.utils import timezone
+
+
+def report_pdf_path(instance, filename):
+    now = timezone.now()
+    token = secrets.token_hex(5)
+    return f"reports/{now.strftime('%Y')}/{now.strftime('%b')}/enq_ref_{token}.pdf"
 
 # Create your models here.
 class Report(BaseModelWithSubject):
@@ -47,6 +55,13 @@ class Report(BaseModelWithSubject):
     finalized_at = models.DateTimeField(
         null=True,
         blank=True
+    )
+
+    report_pdf = models.FileField(
+        _("Report PDF"),
+        upload_to=report_pdf_path,
+        null=True,
+        blank=True,
     )
 
     def save(self, *args, **kwargs):

@@ -38,7 +38,6 @@ class CompanyDirector(BaseModel):
     national_id = models.CharField(
         _("National ID | Passport Number"),
         max_length=15,
-        default="" #REMOVE ON A CLEAN DB
     )
     insolvencies_judgements = models.TextField(
         _("Insolvencies, Judgements, Defaults"),

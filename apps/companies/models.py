@@ -72,7 +72,6 @@ class Company(BaseModel):
     address_registered = models.TextField()
     address_operations = models.TextField(  
         blank=True, 
-        null=True
     )
     prev_addresses = models.JSONField(_("""
         prev[]: address : '....',

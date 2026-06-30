@@ -15,13 +15,16 @@ import { useState } from "react";
 
 interface FinalizedReportDialogProps {
   id: number  
+  main?: boolean
 }
 
 function FinalizedReportDialog({
-  id
+  id,
+  main = false
 }: FinalizedReportDialogProps) {
     const [open, setOpen] = useState(false)
     const {isPending} = useInstanceMutation()
+    
     const onConfirm = () =>{
       console.log(id)
     }
@@ -29,11 +32,17 @@ function FinalizedReportDialog({
     return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger>
-        <OptionButton 
+        {
+          main ?
+          <Button>
+            <CheckCheck/>
+            Finalize Report
+          </Button>
+        : <OptionButton 
           Icon={CheckCheck}
           label="Finalize Report"
           variant={"secondary"}/>
-
+        }
       </AlertDialogTrigger>
       <AlertDialogContent className="rounded-md">
         <AlertDialogHeader>

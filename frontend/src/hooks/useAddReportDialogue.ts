@@ -89,6 +89,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   }, [open, list_report]);
 
   useEffect(()=>{
+    if (!open) return;
     if(handleAxiosError(error)) return 
     if(!data) return;
 
@@ -458,6 +459,25 @@ function useAddReportDialogue(list_report?: ListReport) {
     setClientObjectId(null)
     setSubjectObjectId(null)
     setHeaderEditMode(!list_report);
+    setCompanyOverview(undefined);
+    setIndividualDetails(undefined);
+    setEmploymentInformation(undefined);
+    setNextOfKin(undefined);
+    setClaims([]);
+    setAbsconders([]);
+    setCourtJudgements([]);
+    setInsolvencyRecords([]);
+    setPublicInformation([]);
+    setFinancials(undefined);
+    setProfessionals(undefined);
+    setAccounts(undefined);
+    setTradeReferences([]);
+    setBankerDetails([]);
+    setCompanyStructure(undefined);
+    setCompanyOperations(undefined);
+    setShareholding(undefined);
+    setDirectors([]);
+    setReportDetails(undefined);
   };
 
   return { 
