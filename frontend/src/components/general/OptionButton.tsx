@@ -92,6 +92,7 @@ interface OptionButtonProps
   Icon?: LucideIcon;
   label: string;
   className?: string;
+  onClick?: ()=>void
 }
 export function OptionButton({
   Icon,
@@ -100,11 +101,13 @@ export function OptionButton({
   size,
   fullWidth,
   className,
+  onClick
 }: OptionButtonProps) {
   return (
     <Button
       type="button"
       size={"sm"}
+      onClick={onClick}
       className={cn(
         optionButtonVariants({
           variant,

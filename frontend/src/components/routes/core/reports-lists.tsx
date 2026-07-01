@@ -1,8 +1,10 @@
 import BaseTable from "@/components/general/BaseTable";
 import ColumnsContainer from "@/components/general/ColumnsContainer";
+import { OptionButton } from "@/components/general/OptionButton";
 import OptionsWrapper from "@/components/general/OptionsWrapper";
 import SearchBox from "@/components/general/Searchbox";
 import SectionHeader from "@/components/general/SectionHeader";
+import { StatusPill } from "@/components/general/StatusPills";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ReportHeaders } from "@/constants";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
@@ -12,6 +14,7 @@ import DeleteReportAlert from "@/dialogues/DeleteReportDialogue";
 import FinalizedReportDialog from "@/dialogues/FinalizedReportDialogue";
 import useReports from "@/hooks/useReports";
 import { getEntityName, getFormattedDate } from "@/lib/utils";
+import { ExternalLink } from "lucide-react";
 
 function Reports() {
     const {
@@ -20,6 +23,11 @@ function Reports() {
         isLoading,
         isError,
     } = useReports();
+
+    const openReportInNewTab = (url: string) => () => {
+        if (!url) return;
+        window.open(url, "_blank", "noopener,noreferrer");
+    };
 
     return (
     <div className="main-card">
@@ -71,13 +79,32 @@ function Reports() {
                                 </div>
                             </TableCell>
                             <TableCell className="text-center">
+                                <StatusPill variant={item.status === "draft" ? "outline" : "success"}>
+                                    {item.status === "draft" ? "Draft" : "Finalized"}
+                                </StatusPill>
+                            </TableCell>
+                            <TableCell className="text-center">
+                                {item.overall_risk_rating !== null ? item.overall_risk_rating : "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
                                 {getFormattedDate(item.created_at)}
                             </TableCell>
                             <TableCell className="flex items-center justify-center">
                                 <OptionsWrapper>
-                                    <AddReportDialogue report_item={item}/>
-                                    <FinalizedReportDialog id={item.id}/>
-                                    <DeleteReportAlert id={item.id}/>
+                                    {
+                                        
+                                        (item.status === "finalized" && item.report_pdf)
+                                        ? <OptionButton
+                                            onClick={openReportInNewTab(item.report_pdf)}
+                                            Icon={ExternalLink}
+                                            label="View Report"
+                                        /> 
+                                        :<>
+                                            <AddReportDialogue report_item={item}/>
+                                            <FinalizedReportDialog id={item.id}/>
+                                            <DeleteReportAlert id={item.id}/>
+                                        </>
+                                    }
                                 </OptionsWrapper>
                             </TableCell>
                         </TableRow>

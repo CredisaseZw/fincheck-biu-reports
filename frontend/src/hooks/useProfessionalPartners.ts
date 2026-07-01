@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form" 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import type { ProfessionalsProps, Report } from "@/types/core";
+import type { Company, Individual, ProfessionalsProps, Report } from "@/types/core";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
@@ -63,8 +63,8 @@ function useProfessionalPartners({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data)=>{
-                cache.set(["subject"], data)
+            onSuccess:(data:Company | Individual)=>{
+                cache.set(["subject", "professional_partners"], data.professional_partners)
                 toast.success("Professional Updated successfully.")
             },
             onError : (error) => handleAxiosError(error)

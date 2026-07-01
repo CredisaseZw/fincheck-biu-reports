@@ -6,7 +6,7 @@ import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMut
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
-import type { EntityValue, Report } from "@/types/core";
+import type { EntityValue, Individual, Report } from "@/types/core";
 
 const EmploymentStatus = z.enum(["employed", "self_employed", "unemployed", "part_time", "retired", "student"])
 const employmentSchema = z.object({
@@ -66,8 +66,8 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         PAYLOAD.data = { employment_information: changes }
     
         mutate(PAYLOAD, {
-            onSuccess: (data) => {
-                cache.set(["subject"], data)
+            onSuccess: (data: Individual) => {
+                cache.set(["subject", "employment_information"], data.employment_information)
                 toast.success("Information successfully updated")
             },
             onError: (error) => handleAxiosError(error)

@@ -80,9 +80,15 @@ class ReportViewSet(BaseJSONViewSet):
     @action(url_path="finalize-report", detail=True, methods=["POST"])
     def finalize_report(self, request, *args, **kwargs):
         report = self.get_object()
-
+        
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        if report.overall_risk_rating in (None, ""):
+            return Response(
+                {"error": "Overall risk rating is required."},
+                status=STATUS.HTTP_400_BAD_REQUEST,
+            )
 
         report.status = Report.StatusChoices.FINALIZED
         report.finalized_at = timezone.now()

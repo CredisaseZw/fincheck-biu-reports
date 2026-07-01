@@ -158,7 +158,7 @@ function useFinancialsDetails({
                 changes.financials_file = currentFile;
             }
         }
-        console.log(changes)
+
         const formData = buildFormData(changes)
         save(formData, {
             onSuccess: ({ data: savedEntry }) => {

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   ChevronUp,
+  KeyRound,
   LogOut,
 } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
@@ -28,11 +29,14 @@ import { CORE_ROUTES } from "@/constants/routes"
 import {cn} from "@/lib/utils"
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router';
+import { useState } from 'react';
+import ChangePasswordDialogue from '@/dialogues/ChangePasswordDialogue';
 
 export function AppSidebar() {
     const navigate = useNavigate()
     const location = useLocation();
     const {user , signOut} = useAuth()
+    const [changePasswordOpen, setChangePasswordOpen] = useState(false)
 
     return (
     <Sidebar>
@@ -134,6 +138,13 @@ export function AppSidebar() {
 
                 <DropdownMenuContent side="top" align="start" className="w-56">
                     <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => setChangePasswordOpen(true)}
+                    >
+                        <KeyRound className="mr-2 h-4 w-4" />
+                        Change Password
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                         className="text-destructive focus:text-destructive cursor-pointer"
                         onClick={() => {
                             signOut()
@@ -151,6 +162,11 @@ export function AppSidebar() {
             </SidebarMenuItem>
             </SidebarMenu>
         </SidebarFooter>
+
+        <ChangePasswordDialogue
+            open={changePasswordOpen}
+            onOpenChange={setChangePasswordOpen}
+        />
     </Sidebar>
   )
 }

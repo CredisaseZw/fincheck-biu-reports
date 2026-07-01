@@ -30,7 +30,10 @@ class Individuals(BaseModel):
     
     full_name = models.CharField(_("Full name"), max_length=255, unique = True)
     national_id = models.CharField(_("National ID / Passport"), max_length=100, unique=True)
-    date_of_birth = models.DateField(_("Date of birth"))
+    date_of_birth = models.DateField(_("Date of birth"),
+        blank = True,
+        null = True
+    )
     gender = models.CharField(_("Gender"), max_length=50)
     marital_status = models.CharField(
         _("Marital status"), 

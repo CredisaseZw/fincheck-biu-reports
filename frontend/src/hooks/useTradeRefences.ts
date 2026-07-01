@@ -1,4 +1,4 @@
-import type { Report, TradeReferencesProps } from "@/types/core";
+import type { Company, Individual, Report, TradeReferencesProps } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -81,8 +81,8 @@ function useTradeReferences({
       }
     }
     mutate(payload, {
-      onSuccess: (data) =>{
-        cache.set(["subject"], data)
+      onSuccess: (data : Company | Individual) =>{
+        cache.set(["subject", "trade_references"], data.trade_references)
         toast.success("Trade references updated successfully.");
       },
       onError : (e)=> handleAxiosError(e)

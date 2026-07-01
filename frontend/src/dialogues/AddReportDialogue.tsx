@@ -14,7 +14,7 @@ import {
     DialogContent,
     DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus } from "lucide-react";
+import { CheckCheck, Plus } from "lucide-react";
 import BankerDetails from "@/components/general/BankersDetails";
 import ProfessionalPartnersDetails from "@/components/general/ProfessionalPartnersDetails";
 import RegistrationAccountsDetails from "@/components/general/RegistrationAccountsDetails";
@@ -35,7 +35,7 @@ import Fieldset from "@/components/general/FieldSet";
 import ReportHeaderCard from "@/components/general/ReportHeaderCard";
 import LoadingIndicator from "@/components/general/LoadingIndicator";
 import ReportDetails from "@/components/general/ReportDetails";
-import FinalizedReportDialog from "./FinalizedReportDialogue";
+import useFinalizeReport from "@/hooks/useFinalizeReport";
 
 interface props {
     report_item?: ListReport
@@ -81,7 +81,7 @@ function AddReportDialogue({ report_item }: props) {
     const {
         reportLoading,
     } = useReport()
-
+    const { isPending, onFinalize } = useFinalizeReport()
     const isUpdating = !!report_item;
     const showSkeleton = reportLoading || (isUpdating && isLoading);
 
@@ -257,7 +257,10 @@ function AddReportDialogue({ report_item }: props) {
 
                     <DialogFooter>
                         <DialogClose>
-                            <Button variant={"ghost"}>Cancel</Button>
+                            <Button
+                                disabled ={isPending}
+                                className={isPending ? "cursor-not-allowed" :""}
+                                variant={"ghost"}>Cancel</Button>
                         </DialogClose>
                         {
                             (!report &&
@@ -275,8 +278,26 @@ function AddReportDialogue({ report_item }: props) {
                                 }   
                                 Generate Report
                             </Button>
-                            : report &&
-                            <FinalizedReportDialog main id ={report.id} /> /* MAKE A HOOK FOR THIS */
+                            : 
+                            report &&
+                            report_item && 
+                            !headerEditMode &&
+                            <Button
+                                disabled ={isPending}
+                                className={isPending ? "cursor-not-allowed" :""}
+                                onClick={()=>onFinalize( 
+                                    report.id,
+                                    ()=>{setOpen(false)}
+                                )}
+                            >
+                                {
+                                    !isPending 
+                                    ? <CheckCheck/>
+                                    : <LoadingIndicator variant="button"/>
+                                }
+                                
+                                Finalize Report
+                            </Button>
                         }
                     </DialogFooter>
                 </DialogContent>

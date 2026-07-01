@@ -55,9 +55,10 @@ def get_content_type_id(subject_object_id, subject_type: str) -> int | None:
 
     return ContentType.objects.get_for_model(subject).id
 
-def _content_ob_serializer( content, mini_serializer = False):
+def _content_ob_serializer(content, mini_serializer=False):
     if not content:
         return None
-    if hasattr(content, "next_of_kin"):
+
+    if isinstance(content, Individuals):
         return IndividualSerializer(content).data if not mini_serializer else MiniIndividualSerializer(content).data
     return CompanySerializer(content).data if not mini_serializer else MiniCompanySerializer(content).data

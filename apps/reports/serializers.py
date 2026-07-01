@@ -44,6 +44,7 @@ class ListReportSerializer(serializers.ModelSerializer):
             'client',
             'subject',
             'status',
+            'report_pdf',
             'overall_risk_rating',
             'created_at',
             'updated_at'
@@ -52,7 +53,7 @@ class ListReportSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         client_data = _content_ob_serializer(instance.client, True)
-        subject_data = _content_ob_serializer(instance.subject)
+        subject_data = _content_ob_serializer(instance.subject, True)
 
         data['client'] = client_data
         data['subject'] = subject_data

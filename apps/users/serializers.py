@@ -51,3 +51,24 @@ class CreateUserSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=8)
+    confirm_password = serializers.CharField(required=True)
+
+    def validate_old_password(self, value):
+        user = self.context.get("user")
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect.")
+        return value
+
+    def validate(self, data):
+        if data["new_password"] != data["confirm_password"]:
+            raise serializers.ValidationError({"confirm_password": "New passwords do not match."})
+
+        if data["old_password"] == data["new_password"]:
+            raise serializers.ValidationError({"new_password": "New password must be different from the current password."})
+
+        return data

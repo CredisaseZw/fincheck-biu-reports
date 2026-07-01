@@ -44,7 +44,11 @@ class CompanyDirector(BaseModel):
         blank=True,
         null=True
     )
-    dob = models.DateTimeField(help_text= _("Director Date of birth"))
+    dob = models.DateTimeField(
+        help_text= _("Director Date of birth"),
+        blank = True,
+        null = True
+    )
     address_latest = models.TextField(help_text= _("Director Primary Address"))
     address_prev = models.TextField(
         help_text= _("Director Prev Address"),
@@ -69,12 +73,6 @@ class CompanyDirector(BaseModel):
         db_table = 'company_directors'
         verbose_name = "Company Director"
         verbose_name_plural = "Company Directors"
-        constraints = [
-            UniqueConstraint(
-                fields= ['position', 'full_name'],
-                name='unique_director_per_company'
-            )
-        ]
 
     def __str__(self):
         return f"{self.full_name} | ({self.company})"

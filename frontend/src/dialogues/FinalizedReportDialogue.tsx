@@ -9,10 +9,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import useInstanceMutation from "@/hooks/api/useInstanceMutation";
+import useFinalizeReport from "@/hooks/useFinalizeReport";
 import { CheckCheck, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
-
 interface FinalizedReportDialogProps {
   id: number  
   main?: boolean
@@ -20,29 +18,21 @@ interface FinalizedReportDialogProps {
 
 function FinalizedReportDialog({
   id,
-  main = false
 }: FinalizedReportDialogProps) {
-    const [open, setOpen] = useState(false)
-    const {isPending} = useInstanceMutation()
-    
-    const onConfirm = () =>{
-      console.log(id)
-    }
+    const {
+      open,
+      isPending,
+      onFinalize,
+      setOpen,
+    } =useFinalizeReport()
 
     return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger>
-        {
-          main ?
-          <Button>
-            <CheckCheck/>
-            Finalize Report
-          </Button>
-        : <OptionButton 
+        <OptionButton 
           Icon={CheckCheck}
           label="Finalize Report"
-          variant={"secondary"}/>
-        }
+          variant={"secondary"}/>  
       </AlertDialogTrigger>
       <AlertDialogContent className="rounded-md">
         <AlertDialogHeader>
@@ -56,19 +46,18 @@ function FinalizedReportDialog({
             You may not be able to edit it afterwards.
           </AlertDialogDescription>
         </AlertDialogHeader>
-
         <AlertDialogFooter>
           <Button variant={"ghost"} onClick={()=> setOpen(false)}>
             Cancel
           </Button>
                     
             <Button        
-            onClick={onConfirm}
-            disabled={isPending}
-            className="bg-green-800 hover:bg-green-700 focus:ring-green-500 text-white"
-          >
-            {isPending ? "Finalizing..." : "Confirm Finalize"}
-          </Button>
+              onClick={()=> onFinalize(id)}
+              disabled={isPending}
+              className="bg-green-800 hover:bg-green-700 focus:ring-green-500 text-white"
+            >
+              {isPending ? "Finalizing..." : "Confirm Finalize"}
+            </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

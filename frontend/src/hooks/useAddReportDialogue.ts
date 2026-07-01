@@ -144,6 +144,10 @@ function useAddReportDialogue(list_report?: ListReport) {
         branches : company.structure?.branches 
       })
       setCompanyOperations({
+        purchases_payment_terms : company.operations?.purchases_payment_terms,
+        sales_payment_terms : company.operations?.sales_payment_terms,
+        purchase_supplier_scope : company.operations?.purchase_supplier_scope,  
+        import_export : company.operations?.import_export,
         industry : company.operations?.industry,
         target_markets :company.operations?.target_markets,
         operational_areas : company.operations?.operational_areas,
@@ -151,14 +155,14 @@ function useAddReportDialogue(list_report?: ListReport) {
         property_ownership :company.operations?.property_ownership
       })
       setShareholding({
-        id :  company.shareholdings?.id,
+        id :  company.shareholdings?.id ?? undefined,
         numbers_of_shareholders : company.shareholdings?.numbers_of_shareholders ?? 0,
         numbers_of_shares : company.shareholdings?.numbers_of_shares ?? 0,
         shareholders: 
         company.shareholdings &&
         company.shareholdings.shareholders.length > 0 
         ? company.shareholdings?.shareholders.map(item => ({
-          id : item.id,
+          id : item.id ?? undefined,
           full_name :item.full_name,
           address  :item.address,
           number_of_shares :item.number_of_shares,
@@ -183,7 +187,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           address_latest :  item.address_latest ?? "",
           address_prev : item.address_prev ?? "",
           national_id : item.national_id ?? "",
-          email : item.national_id ?? "",
+          email : item.email ?? "",
           mobile_phone_number : item.mobile_phone_number ?? "",
           insolvencies_judgements : item.insolvencies_judgements ?? ""
         }))

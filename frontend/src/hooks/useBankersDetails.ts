@@ -2,7 +2,7 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { CURRENCY } from "@/constants"
-import type { BankerDetailsProps, Report } from "@/types/core";
+import type { BankerDetailsProps, Company, Individual, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { useEffect } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
@@ -68,6 +68,18 @@ function useBankersDetails({
     })
 
     const onSubmit = (data:BankerDetailsFormData)=>{
+        const accountNumbers = new Set<string>();
+        for (const account of data.accounts) {
+            const accNum = account.account_number?.trim().toLowerCase();
+            if (accNum) {
+                if (accountNumbers.has(accNum)) {
+                    toast.error(`Duplicate Account Number detected: ${account.account_number}`);
+                    return;
+                }
+                accountNumbers.add(accNum);
+            }
+        }
+
         const changes = handleTrackChangedArray(banker_accounts, data.accounts)
         if(changes.length === 0){
             toast.info("No changes made")
@@ -83,8 +95,8 @@ function useBankersDetails({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data)=>{
-                cache.set(["subject"], data)
+            onSuccess:(data: Company | Individual)=>{
+                cache.set(["subject", "banker_accounts"], data.banker_accounts)
                 toast.success("Banker accounts Updated successfully.")
             },
             onError : (error) => handleAxiosError(error)

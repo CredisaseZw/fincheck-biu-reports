@@ -124,7 +124,7 @@ class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON
 class Financials(BaseModelWithSubject):
     def financials_file_path(instance, filename):
         ext = os.path.splitext(filename)[1]
-        return f"financials/financials_file/{uuid.uuid4().hex}{ext}"
+        return f"financials/{uuid.uuid4().hex}{ext}"
     
     total_assets = models.DecimalField(
         _("Total Assets"),

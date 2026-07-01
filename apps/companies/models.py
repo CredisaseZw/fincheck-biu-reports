@@ -309,6 +309,16 @@ class CompanyStructure(BaseModel):
         return f"Structure of {self.company}"
 
 class CompanyOperations(BaseModel):
+    class PaymentTerms(models.TextChoices):
+        CASH_ONLY = "cash_only", "Cash Only"
+        CASH_AND_CREDIT = "cash_and_credit", "Cash & Credit"
+        CREDIT_ONLY = "credit_only", "Credit Only"
+
+    class SupplierScope(models.TextChoices):
+        LOCAL = "local", "Local Suppliers"
+        INTERNATIONAL = "international", "International Suppliers"
+        BOTH = "local_&_international", "Local & International Suppliers"
+
     company = models.OneToOneField(
         Company,
         on_delete=models.CASCADE,
@@ -319,7 +329,27 @@ class CompanyOperations(BaseModel):
     operations_territories = models.TextField(blank=True)
     property_ownership = models.TextField(blank=True)
     operational_areas = models.TextField(blank=True)
+    import_export = models.TextField(blank=True, help_text=_("Import / Export details"))
+    purchases_payment_terms = models.CharField(
+        max_length=50,
+        choices=PaymentTerms.choices,
+        blank=True,
+        null=True
+    )
+    sales_payment_terms = models.CharField(
+        max_length=50,
+        choices=PaymentTerms.choices,
+        blank=True,
+        null=True
+    )
     
+    purchase_supplier_scope = models.CharField(
+        max_length=50,
+        choices=SupplierScope.choices,
+        blank=True,
+        null=True,
+    )
+
     class Meta:
         verbose_name = "company_operations"
         verbose_name_plural = "Company Operations"

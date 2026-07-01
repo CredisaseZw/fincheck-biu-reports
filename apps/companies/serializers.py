@@ -125,23 +125,30 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
     insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
     public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
     trade_references = TradeReferencesWriteSerializer(many=True, write_only=True, required=False)
-    overview = CompanyOverviewSerializer(required=False)
-    structure = CompanyStructureSerializer(required=False)
-    operations = CompanyOperationsSerializer(required=False)
+    overview = CompanyOverviewSerializer(required=False, write_only=True,)
+    structure = CompanyStructureSerializer(required=False, write_only=True,)
+    operations = CompanyOperationsSerializer(required=False, write_only=True,)
     banker_accounts = BankerAccountsWriteSerializer(many = True, write_only=True, required=False)
     registration_accounts = RegistrationAccountsWriteSerializer(required=False, write_only=True)
     professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
-    
+        
     def to_representation(self, instance):
-        data =  super().to_representation(instance)
-    
+        data = super().to_representation(instance)
+
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
         data['professional_partners'] = ProfessionalPartnersSerializer(professional_partners).data if professional_partners else None
         data['registration_accounts'] = RegistrationAccountsSerializer(registration_accounts).data if registration_accounts else None
         data['trade_references'] = TradeReferencesSerializer(instance.trade_references.all(), many=True).data
         data['banker_accounts'] = BankerAccountsSerializer(instance.banker_accounts.all(), many=True).data
-        
+
+        overview = getattr(instance, "overview", None)
+        structure = getattr(instance, "structure", None)
+        operations = getattr(instance, "operations", None)
+        data['overview'] = CompanyOverviewSerializer(overview).data if overview else None
+        data['structure'] = CompanyStructureSerializer(structure).data if structure else None
+        data['operations'] = CompanyOperationsSerializer(operations).data if operations else None
+
         return data
     class Meta:
         model = Company
@@ -200,7 +207,7 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
     court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
     insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
     public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
-    overview = CompanyOverviewSerializer(required=False)
+    overview = CompanyOverviewSerializer(required=False,write_only=True,)
     structure = CompanyStructureSerializer(required=False, write_only=True)
     operations = CompanyOperationsSerializer(required=False, write_only=True)
     company_name = serializers.CharField(required=False)
@@ -210,14 +217,21 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
     professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
    
     def to_representation(self, instance):
-        data =  super().to_representation(instance)
-    
+        data = super().to_representation(instance)
+
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
         data['professional_partners'] = ProfessionalPartnersSerializer(professional_partners).data if professional_partners else None
         data['registration_accounts'] = RegistrationAccountsSerializer(registration_accounts).data if registration_accounts else None
         data['trade_references'] = TradeReferencesSerializer(instance.trade_references.all(), many=True).data
         data['banker_accounts'] = BankerAccountsSerializer(instance.banker_accounts.all(), many=True).data
+
+        overview = getattr(instance, "overview", None)
+        structure = getattr(instance, "structure", None)
+        operations = getattr(instance, "operations", None)
+        data['overview'] = CompanyOverviewSerializer(overview).data if overview else None
+        data['structure'] = CompanyStructureSerializer(structure).data if structure else None
+        data['operations'] = CompanyOperationsSerializer(operations).data if operations else None
 
         return data
     class Meta:

@@ -7,7 +7,7 @@ import useInstanceMutation from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
-import type { EntityValue, Report } from "@/types/core";
+import type { EntityValue, Individual, Report } from "@/types/core";
 
 const nextOfKinSchema = z.object({
     individual_id : z.number().optional(),
@@ -61,8 +61,8 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
         PAYLOAD.data = { next_of_kin: changes }
     
         mutate(PAYLOAD, {
-            onSuccess: (data) => {
-                cache.set(["subject"], data)
+            onSuccess: (data:Individual) => {
+                cache.set(["subject", "next_of_kin"], data.next_of_kin)
                 toast.success("Information successfully updated")
             },
             onError: (error) => handleAxiosError(error)

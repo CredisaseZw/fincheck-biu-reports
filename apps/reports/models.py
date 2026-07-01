@@ -13,7 +13,8 @@ from django.utils import timezone
 def report_pdf_path(instance, filename):
     now = timezone.now()
     token = secrets.token_hex(5)
-    return f"reports/{now.strftime('%Y')}/{now.strftime('%b')}/enq_ref_{token}.pdf"
+    ref = instance.enquiry_reference or "unref"
+    return f"reports/{now.strftime('%Y')}/{now.strftime('%b')}/{ref}_{token}.pdf"
 
 # Create your models here.
 class Report(BaseModelWithSubject):

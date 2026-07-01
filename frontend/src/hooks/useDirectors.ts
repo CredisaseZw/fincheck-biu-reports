@@ -71,6 +71,30 @@ function useDirectors({
     })
 
     const onSubmit = (data : DirectorsFormData) => {
+        const nationalIds = new Set<string>();
+        const emails = new Set<string>();
+
+        for (const dir of data.directors) {
+            const nid = dir.national_id?.trim().toLowerCase();
+            const email = dir.email?.trim().toLowerCase();
+
+            if (nid) {
+                if (nationalIds.has(nid)) {
+                    toast.error(`Duplicate National ID/Passport detected: ${dir.national_id}`);
+                    return;
+                }
+                nationalIds.add(nid);
+            }
+
+            if (email) {
+                if (emails.has(email)) {
+                    toast.error(`Duplicate Email detected: ${dir.email}`);
+                    return;
+                }
+                emails.add(email);
+            }
+        }
+
         const changes = handleTrackChangedArray(directors_data, data.directors)
         if(changes.length === 0){
             toast.warning("No changes made.")
@@ -85,7 +109,7 @@ function useDirectors({
 
         mutate(payload,{
             onSuccess : (data) =>{
-                cache.set(["subject", "directors"], data)
+                cache.set(["subject", "directors"], data.directors)
                 toast.success("Directors successfully updated")
             },
             onError: (e) => handleAxiosError(e)

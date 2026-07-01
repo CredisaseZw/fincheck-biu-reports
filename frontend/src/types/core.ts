@@ -79,6 +79,9 @@ export interface ListReport {
   subject: MiniCompany | MiniIndividual;
   subject_type : EntityValue,
   client_type :EntityValue
+  status : "draft" | "finalized"
+  overall_risk_rating : number | null,
+  report_pdf : string | null,
   created_at: string;
   updated_at: string;
 }
@@ -127,6 +130,10 @@ export interface CompanyOperations {
   operations_territories: string;
   property_ownership: string;
   operational_areas: string;
+  import_export: string;
+  purchase_supplier_scope : "local" | "local_&_international" | "international";
+  sales_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
+  purchases_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
 }
 
 export interface  CompanyDirector {
@@ -151,6 +158,8 @@ export interface Shareholding {
   numbers_of_shares: number;
   numbers_of_shareholders: number;
   shareholders: Shareholder[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Shareholder {

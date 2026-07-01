@@ -30,7 +30,10 @@ class Absconders(BaseFinancialRecord):
         DISPUTED = "disputed", "Disputed"
         WRITTEN_OFF = "written_off", "Written Off"
 
-    start_date = models.DateField()
+    start_date = models.DateField(
+        blank = True,
+        null = True
+    )
     status = models.CharField(
         max_length=20,
         choices=SettlementOptions.choices,
@@ -56,7 +59,10 @@ class CourtJudgement(BaseModelWithSubject):
         
     court_name = models.CharField(max_length=255)
     case_number = models.CharField(max_length=100)
-    judgement_date = models.DateField()
+    judgement_date = models.DateField(
+        blank = True,
+        null = True
+    )
     currency = models.CharField(
         max_length=3,
         choices=Currency.choices,
@@ -88,7 +94,10 @@ class InsolvencyRecord(BaseModelWithSubject):
         choices=InsolvencyType.choices
     )
 
-    start_date = models.DateField()
+    start_date = models.DateField(
+        blank = True,
+        null = True
+    )
     end_date = models.DateField(
         blank=True,
         null=True
@@ -107,7 +116,11 @@ class InsolvencyRecord(BaseModelWithSubject):
         verbose_name_plural = "Insolvency Records"
 
 class PublicInformation(BaseModelWithSubject):
-    record_date = models.DateField(_("Record Date")) 
+    record_date = models.DateField(
+        _("Record Date"), 
+        blank = True,
+        null = True
+    ) 
     summary = models.TextField(blank=True, null=True)
     link = models.CharField(max_length=255, blank=True, null=True)
 

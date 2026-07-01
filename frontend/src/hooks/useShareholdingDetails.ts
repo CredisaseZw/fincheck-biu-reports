@@ -1,7 +1,7 @@
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import type { CompanyShareholdingProps, Report } from "@/types/core";
+import type { CompanyShareholdingProps, Report, Shareholding } from "@/types/core";
 import { useEffect } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
@@ -66,6 +66,7 @@ function useShareholdingDetails({
         const topLevelChanges = handleTrackChangedFields(initData, currentData);
         const shareholderChanges = handleTrackChangedArray(initShareholders ?? [{}], currentShareholders);
 
+        console.log(topLevelChanges, shareholderChanges.length)
         if (!topLevelChanges && shareholderChanges.length === 0){
             toast.info("No changes made.")
             return;
@@ -75,15 +76,27 @@ function useShareholdingDetails({
             url: `/api/companies/${subject_object_id}/shareholders/`,
             mode : "create",
             data : {
-                ...topLevelChanges, 
-                id : data.id,
-                shareholders : shareholderChanges
+                ...topLevelChanges,
+                shareholders : shareholderChanges,
+                ...(data.id ? { id: data.id } : {})
             }
         }
         mutate(payload, {
-            onSuccess : (data_)=>{
+            onSuccess : (data_: Shareholding)=>{
                 toast.success("Shareholders successfully updated.")
                 cache.set(["subject", "shareholdings"], data_)
+                reset({
+                    id : data_.id,
+                    numbers_of_shareholders :data_.numbers_of_shareholders,
+                    numbers_of_shares : data_.numbers_of_shares,
+                    shareholders :  data_.shareholders.map(item => ({
+                        id : item.id ?? undefined,
+                        full_name :item.full_name,
+                        address  :item.address,
+                        number_of_shares :item.number_of_shares,
+                        percentage_ownership :Number(item.percentage_ownership)
+                        }))
+                })
             },
             onError : (e)=> handleAxiosError(e)
         })

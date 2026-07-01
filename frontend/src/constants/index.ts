@@ -1,20 +1,13 @@
 import type { Address, Header } from "@/types/core";
 import {z} from "zod"
+
 export const ReportHeaders:Header[] = [
-    {
-        name : "Enquiry Ref",
-        textAlign : "center"
-    },
-    {
-        name : "Client",
-    },
-    {
-        name : "Subject To",
-    },
-    {
-        name : "Create At",
-        textAlign : "center"
-    },
+    { name : "Enquiry Ref", textAlign : "center"},
+    { name : "Client" },
+    { name : "Subject To" },
+    { name : "Report Status"},
+    { name : "Overall Risk Rating", textAlign : "center"},
+    { name : "Create At", textAlign : "center" },
     { name : "Action", textAlign : "center" },
 ]
 export const DEFAULT_ADDRESSES:Address = {

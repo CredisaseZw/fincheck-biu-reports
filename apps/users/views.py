@@ -2,9 +2,9 @@ from .models import User
 from rest_framework import status as STATUS
 from rest_framework.response import Response
 from apps.utils.permissions import IsStaffUser
-from rest_framework.permissions import AllowAny, SAFE_METHODS
+from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer
+from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from apps.utils.helpers import validate_serializer
@@ -64,3 +64,16 @@ def create_user(request, *args, **kwargs):
     
     user = User.objects.create_user(**serializer.validated_data)
     return Response(UserSerializer(user).data, status=STATUS.HTTP_201_CREATED)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request, *args, **kwargs):
+    serializer = ChangePasswordSerializer(data=request.data, context={"user": request.user})
+    error = validate_serializer(serializer=serializer)
+    if error:
+        return error
+
+    request.user.set_password(serializer.validated_data["new_password"])
+    request.user.save()
+
+    return Response({"message": "Password changed successfully."}, status=STATUS.HTTP_200_OK)

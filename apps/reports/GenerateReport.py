@@ -21,7 +21,8 @@ import weasyprint
 from django.conf import settings
 from django.core.files.base import ContentFile
 from pypdf import PdfReader, PdfWriter
-
+from django.core.files.storage import default_storage
+from urllib.parse import urlparse
 
 def _media_root() -> str:
     return str(getattr(settings, "MEDIA_ROOT", ""))
@@ -85,18 +86,39 @@ class FincheckReportPDF:
         self._subject = self._snapshot.get("subject", {})
 
     # ── Public API ───────────────────────────────────────────────────────────
-
+    
+    def _strip_trailing_blank_page(self, pdf_bytes: bytes) -> bytes:
+        reader = PdfReader(io.BytesIO(pdf_bytes))
+        pages = list(reader.pages)
+        if len(pages) > 1:
+            last_text = (pages[-1].extract_text() or "").strip()
+            chrome_markers = ("CONFIDENTIAL", "Page")
+            meaningful = [
+                line for line in last_text.splitlines()
+                if line.strip() and not any(line.strip().startswith(m) for m in chrome_markers)
+            ]
+            if not meaningful:
+                writer = PdfWriter()
+                for p in pages[:-1]:
+                    writer.add_page(p)
+                buf = io.BytesIO()
+                writer.write(buf)
+                return buf.getvalue()
+        return pdf_bytes
+        
     def generate_bytes(self) -> bytes:
         main_bytes = weasyprint.HTML(string=self._build_html()).write_pdf()
+        main_bytes = self._strip_trailing_blank_page(main_bytes)
         return self._append_financial_attachment(main_bytes)
 
     def _pdf_storage_relpath(self) -> str:
         now = datetime.now()
+        enq_ref = self._enq_ref
         return os.path.join(
             "reports",
             now.strftime("%Y"),
             now.strftime("%b"),
-            f"{self._enq_ref}_{secrets.token_hex(5)}.pdf",
+            f"{str(enq_ref)}_{secrets.token_hex(5)}.pdf",
         )
 
     def generate(self, output_path: Optional[str] = None) -> str:
@@ -260,10 +282,10 @@ class FincheckReportPDF:
     letter-spacing: .5px;
   }}
   @bottom-right {{
-    content: "Page " counter(page) " of " counter(pages);
+    content: "Page " counter(page);
     font-size: 7.5pt;
     color: {c.MUTED};
-  }}
+    }}
 }}
 
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -526,15 +548,19 @@ body {{
 .badge-muted {{ background: #E2E8F0; color: #475569; }}
 
 /* ── Directors ── */
-.dir-grid {{ display: flex; flex-wrap: wrap; }}
+.dir-grid {{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}}
 .dir-card {{
-  flex: 0 0 50%;
   padding: 18px 20px;
   border-right: 1px solid {c.BORDER};
   border-bottom: 1px solid {c.BORDER};
+  page-break-inside: avoid;
 }}
 .dir-card:nth-child(even) {{ border-right: none; }}
-.dir-card:nth-last-child(-n+2) {{ border-bottom: none; }}
+.dir-card:last-child {{ border-bottom: none; }}
+.dir-card:nth-last-child(2):nth-child(odd) {{ border-bottom: none; }}
 .dir-name {{
   font-size: 10pt;
   font-weight: 800;
@@ -632,7 +658,8 @@ body {{
             fin = self._snapshot.get("finalized_at")
         dlbl = "FINALIZED ON" if fin else "REPORT GENERATED ON"
         dval = self._date(fin) if fin else created
-        wm = '<div class="watermark">DRAFT</div>' if self._status == "draft" else ""
+        wm = ""
+        #wm = '<div class="watermark">DRAFT</div>' if self._status == "draft" else ""
         subject_name = self._subject_name()
 
         return f"""{wm}
@@ -843,7 +870,11 @@ body {{
             ("Operations Territories", self._u(op.get("operations_territories"))),
             ("Property Ownership", self._u(op.get("property_ownership"))),
             ("Operational Areas", self._u(op.get("operational_areas"))),
-            ("", ""),
+            ("Import / Export", self._u(op.get("import_export"))),
+            ("Purchase Payment Terms", self._u(op.get("purchases_payment_terms"))),
+            ("Purchase Supplier Scope", self._u(op.get("purchase_supplier_scope"))),
+            ("Sales Payment Terms", self._u(op.get("sales_payment_terms"))),
+            ("", "")
         ]
         return self._card("Operations", self._grid_table(rows))
 
@@ -1096,66 +1127,81 @@ body {{
         ]
 
         ref = html.escape(str(self._enq_ref or "N/A"))
-        return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>FINCHECK Business Credit Report — {ref}</title>
-  <style>{self._css()}</style>
-</head>
-<body><div class="report">{"".join(parts)}</div></body>
-</html>"""
+        return f"""
+            <!DOCTYPE html>
+            <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>FINCHECK Business Credit Report — {ref}</title>
+                    <style>{self._css()}</style>
+                </head>
+                <body>
+                    <div class="report">
+                        {"".join(parts)}
+                        </div>
+                    </body>
+            </html>
+        """
 
     # ── Financial attachment ──────────────────────────────────────────────────
 
-    def _resolve_file_path(self) -> Optional[str]:
+    def _resolve_storage_name(self) -> Optional[str]:
         fin = self._subject.get("financials") or {}
         file_url = fin.get("financials_file")
         if not file_url:
             return None
-        if os.path.isabs(file_url) and os.path.isfile(file_url):
-            return file_url
+
         media_url = _media_url().rstrip("/")
-        media_root = _media_root()
-        rel = file_url[len(media_url):] if file_url.startswith(media_url) else file_url
+
+        if file_url.startswith(("http://", "https://")):
+            path = urlparse(file_url).path
+        else:
+            path = file_url
+
+        rel = path[len(media_url):] if path.startswith(media_url) else path
         rel = rel.lstrip("/")
-        path = os.path.join(media_root, rel)
-        return path if os.path.isfile(path) else None
+
+        return rel if default_storage.exists(rel) else None
 
     def _attachment_as_pdf(self) -> Optional[bytes]:
-        path = self._resolve_file_path()
-        if not path:
+        name = self._resolve_storage_name()
+        print(name or "None name::::")
+        if not name:
             return None
-        ext = os.path.splitext(path)[1].lower()
-        if ext == ".pdf":
-            with open(path, "rb") as fh:
-                return fh.read()
-        if ext in (".jpg", ".jpeg", ".png", ".gif", ".webp"):
-            return self._image_to_pdf(path, ext)
-        if ext in (".xlsx", ".xls"):
-            return self._excel_to_pdf(path)
+        ext = os.path.splitext(name)[1].lower()
+        try:
+            if ext == ".pdf":
+                with default_storage.open(name, "rb") as fh:
+                    return fh.read()
+            if ext in (".jpg", ".jpeg", ".png", ".gif", ".webp"):
+                return self._image_to_pdf(name, ext)
+            if ext in (".xlsx", ".xls"):
+                return self._excel_to_pdf(name)
+        except Exception:
+            return None
         return None
 
     @staticmethod
-    def _image_to_pdf(path: str, ext: str) -> bytes:
+    def _image_to_pdf(name: str, ext: str) -> bytes:
         mime = {
             ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
             ".png": "image/png", ".gif": "image/gif",
             ".webp": "image/webp",
         }.get(ext, "image/jpeg")
-        with open(path, "rb") as fh:
+        with default_storage.open(name, "rb") as fh:
             b64 = base64.b64encode(fh.read()).decode()
         src = f"data:{mime};base64,{b64}"
         return weasyprint.HTML(string=f"""<!DOCTYPE html><html><head>
-<style>@page{{size:A4;margin:10mm}}body{{margin:0;display:flex;justify-content:center}}
-img{{max-width:100%;max-height:267mm;object-fit:contain}}</style></head>
-<body><img src="{src}" alt="Financial Statements"></body></html>""").write_pdf()
+    <style>@page{{size:A4;margin:10mm}}body{{margin:0;display:flex;justify-content:center}}
+    img{{max-width:100%;max-height:267mm;object-fit:contain}}</style></head>
+    <body><img src="{src}" alt="Financial Statements"></body></html>""").write_pdf()
 
     @staticmethod
-    def _excel_to_pdf(path: str) -> bytes:
+    def _excel_to_pdf(name: str) -> bytes:
         try:
             import openpyxl
-            wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+            with default_storage.open(name, "rb") as fh:
+                wb = openpyxl.load_workbook(fh, read_only=True, data_only=True)
             ws = wb.active
             hdr, body_rows = None, []
             for i, row in enumerate(ws.iter_rows(values_only=True)):
@@ -1170,17 +1216,17 @@ img{{max-width:100%;max-height:267mm;object-fit:contain}}</style></head>
                 for r in body_rows
             )
             return weasyprint.HTML(string=f"""<!DOCTYPE html><html><head>
-<style>@page{{size:A4 landscape;margin:10mm}}body{{font-family:Arial;font-size:8pt}}
-table{{border-collapse:collapse;width:100%}}th{{background:#051C2C;color:#fff;padding:5px 8px}}
-td{{border:1px solid #E2E8F0;padding:4px 8px}}tr:nth-child(even) td{{background:#F8FAFC}}</style>
-</head><body><h3 style="color:#051C2C;margin-bottom:8px">Financial Statements</h3>
-<table><thead><tr>{ths}</tr></thead><tbody>{trs}</tbody></table></body></html>""").write_pdf()
+    <style>@page{{size:A4 landscape;margin:10mm}}body{{font-family:Arial;font-size:8pt}}
+    table{{border-collapse:collapse;width:100%}}th{{background:#051C2C;color:#fff;padding:5px 8px}}
+    td{{border:1px solid #E2E8F0;padding:4px 8px}}tr:nth-child(even) td{{background:#F8FAFC}}</style>
+    </head><body><h3 style="color:#051C2C;margin-bottom:8px">Financial Statements</h3>
+    <table><thead><tr>{ths}</tr></thead><tbody>{trs}</tbody></table></body></html>""").write_pdf()
         except ImportError:
             return weasyprint.HTML(string="""<!DOCTYPE html><html><head>
-<style>@page{size:A4;margin:20mm}body{font-family:Arial;text-align:center;padding-top:80mm;color:#374151}</style>
-</head><body><h2 style="color:#051C2C">Financial Statements</h2>
-<p style="margin-top:10px">Excel file attached — please refer to the original spreadsheet.</p>
-</body></html>""").write_pdf()
+    <style>@page{size:A4;margin:20mm}body{font-family:Arial;text-align:center;padding-top:80mm;color:#374151}</style>
+    </head><body><h2 style="color:#051C2C">Financial Statements</h2>
+    <p style="margin-top:10px">Excel file attached — please refer to the original spreadsheet.</p>
+    </body></html>""").write_pdf()
 
     def _append_financial_attachment(self, main_pdf: bytes) -> bytes:
         attachment = self._attachment_as_pdf()

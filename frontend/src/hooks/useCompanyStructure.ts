@@ -1,5 +1,5 @@
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
-import type { CompanyStructureProps, Report } from "@/types/core";
+import type { Company, CompanyStructureProps, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -53,12 +53,12 @@ function useCompanyStructure({
             url :`/api/companies/${subject_object_id}/`,
             mode : "update",
             data : {
-                structure_data :  changes
+                structure :  changes
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data)=>{
-                cache.set(["subject"], data)
+            onSuccess:(data:Company)=>{
+                cache.set(["subject", "structure"], data.structure)
                 toast.success("Company structure updated successfully.")
             },
             onError : (error) => handleAxiosError(error)

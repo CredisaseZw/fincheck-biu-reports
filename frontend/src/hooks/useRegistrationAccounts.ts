@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useEffect } from "react";
-import type { RegistrationsAccountsProps, Report } from "@/types/core";
+import type { Company, Individual, RegistrationsAccountsProps, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { toast } from "sonner";
@@ -69,8 +69,8 @@ function useRegistrationAccounts({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data)=>{
-                cache.set(["subject"], data)
+            onSuccess:(data: Company | Individual)=>{
+                cache.set(["subject", "registration_accounts"], data.registration_accounts)
                 toast.success("Registration accounts Updated successfully.")
             },
             onError : (error) => handleAxiosError(error)
