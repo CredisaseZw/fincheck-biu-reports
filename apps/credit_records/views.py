@@ -27,6 +27,10 @@ from .serializers import (
     PublicInformationWriteSerializer
 )
 from rest_framework.viewsets import GenericViewSet
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 
 class CreditRecordsViewSet(GenericViewSet):
@@ -58,6 +62,7 @@ class CreditRecordsViewSet(GenericViewSet):
         )
         error = validate_serializer(serializer=serializer)
         if error:
+            logger.error(f"Validation error in _update_record: {serializer.errors}")
             return error
         
         serializer.save()
@@ -71,6 +76,7 @@ class CreditRecordsViewSet(GenericViewSet):
         serializer_ = serializer_class(data = data)
         error = validate_serializer(serializer = serializer_)
         if error:
+            logger.error(f"Validation error in _create_record: {serializer_.errors}")
             return error
 
         serializer_.save()

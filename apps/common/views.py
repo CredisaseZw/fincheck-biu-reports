@@ -7,6 +7,9 @@ from apps.utils.permissions import IsStaffUser
 from apps.utils.helpers import validate_serializer, get_content_type_id
 from .models import Financials, TradeReferences, BankerAccounts
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 class FinancialsViewSet(
     GenericViewSet,
@@ -40,6 +43,7 @@ class FinancialsViewSet(
         serializer = FinancialsWriteSerializer(data=data)
         error = validate_serializer(serializer=serializer)
         if error:
+            logger.error(f"Validation error in FinancialsViewSet.create: {serializer.errors}")
             return error
 
         serializer.save()
@@ -76,6 +80,7 @@ class FinancialsViewSet(
         )
         error = validate_serializer(serializer=serializer)
         if error:
+            logger.error(f"Validation error in FinancialsViewSet.update: {serializer.errors}")
             return error
 
         serializer.save()

@@ -6,8 +6,13 @@ from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
 from .filters import ReportSearchFilter
 from rest_framework.decorators import action
+from django.db import transaction
 from django.utils import timezone
 from apps.reports.GenerateReport import FincheckReportPDF
+import logging
+
+logger = logging.getLogger(__name__)
+
 class ReportViewSet(BaseJSONViewSet):
     filter_backends = [ReportSearchFilter]
     queryset = Report.objects.all()
@@ -77,12 +82,13 @@ class ReportViewSet(BaseJSONViewSet):
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
         return super().update(request, *args, **kwargs)
     
+
     @action(url_path="finalize-report", detail=True, methods=["POST"])
     def finalize_report(self, request, *args, **kwargs):
         report = self.get_object()
-        
+
         if report.status == report.StatusChoices.FINALIZED:
-            return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
 
         if report.overall_risk_rating in (None, ""):
             return Response(
@@ -90,16 +96,15 @@ class ReportViewSet(BaseJSONViewSet):
                 status=STATUS.HTTP_400_BAD_REQUEST,
             )
 
-        report.status = Report.StatusChoices.FINALIZED
-        report.finalized_at = timezone.now()
-        report.snapshot = ReportSerializer(report).data
-        report.save()
-
-        pdf_url = FincheckReportPDF(report).save_to_report(report)
-        report.save(update_fields=["report_pdf"])
+        with transaction.atomic():
+            report.status = Report.StatusChoices.FINALIZED
+            report.finalized_at = timezone.now()
+            report.snapshot = ReportSerializer(report).data
+            pdf_url = FincheckReportPDF(report).save_to_report(report)
+            report.save(update_fields=["status", "finalized_at", "snapshot", "report_pdf"])
 
         return Response({"url": pdf_url}, status=STATUS.HTTP_200_OK)
-    
+        
 
 
 

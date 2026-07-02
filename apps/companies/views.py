@@ -21,6 +21,10 @@ from apps.shareholding.serializers import (
     ShareholdingsSerializers,
     ShareholderWriteSerializer
 )
+import logging
+
+logger = logging.getLogger(__name__)
+
 class CompaniesViewSet(BaseJSONViewSet):
     filterset_fields = ["refer_type"]
     search_fields = ["registered_name", "trading_name"]   
@@ -66,6 +70,7 @@ class CompaniesViewSet(BaseJSONViewSet):
             serializer = CompanyDirectorWriteSerializer(data=d)
             error = validate_serializer(serializer=serializer)
             if error:
+                logger.error(f"Validation error for director: {serializer.errors}")
                 return error
             validated_directors.append((d.get("id"), serializer.validated_data))
 

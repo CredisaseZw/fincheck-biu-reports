@@ -280,8 +280,6 @@ function AddReportDialogue({ report_item }: props) {
                             </Button>
                             : 
                             report &&
-                            report_item && 
-                            !headerEditMode &&
                             <Button
                                 disabled ={isPending}
                                 className={isPending ? "cursor-not-allowed" :""}

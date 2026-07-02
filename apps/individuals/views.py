@@ -6,6 +6,10 @@ from .serializers import (
     IndividualUpdateSerializer,
 )
 from apps.utils.base_viewset import BaseJSONViewSet
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 class IndividualsViewSet(BaseJSONViewSet):
     """

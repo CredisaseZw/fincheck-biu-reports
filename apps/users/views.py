@@ -8,6 +8,9 @@ from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerial
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from apps.utils.helpers import validate_serializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 @api_view(['POST'])
@@ -44,6 +47,7 @@ def refresh_token(request, *args, **kwargs):
             "refresh": str(token),
         }, status=STATUS.HTTP_200_OK)
     except TokenError as e:
+        logger.error(f"Token refresh failed: {e}", exc_info=True)
         return Response({"error": str(e)}, status=STATUS.HTTP_401_UNAUTHORIZED)
 
 
