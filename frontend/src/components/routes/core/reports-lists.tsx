@@ -25,11 +25,6 @@ function Reports() {
         isError,
     } = useReports();
 
-    const openReportInNewTab = (url: string) => () => {
-        if (!url) return;
-        window.open(url, "_blank", "noopener,noreferrer");
-    };
-
     return (
     <div className="main-card">
         <ColumnsContainer>
@@ -96,13 +91,11 @@ function Reports() {
                                         
                                         (item.status === "finalized")
                                         ? <OptionButton
-                                            onClick={()=>{
-                                                if(item.report_pdf){
-                                                    openReportInNewTab(item.report_pdf)
-                                                    return
-                                                }
-                                                toast.error("Report PDF not available")
-                                            }}
+                                            onClick={() =>
+                                                item.report_pdf
+                                                    ? window.open(item.report_pdf, "_blank", "noopener,noreferrer")
+                                                    : toast.error("Report PDF not available")
+                                            }
                                             Icon={ExternalLink}
                                             label="View Report"
                                         /> 

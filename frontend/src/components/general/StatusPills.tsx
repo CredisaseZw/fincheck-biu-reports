@@ -13,15 +13,15 @@ interface StatusPillProps {
 
 const variantStyles: Record<Variant, string> = {
   success:
-    "bg-green-100 text-green-800 border border-green-200",
+    "bg-green-100 text-green-800 border border-green-200 dark:bg-green-800/30 ",
   danger:
-    "bg-red-100 text-red-700 border border-red-200",
+    "bg-red-100 text-red-700 border border-red-200 dark:bg-red-800/30 dark:text-red-400",
   warning:
-    "bg-yellow-100 text-yellow-800 border border-yellow-200",
+    "bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-yellow-800/30 dark:text-yellow-400",
   outline:
-    "bg-transparent border border-muted-foreground/30 text-foreground",
+    "bg-transparent border border-muted-foreground/30 text-foreground dark:bg-transparent dark:border-muted-foreground/30 dark:text-foreground",
   ghost:
-    "bg-muted text-foreground border border-transparent",
+    "bg-muted text-foreground border border-transparent dark:bg-muted/30 dark:text-foreground",
 }
 
 export function StatusPill({
