@@ -1,9 +1,7 @@
 import axios from "axios"
 import Cookies from "js-cookie"
 
-export const API_END_POINT = import.meta.env.MODE === "production" 
-? import.meta.env.BASE_URL 
-:"http://127.0.0.1:8000"
+export const API_END_POINT = import.meta.env.BASE_URL ?? "http://127.0.0.1:8000"
 
 export const api = axios.create({
     baseURL : API_END_POINT,
