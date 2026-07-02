@@ -5,7 +5,10 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-   resolve: {
+  server: {
+    host: '0.0.0.0',
+  },
+  resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },

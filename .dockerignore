@@ -1,0 +1,13 @@
+env/
+.git/
+.gitignore
+.vscode/
+.cursor/
+.agents/
+__pycache__/
+*.pyc
+frontend/
+media/
+staticfiles/
+.env
+.env.docker

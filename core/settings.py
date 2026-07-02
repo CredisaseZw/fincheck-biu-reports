@@ -14,7 +14,7 @@ from pathlib import Path
 import os
 import dotenv
 from datetime import timedelta
-dotenv.load_dotenv(override=True)
+dotenv.load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,15 +25,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-kr!&d@o4jnm-)c-d$(q9o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-if DEBUG:
-    ALLOWED_HOSTS = [
-        'localhost',
-        '127.0.0.1'
-    ]
-else :
-    ALLOWED_HOSTS = [
-    #    'fincheck-credit-report.onrender.com' assumption
-    ]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+_extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
+if _extra_hosts:
+    ALLOWED_HOSTS += [h.strip() for h in _extra_hosts.split(',') if h.strip()]
 
 
 # Application definition
@@ -164,6 +159,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # REST Framework
 REST_FRAMEWORK = {
@@ -239,8 +235,8 @@ SIMPLE_JWT = {
 }
 
 # CELERY SETTINGS (MATCH RENTSAFE SETTINGS)
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"

@@ -15,6 +15,7 @@ import FinalizedReportDialog from "@/dialogues/FinalizedReportDialogue";
 import useReports from "@/hooks/useReports";
 import { getEntityName, getFormattedDate } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 
 function Reports() {
     const {
@@ -93,9 +94,15 @@ function Reports() {
                                 <OptionsWrapper>
                                     {
                                         
-                                        (item.status === "finalized" && item.report_pdf)
+                                        (item.status === "finalized")
                                         ? <OptionButton
-                                            onClick={openReportInNewTab(item.report_pdf)}
+                                            onClick={()=>{
+                                                if(item.report_pdf){
+                                                    openReportInNewTab(item.report_pdf)
+                                                    return
+                                                }
+                                                toast.error("Report PDF not available")
+                                            }}
                                             Icon={ExternalLink}
                                             label="View Report"
                                         /> 

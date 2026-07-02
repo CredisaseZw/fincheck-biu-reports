@@ -870,9 +870,9 @@ body {{
             ("Property Ownership", self._u(op.get("property_ownership"))),
             ("Operational Areas", self._u(op.get("operational_areas"))),
             ("Import / Export", self._u(op.get("import_export"))),
-            ("Purchase Payment Terms", self._u(op.get("purchases_payment_terms", "").replace("_", " "))),
-            ("Purchase Supplier Scope", self._u(op.get("purchase_supplier_scope", "").replace("_", " "))),
-            ("Sales Payment Terms", self._u(op.get("sales_payment_terms", "").replace("_", " "))),
+            ("Purchase Payment Terms", self._u((op.get("purchases_payment_terms") or "").replace("_", " "))),
+            ("Purchase Supplier Scope", self._u((op.get("purchase_supplier_scope") or "").replace("_", " "))),
+            ("Sales Payment Terms", self._u((op.get("sales_payment_terms") or "").replace("_", " "))),
             ("", "")
         ]
         return self._card("Operations", self._grid_table(rows))
