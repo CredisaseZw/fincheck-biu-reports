@@ -359,7 +359,7 @@ class Command(BaseCommand):
 
             if Company.objects.filter(registered_name=data["registered_name"]).exists():
                 self.stdout.write(
-                    self.style.WARNING(f"  ⏭  {data['registered_name']} already exists.")
+                    self.style.WARNING(f"  {data['registered_name']} already exists.")
                 )
                 skipped += 1
                 continue
@@ -375,7 +375,7 @@ class Command(BaseCommand):
                     CompanyOperations.objects.create(company=company, **operations_data)
 
             self.stdout.write(
-                self.style.SUCCESS(f"  ✔  {company.registered_name} created.")
+                self.style.SUCCESS(f"  {company.registered_name} created.")
             )
             created += 1
 
@@ -391,7 +391,7 @@ class Command(BaseCommand):
 
             if Individuals.objects.filter(national_id=data["national_id"]).exists():
                 self.stdout.write(
-                    self.style.WARNING(f"  ⏭  {data['full_name']} already exists.")
+                    self.style.WARNING(f"  {data['full_name']} already exists.")
                 )
                 skipped += 1
                 continue
@@ -409,7 +409,7 @@ class Command(BaseCommand):
                     )
 
             self.stdout.write(
-                self.style.SUCCESS(f"  ✔  {individual.full_name} created.")
+                self.style.SUCCESS(f"   {individual.full_name} created.")
             )
             created += 1
 
@@ -422,13 +422,13 @@ class Command(BaseCommand):
         total_skipped = 0
 
         if mode in ("companies", "all"):
-            self.stdout.write(self.style.HTTP_INFO("\n📦 Seeding Companies..."))
+            self.stdout.write(self.style.HTTP_INFO("\n Seeding Companies..."))
             created, skipped = self._seed_companies()
             total_created += created
             total_skipped += skipped
 
         if mode in ("individuals", "all"):
-            self.stdout.write(self.style.HTTP_INFO("\n👤 Seeding Individuals..."))
+            self.stdout.write(self.style.HTTP_INFO("\n Seeding Individuals..."))
             created, skipped = self._seed_individuals()
             total_created += created
             total_skipped += skipped
@@ -436,6 +436,6 @@ class Command(BaseCommand):
         self.stdout.write("")
         self.stdout.write(
             self.style.SUCCESS(
-                f"✅ Done! Created: {total_created} | Skipped: {total_skipped}"
+                f"Done! Created: {total_created} | Skipped: {total_skipped}"
             )
         )
