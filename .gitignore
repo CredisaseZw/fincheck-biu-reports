@@ -1,5 +1,4 @@
 .env
-.env.docker
 .vscode/*
 !.vscode/extensions.json
 .idea
