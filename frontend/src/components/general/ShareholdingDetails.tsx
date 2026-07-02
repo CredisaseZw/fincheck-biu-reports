@@ -54,8 +54,8 @@ function ShareholdingDetails({
                         )}
                     </div>
                 </ColumnsContainer>
-
-                {fields.map((field, index) => (
+                {   fields.length > 0 ?
+                    fields.map((field, index) => (
                     <div key={field.id} className="flex flex-col gap-3 border rounded-md p-4">
 
                         <div className="flex justify-between items-center">
@@ -120,7 +120,9 @@ function ShareholdingDetails({
                             </div>
                         </ColumnsContainer>
                     </div>
-                ))}
+                ))
+                : <span className="text-muted-foreground text-center">No Shareholders added. Press "Add Shareholder"</span>
+            }
 
                 <div className="flex justify-between">
                     <Button

@@ -20,24 +20,27 @@ export default function ReportHeaderCard({
                         <p className="text-sm font-medium opacity-80">
                             Client Name
                         </p>
-                        <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
-                            {
-                                default_header?.client_default_search ?? 
-                                <LoadingIndicator variant="button"/> 
-                            }
-                        </h2>
+                        {
+                            default_header?.client_default_search ? (
+                                <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
+                                    {default_header.client_default_search}
+                                </h2>
+                            ) :  <LoadingIndicator variant="button"/> 
+                        }
                     </div>
 
                     <div>
                         <p className="text-sm font-medium opacity-80">
                             Subject Name
                         </p>
-                        <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
-                            {
-                                default_header?.subject_default_search ??
-                                <LoadingIndicator variant="button"/> 
-                            }
-                        </h2>
+                        {
+                            default_header?.subject_default_search ? (
+                                <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
+                                    {default_header.subject_default_search}
+                                </h2>
+                            ) : <LoadingIndicator variant="button"/>   
+                        
+                        }
                     </div>
                 </div>
 
@@ -48,12 +51,13 @@ export default function ReportHeaderCard({
                         <p className="text-sm font-medium opacity-80">
                             Enquiry Reference
                         </p>
-                        <p className="mt-1 text-2xl font-bold">
-                            {
-                                default_header?.enquiry_reference ??
-                                <LoadingIndicator variant="button"/> 
-                            }
-                        </p>
+                        {
+                            default_header?.enquiry_reference ? (
+                                <p className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
+                                    {default_header.enquiry_reference}
+                                </p>
+                            ) : <LoadingIndicator variant="button"/>
+                        }
                     </div>
 
                     <div>

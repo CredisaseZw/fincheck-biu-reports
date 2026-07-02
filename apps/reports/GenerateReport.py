@@ -658,8 +658,7 @@ body {{
             fin = self._snapshot.get("finalized_at")
         dlbl = "FINALIZED ON" if fin else "REPORT GENERATED ON"
         dval = self._date(fin) if fin else created
-        wm = ""
-        #wm = '<div class="watermark">DRAFT</div>' if self._status == "draft" else ""
+        wm = '<div class="watermark">DRAFT</div>' if self._status == "draft" else ""
         subject_name = self._subject_name()
 
         return f"""{wm}
@@ -871,13 +870,13 @@ body {{
             ("Property Ownership", self._u(op.get("property_ownership"))),
             ("Operational Areas", self._u(op.get("operational_areas"))),
             ("Import / Export", self._u(op.get("import_export"))),
-            ("Purchase Payment Terms", self._u(op.get("purchases_payment_terms"))),
-            ("Purchase Supplier Scope", self._u(op.get("purchase_supplier_scope"))),
-            ("Sales Payment Terms", self._u(op.get("sales_payment_terms"))),
+            ("Purchase Payment Terms", self._u(op.get("purchases_payment_terms", "").replace("_", " "))),
+            ("Purchase Supplier Scope", self._u(op.get("purchase_supplier_scope", "").replace("_", " "))),
+            ("Sales Payment Terms", self._u(op.get("sales_payment_terms", "").replace("_", " "))),
             ("", "")
         ]
         return self._card("Operations", self._grid_table(rows))
-
+    
     def _render_individual_details(self) -> str:
         s = self._subject
         rows = [
@@ -1165,7 +1164,6 @@ body {{
 
     def _attachment_as_pdf(self) -> Optional[bytes]:
         name = self._resolve_storage_name()
-        print(name or "None name::::")
         if not name:
             return None
         ext = os.path.splitext(name)[1].lower()
