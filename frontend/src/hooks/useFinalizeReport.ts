@@ -11,7 +11,6 @@ function useFinalizeReport() {
 
     const { mutate, isPending } = useInstanceMutation()
     const onFinalize = (id: number, callback?: () => void) => {
-        const newTab = window.open("", "_blank", "noopener,noreferrer");
         mutate({ url: `/api/reports/${id}/finalize-report/`,
         mode: "create"},
             {
@@ -23,12 +22,7 @@ function useFinalizeReport() {
                     });
 
                     callback?.();
-
-                    if (newTab) {
-                        newTab.location.href = reportUrl;
-                    } else {
-                        window.open(reportUrl, "_blank", "noopener,noreferrer");
-                    }
+                    window.open(reportUrl, "_blank", "noopener,noreferrer");
                 },
                 onError: (e) => handleAxiosError(e),
             }
