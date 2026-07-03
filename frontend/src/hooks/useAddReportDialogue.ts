@@ -110,6 +110,7 @@ function useAddReportDialogue(list_report?: ListReport) {
       const company = report.subject as Company
       setCompanyOverview({
         id: company.id,
+        registration_number: company?.registration_number ?? "",
         registered_name: company?.registered_name ?? "",
         trading_name: company?.trading_name ?? "",
         address_registered: company?.address_registered 

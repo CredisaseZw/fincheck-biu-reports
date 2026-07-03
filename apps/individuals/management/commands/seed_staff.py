@@ -7,7 +7,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         users = [
-            {
+            {   
+                "first_name" : "Admin",
+                "last_name": "Admin",
                 "email": "admin@admin.com",
                 "password": "admin",
                 "is_staff": True,
@@ -15,6 +17,8 @@ class Command(BaseCommand):
                 "label": "Default admin",
             },
             {
+                "first_name" : "Fincheck",
+                "last_name": "Admin",
                 "email": "gilbert2klopah@gmail.com",
                 "password": "admin",
                 "is_staff": True,

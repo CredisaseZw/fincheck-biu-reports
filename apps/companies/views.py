@@ -9,6 +9,7 @@ from .serializers import (
     CompanyUpdateSerializer,
 )
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework import status as STATUS
 from apps.directors.models import CompanyDirector
 from apps.utils.helpers import validate_serializer
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class CompaniesViewSet(BaseJSONViewSet):
     filterset_fields = ["refer_type"]
-    search_fields = ["registered_name", "trading_name"]   
+    search_fields = ["registered_name", "trading_name", "registration_number"]   
     ordering_fields = ["created_at", "registered_name", "trading_name"]
 
     serializer_class = CompanySerializer
@@ -42,13 +43,14 @@ class CompaniesViewSet(BaseJSONViewSet):
         "trade_references",
         "financials",
         "registration_accounts",
-        "professional_partners"
+        "professional_partners",
+        "updated_by"
     ).select_related(
         "structure",
         "operations",
         "overview",
         "shareholdings"
-    ).filter(is_deleted = False)
+).filter(is_deleted = False)
     
     def get_serializer_class(self):
         if self.action == "list":
@@ -61,7 +63,8 @@ class CompaniesViewSet(BaseJSONViewSet):
     
 
     @action(detail=True, methods=["POST"], url_path="directors")
-    def update_or_create_directors(self, request, *args, **kwargs):
+    def update_or_create_directors(self, request: Request, *args, **kwargs):
+        user = request.user
         company = self.get_object()
         directors = request.data.get("directors", [])
 
@@ -76,6 +79,7 @@ class CompaniesViewSet(BaseJSONViewSet):
 
         with transaction.atomic():
             for director_id, validated_data in validated_directors:
+                validated_data['updated_by'] = user
                 if director_id:
                     CompanyDirector.objects.filter(
                         pk=director_id,
@@ -94,7 +98,8 @@ class CompaniesViewSet(BaseJSONViewSet):
         )
 
     @action(detail=True, methods=["POST"], url_path="shareholders")
-    def update_or_create_shareholders(self, request, *args, **kwargs):
+    def update_or_create_shareholders(self, request:Request, *args, **kwargs):
+        user = request.user
         company = self.get_object()
         data = request.data.copy()
         shareholders = data.pop("shareholders", [])
@@ -112,14 +117,14 @@ class CompaniesViewSet(BaseJSONViewSet):
                 error = validate_serializer(serializer=shareholding_serializer)
                 if error:
                     return error
-                shareholding = shareholding_serializer.save()
+                shareholding = self.perform_update(serializer=shareholding_serializer)
             else:
                 data["company"] = company.id
                 shareholding_serializer = CompanyShareholdingWriteSerializer(data=data)
                 error = validate_serializer(serializer=shareholding_serializer)
                 if error:
                     return error
-                shareholding = shareholding_serializer.save()  
+                shareholding = self.perform_create(serializer=shareholding_serializer)  
 
             validated_shareholders = []
             for s in shareholders:
@@ -130,6 +135,7 @@ class CompaniesViewSet(BaseJSONViewSet):
                 validated_shareholders.append((s.get("id"), shareholder_serializer.validated_data))
 
             for shareholder_id, validated_data in validated_shareholders:
+                validated_data['updated_by'] = user
                 if shareholder_id:
                     Shareholder.objects.filter(
                         pk=shareholder_id,

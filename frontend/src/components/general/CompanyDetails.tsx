@@ -18,6 +18,7 @@ import type { EntityValue } from "@/types/core";
 import { Switch } from "../ui/switch";
 
 interface props {
+    isReport?: boolean
     subject_type : EntityValue | null
     onSuccess?: (id: number) => void
     report_id?: number | undefined
@@ -25,6 +26,7 @@ interface props {
 }
 
 function CompanyDetails({
+    isReport = true,
     company_overview,
     report_id,
     subject_type,
@@ -63,62 +65,16 @@ function CompanyDetails({
                             <Input {...register("trading_name")} />
                         </div>
                     </ColumnsContainer>
-                    <ColumnsContainer numberOfCols={3}>
+                    <ColumnsContainer>
                         <div className="form-group">
-                            <Label>Email</Label>
-                            <Input type="email" {...register("email")} />
-                            {errors.email && (
-                                <p className="text-destructive text-sm">{errors.email.message}</p>
-                            )}
+                            <Label>Registration Number</Label>
+                            <Input {...register("registration_number")} />    
                         </div>
-
-                        <div className="form-group">
-                            <Label>Telephone</Label>
-                            <Input {...register("telephone_number")} />
-                        </div>
-
-                        <div className="form-group">
-                            <Label>Mobile</Label>
-                            <Input {...register("mobile_number")} />
-                        </div>
-                    </ColumnsContainer>
-                     <div className="form-group">
-                        <Label>Website</Label>
-                        <Input {...register("website")} />
-                        {errors.website && (
-                            <p className="text-destructive text-sm">{errors.website.message}</p>
-                        )}
-                    </div>
-                    <ColumnsContainer numberOfCols={3} gapClass="gap-4">
                         <div className="form-group">
                             <Label>Date of Registration</Label>
                             <Input type="date" {...register("overview.date_of_registration")} />
                         </div>
-                        <div className="form-group">
-                            <Label>Number of Employees</Label>
-                            <Input type="number" {...register("overview.number_of_employees", numericField)} />
-                        </div>
-
-                        <div className="form-group">
-                            <Label>Last Financial Result</Label>
-                            <Input {...register("overview.last_financial_result")} />
-                        </div>
                     </ColumnsContainer>
-                    <ColumnsContainer>
-                         <div className="form-group">
-                            <Label>Net Asset Value</Label>
-                            <Input {...register("overview.net_asset_value")} />
-                        </div>
-
-                        <div className="form-group">
-                            <Label>Authorized Share Capital</Label>
-                            <Input {...register("overview.authorized_share_capital")} />
-                        </div>
-                    </ColumnsContainer>
-                    <div className="form-group">
-                        <Label>Issued Share Capital</Label>
-                        <Input {...register("overview.issued_share_capital")} />
-                    </div>
                     <ColumnsContainer numberOfCols={4}>
                         <div className="form-group">
                             <Label>Trading Status</Label>
@@ -205,6 +161,65 @@ function CompanyDetails({
                             />
                         </div>
                     </ColumnsContainer>
+                    <ColumnsContainer gapClass="gap-4">
+                        
+                        <div className="form-group">
+                            <Label>Number of Employees</Label>
+                            <Input type="number" {...register("overview.number_of_employees", numericField)} />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Last Financial Result</Label>
+                            <Input {...register("overview.last_financial_result")} />
+                        </div>
+                    </ColumnsContainer>
+                    {
+                        isReport && (
+                        <>
+                            <div className="form-group">
+                                <Label>Issued Share Capital</Label>
+                                <Input {...register("overview.issued_share_capital")} />
+                            </div>
+                            <ColumnsContainer>
+                                <div className="form-group">
+                                    <Label>Net Asset Value</Label>
+                                    <Input {...register("overview.net_asset_value")} />
+                                </div>
+
+                                <div className="form-group">
+                                    <Label>Authorized Share Capital</Label>
+                                    <Input {...register("overview.authorized_share_capital")} />
+                                </div>
+                            </ColumnsContainer>
+                        </>
+                    )
+                    }
+                    <ColumnsContainer numberOfCols={3}>
+                        <div className="form-group">
+                            <Label>Email</Label>
+                            <Input type="email" {...register("email")} />
+                            {errors.email && (
+                                <p className="text-destructive text-sm">{errors.email.message}</p>
+                            )}
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Telephone</Label>
+                            <Input {...register("telephone_number")} />
+                        </div>
+
+                        <div className="form-group">
+                            <Label>Mobile</Label>
+                            <Input {...register("mobile_number")} />
+                        </div>
+                    </ColumnsContainer>
+                    <div className="form-group">
+                        <Label>Website</Label>
+                        <Input {...register("website")} />
+                        {errors.website && (
+                            <p className="text-destructive text-sm">{errors.website.message}</p>
+                        )}
+                    </div>
                     <AddressFieldset
                         showRequired
                         register={register}

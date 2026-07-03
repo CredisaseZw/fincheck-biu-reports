@@ -6,6 +6,7 @@ from apps.individuals.models import Individuals, EmploymentInformation, NextOfKi
 
 COMPANIES = [
     {
+        "registration_number": "123456789",
         "registered_name": "Sunrise Foods Zimbabwe",
         "address_registered": "12 Julius Nyerere Way, Level 2, Zimbabwe, Harare, Harare Province, 00000",
         "address_operations": "45 Coventry Road, Unit 5, Zimbabwe, Harare, Harare Province, 00001",
@@ -46,6 +47,7 @@ COMPANIES = [
         },
     },
     {
+        "registration_number": "123459",
         "registered_name": "TechNova Solutions Zimbabwe",
         "address_registered": "88 Samora Machel Avenue, Suite 10, Zimbabwe, Harare, Harare Province, 00002",
         "address_operations": "5 Borrowdale Road, Office 4, Zimbabwe, Harare, Harare Province, 00003",
@@ -86,6 +88,7 @@ COMPANIES = [
         },
     },
     {
+        "registration_number": "456789",
         "registered_name": "GreenFields Agriculture Pvt Ltd",
         "address_registered": "22 Enterprise Road, Farm Block B, Zimbabwe, Harare, Harare Province, 00004",
         "address_operations": "Farm 18, Mazowe, Zimbabwe, Mazowe, Mashonaland Central, 00005",
@@ -126,6 +129,7 @@ COMPANIES = [
         },
     },
     {
+        "registration_number": "12345679",
         "registered_name": "UrbanBuild Construction Ltd",
         "address_registered": "14 Nelson Mandela Avenue, Floor 3, Zimbabwe, Harare, Harare Province, 00006",
         "address_operations": "67 Airport Road, Plot 9, Zimbabwe, Harare, Harare Province, 00007",
@@ -165,7 +169,8 @@ COMPANIES = [
             "operational_areas": "Harare, Bulawayo, Mutare",
         },
     },
-    {
+    {   
+        "registration_number": "123/789",
         "registered_name": "BlueWave Transport Services",
         "address_registered": "30 Lobengula Street, Warehouse 2, Zimbabwe, Bulawayo, Bulawayo Province, 00008",
         "address_operations": "Industrial Site, Belmont, Zimbabwe, Bulawayo, Bulawayo Province, 00009",

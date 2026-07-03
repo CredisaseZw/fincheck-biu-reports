@@ -40,9 +40,10 @@ from apps.credit_records.serializers import (
 
 from django.contrib.contenttypes.models import ContentType
 from apps.directors.serializers import DirectorSerializer
+from apps.utils.base_serialisers import UpdatedBySerializerMixin
 from apps.shareholding.serializers import ShareholdingsSerializers
 # GET OPERATIONS
-class CompanyOverviewSerializer(serializers.ModelSerializer):
+class CompanyOverviewSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
     class Meta:
         model = CompanyOverview
         exclude = [
@@ -51,7 +52,7 @@ class CompanyOverviewSerializer(serializers.ModelSerializer):
             "company",
         ]
 
-class CompanyStructureSerializer(serializers.ModelSerializer):
+class CompanyStructureSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
     class Meta:
         model = CompanyStructure
         fields = [
@@ -59,10 +60,11 @@ class CompanyStructureSerializer(serializers.ModelSerializer):
             'subsidiaries',
             'associated_companies',
             'divisions',
-            'branches'
+            'branches',
+            'updated_by'
         ]
 
-class CompanyOperationsSerializer(serializers.ModelSerializer):
+class CompanyOperationsSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
     class Meta:
         model = CompanyOperations
         exclude = [
@@ -70,7 +72,7 @@ class CompanyOperationsSerializer(serializers.ModelSerializer):
             "updated_at",
             "company",
         ]
-class CompanySerializer(serializers.ModelSerializer):
+class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)
     structure = CompanyStructureSerializer(read_only=True)
     operations = CompanyOperationsSerializer(read_only=True)
@@ -88,7 +90,7 @@ class CompanySerializer(serializers.ModelSerializer):
    
     def to_representation(self, instance):
         data =  super().to_representation(instance)
-    
+
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
         financials = instance.financials.first()
@@ -109,12 +111,14 @@ class CompanyListSerializer(serializers.ModelSerializer):
             "company_name",
             "registered_name",
             "trading_name",
+            "registration_number",
             "refer_type",
             "email",
             "telephone_number",
             "is_active",
             "is_company_verified",
             "created_at",
+            'updated_by'
         ]
 
 #WRITE OPERATIONS
@@ -163,7 +167,7 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
                 **item
             )
 
-    def _create_oto_generic(self, instance, data, model, content_type):
+    def _create_oto_generic(self, instance, data, model, content_type, updated_by = None):
         if not data:
             return
         data = data.copy()
@@ -171,11 +175,13 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
         model.objects.create(
             subject_content_type=content_type,
             subject_object_id=instance.id,
+            updated_by = updated_by,
             **data
         )
 
 
     def create(self, validated_data):
+        updated_by = validated_data.get("updated_by", None) 
         overview_data = validated_data.pop("overview", None)
         structure_data = validated_data.pop("structure", None)
         operations_data = validated_data.pop("operations", None)
@@ -189,16 +195,25 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
             content_type = ContentType.objects.get_for_model(company)
 
             if overview_data:
-                CompanyOverview.objects.create(company=company, **overview_data)
+                CompanyOverview.objects.create(
+                    company=company, 
+                    updated_by = updated_by,
+                    **overview_data)
             if structure_data:
-                CompanyStructure.objects.create(company=company, **structure_data)
+                CompanyStructure.objects.create(
+                    company=company, 
+                    updated_by = updated_by,
+                    **structure_data)
             if operations_data:
-                CompanyOperations.objects.create(company=company, **operations_data)
+                CompanyOperations.objects.create(
+                    company=company, 
+                    updated_by = updated_by,
+                    **operations_data)
 
-            self._create_oto_generic(company, registration_accounts_data, RegistrationAccounts, content_type)
-            self._create_generic_relations(company, banker_accounts_data, BankerAccounts,content_type)
-            self._create_oto_generic(company, professional_partners_data, ProfessionalPartners, content_type)
-            self._create_generic_relations(company, trade_references_data, TradeReferences,content_type)
+            self._create_oto_generic(company, registration_accounts_data, RegistrationAccounts, content_type, updated_by)
+            self._create_generic_relations(company, banker_accounts_data, BankerAccounts,content_type, updated_by)
+            self._create_oto_generic(company, professional_partners_data, ProfessionalPartners, content_type, updated_by)
+            self._create_generic_relations(company, trade_references_data, TradeReferences,content_type, updated_by)
         return company
 
 class CompanyUpdateSerializer(serializers.ModelSerializer):
@@ -238,23 +253,25 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
         model = Company
         fields = "__all__"
     
-    def _update_generic_relations(self, company, data_list, model, content_type):
+    def _update_generic_relations(self, company, data_list, model, content_type, updated_by = None):
         for item in data_list:
             item_id = item.pop("id", None)
             model.objects.update_or_create(
                 pk=item_id,
                 defaults={
                     **item,
+                    'updated_by' : updated_by,
                     "subject_content_type": content_type,
                     "subject_object_id": company.id,
                 },
             )
 
-    def _update_oto_generic(self, instance, data, model, content_type):
+    def _update_oto_generic(self, instance, data, model, content_type, updated_by = None):
         if not data:
             return
         data = data.copy()
         data.pop("id", None)
+        data['updated_by'] = updated_by
         model.objects.update_or_create(
             subject_content_type=content_type,
             subject_object_id=instance.id,
@@ -262,6 +279,7 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
+        updated_by = validated_data.get("updated_by", None)
         overview_data = validated_data.pop("overview", None)
         structure_data = validated_data.pop("structure", None)
         operations_data = validated_data.pop("operations", None)
@@ -289,23 +307,26 @@ class CompanyUpdateSerializer(serializers.ModelSerializer):
 
             if overview_data:
                 overview_data.pop("id", None)
+                overview_data['updated_by'] = updated_by
                 CompanyOverview.objects.update_or_create(
                     company=instance, defaults=overview_data
                 )
             if structure_data:
                 structure_data.pop("id", None)
+                structure_data['updated_by'] = updated_by
                 CompanyStructure.objects.update_or_create(
                     company=instance, defaults=structure_data
                 )
             if operations_data:
                 operations_data.pop("id", None)
+                operations_data['updated_by'] = updated_by
                 CompanyOperations.objects.update_or_create(
                     company=instance, defaults=operations_data
                 )
 
-            self._update_oto_generic(instance, professional_partners_data, ProfessionalPartners, content_type)
-            self._update_oto_generic(instance, registration_accounts_data, RegistrationAccounts, content_type)
-            self._update_generic_relations(instance, banker_accounts_data, BankerAccounts, content_type)
-            self._update_generic_relations(instance, trade_references_data, TradeReferences,content_type)
+            self._update_oto_generic(instance, professional_partners_data, ProfessionalPartners, content_type, updated_by)
+            self._update_oto_generic(instance, registration_accounts_data, RegistrationAccounts, content_type, updated_by)
+            self._update_generic_relations(instance, banker_accounts_data, BankerAccounts, content_type, updated_by)
+            self._update_generic_relations(instance, trade_references_data, TradeReferences,content_type, updated_by)
         instance.refresh_from_db()
         return instance

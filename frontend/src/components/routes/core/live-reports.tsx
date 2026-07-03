@@ -17,7 +17,7 @@ import { getEntityName, getFormattedDate } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
-function Reports() {
+function LiveReports() {
     const {
         pagination,
         reports,
@@ -29,7 +29,7 @@ function Reports() {
     <div className="main-card">
         <ColumnsContainer>
             <SectionHeader
-                label="All Reports"
+                label="Live Reports"
                 subLabel="reports"
                 total={pagination?.count}
                 subTotal={reports.length}
@@ -116,4 +116,4 @@ function Reports() {
   )
 }
 
-export default Reports
+export default LiveReports

@@ -1,12 +1,12 @@
-import Reports from "@/components/routes/core/reports-lists";
+import LiveReports from "@/components/routes/core/live-reports";
 import type { RouteItem } from "@/types/core";
 import { FileText} from "lucide-react";
 
 export const CORE_ROUTES: RouteItem[] = [
   {
-    name: 'Reports',
-    link: '/reports',
+    name: 'Dashboard',
+    link: '/dashboard',
     icon: FileText,
-    component: Reports,
+    component: LiveReports,
   }
 ]

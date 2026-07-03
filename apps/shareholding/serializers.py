@@ -1,13 +1,13 @@
 from .models import Shareholder, CompanyShareholding
 from rest_framework import serializers
 from apps.utils.mini_serializers import MiniCompanySerializer
-
-class ShareholderSerializer(serializers.ModelSerializer):
+from apps.utils.base_serialisers import UpdatedBySerializerMixin
+class ShareholderSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Shareholder
         exclude = ['shareholding']
 
-class ShareholdingsSerializers(serializers.ModelSerializer):
+class ShareholdingsSerializers(UpdatedBySerializerMixin,serializers.ModelSerializer):
     shareholders = serializers.SerializerMethodField()
 
     class Meta:
@@ -18,13 +18,14 @@ class ShareholdingsSerializers(serializers.ModelSerializer):
             'numbers_of_shareholders',
             'shareholders',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'updated_by'
         ]
 
     def get_shareholders(self, obj):
         qs = obj.shareholders.order_by("created_at")
         return ShareholderSerializer(qs, many=True).data
-class CompanyShareholdingsSerializer(serializers.ModelSerializer):
+class CompanyShareholdingsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     company = MiniCompanySerializer(read_only = True, source = "shareholdings")
     shareholders = ShareholderSerializer(many = True, read_only =True)
     class Meta:
@@ -35,7 +36,8 @@ class CompanyShareholdingsSerializer(serializers.ModelSerializer):
             'numbers_of_shareholders',
             'shareholders',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'updated_by'
         ]
 
 class CompanyShareholdingWriteSerializer(serializers.ModelSerializer):

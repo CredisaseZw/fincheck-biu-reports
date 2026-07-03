@@ -7,14 +7,15 @@ from apps.utils.permissions import IsStaffUser
 from apps.utils.helpers import validate_serializer, get_content_type_id
 from .models import Financials, TradeReferences, BankerAccounts
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
+from apps.utils.base_viewset import UpdatedByMixin
 import logging
-
 logger = logging.getLogger(__name__)
 
 class FinancialsViewSet(
     GenericViewSet,
     CreateModelMixin,
     UpdateModelMixin,
+    UpdatedByMixin
 ):
     permission_classes = [IsStaffUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -43,10 +44,9 @@ class FinancialsViewSet(
         serializer = FinancialsWriteSerializer(data=data)
         error = validate_serializer(serializer=serializer)
         if error:
-            logger.error(f"Validation error in FinancialsViewSet.create: {serializer.errors}")
             return error
+        self.perform_create(serializer=serializer)
 
-        serializer.save()
         return Response(
             FinancialsSerializer(serializer.instance).data,
             status=STATUS.HTTP_201_CREATED
@@ -83,7 +83,7 @@ class FinancialsViewSet(
             logger.error(f"Validation error in FinancialsViewSet.update: {serializer.errors}")
             return error
 
-        serializer.save()
+        self.perform_update(serializer=serializer)
         return Response(
             FinancialsSerializer(serializer.instance).data,
             status=STATUS.HTTP_200_OK

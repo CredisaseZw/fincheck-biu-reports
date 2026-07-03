@@ -20,8 +20,10 @@ def report_pdf_path(instance, filename):
 class Report(BaseModelWithSubject):
     class StatusChoices(models.TextChoices):
         DRAFT = "draft", "Draft"
+        IN_PROGRESS = "in_progress", "In Progress"
+        SUSPENDED = "suspended", "Suspended"
         FINALIZED = "finalized", "Finalized"
-    
+
     client_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,

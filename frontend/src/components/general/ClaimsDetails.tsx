@@ -45,7 +45,6 @@ function ClaimsDetails({
         <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Claim Records" className="flex flex-col gap-4 " >
                 <BaseTable 
-                    innerTableClassName = "overflow-visible"
                     isEmpty = {fields.length === 0}
                     headers={CLAIMS_HEADERS}
                 >

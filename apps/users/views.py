@@ -2,7 +2,7 @@ from .models import User
 from rest_framework import status as STATUS
 from rest_framework.response import Response
 from apps.utils.permissions import IsStaffUser
-from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken

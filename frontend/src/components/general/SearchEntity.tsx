@@ -4,6 +4,7 @@ import { cn, handleAxiosError } from "@/lib/utils"
 import { useDebounce } from "use-debounce"
 import { X } from "lucide-react";
 import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
 import type { EntityMode, EntityValue, MiniCompany, MiniIndividual } from "@/types/core";
 import useGetEntityObject from "@/hooks/api/useGetEntityObject";
 import { Button } from "../ui/button";
@@ -65,15 +66,13 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         setActiveIndex(-1)
     }, [selected, defaultSearch])
 
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-                close()
-            }
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
+            close()
+        } else {
+            setIsOpen(true)
         }
-        document.addEventListener("mousedown", handler)
-        return () => document.removeEventListener("mousedown", handler)
-    }, [close])
+    }
 
     useEffect(() => {
         if (activeIndex >= 0 && listRef.current) {
@@ -206,8 +205,10 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     }))
 
     return (
+        <Popover open={isOpen} onOpenChange={handleOpenChange}>
         <div ref={containerRef} 
-            className="form-group w-full relative overflow-visible">
+            className="form-group w-full relative">
+            <PopoverAnchor asChild>
             <div className="relative flex items-center mt-1">
 
                 {isLoading && isOpen ? (
@@ -264,20 +265,26 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
                     </svg>
                 </div>
             </div>
+            </PopoverAnchor>
 
             {/* Dropdown */}
-            {isOpen && (
-                <div className="absolute z-855 mt-0 w-full top-15 rounded-md">
-                    <div
-                        ref={listRef}
-                        role="listbox"
-                        className="bg-popover border shadow-lg max-h-60 overflow-y-auto py-1 rounded-md"
-                    >
-                        {renderBody()}
-                    </div>
+            <PopoverContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+                align="start"
+                sideOffset={4}
+                className="w-(--radix-popover-trigger-width) p-1 max-h-60 overflow-y-auto rouned-md"
+            >
+                <div
+                    ref={listRef}
+                    role="listbox"
+                    className="flex flex-col"
+                >
+                    {renderBody()}
                 </div>
-            )}
+            </PopoverContent>
         </div>
+        </Popover>
     )
 })
 

@@ -303,6 +303,7 @@ export interface CommonFields extends Timestamps{
 
 export interface Company extends CommonFields{
   company_name: string;
+  registration_number: string| null;
   registered_name: string;
   trading_name: string | null;
   refer_type: string;

@@ -1,3 +1,4 @@
+from rest_framework.request import Request
 from rest_framework.response import Response
 from apps.utils.base_viewset import BaseJSONViewSet
 from apps.utils.helpers import get_content_type_id
@@ -23,7 +24,8 @@ class ReportViewSet(BaseJSONViewSet):
             return ListReportSerializer
         return ReportSerializer
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args, **kwargs):
+        user = request.user
         subject_id = request.data.get("subject_object_id")
         client_id = request.data.get("client_object_id")
         subject_type = request.data.get("subject_type")
@@ -55,6 +57,7 @@ class ReportViewSet(BaseJSONViewSet):
             subject_content_type_id=subject_content_type_id,
             client_object_id=client_id,
             client_content_type_id=client_content_type_id,
+            updated_by = user
         )
 
         report.refresh_from_db()
@@ -85,6 +88,7 @@ class ReportViewSet(BaseJSONViewSet):
 
     @action(url_path="finalize-report", detail=True, methods=["POST"])
     def finalize_report(self, request, *args, **kwargs):
+        user  = request.user
         report = self.get_object()
 
         if report.status == report.StatusChoices.FINALIZED:
@@ -100,8 +104,9 @@ class ReportViewSet(BaseJSONViewSet):
             report.status = Report.StatusChoices.FINALIZED
             report.finalized_at = timezone.now()
             report.snapshot = ReportSerializer(report).data
+            report.updated_by = user
             pdf_url = FincheckReportPDF(report).save_to_report(report)
-            report.save(update_fields=["status", "finalized_at", "snapshot", "report_pdf"])
+            report.save(update_fields=["status", "finalized_at", "snapshot", "report_pdf", "updated_by"]) 
 
         return Response({"url": pdf_url}, status=STATUS.HTTP_200_OK)
         

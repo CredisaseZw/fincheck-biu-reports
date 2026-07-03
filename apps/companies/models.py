@@ -49,6 +49,11 @@ class Company(BaseModel):
             "The name the company trades under, if different from registration name."
         ),
     )
+    registration_number = models.CharField(
+        _("Company Registration Number"),
+        blank=True, 
+        null=True
+    )
     refer_type = models.CharField(
         max_length=10,
         choices= ReferType.choices,

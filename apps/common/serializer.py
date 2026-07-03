@@ -6,33 +6,33 @@ from .models import (
     Financials,
     TradeReferences
 )
-
+from apps.utils.base_serialisers import UpdatedBySerializerMixin
 # READ SERIALIZERS
-class RegistrationAccountsSerializer(serializers.ModelSerializer):
+class RegistrationAccountsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = RegistrationAccounts
-        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
+        exclude = ["subject_content_type", "subject_object_id"]
 
-class BankerAccountsSerializer(serializers.ModelSerializer):
+class BankerAccountsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = BankerAccounts
-        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
+        exclude = ["subject_content_type", "subject_object_id"]
 
-class ProfessionalPartnersSerializer(serializers.ModelSerializer):
+class ProfessionalPartnersSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = ProfessionalPartners
-        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
+        exclude = ["subject_content_type", "subject_object_id"]
 
-class FinancialsSerializer(serializers.ModelSerializer):
+class FinancialsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Financials
-        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
+        exclude = ["subject_content_type", "subject_object_id"]
 
-class TradeReferencesSerializer(serializers.ModelSerializer):
+class TradeReferencesSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     payment_trend_display = serializers.CharField(source="get_payment_trend_display", read_only=True)
     class Meta:
         model = TradeReferences
-        exclude = ["subject_content_type", "subject_object_id","created_at", "updated_at"]
+        exclude = ["subject_content_type", "subject_object_id"]
 
 # WRITE SERIALIZERS
 class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):

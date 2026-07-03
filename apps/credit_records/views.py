@@ -26,6 +26,7 @@ from .serializers import (
     InsolvencyRecordWriteSerializer,
     PublicInformationWriteSerializer
 )
+from apps.utils.base_viewset import UpdatedByMixin
 from rest_framework.viewsets import GenericViewSet
 import logging
 
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
-class CreditRecordsViewSet(GenericViewSet):
+class CreditRecordsViewSet(GenericViewSet, UpdatedByMixin):
     permission_classes = [IsStaffUser]
     RECORD_MAP = {
         "claims": Claims,
@@ -64,8 +65,7 @@ class CreditRecordsViewSet(GenericViewSet):
         if error:
             logger.error(f"Validation error in _update_record: {serializer.errors}")
             return error
-        
-        serializer.save()
+        self.perform_update(serializer=serializer)
         return None
 
     def _create_record(
@@ -78,8 +78,7 @@ class CreditRecordsViewSet(GenericViewSet):
         if error:
             logger.error(f"Validation error in _create_record: {serializer_.errors}")
             return error
-
-        serializer_.save()
+        self.perform_create(serializer=serializer_)
         return None 
         
     @action(url_path="claims", methods=["PATCH"], detail=False)
