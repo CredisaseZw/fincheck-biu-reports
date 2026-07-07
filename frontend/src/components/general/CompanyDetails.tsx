@@ -1,4 +1,4 @@
-import useCompanyDetails, { type CompanyFormData } from "@/hooks/useCompanyDetails"
+import useCompanyDetails, { LegalForms, type CompanyFormData } from "@/hooks/useCompanyDetails"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import ColumnsContainer from "./ColumnsContainer"
@@ -16,6 +16,7 @@ import { numericField } from "@/constants";
 import CustomSubmitButton from "./CustomSubmitButton";
 import type { EntityValue } from "@/types/core";
 import { Switch } from "../ui/switch";
+import { toCap } from "@/lib/utils";
 
 interface props {
     isReport?: boolean
@@ -75,7 +76,7 @@ function CompanyDetails({
                             <Input type="date" {...register("overview.date_of_registration")} />
                         </div>
                     </ColumnsContainer>
-                    <ColumnsContainer numberOfCols={4}>
+                    <ColumnsContainer numberOfCols={isReport ? 4 : 2}>
                         <div className="form-group">
                             <Label>Trading Status</Label>
                             <Controller
@@ -109,77 +110,84 @@ function CompanyDetails({
                                             <SelectValue placeholder="Select legal form" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="llc">LLC</SelectItem>
-                                            <SelectItem value="plc">PLC</SelectItem>
-                                            <SelectItem value="sole_trader">Sole Trader</SelectItem>
-                                            <SelectItem value="partnership">Partnership</SelectItem>
+                                            {
+                                                LegalForms.map((item, id)=>(
+                                                    <SelectItem key={id} value={item}>{toCap(item)}</SelectItem>
+                                                ))
+                                            }
                                         </SelectContent>
                                     </Select>
                                 )}
                             />
                         </div>
-
-                        <div className="form-group">
-                            <Label>Condition</Label>
-                            <Controller
-                                control={control}
-                                key = {getValues(`overview.condition`)}
-                                name="overview.condition"
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select condition" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="good">Good</SelectItem>
-                                            <SelectItem value="fair">Fair</SelectItem>
-                                            <SelectItem value="poor">Poor</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <Label>Trend</Label>
-                            <Controller
-                                control={control}
-                                key = {getValues(`overview.trend`)}
-                                name="overview.trend"
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select trend" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="improving">Improving</SelectItem>
-                                            <SelectItem value="stable">Stable</SelectItem>
-                                            <SelectItem value="declining">Declining</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
-                    </ColumnsContainer>
-                    <ColumnsContainer gapClass="gap-4">
-                        
-                        <div className="form-group">
-                            <Label>Number of Employees</Label>
-                            <Input type="number" {...register("overview.number_of_employees", numericField)} />
-                        </div>
-
-                        <div className="form-group">
-                            <Label>Last Financial Result</Label>
-                            <Input {...register("overview.last_financial_result")} />
-                        </div>
+                        {
+                            isReport &&                         
+                            <div className="form-group">
+                                <Label>Condition</Label>
+                                <Controller
+                                    control={control}
+                                    key = {getValues(`overview.condition`)}
+                                    name="overview.condition"
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select condition" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="good">Good</SelectItem>
+                                                <SelectItem value="fair">Fair</SelectItem>
+                                                <SelectItem value="poor">Poor</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </div>
+                        }
+                        {
+                            isReport &&              
+                            <div className="form-group">
+                                <Label>Trend</Label>
+                                <Controller
+                                    control={control}
+                                    key = {getValues(`overview.trend`)}
+                                    name="overview.trend"
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select trend" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="improving">Improving</SelectItem>
+                                                <SelectItem value="stable">Stable</SelectItem>
+                                                <SelectItem value="declining">Declining</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </div>
+                        }
                     </ColumnsContainer>
                     {
                         isReport && (
                         <>
+                            <ColumnsContainer gapClass="gap-4">
+                                
+                                <div className="form-group">
+                                    <Label>Number of Employees</Label>
+                                    <Input type="number" {...register("overview.number_of_employees", numericField)} />
+                                </div>
+
+                                <div className="form-group">
+                                    <Label>Last Financial Result</Label>
+                                    <Input {...register("overview.last_financial_result")} />
+                                </div>
+                            </ColumnsContainer>
+                
                             <div className="form-group">
                                 <Label>Issued Share Capital</Label>
                                 <Input {...register("overview.issued_share_capital")} />
                             </div>
+
                             <ColumnsContainer>
                                 <div className="form-group">
                                     <Label>Net Asset Value</Label>

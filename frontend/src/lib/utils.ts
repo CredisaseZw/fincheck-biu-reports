@@ -46,8 +46,14 @@ export function getFormattedDate(dateStr: string){
   const month = months[date.getMonth()];
   const year = date.getFullYear();
 
-  return `${day}-${month.toLowerCase()}-${year}`;
+  return `${day}-${month.toLocaleUpperCase()}-${year}`;
 }
+
+export const toCap = (value: string): string => {
+  const normalized = value.replaceAll(/_/g, " ");
+  if (!normalized) return normalized;
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
 
 export const handleAxiosError = (
   error: Error | AxiosError | unknown,
@@ -202,3 +208,4 @@ export const getEntityName =(item :Company | Individual | MiniCompany | MiniIndi
   ? item.full_name
   : item.registered_name
 }
+

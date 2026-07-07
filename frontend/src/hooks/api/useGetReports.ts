@@ -23,6 +23,7 @@ function useGetReports() {
       });
       return response.data;
     },
+    staleTime: 2 * 60 * 1000,
   });
 
   return { data, isLoading, error, isError };

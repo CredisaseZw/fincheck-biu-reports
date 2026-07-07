@@ -3,11 +3,12 @@ import {z} from "zod"
 
 export const ReportHeaders:Header[] = [
     { name : "Enquiry Ref", textAlign : "center"},
+    { name : "Create At", textAlign : "center" },
     { name : "Client" },
     { name : "Subject To" },
+    { name : "User Name"},
     { name : "Report Status"},
     { name : "Overall Risk Rating", textAlign : "center"},
-    { name : "Create At", textAlign : "center" },
     { name : "Action", textAlign : "center" },
 ]
 export const DEFAULT_ADDRESSES:Address = {
@@ -97,6 +98,12 @@ export const TRADE_REFERENCES_HEADERS: Header[] = [
 
 ]
 
+export const REPORT_STATUS_PILL_VARIANTS = {
+    draft : "outline",
+    finalized : "success",
+    in_progress : "warning",
+    suspended : "danger"
+}
 export const DEBTOR_TYPE = z.enum(["company", "individual"])
 
 export const SETTLEMENT_OPTIONS = z.enum(["open", "settled", "disputed", "written_off"])

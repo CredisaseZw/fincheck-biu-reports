@@ -51,6 +51,7 @@ export interface MiniCompany {
   registered_name: string;
   trading_name: string | null;
   address_registered: string;
+  registration_number : string | null;
   email: string | null;
 }
 
@@ -79,7 +80,7 @@ export interface ListReport {
   subject: MiniCompany | MiniIndividual;
   subject_type : EntityValue,
   client_type :EntityValue
-  status : "draft" | "finalized"
+  status : "draft" | "finalized" | "in_progress" | "suspended"
   overall_risk_rating : number | null,
   report_pdf : string | null,
   created_at: string;
@@ -105,7 +106,14 @@ export interface CompanyOverview {
   id: number;
   trading_status: "active" | "inactive" | "suspended";
   date_of_registration: string;
-  legal_form: "llc" | "plc" | "sole_trader" | "partnership";
+  legal_form: "pvt_ltd" 
+  | "plc" 
+  | "pbc" 
+  | "partnership" 
+  | "trust" 
+  | "joint_venture" 
+  | "cooperative" 
+  | "sole_trader";
   condition: "good" | "fair" | "poor";
   trend: "improving" | "stable" | "declining";
   number_of_employees: number;

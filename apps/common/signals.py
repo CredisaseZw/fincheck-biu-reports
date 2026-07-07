@@ -3,6 +3,6 @@ from django.dispatch import receiver
 from .models import Financials
 
 @receiver(post_delete, sender=Financials)
-def delete_photo(sender, instance, **kwargs):
+def delete_financial_file(sender, instance, **kwargs):
     if instance.financials_file:
         instance.financials_file.delete(save=False)

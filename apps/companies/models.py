@@ -106,7 +106,7 @@ class Company(BaseModel):
         null=True,
         help_text=_("General phone number for the company."),
     )
-    website = models.URLField(
+    website = models.CharField(
         max_length=255,
         blank=True,
         null=True,
@@ -211,10 +211,14 @@ class CompanyOverview(BaseModel):
         SUSPENDED = "suspended", "Suspended"
 
     class LegalForm(models.TextChoices):
-        LLC = "llc", "LLC"
+        PVT_LTD = "pvt_ltd", "Private Limited"
         PLC = "plc", "PLC"
-        SOLE_TRADER = "sole_trader", "Sole Trader"
+        PBC = "pbc", "Public Benefit Company"
         PARTNERSHIP = "partnership", "Partnership"
+        TRUST = "trust", "Trust"
+        JOINT_VENTURE = "joint_venture", "Joint Venture"
+        COOPERATIVE = "cooperative", "Cooperative"
+        SOLE_TRADER = "sole_trader", "Sole Trader"
 
     class Condition(models.TextChoices):
         GOOD = "good", "Good"
@@ -293,6 +297,7 @@ class CompanyOverview(BaseModel):
         verbose_name = _("Company Overview")
         verbose_name_plural = _("Company Overviews")
         ordering = ["-created_at"]
+
 
 class CompanyStructure(BaseModel):
     company = models.OneToOneField(

@@ -6,14 +6,14 @@ import SearchBox from "@/components/general/Searchbox";
 import SectionHeader from "@/components/general/SectionHeader";
 import { StatusPill } from "@/components/general/StatusPills";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ReportHeaders } from "@/constants";
+import { REPORT_STATUS_PILL_VARIANTS, ReportHeaders } from "@/constants";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
 import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
 import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
 import DeleteReportAlert from "@/dialogues/DeleteReportDialogue";
 import FinalizedReportDialog from "@/dialogues/FinalizedReportDialogue";
 import useReports from "@/hooks/useReports";
-import { getEntityName, getFormattedDate } from "@/lib/utils";
+import { getEntityName, getFormattedDate, toCap } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
@@ -53,15 +53,18 @@ function LiveReports() {
                     reports.map((item)=>{
                         const client_bottom_level = "national_id" in item.client
                         ? item.client.email ?? "-"
-                        : item.client.trading_name ?? "-"
+                        : item.client.registration_number ?? item.client.trading_name ??"-"
 
                         const subject_bottom_level = "national_id" in item.subject
                         ? item.subject.email ?? "-"
-                        : item.subject.trading_name ?? "-"
+                        : item.subject.registration_number ?? item.subject.trading_name ?? "-"
                             
                         return (
                         <TableRow key={item.id}>
                             <TableCell className="text-center">{item.enquiry_reference}</TableCell>
+                            <TableCell className="text-center">
+                                {getFormattedDate(item.created_at)}
+                            </TableCell>
                             <TableCell>
                                 <div className="flex flex-col gap-1 text-center">
                                     <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
@@ -74,16 +77,14 @@ function LiveReports() {
                                     <span>{subject_bottom_level}</span>
                                 </div>
                             </TableCell>
+                            <TableCell> - </TableCell>
                             <TableCell className="text-center">
-                                <StatusPill variant={item.status === "draft" ? "outline" : "success"}>
-                                    {item.status === "draft" ? "Draft" : "Finalized"}
+                                <StatusPill variant={REPORT_STATUS_PILL_VARIANTS[item.status] as any}>
+                                    {toCap(item.status)}
                                 </StatusPill>
                             </TableCell>
                             <TableCell className="text-center">
                                 {item.overall_risk_rating !== null ? item.overall_risk_rating : "-"}
-                            </TableCell>
-                            <TableCell className="text-center">
-                                {getFormattedDate(item.created_at)}
                             </TableCell>
                             <TableCell className="flex items-center justify-center">
                                 <OptionsWrapper>

@@ -116,16 +116,28 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+
+LIVE_DB = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.environ.get('DB_NAME'),
+    'USER': os.environ.get('DB_USER'),
+    'PASSWORD': os.environ.get('DB_PASS'),
+    'HOST': os.environ.get('DB_HOST'),
+    'PORT': os.environ.get('DB_PORT'),
+}
+
+TESTING_DB = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.environ.get('TESTING_DB_NAME'),
+    'USER': os.environ.get('TESTING_DB_USER'),
+    'PASSWORD': os.environ.get('TESTING_DB_PASS'),
+    'HOST': os.environ.get('TESTING_DB_HOST'),
+    'PORT': os.environ.get('TESTING_DB_PORT'),
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
-    }
+    'default': TESTING_DB if DEBUG else LIVE_DB
 }
 
 # Password validation
@@ -179,16 +191,25 @@ REST_FRAMEWORK = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": os.environ.get('R2_ACCESS_KEY_ID'),
+            "secret_key": os.environ.get('R2_SECRET_ACCESS_KEY'),
+            "bucket_name": os.environ.get('R2_STORAGE_BUCKET_NAME'),
+            "endpoint_url": os.environ.get('R2_S3_ENDPOINT_URL'),
+            "custom_domain": os.environ.get('CUSTOM_BUCKET_URL'),
+            "region_name": "auto",
+            "default_acl": "public-read",
+            "file_overwrite": False,
+            "querystring_auth": False,
+    },
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
 
 #USER MODEL
 AUTH_USER_MODEL = "users.User"
@@ -277,7 +298,7 @@ CACHES = {
 
 # LOGGING
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "ERROR").upper()
-
+1
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

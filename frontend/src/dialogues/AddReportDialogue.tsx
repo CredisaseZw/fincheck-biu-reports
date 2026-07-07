@@ -70,6 +70,7 @@ function AddReportDialogue({ report_item }: props) {
         subjectType,
         financials,
         headerEditMode,
+        isLocked,
         shareholding,
         onClear,
         onEdit,
@@ -99,205 +100,215 @@ function AddReportDialogue({ report_item }: props) {
                     label="Add Report"
                 />
                 <DialogContent className="md:max-w-332 max-h-[95vh] overflow-y-auto">
-                    <CustomDialogueHeader
-                        title={report_item ? "Edit report information" : "Create a new report"}
-                    />
-                    {
-                    headerEditMode 
-                    ? <ReportHeaderForm 
-                            default_header={defaultHeader}
-                            clientType={clientType}
-                            subjectType={subjectType}
-                            onSetEntityId={onSetEntityId}
-                            onUpdateEntityTypes={onUpdateEntityTypes}
+                    <div className="w-full h-full relative flex flex-col gap-5">
+                        {
+                            isLocked &&
+                            <div className="absolute inset-0 z-50 flex flex-col items-center bg-white/70 dark:bg-dark/70 backdrop-blur-sm text-white">
+                                <p className="text-lg font-semibold mt-80 text-foreground">Hold up</p>
+                                <p className="text-sm text-muted-foreground mt-1">Report cant be worked on right now!.</p>
+                            </div>
+                        }
+                        <CustomDialogueHeader
+                            title={report_item ? "Edit report information" : "Create a new report"}
                         />
-                        : <ReportHeaderCard
-                            onEdit={onEdit}
-                            default_header={defaultHeader}
-                        />
-                    }
-                    
-                    {showSkeleton
-                        ? <FormSkeleton />
-                        : report ? 
-                            subjectType === "company"
-                            ? <>
-                                <CompanyDetails
-                                    subject_type= {subject_type}
-                                    company_overview = {companyOverview}
-                                    report_id={report.id}
-                                />
-                                <CompanyStructure 
-                                    structure_data = {companyStructure}
-                                    report_id={report.id}
-                                    subject_object_id = {subject_object_id}
-                                    subject_type = {subject_type}
-                                />
-                                <CompanyOperations 
-                                    operations_data = {companyOperations}
-                                    report_id={report.id}
-                                    subject_object_id = {subject_object_id}
-                                    subject_type = {subject_type}
-                                />
-                            </>
-                            : subjectType === "individual"
-                                ? <>
-                                    <IndividualDetails 
-                                        report_id={report.id}
-                                        individual_details={individualDetails}
-                                    />
-                                    <EmploymentInformation 
-                                        employment_information = {employmentInformation}
-                                        report_id={report.id}
-                                        subject_type= {subject_type}
-                                    />
-                                    <NextOfKin 
-                                        subject_type={subject_type}
-                                        next_of_kin={nextOfKin}
-                                        report_id={report.id}
-                                    />
-                                </>
-                                : null
-                            : null
-                            }
 
-                    {showSkeleton
-                        ? <FormSkeleton />
-                        : report &&
-                        <>
-                            {/* REPORT SUMMARY */}
-                            {
-                                subjectType === "company" &&
-                                <>
-                                    <DirectorDetails 
-                                        directors_data={directors}
+                        {
+                        headerEditMode 
+                        ? <ReportHeaderForm 
+                                default_header={defaultHeader}
+                                clientType={clientType}
+                                subjectType={subjectType}
+                                onSetEntityId={onSetEntityId}
+                                onUpdateEntityTypes={onUpdateEntityTypes}
+                            />
+                            : <ReportHeaderCard
+                                onEdit={onEdit}
+                                default_header={defaultHeader}
+                            />
+                        }
+                    
+                        {showSkeleton
+                            ? <FormSkeleton />
+                            : report ? 
+                                subjectType === "company"
+                                ? <>
+                                    <CompanyDetails
+                                        subject_type= {subject_type}
+                                        company_overview = {companyOverview}
+                                        report_id={report.id}
+                                    />
+                                    <CompanyStructure 
+                                        structure_data = {companyStructure}
                                         report_id={report.id}
                                         subject_object_id = {subject_object_id}
                                         subject_type = {subject_type}
-                                    />             
-                                    <ShareholdingDetails
-                                        shareholdings_data = {shareholding}
+                                    />
+                                    <CompanyOperations 
+                                        operations_data = {companyOperations}
                                         report_id={report.id}
                                         subject_object_id = {subject_object_id}
                                         subject_type = {subject_type}
                                     />
                                 </>
-                            }
-                            <BankerDetails 
-                                banker_accounts={bankerDetails}
-                                report_id={report.id}
-                                subject_object_id = {subject_object_id}
-                                subject_type = {subject_type}
-                            />
-                            <Fieldset legendTitle="Credit Records">
-                                <ClaimsDetails
-                                    claims_data = {claims}
+                                : subjectType === "individual"
+                                    ? <>
+                                        <IndividualDetails 
+                                            report_id={report.id}
+                                            individual_details={individualDetails}
+                                        />
+                                        <EmploymentInformation 
+                                            employment_information = {employmentInformation}
+                                            report_id={report.id}
+                                            subject_type= {subject_type}
+                                        />
+                                        <NextOfKin 
+                                            subject_type={subject_type}
+                                            next_of_kin={nextOfKin}
+                                            report_id={report.id}
+                                        />
+                                    </>
+                                    : null
+                                : null
+                                }
+
+                        {showSkeleton
+                            ? <FormSkeleton />
+                            : report &&
+                            <>
+                                {/* REPORT SUMMARY */}
+                                {
+                                    subjectType === "company" &&
+                                    <>
+                                        <DirectorDetails 
+                                            directors_data={directors}
+                                            report_id={report.id}
+                                            subject_object_id = {subject_object_id}
+                                            subject_type = {subject_type}
+                                        />             
+                                        <ShareholdingDetails
+                                            shareholdings_data = {shareholding}
+                                            report_id={report.id}
+                                            subject_object_id = {subject_object_id}
+                                            subject_type = {subject_type}
+                                        />
+                                    </>
+                                }
+                                <BankerDetails 
+                                    banker_accounts={bankerDetails}
                                     report_id={report.id}
                                     subject_object_id = {subject_object_id}
                                     subject_type = {subject_type}
                                 />
-                                <AbsconderDetails
-                                    absconders_data={absconders}
-                                    report_id={report.id}
-                                    subject_object_id = {subject_object_id}
-                                    subject_type = {subject_type}
-                                />
-                                <CourtDetails
-                                    court_judgements_data={courtJudgements}
-                                    report_id={report.id}
-                                    subject_object_id = {subject_object_id}
-                                    subject_type = {subject_type}
-                                />
-                                <InsolvencyRecordsDetails
-                                    insolvency_data={insolvencyRecords} 
-                                    report_id={report.id}
-                                    subject_object_id = {subject_object_id}
-                                    subject_type = {subject_type}
-                                />
-                                <PublicInformationDetails
-                                    public_information_data={publicInformation}
+                                <Fieldset legendTitle="Credit Records">
+                                    <ClaimsDetails
+                                        claims_data = {claims}
+                                        report_id={report.id}
+                                        subject_object_id = {subject_object_id}
+                                        subject_type = {subject_type}
+                                    />
+                                    <AbsconderDetails
+                                        absconders_data={absconders}
+                                        report_id={report.id}
+                                        subject_object_id = {subject_object_id}
+                                        subject_type = {subject_type}
+                                    />
+                                    <CourtDetails
+                                        court_judgements_data={courtJudgements}
+                                        report_id={report.id}
+                                        subject_object_id = {subject_object_id}
+                                        subject_type = {subject_type}
+                                    />
+                                    <InsolvencyRecordsDetails
+                                        insolvency_data={insolvencyRecords} 
+                                        report_id={report.id}
+                                        subject_object_id = {subject_object_id}
+                                        subject_type = {subject_type}
+                                    />
+                                    <PublicInformationDetails
+                                        public_information_data={publicInformation}
+                                        report_id={report.id}
+                                        subject_object_id={subject_object_id}
+                                        subject_type={subject_type}
+                                    />
+                                </Fieldset>
+
+                                <TradeReferencesDetails 
+                                    trade_references_data={tradeReferences}
                                     report_id={report.id}
                                     subject_object_id={subject_object_id}
                                     subject_type={subject_type}
                                 />
-                            </Fieldset>
-
-                            <TradeReferencesDetails 
-                                trade_references_data={tradeReferences}
-                                report_id={report.id}
-                                subject_object_id={subject_object_id}
-                                subject_type={subject_type}
-                            />
-                            <FinancialsDetails 
-                                financials_data={financials}
-                                report_id={report.id}
-                                subject_object_id={subject_object_id}
-                                subject_type={subject_type}
-                            />
-                            <RegistrationAccountsDetails
-                                accounts_data={accounts}
-                                report_id={report.id}
-                                subject_object_id={subject_object_id}
-                                subject_type={subject_type} 
-                            />
-                            <ProfessionalPartnersDetails
-                                professionals_data={professionals}
-                                report_id={report.id}
-                                subject_object_id={subject_object_id}
-                                subject_type={subject_type}
-                            />
-                            <ReportDetails
-                                report_data={reportDetails}
-                                report_id={report.id}
-                                subject_object_id = {subject_object_id}
-                                subject_type = {subject_type}
-                            />
-                        </>    
-                    }
-
-                    <DialogFooter>
-                        <DialogClose>
-                            <Button
-                                disabled ={isPending}
-                                className={isPending ? "cursor-not-allowed" :""}
-                                variant={"ghost"}>Cancel</Button>
-                        </DialogClose>
-                        {
-                            (!report &&
-                            !report_item &&
-                            headerEditMode) ?
-                            <Button 
-                                className={reportLoading ? "cursor-not-allowed" : "cursor-pointer"}
-                                disabled = {reportLoading}
-                                onClick={generateReport}
-                            >
-                                {
-                                    reportLoading 
-                                    ? <LoadingIndicator variant="button"/>
-                                    : <Plus/>
-                                }   
-                                Generate Report
-                            </Button>
-                            : 
-                            report &&
-                            <Button
-                                disabled ={isPending}
-                                className={isPending ? "cursor-not-allowed" :""}
-                                onClick={()=>onFinalize( 
-                                    report.id,
-                                    ()=>{setOpen(false)}
-                                )}
-                            >
-                                {
-                                    !isPending 
-                                    ? <CheckCheck/>
-                                    : <LoadingIndicator variant="button"/>
-                                }
-                                
-                                Finalize Report
-                            </Button>
+                                <FinancialsDetails 
+                                    financials_data={financials}
+                                    report_id={report.id}
+                                    subject_object_id={subject_object_id}
+                                    subject_type={subject_type}
+                                />
+                                <RegistrationAccountsDetails
+                                    accounts_data={accounts}
+                                    report_id={report.id}
+                                    subject_object_id={subject_object_id}
+                                    subject_type={subject_type} 
+                                />
+                                <ProfessionalPartnersDetails
+                                    professionals_data={professionals}
+                                    report_id={report.id}
+                                    subject_object_id={subject_object_id}
+                                    subject_type={subject_type}
+                                />
+                                <ReportDetails
+                                    report_data={reportDetails}
+                                    report_id={report.id}
+                                    subject_object_id = {subject_object_id}
+                                    subject_type = {subject_type}
+                                />
+                            </>    
                         }
-                    </DialogFooter>
+
+                        <DialogFooter>
+                            <DialogClose>
+                                <Button
+                                    disabled ={isPending}
+                                    className={isPending ? "cursor-not-allowed" :""}
+                                    variant={"ghost"}>Cancel</Button>
+                            </DialogClose>
+                            {
+                                (!report &&
+                                !report_item &&
+                                headerEditMode) ?
+                                <Button 
+                                    className={reportLoading ? "cursor-not-allowed" : "cursor-pointer"}
+                                    disabled = {reportLoading}
+                                    onClick={generateReport}
+                                >
+                                    {
+                                        reportLoading 
+                                        ? <LoadingIndicator variant="button"/>
+                                        : <Plus/>
+                                    }   
+                                    Generate Report
+                                </Button>
+                                : 
+                                report &&
+                                <Button
+                                    disabled ={isPending}
+                                    className={isPending ? "cursor-not-allowed" :""}
+                                    onClick={()=>onFinalize( 
+                                        report.id,
+                                        ()=>{setOpen(false)}
+                                    )}
+                                >
+                                    {
+                                        !isPending 
+                                        ? <CheckCheck/>
+                                        : <LoadingIndicator variant="button"/>
+                                    }
+                                    
+                                    Finalize Report
+                                </Button>
+                            }
+                        </DialogFooter>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

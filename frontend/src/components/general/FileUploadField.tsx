@@ -1,7 +1,6 @@
 import { FileText, ImageIcon, FileSpreadsheet, File } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { API_END_POINT } from "@/axios/api";
 
 export default function FileUploadField({
     label,
@@ -69,7 +68,7 @@ export default function FileUploadField({
                     <div className="flex items-center gap-2 text-sm">
                         {renderIcon(displayInfo)}
                         {displayInfo.url ? (
-                            <a href={API_END_POINT + displayInfo.url} target="_blank" rel="noopener noreferrer" className="truncate max-w-50 text-primary hover:underline">
+                            <a href={displayInfo.url} target="_blank" rel="noopener noreferrer" className="truncate max-w-50 text-primary hover:underline">
                                 {displayInfo.name}
                             </a>
                         ) : (

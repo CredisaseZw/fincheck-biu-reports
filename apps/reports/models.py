@@ -9,12 +9,12 @@ from django.db.models import UniqueConstraint
 from django.db import transaction
 from django.utils import timezone
 
-
 def report_pdf_path(instance, filename):
+    from django.conf import settings
     now = timezone.now()
     token = secrets.token_hex(5)
     ref = instance.enquiry_reference or "unref"
-    return f"reports/{now.strftime('%Y')}/{now.strftime('%b')}/{ref}_{token}.pdf"
+    return f"{ 'l' if not settings.DEBUG else 't' }/reports/{now.strftime('%Y')}/{now.strftime('%b')}/{ref}_{token}.pdf"
 
 # Create your models here.
 class Report(BaseModelWithSubject):

@@ -1,5 +1,8 @@
+import redis
+import logging
 from rest_framework.request import Request
 from rest_framework.response import Response
+from django.conf import settings
 from apps.utils.base_viewset import BaseJSONViewSet
 from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
@@ -10,10 +13,15 @@ from rest_framework.decorators import action
 from django.db import transaction
 from django.utils import timezone
 from apps.reports.GenerateReport import FincheckReportPDF
-import logging
-
+from apps.users.models import User
+from .lock_management import (
+    acquire_report_lock,
+    refresh_report_lock,
+    release_report_lock
+)
 logger = logging.getLogger(__name__)
 
+r = redis.from_url(settings.REDIS_CACHE_LOCATION)
 class ReportViewSet(BaseJSONViewSet):
     filter_backends = [ReportSearchFilter]
     queryset = Report.objects.all()
@@ -51,13 +59,20 @@ class ReportViewSet(BaseJSONViewSet):
                 {"error": "Subject & client cannot be the same."},
                 status=STATUS.HTTP_400_BAD_REQUEST
             )
-
+        
+        subject_holder = r.get(f"subject_lock:{subject_id}")
+        if subject_holder:
+            return Response(
+                {"error": "This subject has another report currently being edited."},
+                status=STATUS.HTTP_423_LOCKED,
+            )
+        
         report = Report.objects.create(
             subject_object_id=subject_id,
             subject_content_type_id=subject_content_type_id,
             client_object_id=client_id,
             client_content_type_id=client_content_type_id,
-            updated_by = user
+            updated_by = user   
         )
 
         report.refresh_from_db()
@@ -99,6 +114,21 @@ class ReportViewSet(BaseJSONViewSet):
                 {"error": "Overall risk rating is required."},
                 status=STATUS.HTTP_400_BAD_REQUEST,
             )
+        
+        report_holder = r.get(f"report_lock:{report.id}")
+        subject_holder = r.get(f"subject_lock:{subject_id}")
+
+        if report_holder:
+            return Response(
+                {"error": "This report is currently being edited by another user."},
+                status=STATUS.HTTP_423_LOCKED,
+            )
+
+        if subject_holder:
+            return Response(
+                {"error": "This subject has another report currently being edited."},
+                status=STATUS.HTTP_423_LOCKED,
+            )
 
         with transaction.atomic():
             report.status = Report.StatusChoices.FINALIZED
@@ -108,8 +138,67 @@ class ReportViewSet(BaseJSONViewSet):
             pdf_url = FincheckReportPDF(report).save_to_report(report)
             report.save(update_fields=["status", "finalized_at", "snapshot", "report_pdf", "updated_by"]) 
 
+        release_report_lock(report_id=report.id, user_id= user.id, subject_id=report.subject.id)
         return Response({"url": pdf_url}, status=STATUS.HTTP_200_OK)
         
 
+    @action(url_path="acquire-report-lock", detail=True, methods=['POST'])
+    def acquire_lock(self, request, *args, **kwargs):
+        report = self.get_object()
+        subject_id  = report.subject.id
+        
+        acquired, info = acquire_report_lock(
+            report.id, 
+            request.user.id,
+            subject_id
+        )
 
+        acquired, info = acquire_report_lock(report.id, request.user.id, subject_id)
+        if not acquired:
+            holder_user = User.objects.filter(id=info["holder"]).first()
+            holder_name = holder_user.get_full_name() or holder_user.email or holder_user.id
+            
+            if info["locked_on"] == "subject":
+                message = f"{holder_name} is editing another report for this subject."
+            else:
+                message = f"{holder_name} is currently editing this report."
 
+            return Response({"detail": message, "locked_on": info["locked_on"]}, status=STATUS.HTTP_423_LOCKED)
+
+        report.status = Report.StatusChoices.IN_PROGRESS
+        report.save(update_fields=["status"])
+        return Response({"detail": "Lock acquired"}, status=STATUS.HTTP_200_OK)
+
+    @action(url_path="release-report-lock", detail=True, methods=['POST'])
+    def release_lock(self, request, *args, **kwargs):
+        report = self.get_object()
+        subject_id  = report.subject.id
+
+        with transaction.atomic():
+            report.status =  Report.StatusChoices.DRAFT
+            report.save(update_fields = ["status"])
+            
+        release_report_lock(
+            report_id=report.id,
+            user_id=request.user.id,
+            subject_id=subject_id
+        )
+        return Response(status=STATUS.HTTP_200_OK)  
+    
+    @action(url_path="refresh-dual-lock", detail=True, methods=['POST'])
+    def refresh_lock(self, request, *args, **kwargs):
+        report = self.get_object()
+        subject_id = report.subject.id
+
+        refreshed = refresh_report_lock(
+            report_id=report.id,
+            user_id=request.user.id,
+            subject_id=subject_id,
+        )
+        if refreshed:
+            return Response({"detail": "Lock refreshed"}, status=STATUS.HTTP_200_OK)
+
+        return Response(
+            {"detail": "Lock lost or expired — someone else may now be editing."},
+            status=STATUS.HTTP_409_CONFLICT,
+        )

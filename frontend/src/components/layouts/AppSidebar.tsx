@@ -56,7 +56,7 @@ export function AppSidebar() {
         </SidebarHeader>
         <SidebarContent>
             <SidebarGroup>
-                <SidebarGroupLabel>MAIN APPLICATION</SidebarGroupLabel>
+                <SidebarGroupLabel>BUSINESS REPORTS</SidebarGroupLabel>
                 <SidebarGroupContent>
                     <SidebarMenu>
 

@@ -37,7 +37,7 @@ function ChangePasswordDialogue({ open, onOpenChange }: ChangePasswordDialoguePr
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md rounded-md p-6">
+      <DialogContent className="sm:max-w-xl rounded-md p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <KeyRound className="size-5 text-primary" />

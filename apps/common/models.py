@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.utils.base_models import BaseModelWithSubject
 import os
 import uuid
+from django.conf import settings
 # Create your models here.
 class RegistrationAccounts(BaseModelWithSubject):
     tin_number = models.CharField(
@@ -123,8 +124,9 @@ class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON
 
 class Financials(BaseModelWithSubject):
     def financials_file_path(instance, filename):
+        from django.conf import settings
         ext = os.path.splitext(filename)[1]
-        return f"financials/{uuid.uuid4().hex}{ext}"
+        return f"{'l' if not settings.DEBUG else 't'}/financials/{uuid.uuid4().hex}{ext}" # l = live, t = test
     
     total_assets = models.DecimalField(
         _("Total Assets"),

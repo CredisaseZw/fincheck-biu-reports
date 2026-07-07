@@ -12,10 +12,19 @@ import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { useQueryClient } from "@tanstack/react-query";
 
 const TradingStatus = z.enum(["active", "inactive", "suspended"])
-const LegalForm = z.enum(["llc", "plc", "sole_trader", "partnership"])
 const Condition = z.enum(["good", "fair", "poor"])
 const Trend = z.enum(["improving", "stable", "declining"])
-
+const LegalForm = z.enum([
+    "pvt_ltd",
+    "plc",
+    "pbc",
+    "partnership",
+    "trust",
+    "joint_venture",
+    "cooperative",
+    "sole_trader",
+])
+export const LegalForms = LegalForm.options;
 const companyOverviewSchema = z.object({
     date_of_registration: z.string().optional(),    
     legal_form: LegalForm.optional(),
@@ -29,7 +38,7 @@ const companyOverviewSchema = z.object({
     issued_share_capital: z.string().optional()
 })
 
-export const companySchema = z.object({
+const companySchema = z.object({
     id : z.number().optional(),
     registered_name: z.string().min(1, "Registered name is required").max(50, "Company Name too long."),
     registration_number: z.string().optional(),
@@ -60,7 +69,6 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     const {mutate, isPending } = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const client = useQueryClient()
-
 
     const {
         reset,

@@ -1,14 +1,4 @@
-"""
-FINCHECK Business Credit Report — PDF Generator
-================================================
-    from apps.reports.GenerateReport import FincheckReportPDF
-
-    pdf_bytes = FincheckReportPDF(report).generate_bytes()
-    FincheckReportPDF(report).save_to_report(report)
-"""
-
 from __future__ import annotations
-
 import base64
 import html
 import io
@@ -84,8 +74,6 @@ class FincheckReportPDF:
         self._client_type = self._snapshot.get("client_type", "individual")
         self._client = self._snapshot.get("client", {})
         self._subject = self._snapshot.get("subject", {})
-
-    # ── Public API ───────────────────────────────────────────────────────────
     
     def _strip_trailing_blank_page(self, pdf_bytes: bytes) -> bytes:
         reader = PdfReader(io.BytesIO(pdf_bytes))
@@ -135,8 +123,6 @@ class FincheckReportPDF:
         filename = os.path.basename(self._pdf_storage_relpath())
         report.report_pdf.save(filename, ContentFile(pdf_bytes), save=False)
         return report.report_pdf.url
-
-    # ── Helpers ──────────────────────────────────────────────────────────────
 
     @staticmethod
     def _u(val, default: str = "—") -> str:
@@ -266,8 +252,6 @@ class FincheckReportPDF:
               {label}
             </div>"""
         return f'<div class="risk-scale">{cells}</div>'
-
-    # ── CSS ───────────────────────────────────────────────────────────────────
 
     def _css(self) -> str:
         c = self

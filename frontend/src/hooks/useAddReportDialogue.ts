@@ -1,11 +1,12 @@
-import type { Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, Report} from "@/types/core";
 import { useEffect, useState} from "react";
 import useGetSingleReport from "./api/useGetSingleReport";
-import { formatAddressToObject, getEntityName, handleAxiosError } from "@/lib/utils";
-import type { CompanyFormData } from "./useCompanyDetails";
 import { DEFAULT_ADDRESSES } from "@/constants";
+import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
 import useCreateReport from "./api/useCreateReport";
+import { formatAddressToObject, getEntityName, handleAxiosError } from "@/lib/utils";
+import type { Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, Report} from "@/types/core";
+import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
 import type { NextOfKinFormData } from "./useNextOfKin";
@@ -23,13 +24,13 @@ import type { CompanyStructureFormData } from "./useCompanyStructure";
 import type { CompanyOperationsFormData } from "./useCompanyOperations";
 import type { ShareholdingsFormData } from "./useShareholdingDetails";
 import type { DirectorFormData } from "./useDirectors";
-import { useQueryClient } from "@tanstack/react-query";
 import type { ReportDetailsFormData } from "./useReportDetails";
+import useLockManagement from "./useLockManagement";
 
 function useAddReportDialogue(list_report?: ListReport) {
-  const [open, setOpen] = useState(false);  
   const { mutate } = useCreateReport();
   const { setReportLoading } = useReport()
+  const [open, setOpen] = useState(false);  
   const [clientObjectId, setClientObjectId] = useState<number | null>(null);
   const [subjectObjectId, setSubjectObjectId] = useState<number | null>(null);
   const [clientType, setClientType] = useState<EntityValue>("company")
@@ -63,6 +64,11 @@ function useAddReportDialogue(list_report?: ListReport) {
     enabled :Boolean(list_report && open)
   });
 
+  const {isLocked} = useLockManagement(
+    report?.id, 
+    Boolean( open && !headerEditMode && report )
+  )
+  
   const onEdit = () => setHeaderEditMode(true)
   const queryClient =  useQueryClient()
 
@@ -73,13 +79,13 @@ function useAddReportDialogue(list_report?: ListReport) {
     }
     setSubjectType(value);
   }
-  
+
   const onSetEntityId = (entity : EntityMode, value: number | null) => {
-      if (entity === "client"){
-        setClientObjectId(value)
-        return;
-      }
-      setSubjectObjectId(value)
+    if (entity === "client"){
+      setClientObjectId(value)
+      return;
+    }
+    setSubjectObjectId(value)
   }
 
   useEffect(() => {
@@ -125,16 +131,16 @@ function useAddReportDialogue(list_report?: ListReport) {
         website: company?.website ?? "",
         is_address_registered_verified: company?.is_address_registered_verified ?? true,
         overview: {
-            trading_status: company?.overview?.trading_status ?? "active",
-            date_of_registration: company?.overview?.date_of_registration ?? "",
-            legal_form: company?.overview?.legal_form ?? undefined,
-            condition: company?.overview?.condition ?? "good",
-            trend: company?.overview?.trend ?? "stable",
-            number_of_employees: company?.overview?.number_of_employees ?? undefined,
-            last_financial_result: company?.overview?.last_financial_result ?? undefined,
-            net_asset_value: company?.overview?.net_asset_value ?? undefined,
-            authorized_share_capital: company?.overview?.authorized_share_capital ?? undefined,
-            issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
+          trading_status: company?.overview?.trading_status ?? "active",
+          date_of_registration: company?.overview?.date_of_registration ?? "",
+          legal_form: company?.overview?.legal_form ?? undefined,
+          condition: company?.overview?.condition ?? "good",
+          trend: company?.overview?.trend ?? "stable",
+          number_of_employees: company?.overview?.number_of_employees ?? undefined,
+          last_financial_result: company?.overview?.last_financial_result ?? undefined,
+          net_asset_value: company?.overview?.net_asset_value ?? undefined,
+          authorized_share_capital: company?.overview?.authorized_share_capital ?? undefined,
+          issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
         }, 
       })
       setCompanyStructure({
@@ -459,7 +465,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   }
 
   const onClear = () => {
-    setReport(undefined);
+    setReport(undefined); 
     setDefaultHeader(undefined)
     setClientObjectId(null)
     setSubjectObjectId(null)
@@ -494,6 +500,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     nextOfKin,
     companyOverview,
     directors,
+    isLocked,
     tradeReferences,
     individualDetails,
     companyStructure,
