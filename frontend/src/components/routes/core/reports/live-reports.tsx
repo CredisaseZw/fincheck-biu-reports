@@ -108,7 +108,7 @@ function LiveReports() {
                                                 Icon={ExternalLink}
                                                 label="View Report"
                                             /> 
-                                            :<>
+                                            :<> 
                                                 <AddReportDialogue report_item={item}/>
                                                 <FinalizedReportDialog id={item.id}/>
                                                 <DeleteReportAlert id={item.id}/>
