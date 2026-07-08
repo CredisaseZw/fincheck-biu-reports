@@ -8,10 +8,11 @@ from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
-from .filters import ReportSearchFilter
+from .filters import ReportSearchFilter,ReportsFilter
 from rest_framework.decorators import action
 from django.db import transaction
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
 from apps.reports.GenerateReport import FincheckReportPDF
 from apps.users.models import User
 from .lock_management import (
@@ -23,10 +24,11 @@ logger = logging.getLogger(__name__)
 
 r = redis.from_url(settings.REDIS_CACHE_LOCATION)
 class ReportViewSet(BaseJSONViewSet):
-    filter_backends = [ReportSearchFilter]
+    filter_backends = [ReportSearchFilter, DjangoFilterBackend]
     queryset = Report.objects.all()
+    filterset_class = ReportsFilter
     serializer_class = ReportSerializer
-
+    
     def get_serializer_class(self):
         if self.action == "list":
             return ListReportSerializer
@@ -34,6 +36,7 @@ class ReportViewSet(BaseJSONViewSet):
 
     def create(self, request: Request, *args, **kwargs):
         user = request.user
+        username = request.data.get("username", "")
         subject_id = request.data.get("subject_object_id")
         client_id = request.data.get("client_object_id")
         subject_type = request.data.get("subject_type")
@@ -71,6 +74,7 @@ class ReportViewSet(BaseJSONViewSet):
             subject_object_id=subject_id,
             subject_content_type_id=subject_content_type_id,
             client_object_id=client_id,
+            username = username,
             client_content_type_id=client_content_type_id,
             updated_by = user   
         )
@@ -114,22 +118,7 @@ class ReportViewSet(BaseJSONViewSet):
                 {"error": "Overall risk rating is required."},
                 status=STATUS.HTTP_400_BAD_REQUEST,
             )
-        
-        report_holder = r.get(f"report_lock:{report.id}")
-        subject_holder = r.get(f"subject_lock:{subject_id}")
-
-        if report_holder:
-            return Response(
-                {"error": "This report is currently being edited by another user."},
-                status=STATUS.HTTP_423_LOCKED,
-            )
-
-        if subject_holder:
-            return Response(
-                {"error": "This subject has another report currently being edited."},
-                status=STATUS.HTTP_423_LOCKED,
-            )
-
+    
         with transaction.atomic():
             report.status = Report.StatusChoices.FINALIZED
             report.finalized_at = timezone.now()
@@ -146,7 +135,10 @@ class ReportViewSet(BaseJSONViewSet):
     def acquire_lock(self, request, *args, **kwargs):
         report = self.get_object()
         subject_id  = report.subject.id
-        
+
+        if report.status == Report.StatusChoices.FINALIZED:
+            return Response({"detail" : "Report is finalized"}, status=STATUS.HTTP_400_BAD_REQUEST)
+
         acquired, info = acquire_report_lock(
             report.id, 
             request.user.id,
@@ -173,6 +165,9 @@ class ReportViewSet(BaseJSONViewSet):
     def release_lock(self, request, *args, **kwargs):
         report = self.get_object()
         subject_id  = report.subject.id
+
+        if report.status == Report.StatusChoices.FINALIZED:
+            return Response({"detail" : "Report is finalized"}, status=STATUS.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
             report.status =  Report.StatusChoices.DRAFT

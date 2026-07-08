@@ -1,33 +1,36 @@
 import { useState } from "react";
 import useInstanceMutation from "./api/useInstanceMutation";
 import { useQueryClient } from "@tanstack/react-query";
-import { API_END_POINT } from "@/axios/api";
 import { handleAxiosError } from "@/lib/utils";
 
-function useFinalizeReport() {
+function useFinalizeReport(c?:()=> void) {
     const client = useQueryClient()
     const [url, setUrl] = useState<undefined | string>()
-    const [open, setOpen] = useState(false)
+    const [open, setOpenState] = useState(false)
 
     const { mutate, isPending } = useInstanceMutation()
-    const onFinalize = (id: number, callback?: () => void) => {
+
+    const onFinalize = (id: number) => {
         mutate({ url: `/api/reports/${id}/finalize-report/`,
         mode: "create"},
             {
-                onSuccess: (url) => {
-                    const reportUrl = API_END_POINT + url.url;
-                    setUrl(reportUrl);
-                    client.invalidateQueries({
-                        queryKey: ["reports"],
-                    });
-
-                    callback?.();
-                    window.open(reportUrl, "_blank", "noopener,noreferrer");
+                onSuccess: (data) => {
+                    setUrl(data.url);
+                    setOpenState(true);
                 },
                 onError: (e) => handleAxiosError(e),
             }
         );
     };
+
+    const setOpen = (next: boolean) => {
+        setOpenState(next);
+        if (!next && url) {
+            client.invalidateQueries({ queryKey: ["reports"] });
+            c?.()
+        }
+    };
+
     return {
         isPending,
         onFinalize,

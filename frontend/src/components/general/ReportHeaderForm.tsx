@@ -3,19 +3,24 @@ import ColumnsContainer from './ColumnsContainer';
 import type { DefaultHeaderProps, EntityMode, EntityValue } from '@/types/core';
 import SearchEntity, { type SearchEntityRef } from './SearchEntity';
 import { getCurrentDateFormatted, getFormattedDate } from '@/lib/utils';
-import { useRef } from 'react';
+import { useRef, type Dispatch, type SetStateAction } from 'react';
+import { Input } from '../ui/input';
 interface props{
     clientType : EntityValue,
     subjectType : EntityValue    
+    username : string,
     default_header : DefaultHeaderProps | undefined,
     onUpdateEntityTypes : (entity :EntityMode, value: EntityValue)=> void
     onSetEntityId : (entity : EntityMode, value: number | null) => void
+    setUsername:Dispatch<SetStateAction<string>>
 }
 
 function ReportHeaderForm({ 
     default_header, 
     clientType,
     subjectType,
+    username,
+    setUsername,
     onSetEntityId,
     onUpdateEntityTypes
 }: props) {
@@ -24,7 +29,7 @@ function ReportHeaderForm({
 
     return (
     <div className="w-full">
-        <div className="border-b pb-5">
+        <div className="border-b pb-5 flex flex-col gap-5">
             <ColumnsContainer gapClass="gap-8">
                 <div className="flex flex-col">
                     <h1 className="font-bold text-lg text-gray-800 dark:text-gray-200">Client Name</h1>
@@ -84,6 +89,14 @@ function ReportHeaderForm({
                     </div>
                 </div>
             </ColumnsContainer>
+            <div className="form-group">
+                <h1 className="font-bold text-lg text-gray-800 dark:text-gray-200">User Name</h1>
+                <Input
+                    value={username}
+                    onChange={(e)=> setUsername(e.target.value)}
+                    placeholder = "e.g John Doe"
+                />
+            </div>
         </div>
         <div className="pt-5 flex flex-row justify-between">
             <div className="flex flex-col gap-1.5">

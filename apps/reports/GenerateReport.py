@@ -324,12 +324,14 @@ body {{
   max-width: 42%;
   text-align: right;
 }}
+.header-username,
 .header-ref,
 .header-client {{
   font-size: 8.5pt;
   color: {c.MUTED};
   line-height: 1.85;
 }}
+.header-username {{white-space: nowrap;}}
 .header-ref {{ white-space: nowrap; }}
 .header-client {{ overflow-wrap: anywhere; }}
 .logo {{ height: 52px; display: inline-block; vertical-align: middle; }}
@@ -351,7 +353,7 @@ body {{
   font-size: 9pt;
   color: {c.MUTED};
 }}
-.header-meta b, .header-ref b, .header-client b {{ color: {c.PRIMARY}; }}
+.header-meta b, .header-ref b, .header-client b, .header-username b {{ color: {c.PRIMARY}; }}
 
 /* ── Cards ── */
 .card {{
@@ -631,6 +633,11 @@ body {{
             or self._client.get("company_name", "")
         )
 
+    def _username(self)-> str:
+        return self._u(
+            self._report.username
+        )
+
     def _render_header(self) -> str:
         if self._report is not None:
             ref = self._e(self._report.enquiry_reference)
@@ -657,6 +664,8 @@ body {{
               <div class="header-col-right">
                 <div class="header-ref">ENQUIRY REF: <b>{ref}</b></div>
                 <div class="header-client">CLIENT: <b>{self._client_name()}</b></div>
+                <div class="header-client">USER NAME: <b>{self._username()}</b></div>
+              
               </div>
             </div>
           </div>
@@ -752,7 +761,7 @@ body {{
         rows = [
             ("Registered Name", self._u(s.get("registered_name"))),
             ("Trading Name", self._u(s.get("trading_name"))),
-            ("Refer Type", self._u(s.get("refer_type"))),
+            ("Registration Number", self._u(s.get("registration_number"))),
             ("Legal Form", self._label((s.get("overview") or {}).get("legal_form", ""))),
             ("Registration Number", self._e(s.get("registration_number", "N/A"))),
             ("Year Registered", self._date((s.get("overview") or {}).get("date_of_registration"))),

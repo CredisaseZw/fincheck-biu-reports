@@ -10,7 +10,7 @@ interface props {
 }
 function CustomDialogueTrigger({Icon, label, mode}: props) {
     return (
-    <DialogTrigger>
+    <DialogTrigger className="self-center">
         {
             mode === "create"
             ? <Button>

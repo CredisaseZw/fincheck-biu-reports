@@ -14,7 +14,7 @@ import {
     DialogContent,
     DialogFooter,
 } from "@/components/ui/dialog"
-import { CheckCheck, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import BankerDetails from "@/components/general/BankersDetails";
 import ProfessionalPartnersDetails from "@/components/general/ProfessionalPartnersDetails";
 import RegistrationAccountsDetails from "@/components/general/RegistrationAccountsDetails";
@@ -35,7 +35,7 @@ import Fieldset from "@/components/general/FieldSet";
 import ReportHeaderCard from "@/components/general/ReportHeaderCard";
 import LoadingIndicator from "@/components/general/LoadingIndicator";
 import ReportDetails from "@/components/general/ReportDetails";
-import useFinalizeReport from "@/hooks/useFinalizeReport";
+import FinalizedReportDialog from "./FinalizedReportDialogue";
 
 interface props {
     report_item?: ListReport
@@ -54,6 +54,7 @@ function AddReportDialogue({ report_item }: props) {
         tradeReferences,
         defaultHeader,
         isLoading, 
+        username,
         directors,
         companyOperations,
         professionals,
@@ -73,6 +74,7 @@ function AddReportDialogue({ report_item }: props) {
         isLocked,
         shareholding,
         onClear,
+        setUsername,
         onEdit,
         generateReport,
         setOpen,
@@ -82,7 +84,6 @@ function AddReportDialogue({ report_item }: props) {
     const {
         reportLoading,
     } = useReport()
-    const { isPending, onFinalize } = useFinalizeReport()
     const isUpdating = !!report_item;
     const showSkeleton = reportLoading || (isUpdating && isLoading);
 
@@ -115,6 +116,8 @@ function AddReportDialogue({ report_item }: props) {
                         {
                         headerEditMode 
                         ? <ReportHeaderForm 
+                                username = {username}
+                                setUsername = {setUsername}
                                 default_header={defaultHeader}
                                 clientType={clientType}
                                 subjectType={subjectType}
@@ -268,9 +271,7 @@ function AddReportDialogue({ report_item }: props) {
                         <DialogFooter>
                             <DialogClose>
                                 <Button
-                                    disabled ={isPending}
-                                    className={isPending ? "cursor-not-allowed" :""}
-                                    variant={"ghost"}>Cancel</Button>
+                                variant={"ghost"}>Cancel</Button>
                             </DialogClose>
                             {
                                 (!report &&
@@ -290,22 +291,11 @@ function AddReportDialogue({ report_item }: props) {
                                 </Button>
                                 : 
                                 report &&
-                                <Button
-                                    disabled ={isPending}
-                                    className={isPending ? "cursor-not-allowed" :""}
-                                    onClick={()=>onFinalize( 
-                                        report.id,
-                                        ()=>{setOpen(false)}
-                                    )}
-                                >
-                                    {
-                                        !isPending 
-                                        ? <CheckCheck/>
-                                        : <LoadingIndicator variant="button"/>
-                                    }
-                                    
-                                    Finalize Report
-                                </Button>
+                                <FinalizedReportDialog
+                                    callback = {()=>handleOpenChange(false)}
+                                    id={report.id}
+                                    main
+                                />
                             }
                         </DialogFooter>
                     </div>

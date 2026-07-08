@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react"
 import { Search, X } from "lucide-react"
 import useURLParamsFilter from "@/hooks/useURLParamsFilter"
@@ -11,11 +10,10 @@ function SearchBox() {
     useEffect(()=>{
         const params = getUrlParams()
         if(params.search) setValue(String(params.search));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [getUrlParams])
 
     return (
-        <form className="relative w-full max-w-75 flex items-center justify-center" onSubmit={(e)=>{
+        <form className="relative w-full max-w-100 flex items-center justify-center" onSubmit={(e)=>{
             e.preventDefault()
             if(value.length <= 0) return removeSingleUrlParam("search")
             setSingleUrlParam("search", value)
@@ -39,11 +37,17 @@ function SearchBox() {
                         setValue("")
                     }}
 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-13 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <X size={16} />
                 </button>
             )}
+            <button 
+                type={"submit"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 outline-0 bg-primary p-2 rounded hover:bg-primary/80 cursor-pointer"
+                >
+                <Search size={15} color="white"/>
+            </button>
         </form>
     )
 }

@@ -109,6 +109,7 @@ export function OptionButton({
       size={"sm"}
       onClick={onClick}
       className={cn(
+        "self-center",
         optionButtonVariants({
           variant,
           size,

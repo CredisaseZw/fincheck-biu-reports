@@ -1,21 +1,14 @@
 import { api } from "@/axios/api";
 import { handleAxiosError } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { useEffect, useRef, useState, useCallback } from "react";
-
-interface LockState {
-  isLocked: boolean;
-  lockMessage: string | null;
-}
 
 export default function useLockManagement(
   report_id: number | null | undefined,
   enabled: boolean
 ) {
-  const [lockState, setLockState] = useState<LockState>({
-    isLocked: false,
-    lockMessage: null,
-  });
+  const [lockState, setLockState] = useState(false);
   const holdsLockRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const client = useQueryClient();
@@ -27,15 +20,14 @@ export default function useLockManagement(
       .then(() => {
         holdsLockRef.current = true;
         client.invalidateQueries({ queryKey: ["reports"] });
-        setLockState({ isLocked: false, lockMessage: null });
+        setLockState(false);
       })
-      .catch((err) => {
+      .catch((err:AxiosError) => {
         holdsLockRef.current = false;
-        setLockState({
-          isLocked: true,
-          lockMessage: err.response?.data?.detail ?? "Report is locked.",
-        });
-        handleAxiosError(err);
+        if(err.status === 423){
+          setLockState(true);
+          handleAxiosError(err);
+        }
       });
   }, [report_id, client]);
 
@@ -50,7 +42,6 @@ export default function useLockManagement(
 
   const heartbeat = useCallback(() => {
     if (!report_id) return;
-
     if (!holdsLockRef.current) {
       acquireLock();
       return;
@@ -58,13 +49,12 @@ export default function useLockManagement(
 
     api
       .post(`/api/reports/${report_id}/refresh-dual-lock/`)
-      .then(() => setLockState({ isLocked: false, lockMessage: null }))
-      .catch((err) => {
+      .then(() => setLockState(false))
+      .catch((err:AxiosError) => {
         holdsLockRef.current = false;
-        setLockState({
-          isLocked: true,
-          lockMessage: err.response?.data?.detail ?? "Lock expired.",
-        });
+        if(err.status === 409){
+          setLockState(false);
+        }
       });
   }, [report_id, acquireLock]);
 
@@ -83,8 +73,7 @@ export default function useLockManagement(
   }, [enabled, report_id, acquireLock, heartbeat, releaseLock]);
 
   return {
-    isLocked: lockState.isLocked,
-    lockMessage: lockState.lockMessage,
+    isLocked: lockState,
     releaseLock,
     acquireLock,
   };

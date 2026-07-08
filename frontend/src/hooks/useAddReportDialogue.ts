@@ -35,6 +35,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [subjectObjectId, setSubjectObjectId] = useState<number | null>(null);
   const [clientType, setClientType] = useState<EntityValue>("company")
   const [subjectType, setSubjectType] = useState<EntityValue>("company")
+  const [username, setUsername] = useState<string>("");
   const [report, setReport] =useState<Report | undefined>(undefined)
   const [headerEditMode, setHeaderEditMode ] = useState<boolean>()
   const [defaultHeader, setDefaultHeader] = useState<DefaultHeaderProps | undefined>(undefined);
@@ -446,6 +447,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     if(!clientObjectId || !subjectObjectId) return;
     setReportLoading(true);
     mutate({
+        ...(username && { username : username,}),
         client_object_id : clientObjectId,
         client_type :  clientType,
         subject_object_id : subjectObjectId,
@@ -460,11 +462,11 @@ function useAddReportDialogue(list_report?: ListReport) {
         },
         onError : (error) => handleAxiosError(error),
         onSettled :()=> setReportLoading(false)
-
     })
   }
 
   const onClear = () => {
+    setUsername("");
     setReport(undefined); 
     setDefaultHeader(undefined)
     setClientObjectId(null)
@@ -499,6 +501,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     report,
     nextOfKin,
     companyOverview,
+    username,
     directors,
     isLocked,
     tradeReferences,
@@ -522,6 +525,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     accounts,
     companyOperations,
     onClear,
+    setUsername,
     onEdit,
     setOpen,
     onSetEntityId,

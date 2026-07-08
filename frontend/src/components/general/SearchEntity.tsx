@@ -273,7 +273,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
                 onCloseAutoFocus={(e) => e.preventDefault()}
                 align="start"
                 sideOffset={4}
-                className="w-(--radix-popover-trigger-width) p-1 max-h-60 overflow-y-auto rouned-md"
+                className="w-(--radix-popover-trigger-width) p-1 max-h-60 overflow-y-auto rounded"
             >
                 <div
                     ref={listRef}

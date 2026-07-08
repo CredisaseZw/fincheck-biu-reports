@@ -2,11 +2,16 @@ import type { ListReport, PaginationData } from "@/types/core";
 import { useEffect, useState } from "react";
 import useGetReports from "./api/useGetReports";
 import { handleAxiosError } from "@/lib/utils";
+import useURLParamsFilter from "./useURLParamsFilter";
 
-function useReports() {
+function useReports(mode: string = "live") {
     const [pagination, setPagination] = useState<PaginationData | undefined>(undefined)
     const [reports, setReports] = useState<ListReport[]>([])
-    const {data, isLoading, error, isError} = useGetReports()
+    const {getUrlParams} = useURLParamsFilter()
+    const {data, isLoading, error, isError} = useGetReports({
+        status: mode,
+        ...getUrlParams()
+    })
 
     useEffect(()=>{
         if(handleAxiosError(error)) return;

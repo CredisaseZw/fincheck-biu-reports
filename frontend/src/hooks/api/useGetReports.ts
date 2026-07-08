@@ -1,25 +1,18 @@
-import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query";
 import useURLParamsFilter from "../useURLParamsFilter";
 import { api } from "@/axios/api";
 import type { DRFResponse, ListReport } from "@/types/core";
 
-function useGetReports() {
+function useGetReports(params?: Record<string, string | number | boolean>) {
   const { getUrlParams } = useURLParamsFilter();
-
-  const params = useMemo(() => {
-    const p = getUrlParams();
-    if (p.search) {
-      delete p.page;  
-    }
-    return p;
-  }, [getUrlParams]);
+  const resolvedParams = {...(params ?? getUrlParams())}
+  if(resolvedParams.search && resolvedParams.page) delete resolvedParams.page;
 
   const { data, isLoading, error, isError } = useQuery({
     queryKey: ["reports", params],
     queryFn: async () => {
       const response = await api.get<DRFResponse<ListReport>>("/api/reports/", {
-        params,
+        params : resolvedParams,
       });
       return response.data;
     },

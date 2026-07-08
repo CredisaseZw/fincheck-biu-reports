@@ -1,4 +1,5 @@
 import type { Address, Header } from "@/types/core";
+import { FileText, Image, File } from "lucide-react";
 import {z} from "zod"
 
 export const ReportHeaders:Header[] = [
@@ -6,7 +7,7 @@ export const ReportHeaders:Header[] = [
     { name : "Create At", textAlign : "center" },
     { name : "Client" },
     { name : "Subject To" },
-    { name : "User Name"},
+    { name : "User Name", textAlign: "left"},
     { name : "Report Status"},
     { name : "Overall Risk Rating", textAlign : "center"},
     { name : "Action", textAlign : "center" },
@@ -140,3 +141,21 @@ export const NARRATIONS = [
     { value: "D", label: "No Credit Worthy" },
     { value: "E", label: "Rating Suspended" },
 ]
+
+export const FILE_STYLES = {
+  pdf: {
+    icon: FileText,
+    classes:
+      "border-green-300 bg-green-50 text-green-800 hover:bg-green-100 dark:border-green-900 dark:bg-green-950 dark:text-green-400",
+  },
+  image: {
+    icon: Image,
+    classes:
+      "border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-400",
+  },
+  other: {
+    icon: File,
+    classes:
+      "border-red-300 bg-red-50 text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-400",
+  },
+} as const;

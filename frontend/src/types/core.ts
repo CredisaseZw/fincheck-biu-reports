@@ -82,6 +82,7 @@ export interface ListReport {
   client_type :EntityValue
   status : "draft" | "finalized" | "in_progress" | "suspended"
   overall_risk_rating : number | null,
+  username : string | null,
   report_pdf : string | null,
   created_at: string;
   updated_at: string;

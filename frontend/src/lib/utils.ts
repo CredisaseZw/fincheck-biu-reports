@@ -1,3 +1,4 @@
+import { FILE_STYLES } from "@/constants";
 import type { Address, Company, Individual, MiniCompany, MiniIndividual } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
@@ -203,9 +204,18 @@ export const handleTrackChangedArray = (initial: any[], current: any[]): any[] =
     return acc;
   }, [] as any[]);
 };
+
 export const getEntityName =(item :Company | Individual | MiniCompany | MiniIndividual) =>{
   return "national_id" in item
   ? item.full_name
   : item.registered_name
 }
 
+
+export function getFileKind(url?: string): keyof typeof FILE_STYLES {
+  if (!url) return "other";
+  const ext = url.split("?")[0].split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "webp", "gif"].includes(ext ?? "")) return "image";
+  return "other";
+}

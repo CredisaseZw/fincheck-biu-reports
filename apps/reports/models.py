@@ -31,6 +31,11 @@ class Report(BaseModelWithSubject):
     )
     client_object_id = models.PositiveIntegerField()
     client = GenericForeignKey("client_content_type", "client_object_id")
+    username = models.CharField(
+        max_length=25,
+        blank=True,
+        null=True
+    )
     status = models.CharField(
         max_length=20, 
         choices=StatusChoices.choices, 

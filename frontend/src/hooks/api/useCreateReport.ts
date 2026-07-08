@@ -6,7 +6,8 @@ export interface CreateReportPayload {
     subject_object_id: number,
     subject_type : EntityValue
     client_object_id : number,
-    client_type : EntityValue
+    client_type : EntityValue,
+    username?: string
 }
 
 function useCreateReport() {
