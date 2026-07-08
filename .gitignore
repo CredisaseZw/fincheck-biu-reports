@@ -19,8 +19,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 __pycache__/
-staticfiles/
-static/
 media/
 
 node_modules
