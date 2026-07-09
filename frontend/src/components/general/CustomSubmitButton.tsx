@@ -4,15 +4,18 @@ import LoadingIndicator from './LoadingIndicator';
 
 interface props { 
     isPending?: boolean
+    state?: "touched" | "untouched" 
 }
 
-function CustomSubmitButton({isPending}:props) {
+function CustomSubmitButton({isPending, state}:props) {
   return (
     <Button
+
         className={
             cn(
                 "self-end",
-                isPending ? "cursor-not-allowed" : "" 
+                isPending ? "cursor-not-allowed" : "",
+                state === "touched" ? "bg-green-500 hover:bg-green-600" : ""
             )
         }
         disabled = {isPending}
@@ -23,7 +26,7 @@ function CustomSubmitButton({isPending}:props) {
             isPending && 
             <LoadingIndicator variant="button"/>
         }
-        Submit
+        Update
     </Button>
   )
 }
