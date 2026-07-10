@@ -28,8 +28,7 @@ const financialsSchema = z.object({
     net_profit: z.number().optional(),
     net_worth: z.number().optional(),
     total_revenue: z.number().optional(),
-    paid_up_capital: z.number().optional(),
-    authorized_capital: z.number().optional(),
+    asset_ratio : z.number().optional(),
     financial_year: z.number().int().positive().min(2000).max(new Date().getFullYear()),
     financials_file: fileSchema,
     default_file :z.string().optional()
@@ -54,16 +53,7 @@ function useFinancialsDetails({
         formState: { errors },
     } = useForm<FinancialEntryFormData>({
         resolver: zodResolver(financialsSchema),
-        defaultValues: financials_data || {
-            total_assets: undefined,
-            net_profit: undefined,
-            net_worth: undefined,
-            total_revenue: undefined,
-            paid_up_capital: undefined,
-            authorized_capital: undefined,
-            financial_year: undefined,
-            financials_file: undefined,
-        },
+        defaultValues: financials_data ?? undefined
     })
 
     useEffect(() => {
@@ -101,7 +91,7 @@ function useFinancialsDetails({
 
         const numericKeys = [
             "total_assets", "net_profit", "net_worth",
-            "total_revenue", "paid_up_capital", "authorized_capital", "financial_year"
+            "total_revenue", "asset_ratio", "financial_year"
         ] as const
 
         numericKeys.forEach((key) => {

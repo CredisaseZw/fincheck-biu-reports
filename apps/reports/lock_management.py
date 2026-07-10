@@ -75,9 +75,16 @@ local user_id = ARGV[1]
 local ttl = ARGV[2]
 
 local report_holder = redis.call('GET', report_key)
+local subject_holder = redis.call('GET', subject_key)
+
 if report_holder ~= user_id then
     return 0
 end
+
+if subject_holder ~= user_id then
+    return 0
+end
+
 redis.call('EXPIRE', report_key, ttl)
 redis.call('EXPIRE', subject_key, ttl)
 return 1

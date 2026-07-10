@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from apps.companies.models import Company
 from apps.utils.base_models import BaseModel
 
@@ -11,6 +12,20 @@ class CompanyShareholding(BaseModel):
     )
     numbers_of_shares = models.PositiveIntegerField()
     numbers_of_shareholders = models.PositiveIntegerField()
+    paid_up_capital = models.DecimalField(
+        _("Paid Up Capital"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    authorized_capital = models.DecimalField(
+        _("Authorized Capital"),
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
 
     class Meta:
         app_label = "shareholding"

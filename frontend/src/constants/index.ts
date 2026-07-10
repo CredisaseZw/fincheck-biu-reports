@@ -2,12 +2,22 @@ import type { Address, Header } from "@/types/core";
 import { FileText, Image, File } from "lucide-react";
 import {z} from "zod"
 
+export const LiveReportHeaders:Header[] = [
+    { name : "Enquiry Ref", textAlign : "center"},
+    { name : "Request Date", textAlign : "center" },
+    { name : "Client" },
+    { name : "Subject" },
+    { name : "Requestor", textAlign: "left"},
+    { name : "Report Status"},
+    { name : "Action", textAlign : "center" },
+]
+
 export const ReportHeaders:Header[] = [
     { name : "Enquiry Ref", textAlign : "center"},
-    { name : "Create At", textAlign : "center" },
+    { name : "Request Date", textAlign : "center" },
     { name : "Client" },
-    { name : "Subject To" },
-    { name : "User Name", textAlign: "left"},
+    { name : "Subject" },
+    { name : "Requestor", textAlign: "left"},
     { name : "Report Status"},
     { name : "Overall Risk Rating", textAlign : "center"},
     { name : "Action", textAlign : "center" },

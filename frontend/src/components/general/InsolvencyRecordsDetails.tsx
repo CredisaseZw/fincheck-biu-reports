@@ -37,13 +37,13 @@ function InsolvencyRecordsDetails({
     })
     return (
     <form onSubmit={handleSubmit(onSubmit)}>
-        <Fieldset legendTitle="Insolvency Details">
+        <Fieldset legendTitle="Solvency Details">
             <BaseTable 
                 isEmpty = {fields.length === 0}
                 headers={INSOLVENCY_HEADERS}>
                     {
                         fields.map((field, idx)=>(
-                            <TableRow key= {field.id}>
+                        <TableRow key= {field.id}>
                                 <TableCell>
                                     <Controller
                                         control={control}
@@ -57,8 +57,7 @@ function InsolvencyRecordsDetails({
                                                     <SelectValue placeholder="Please Select..." />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="insolvency">Insolvency</SelectItem>
-                                                    <SelectItem value="bankruptcy">Bankruptcy</SelectItem>
+                                                    <SelectItem value="insolvent">Insolvent</SelectItem>
                                                     <SelectItem value="judicial_management">Judicial Management</SelectItem>
                                                 </SelectContent>
                                             </Select>
@@ -126,7 +125,7 @@ function InsolvencyRecordsDetails({
                     onClick={() => append({
                         id: undefined,
                         court_reference: "",
-                        insolvency_type: "bankruptcy",
+                        insolvency_type: "insolvent",
                         start_date: "",
                         end_date:"",
                     })}

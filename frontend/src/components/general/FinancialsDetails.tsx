@@ -28,14 +28,16 @@ function FinancialsDetails({
         financials_data,
     })
 
-    const numberFields = [
-        { name: "total_assets", label: "Total Assets" },
+    const _numeric_three_rows = [
+        { name: "total_revenue", label: "Revenue" },
         { name: "net_profit", label: "Net Profit" },
-        { name: "net_worth", label: "Net Worth" },
-        { name: "total_revenue", label: "Total Revenue" },
-        { name: "paid_up_capital", label: "Paid Up Capital" },
-        { name: "authorized_capital", label: "Authorized Capital" },
+        { name: "total_assets", label: "Total Assets" }
     ] as const
+
+    const _numeric_two_rows = [
+        { name: "net_worth", label: "Net Worth" },
+        { name: "asset_ratio", label: "Asset Ratio" },    
+    ]
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -43,7 +45,24 @@ function FinancialsDetails({
                 <div className="flex flex-col gap-4">
                     {/* Numeric fields */}
                     <ColumnsContainer numberOfCols={3} gapClass="gap-4">
-                        {numberFields.map(({ name, label }) => (
+                        {_numeric_three_rows.map(({ name, label }) => (
+                            <div key={name} className="form-group">
+                                <Label>{label}</Label>
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    {...register(name as any, numericField)}
+                                />
+                                {errors[name as keyof typeof errors] && (
+                                    <p className="text-destructive text-sm">
+                                        {errors[name as keyof typeof errors]?.message as string}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </ColumnsContainer>
+                    <ColumnsContainer gapClass="gap-4">
+                        {_numeric_two_rows.map(({ name, label }) => (
                             <div key={name} className="form-group">
                                 <Label>{label}</Label>
                                 <Input

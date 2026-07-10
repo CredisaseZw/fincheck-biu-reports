@@ -14,7 +14,7 @@ function CreateIndividualDialogue() {
         onOpenChange={setOpenIndividualFields}
     >
         <DialogContent className="md:max-w-275 max-h-[90vh] overflow-y-auto">
-            <CustomDialogueHeader title="Create Individual"/>
+            <CustomDialogueHeader title="Add Individual"/>
             <IndividualDetails/>
         </DialogContent>
     </Dialog>

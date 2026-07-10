@@ -12,6 +12,8 @@ const schema = z.object({
     id: z.number().optional(),
     numbers_of_shares: z.number("Enter a valid number of shares").positive("Positive numbers required"),
     numbers_of_shareholders: z.number("Enter a valid number of shareholders").positive("Positive numbers required"),
+    paid_up_capital: z.number().optional(),
+    authorized_capital: z.number().optional(),
     shareholders: z.array(
         z.object({
             id: z.number().optional(),
@@ -52,6 +54,8 @@ function useShareholdingDetails({
                 id: shareholdings_data.id,
                 numbers_of_shareholders: shareholdings_data.numbers_of_shareholders,
                 numbers_of_shares: shareholdings_data.numbers_of_shares,
+                paid_up_capital :shareholdings_data.paid_up_capital,
+                authorized_capital : shareholdings_data.authorized_capital,
                 shareholders: shareholdings_data.shareholders.map(item => ({
                     id: item.id,
                     full_name: item.full_name,
@@ -117,6 +121,8 @@ function useShareholdingDetails({
                     id: data_.id,
                     numbers_of_shareholders: data_.numbers_of_shareholders,
                     numbers_of_shares: data_.numbers_of_shares,
+                    paid_up_capital : Number(data_.paid_up_capital),
+                    authorized_capital :Number(data_.authorized_capital),
                     shareholders: data_.shareholders.map(item => ({
                         id: item.id ?? undefined,
                         full_name: item.full_name,

@@ -105,7 +105,7 @@ export type EntityMode = "client" | "subject"
 type CreditRecordStatus = "open" | "settled" | "disputed" | "written_off"
 export interface CompanyOverview {
   id: number;
-  trading_status: "active" | "inactive" | "suspended";
+  trading_status: "active" | "inactive" | "administration" | "insolvent"
   date_of_registration: string;
   legal_form: "pvt_ltd" 
   | "plc" 
@@ -166,6 +166,8 @@ export interface Shareholding {
   id: number;
   numbers_of_shares: number;
   numbers_of_shareholders: number;
+  paid_up_capital: string | null;
+  authorized_capital: string | null;
   shareholders: Shareholder[];
   created_at: string;
   updated_at: string;
@@ -215,9 +217,8 @@ export interface Financial {
   total_assets: string | null;
   net_profit: string | null;
   net_worth: string | null;
+  asset_ratio : string | null;
   total_revenue: string | null;
-  paid_up_capital: string | null;
-  authorized_capital: string | null;
   financials_file : string | null
   financial_year: number;
 }
@@ -273,7 +274,7 @@ export interface InsolvencyRecord {
   start_date : string,
   end_date:string,
   court_reference: string;
-  insolvency_type: "insolvency" | "bankruptcy" | "judicial_management";
+  insolvency_type: "insolvent" | "judicial_management";
 }
 
 export interface PublicInformation {

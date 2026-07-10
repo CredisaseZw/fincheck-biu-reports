@@ -208,8 +208,8 @@ class CompanyOverview(BaseModel):
     class TradingStatus(models.TextChoices):
         ACTIVE = "active", "Active"
         INACTIVE = "inactive", "Inactive"
-        SUSPENDED = "suspended", "Suspended"
-
+        ADMINISTRATION = "administration", "Administration"
+        INSOLVENT = "insolvent" , "Insolvent"
     class LegalForm(models.TextChoices):
         PVT_LTD = "pvt_ltd", "Private Limited"
         PLC = "plc", "PLC"

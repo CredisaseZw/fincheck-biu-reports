@@ -87,8 +87,7 @@ class FinancialsWriteSerializer(serializers.ModelSerializer):
             "net_profit",
             "net_worth",
             "total_revenue",
-            "paid_up_capital",
-            "authorized_capital",
+            "asset_ratio",
             "financials_file",
             "financial_year",
         ]

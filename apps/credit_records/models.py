@@ -82,8 +82,7 @@ class CourtJudgement(BaseModelWithSubject):
         
 class InsolvencyRecord(BaseModelWithSubject):
     class InsolvencyType(models.TextChoices):
-        INSOLVENCY = "insolvency", "Insolvency"
-        BANKRUPTCY = "bankruptcy", "Bankruptcy"
+        INSOLVENT = "insolvent", "Insolvent"
         JUDICIAL_MANAGEMENT = (
             "judicial_management",
             "Judicial Management"

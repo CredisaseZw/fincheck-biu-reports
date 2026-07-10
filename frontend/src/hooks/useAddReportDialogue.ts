@@ -166,6 +166,9 @@ function useAddReportDialogue(list_report?: ListReport) {
         id :  company.shareholdings?.id ?? undefined,
         numbers_of_shareholders : company.shareholdings?.numbers_of_shareholders ?? 0,
         numbers_of_shares : company.shareholdings?.numbers_of_shares ?? 0,
+        paid_up_capital: company.shareholdings?.paid_up_capital ? Number(company.shareholdings?.paid_up_capital) : undefined,
+        authorized_capital: company.shareholdings?.authorized_capital ? Number(company.shareholdings?.authorized_capital) : undefined,
+       
         shareholders: 
         company.shareholdings &&
         company.shareholdings.shareholders.length > 0 
@@ -323,7 +326,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         court_reference:item.court_reference
       }))
       : [{
-        insolvency_type : "insolvency",
+        insolvency_type : "insolvent",
         start_date :"",
         end_date :"",
         court_reference:""
@@ -353,9 +356,8 @@ function useAddReportDialogue(list_report?: ListReport) {
         net_profit: report.subject.financials.net_profit ? Number(report.subject.financials.net_profit) : undefined,
         net_worth: report.subject.financials.net_worth ? Number(report.subject.financials.net_worth) : undefined,
         total_revenue: report.subject.financials.total_revenue ? Number(report.subject.financials.total_revenue) : undefined,
-        paid_up_capital: report.subject.financials.paid_up_capital ? Number(report.subject.financials.paid_up_capital) : undefined,
-        authorized_capital: report.subject.financials.authorized_capital ? Number(report.subject.financials.authorized_capital) : undefined,
         financial_year: report.subject.financials.financial_year,
+        asset_ratio : report.subject.financials.asset_ratio ? Number(report.subject.financials.asset_ratio) : undefined, 
         default_file :report.subject.financials.financials_file ?? undefined,
       }
       : undefined

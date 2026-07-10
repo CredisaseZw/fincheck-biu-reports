@@ -16,6 +16,7 @@ class ReportSearchFilter(BaseFilterBackend):
 
         company_ids = Company.objects.filter(
             Q(registered_name__icontains=search) |
+            Q(registration_number__icontains=search) |
             Q(trading_name__icontains=search) |
             Q(email__icontains=search)
         ).values_list("id", flat=True)

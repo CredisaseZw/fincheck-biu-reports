@@ -158,12 +158,13 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
         model = Company
         fields = "__all__"
 
-    def _create_generic_relations(self, company, data_list, model,content_type):
+    def _create_generic_relations(self, company, data_list, model, content_type, updated_by = None):
         for item in data_list:
             item.pop("id", None)
             model.objects.create(
                 subject_content_type=content_type,
-            subject_object_id=company.id,
+                subject_object_id=company.id,
+                updated_by = updated_by,
                 **item
             )
 

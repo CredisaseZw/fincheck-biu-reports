@@ -13,9 +13,9 @@ function CustomSubmitButton({isPending, state}:props) {
 
         className={
             cn(
-                "self-end",
+                "self-end text-gray-200",
                 isPending ? "cursor-not-allowed" : "",
-                state === "touched" ? "bg-green-500 hover:bg-green-600" : ""
+                state === "touched" ? "bg-green-500 hover:bg-green-600" : "bg-orange-500 hover:bg-orange-600"
             )
         }
         disabled = {isPending}

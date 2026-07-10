@@ -62,7 +62,7 @@ export default function ReportHeaderCard({
 
                     <div>
                         <p className="text-sm font-medium opacity-80">
-                            Report Date
+                            Request Date
                         </p>
                         <p className="mt-1 text-2xl font-bold">
                             {   default_header?.created_at

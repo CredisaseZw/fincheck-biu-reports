@@ -62,8 +62,11 @@ function CompanyDetails({
                         </div>
 
                         <div className="form-group">
-                            <Label>Trading Name</Label>
+                            <Label className="required">Trading Name</Label>
                             <Input {...register("trading_name")} />
+                            {errors.trading_name && (
+                                <p className="text-destructive text-sm">{errors.trading_name.message}</p>
+                            )}
                         </div>
                     </ColumnsContainer>
                     <ColumnsContainer>

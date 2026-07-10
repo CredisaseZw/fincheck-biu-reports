@@ -6,13 +6,12 @@ import SearchBox from "@/components/general/Searchbox";
 import SectionHeader from "@/components/general/SectionHeader";
 import { StatusPill } from "@/components/general/StatusPills";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { REPORT_STATUS_PILL_VARIANTS, ReportHeaders } from "@/constants";
+import { REPORT_STATUS_PILL_VARIANTS, LiveReportHeaders } from "@/constants";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
 import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
 import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
 import DeleteReportAlert from "@/dialogues/DeleteReportDialogue";
 import FilterOptionsDialogue from "@/dialogues/FilterOptionsDialgue";
-import FinalizedReportDialog from "@/dialogues/FinalizedReportDialogue";
 import useReports from "@/hooks/useReports";
 import { getEntityName, getFormattedDate, toCap } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
@@ -55,7 +54,7 @@ function LiveReports() {
                     isError = {isError}
                     isEmpty = {reports.length === 0}
                     paginationData={pagination}
-                    headers={ReportHeaders}
+                    headers={LiveReportHeaders}
                 >
                     {
                         reports.map((item)=>{
@@ -91,9 +90,6 @@ function LiveReports() {
                                         {toCap(item.status)}
                                     </StatusPill>
                                 </TableCell>
-                                <TableCell className="text-center">
-                                    {item.overall_risk_rating !== null ? item.overall_risk_rating : "-"}
-                                </TableCell>
                                 <TableCell className="flex items-center justify-center">
                                     <OptionsWrapper>
                                         {
@@ -110,7 +106,6 @@ function LiveReports() {
                                             /> 
                                             :<> 
                                                 <AddReportDialogue report_item={item}/>
-                                                <FinalizedReportDialog id={item.id}/>
                                                 <DeleteReportAlert id={item.id}/>
                                             </>
                                         }

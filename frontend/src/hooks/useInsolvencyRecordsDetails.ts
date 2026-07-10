@@ -9,7 +9,7 @@ import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 
-const InsolvencyType = z.enum(["insolvency", "bankruptcy", "judicial_management"])
+const InsolvencyType = z.enum(["insolvent", "judicial_management"])
 
 const schema = z.object({
     id:z.number().optional(),

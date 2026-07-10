@@ -37,7 +37,7 @@ function ShareholdingDetails({
         <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Shareholding Details" className="flex flex-col gap-4">
 
-                <ColumnsContainer numberOfCols={2} gapClass="gap-4">
+                <ColumnsContainer numberOfCols={3} gapClass="gap-4">
                     <div className="form-group">
                         <Label className="required">Number of Shares</Label>
                         <Input type="number" {...register("numbers_of_shares", numericField)} />
@@ -53,7 +53,24 @@ function ShareholdingDetails({
                             <p className="text-destructive text-sm">{errors.numbers_of_shareholders.message}</p>
                         )}
                     </div>
+                    <div className="form-group">
+                        <Label>Paid-up Capital</Label>
+                        <Input type="number" {...register("paid_up_capital", numericField)}/>
+                        {errors.paid_up_capital && (
+                            <p className="text-destructive text-sm">{errors.paid_up_capital.message}</p>
+                        )}
+                    </div>
                 </ColumnsContainer>
+                <div className="form-group">
+                    <Label>Authorized Capital</Label>
+                    <Input type="number" {...register("authorized_capital", numericField)}/>
+                    {errors.authorized_capital && (
+                        <p className="text-destructive text-sm">{errors.authorized_capital.message}</p>
+                    )}
+                </div>
+                <div>
+
+                </div>
                 {   fields.length > 0 ?
                     fields.map((field, index) => (
                     <div key={field.id} className="flex flex-col gap-3 border rounded-md p-4">

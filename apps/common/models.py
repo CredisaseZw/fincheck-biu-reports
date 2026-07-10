@@ -156,20 +156,14 @@ class Financials(BaseModelWithSubject):
         null=True,
         blank=True
     )
-    paid_up_capital = models.DecimalField(
-        _("Paid Up Capital"),
+    asset_ratio = models.DecimalField(
+        _("Asset Ratio"),
         max_digits=20,
         decimal_places=2,
         null=True,
-        blank=True
+        blank=True   
     )
-    authorized_capital = models.DecimalField(
-        _("Authorized Capital"),
-        max_digits=20,
-        decimal_places=2,
-        null=True,
-        blank=True
-    ) #add doc key (url)
+
     financials_file = models.FileField(
         _("Financials File"),
         upload_to=financials_file_path,
