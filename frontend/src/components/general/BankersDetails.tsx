@@ -20,7 +20,8 @@ function BankerDetails({
     report_id,
     banker_accounts
 }:BankerDetailsProps) {
-    const { 
+    const {
+        touched, 
         append,
         remove, 
         getValues,
@@ -219,8 +220,9 @@ function BankerDetails({
                     >
                         <Plus /> Add Account
                     </Button>
-                    <CustomSubmitButton 
-                        isPending = {isPending}
+                    <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
                     />
                 </div>
             </Fieldset>

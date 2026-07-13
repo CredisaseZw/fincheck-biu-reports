@@ -26,6 +26,7 @@ import type { ShareholdingsFormData } from "./useShareholdingDetails";
 import type { DirectorFormData } from "./useDirectors";
 import type { ReportDetailsFormData } from "./useReportDetails";
 import useLockManagement from "./useLockManagement";
+import type { CompanyOverviewFormData } from "./useCompanyOverview";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const { mutate } = useCreateReport();
@@ -39,7 +40,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [report, setReport] =useState<Report | undefined>(undefined)
   const [headerEditMode, setHeaderEditMode ] = useState<boolean>()
   const [defaultHeader, setDefaultHeader] = useState<DefaultHeaderProps | undefined>(undefined);
-  const [companyOverview, setCompanyOverview] = useState<CompanyFormData | undefined>(undefined);
+  const [companyInformation, setCompanyInformation] = useState<CompanyFormData | undefined>(undefined);
   const [individualDetails, setIndividualDetails] = useState<IndividualFormData | undefined>(undefined)
   const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
   const [nextOfKin, setNextOfKin] = useState<NextOfKinFormData | undefined>(undefined);
@@ -53,6 +54,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [accounts, setAccounts] = useState<RegistrationAccountsFormData | undefined>(undefined)
   const [tradeReferences, setTradeReferences] = useState<TradeReferenceFormData[]>([])
   const [bankerDetails, setBankerDetails] = useState<BankerAccountFormData[]>([])
+  const [companyOverview, setCompanyOverview] = useState<CompanyOverviewFormData | undefined>(undefined);
   const [companyStructure, setCompanyStructure] = useState<CompanyStructureFormData | undefined>(undefined);
   const [companyOperations, setCompanyOperations] = useState<CompanyOperationsFormData | undefined>(undefined)
   const [shareholding, setShareholding] = useState<ShareholdingsFormData | undefined>();
@@ -115,11 +117,12 @@ function useAddReportDialogue(list_report?: ListReport) {
 
     if(report.subject_type === "company"){
       const company = report.subject as Company
-      setCompanyOverview({
+      setCompanyInformation({
         id: company.id,
         registration_number: company?.registration_number ?? "",
         registered_name: company?.registered_name ?? "",
         trading_name: company?.trading_name ?? "",
+        date_of_registration: company?.date_of_registration ?? "",
         address_registered: company?.address_registered 
         ? formatAddressToObject(company.address_registered)
         : DEFAULT_ADDRESSES,
@@ -130,19 +133,18 @@ function useAddReportDialogue(list_report?: ListReport) {
         telephone_number: company?.telephone_number ?? "",
         mobile_number: company?.mobile_number ?? "",
         website: company?.website ?? "",
-        is_address_registered_verified: company?.is_address_registered_verified ?? true,
-        overview: {
-          trading_status: company?.overview?.trading_status ?? "active",
-          date_of_registration: company?.overview?.date_of_registration ?? "",
-          legal_form: company?.overview?.legal_form ?? undefined,
-          condition: company?.overview?.condition ?? "good",
-          trend: company?.overview?.trend ?? "stable",
-          number_of_employees: company?.overview?.number_of_employees ?? undefined,
-          last_financial_result: company?.overview?.last_financial_result ?? undefined,
-          net_asset_value: company?.overview?.net_asset_value ?? undefined,
-          authorized_share_capital: company?.overview?.authorized_share_capital ?? undefined,
-          issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
-        }, 
+        is_address_registered_verified: company?.is_address_registered_verified ?? true, 
+      })
+      setCompanyOverview({
+        trading_status: company?.overview?.trading_status ?? "active",
+        legal_form: company?.overview?.legal_form ?? undefined,
+        condition: company?.overview?.condition ?? "good",
+        trend: company?.overview?.trend ?? "stable",
+        number_of_employees: company?.overview?.number_of_employees ?? undefined,
+        last_financial_result: company?.overview?.last_financial_result ?? undefined,
+        net_asset_value: company?.overview?.net_asset_value ?? undefined,
+        authorized_share_capital: company?.overview?.authorized_share_capital ?? undefined,
+        issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
       })
       setCompanyStructure({
         holding_company : company.structure?.holding_company,
@@ -353,9 +355,9 @@ function useAddReportDialogue(list_report?: ListReport) {
       ? {
         id: report.subject.financials.id,
         total_assets: report.subject.financials.total_assets ? Number(report.subject.financials.total_assets) : undefined,
-        net_profit: report.subject.financials.net_profit ? Number(report.subject.financials.net_profit) : undefined,
-        net_worth: report.subject.financials.net_worth ? Number(report.subject.financials.net_worth) : undefined,
-        total_revenue: report.subject.financials.total_revenue ? Number(report.subject.financials.total_revenue) : undefined,
+        net_profit: report.subject.financials.net_profit ?? "",
+        net_worth: report.subject.financials.net_worth ?? "",
+        total_revenue: report.subject.financials.total_revenue ?? "",
         financial_year: report.subject.financials.financial_year,
         asset_ratio : report.subject.financials.asset_ratio ? Number(report.subject.financials.asset_ratio) : undefined, 
         default_file :report.subject.financials.financials_file ?? undefined,
@@ -526,6 +528,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     financials,
     accounts,
     companyOperations,
+    companyInformation,
     onClear,
     setUsername,
     onEdit,

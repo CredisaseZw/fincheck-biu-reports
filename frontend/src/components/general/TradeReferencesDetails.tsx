@@ -18,6 +18,7 @@ function TradeReferencesDetails({
   trade_references_data
 }:TradeReferencesProps) {
     const {
+        touched,
         append,
         remove,
         onSubmit,
@@ -162,7 +163,10 @@ function TradeReferencesDetails({
           >
               <Plus size={16} className="mr-2" /> Add Row
           </Button>
-          <CustomSubmitButton isPending = {isPending}/>
+          <CustomSubmitButton 
+              state={touched}
+              isPending={isPending} 
+          />
       </div>
       </Fieldset>
     </form>

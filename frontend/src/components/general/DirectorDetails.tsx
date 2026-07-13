@@ -20,7 +20,8 @@ function DirectorDetails({
     subject_type,
     report_id
 }: CompanyDirectorsProps) {
-    const { 
+    const {
+        touched, 
         errors,
         fields,
         control,
@@ -184,8 +185,10 @@ function DirectorDetails({
                     >
                         <Plus size={16} className="mr-2" /> Add Director
                     </Button>
-                    <CustomSubmitButton 
-                        isPending = {isPending}/>
+                    <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
+                    />
                 </div>
 
             </Fieldset>

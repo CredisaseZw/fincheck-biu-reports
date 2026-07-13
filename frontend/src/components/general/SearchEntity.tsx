@@ -168,7 +168,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
                             size="sm"
                             variant="outline"
                         >
-                            Create {entityType}
+                            Add {entityType}
                         </Button>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
 import type { InsolvencyRecordsProps, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {z} from "zod"
@@ -46,6 +46,7 @@ function useInsolvencyRecordsDetails({
         }
     })
     const { mutate, isPending } = useInstanceMutation()
+    const [touched, setTouched] = useState(false)
     const cache =  useDetailCacheUpdate<Report>(["report", subject_type, report_id])
 
     useEffect(()=>{
@@ -82,10 +83,11 @@ function useInsolvencyRecordsDetails({
         }
     
         mutate(payload, {
-            onSuccess : (data) =>{
+            onSuccess : (data) => {
                 cache.set(["subject", "insolvency_records"], data.insolvency_records)
                 toast.success("Insolvency records updated successfully")
-            },
+                setTouched(true)
+      },
             onError :(error) => handleAxiosError(error)
         })
     }
@@ -95,16 +97,18 @@ function useInsolvencyRecordsDetails({
             url : `/api/credit-records/insolvency_records/${id}/`,
             mode:  "deletion"
         }, {
-            onSuccess:()=>{
+            onSuccess : () => {
                 cache.removeFromList(["subject", "insolvency_records"], id)
                 toast.success("Insolvency record row deleted successfully")
-            },
+                setTouched(true)
+      },
             onError : (error) => handleAxiosError(error)
         })
     }
 
 
     return {
+        touched,
         control,
         errors,
         fields,

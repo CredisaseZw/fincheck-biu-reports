@@ -69,13 +69,14 @@ class ReportViewSet(BaseJSONViewSet):
                 {"error": "This subject has another report currently being edited."},
                 status=STATUS.HTTP_423_LOCKED,
             )
-        
+        status = Report.StatusChoices.IN_PROGRESS if self.request.user.is_staff else Report.StatusChoices.DRAFT
         report = Report.objects.create(
             subject_object_id=subject_id,
             subject_content_type_id=subject_content_type_id,
             client_object_id=client_id,
             username = username,
             client_content_type_id=client_content_type_id,
+            status = status,
             updated_by = user   
         )
 
@@ -157,8 +158,6 @@ class ReportViewSet(BaseJSONViewSet):
 
             return Response({"detail": message, "locked_on": info["locked_on"]}, status=STATUS.HTTP_423_LOCKED)
 
-        report.status = Report.StatusChoices.IN_PROGRESS
-        report.save(update_fields=["status"])
         return Response({"detail": "Lock acquired"}, status=STATUS.HTTP_200_OK)
 
     @action(url_path="release-report-lock", detail=True, methods=['POST'])
@@ -168,10 +167,6 @@ class ReportViewSet(BaseJSONViewSet):
 
         if report.status == Report.StatusChoices.FINALIZED:
             return Response({"detail" : "Report is finalized"}, status=STATUS.HTTP_400_BAD_REQUEST)
-
-        with transaction.atomic():
-            report.status =  Report.StatusChoices.DRAFT
-            report.save(update_fields = ["status"])
             
         release_report_lock(
             report_id=report.id,

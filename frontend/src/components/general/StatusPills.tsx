@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-type Variant = "success" | "danger" | "warning" | "outline" | "ghost";
+type Variant = "success" | "danger" | "warning" | "black" | "outline" | "ghost";
 
 interface StatusPillProps {
   children: ReactNode;
@@ -23,6 +23,10 @@ const variantStyles: Record<Variant, string> = {
   warning:
     "bg-yellow-100 text-yellow-800 border border-yellow-200 " +
     "dark:bg-yellow-500/10 dark:text-yellow-300 dark:border-yellow-500/30",
+
+  black:
+    "bg-black text-white border border-black/20 " +
+    "dark:bg-black dark:text-white",
 
   outline:
     "bg-transparent border border-muted-foreground/30 text-foreground " +

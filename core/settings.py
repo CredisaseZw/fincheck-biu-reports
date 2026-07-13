@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 import dotenv
+from celery.schedules import crontab
 from datetime import timedelta
 dotenv.load_dotenv()
 
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    #'django_celery_beat',
 
     #System Apps
     'apps.users',
@@ -274,17 +276,18 @@ SIMPLE_JWT = {
 # CELERY SETTINGS (MATCH RENTSAFE SETTINGS)
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
-CELERY_WORKER_STATE_DB = None
-CELERY_BEAT_SCHEDULE_FILENAME = "celerybeat-schedule"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
+# CELERY_BEAT_SCHEDULE = {
+#     "tag-stale-reports": {
+#         "task": "",
+#         "schedule": crontab(hour=0, minute=0) #MIDNIGHT PRODUCTION, 
+#     },
+# }
 # REDIS + CACHE SETTINGS 
 
 REDIS_CACHE_LOCATION = os.getenv("REDIS_CACHE_LOCATION", "redis://localhost:6379/1")
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -297,10 +300,8 @@ CACHES = {
     }
 }
 
-
 # LOGGING
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "ERROR").upper()
-1
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

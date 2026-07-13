@@ -113,7 +113,7 @@ export const REPORT_STATUS_PILL_VARIANTS = {
     draft : "outline",
     finalized : "success",
     in_progress : "warning",
-    suspended : "danger"
+    suspended : "black"
 }
 export const DEBTOR_TYPE = z.enum(["company", "individual"])
 

@@ -13,7 +13,8 @@ interface props {
 }
 
 function NextOfKin({next_of_kin, report_id, subject_type}: props) {
-    const { 
+    const {
+        touched, 
         onSubmit,
         register,
         handleSubmit, 

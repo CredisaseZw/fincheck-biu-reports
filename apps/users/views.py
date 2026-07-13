@@ -66,7 +66,7 @@ def create_user(request, *args, **kwargs):
     if error:
         return error
     
-    user = User.objects.create_user(**serializer.validated_data)
+    user = User.objects.create_user(**serializer.validated_data, is_staff = True)
     return Response(UserSerializer(user).data, status=STATUS.HTTP_201_CREATED)
 
 @api_view(['POST'])

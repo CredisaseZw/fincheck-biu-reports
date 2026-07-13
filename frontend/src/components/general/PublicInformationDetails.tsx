@@ -16,6 +16,7 @@ function PublicInformationDetails({
     public_information_data
 }: PublicInformationProps) {
     const {
+        touched,
         register,
         append,
         remove,
@@ -110,7 +111,10 @@ function PublicInformationDetails({
                     >
                         <Plus size={16} className="mr-2" /> Add Row
                     </Button>
-                    <CustomSubmitButton isPending={isPending} />
+                    <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
+                    />
                 </div>
             </Fieldset>
         </form>

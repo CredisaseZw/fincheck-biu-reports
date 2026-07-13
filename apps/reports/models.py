@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models import UniqueConstraint
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta
 
 def report_pdf_path(instance, filename):
     from django.conf import settings
@@ -30,7 +31,10 @@ class Report(BaseModelWithSubject):
         related_name="report_clients"
     )
     client_object_id = models.PositiveIntegerField()
-    client = GenericForeignKey("client_content_type", "client_object_id")
+    client = GenericForeignKey(
+        "client_content_type", 
+        "client_object_id"
+    )
     username = models.CharField(
         max_length=25,
         blank=True,
@@ -41,7 +45,6 @@ class Report(BaseModelWithSubject):
         choices=StatusChoices.choices, 
         default=StatusChoices.DRAFT
     )
-
     overall_risk_rating = models.CharField(
         max_length=50,
         blank=True,
@@ -51,26 +54,32 @@ class Report(BaseModelWithSubject):
         blank=True, 
         null=True
     )
-
-    enquiry_reference = models.CharField(max_length=20, unique=True, editable=False)
-    is_deleted = models.BooleanField(default=False)
-    
+    suspension_reason = models.TextField(
+        blank=True,
+        null=True 
+    )    
     snapshot = models.JSONField(
-        _("Holds how the data was for the subject at the date of finalization"),
+        _("Data ScreenShot"),
         default=dict
     )
-
     finalized_at = models.DateTimeField(
         null=True,
         blank=True
     )
-
     report_pdf = models.FileField(
         _("Report PDF"),
         upload_to=report_pdf_path,
         null=True,
         blank=True,
     )
+    enquiry_reference = models.CharField(max_length=20, unique=True, editable=False)
+    is_deleted = models.BooleanField(default=False)
+
+    @property
+    def is_stale(self):
+        if self.status not in [self.StatusChoices.DRAFT, self.StatusChoices.IN_PROGRESS]:
+            return False
+        return timezone.now() - self.created_at > timedelta(days=3)
 
     def save(self, *args, **kwargs):
         if not self.enquiry_reference:

@@ -4,7 +4,7 @@ import { z } from "zod"
 import { CURRENCY } from "@/constants"
 import type { BankerDetailsProps, Company, Individual, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
@@ -62,6 +62,7 @@ function useBankersDetails({
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const { mutate, isPending } = useInstanceMutation()
+    const [touched, setTouched] = useState(false)
     const { fields, append, remove } = useFieldArray({
         control,
         name: "accounts",
@@ -95,9 +96,10 @@ function useBankersDetails({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data: Company | Individual)=>{
+            onSuccess : (data: Company | Individual) => {
                 cache.set(["subject", "banker_accounts"], data.banker_accounts)
-                toast.success("Banker accounts Updated successfully.")
+                toast.success("Banker accounts Updated successfully.")     
+                setTouched(true)
             },
             onError : (error) => handleAxiosError(error)
         })
@@ -108,10 +110,11 @@ function useBankersDetails({
            url : `/api/bankers_accounts/${id}/`,
            mode :"deletion" 
         }, {
-            onSuccess : ()=>{
+            onSuccess : () => {
                 cache.removeFromList(["subject", "banker_accounts"], id)
                 toast.success("Banker row successfully deleted.")
-            },
+                setTouched(true)
+      },
             onError :(e)=>handleAxiosError(e)
         })
     }
@@ -128,6 +131,7 @@ function useBankersDetails({
         isPending,
         errors,
         fields,
+        touched
     }
 }
 

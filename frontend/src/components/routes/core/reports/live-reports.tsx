@@ -12,6 +12,7 @@ import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
 import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
 import DeleteReportAlert from "@/dialogues/DeleteReportDialogue";
 import FilterOptionsDialogue from "@/dialogues/FilterOptionsDialgue";
+import SuspendReportDialog from "@/dialogues/SuspendReportDialog";
 import useReports from "@/hooks/useReports";
 import { getEntityName, getFormattedDate, toCap } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
@@ -65,7 +66,9 @@ function LiveReports() {
                             const subject_bottom_level = "national_id" in item.subject
                             ? item.subject.email ?? "-"
                             : item.subject.registration_number ?? item.subject.trading_name ?? "-"
-                                
+                            
+                            const pillVariant = (item.is_stale && item.status === "in_progress") ? "danger" : REPORT_STATUS_PILL_VARIANTS[item.status]
+
                             return (
                             <TableRow key={item.id}>
                                 <TableCell className="text-center">{item.enquiry_reference}</TableCell>
@@ -86,7 +89,7 @@ function LiveReports() {
                                 </TableCell>
                                 <TableCell>{(!item.username || item.username.trim() === "") ? '-' : item.username}</TableCell>
                                 <TableCell className="text-center">
-                                    <StatusPill variant={REPORT_STATUS_PILL_VARIANTS[item.status] as any}>
+                                    <StatusPill variant={pillVariant as any}>
                                         {toCap(item.status)}
                                     </StatusPill>
                                 </TableCell>
@@ -105,7 +108,15 @@ function LiveReports() {
                                                 label="View Report"
                                             /> 
                                             :<> 
-                                                <AddReportDialogue report_item={item}/>
+                                                {
+                                                    item.status === "suspended"
+                                                    ? <SuspendReportDialog 
+                                                        mode={"unsuspend"} 
+                                                        reason={item.suspension_reason}
+                                                        id={item.id}
+                                                    />
+                                                    : <AddReportDialogue report_item={item}/>
+                                                }
                                                 <DeleteReportAlert id={item.id}/>
                                             </>
                                         }

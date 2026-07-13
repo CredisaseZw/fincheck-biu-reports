@@ -54,6 +54,10 @@ class Company(BaseModel):
         blank=True, 
         null=True
     )
+    date_of_registration = models.DateField(
+        null=True,
+        blank=True
+    )
     refer_type = models.CharField(
         max_length=10,
         choices= ReferType.choices,
@@ -238,10 +242,6 @@ class CompanyOverview(BaseModel):
     trading_status = models.CharField(
         max_length=20,
         choices=TradingStatus.choices,
-        null=True,
-        blank=True
-    )
-    date_of_registration = models.DateField(
         null=True,
         blank=True
     )

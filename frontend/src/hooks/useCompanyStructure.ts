@@ -7,7 +7,7 @@ import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 
 const companyStructureSchema = z.object({
     holding_company: z.string().optional(),
@@ -36,6 +36,7 @@ function useCompanyStructure({
     })
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const [touched, setTouched] = useState(false)
 
     useEffect(()=>{
         if(structure_data){
@@ -57,9 +58,10 @@ function useCompanyStructure({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data:Company)=>{
-                cache.set(["subject", "structure"], data.structure)
+            onSuccess : (data:Company) => {
+                cache.set(["subject","structure"], data.structure)
                 toast.success("Company structure updated successfully.")
+                setTouched(true)
             },
             onError : (error) => handleAxiosError(error)
         })
@@ -71,7 +73,8 @@ function useCompanyStructure({
         onSubmit,
         control,
         errors,
-        isPending
+        isPending,
+        touched
     }
 }
 

@@ -6,7 +6,7 @@ import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { toast } from "sonner";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const PaymentTrends = z.enum(["good", "fair", "poor"])
 const PaymentTrendsOptions = PaymentTrends.options;
@@ -60,6 +60,7 @@ function useTradeReferences({
 
   const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
   const {mutate, isPending} = useInstanceMutation();
+  const [touched, setTouched] = useState(false);
 
   const onSubmit = (data: TradeReferencesFormData) => {
     if(!subject_object_id || !subject_type){
@@ -84,6 +85,7 @@ function useTradeReferences({
       onSuccess: (data : Company | Individual) =>{
         cache.set(["subject", "trade_references"], data.trade_references)
         toast.success("Trade references updated successfully.");
+        setTouched(true);
       },
       onError : (e)=> handleAxiosError(e)
     })
@@ -103,11 +105,13 @@ function useTradeReferences({
       onSuccess : ()=>{
         cache.removeFromList(["subject", "trade_references"],id)
         toast.success("Trade references deleted successfully.");
+        setTouched(true)
       }
     })
   }
 
   return {
+    touched,
     append,
     remove,
     onSubmit,

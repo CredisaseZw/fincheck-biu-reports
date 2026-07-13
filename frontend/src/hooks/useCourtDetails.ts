@@ -1,7 +1,7 @@
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
 import type { CourtJudgementsProps, Report } from "@/types/core";
 import {zodResolver} from "@hookform/resolvers/zod"
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod"
@@ -57,6 +57,7 @@ function useCourtDetails({
 
     const cache = useDetailCacheUpdate<Report>(['report', subject_type, report_id])
     const {mutate, isPending} = useInstanceMutation()
+    const [touched, setTouched] = useState(false)
     const {fields, append, remove} = useFieldArray({
         control,
         name : "court_judgements"
@@ -83,9 +84,10 @@ function useCourtDetails({
         }
     
         mutate(payload, {
-            onSuccess : (data) =>{
+            onSuccess : (data) => {
                 cache.set(["subject", "court_judgements"], data.court_judgements)
                 toast.success("Court Judgements updated successfully")
+                setTouched(true)
             },
             onError :(error) => handleAxiosError(error)
         })
@@ -95,16 +97,19 @@ function useCourtDetails({
         mutate({
             url : `/api/credit-records/court_judgements/${id}/`,
             mode:  "deletion"
-        }, {
-            onSuccess:()=>{
+        },{
+            onSuccess : () => {
+        
                 cache.removeFromList(["subject", "court_judgements"], id)
                 toast.success("Court Judgement row deleted successfully")
+                setTouched(true)            
             },
             onError : (error) => handleAxiosError(error)
         })
     }
 
-    return {   
+    return {
+        touched,   
         fields,
         errors,
         control,

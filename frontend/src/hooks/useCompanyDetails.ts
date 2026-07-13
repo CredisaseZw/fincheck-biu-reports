@@ -7,39 +7,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { useQueryClient } from "@tanstack/react-query";
 
-const TradingStatus = z.enum(["active", "inactive", "administration", "insolvent"])
-const Condition = z.enum(["good", "fair", "poor"])
-const Trend = z.enum(["improving", "stable", "declining"])
-const LegalForm = z.enum([
-    "pvt_ltd",
-    "plc",
-    "pbc",
-    "partnership",
-    "trust",
-    "joint_venture",
-    "cooperative",
-    "sole_trader",
-])
-export const LegalForms = LegalForm.options;
-const companyOverviewSchema = z.object({
-    date_of_registration: z.string().optional(),    
-    legal_form: LegalForm.optional(),
-    trading_status: TradingStatus.optional(),
-    condition: Condition.optional(),
-    trend: Trend.optional(),
-    number_of_employees: z.number().optional(),
-    last_financial_result: z.string().optional(),
-    net_asset_value: z.string().optional(),
-    authorized_share_capital: z.string().optional(),
-    issued_share_capital: z.string().optional()
-})
 
 const companySchema = z.object({
     id : z.number().optional(),
+    date_of_registration: z.string().optional(),    
     registered_name: z.string().min(1, "Registered name is required").max(50, "Company Name too long."),
     registration_number: z.string().optional(),
     trading_name: z.string().max(255),
@@ -55,7 +30,6 @@ const companySchema = z.object({
     )
     .optional(),    
     is_address_registered_verified: z.boolean().optional(),
-    overview: companyOverviewSchema.optional(),
 })
 
 export type CompanyFormData = z.infer<typeof companySchema>
@@ -67,6 +41,7 @@ interface props {
 }
 function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     const {mutate, isPending } = useInstanceMutation()
+    const [touched, setTouched] = useState(false)
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const client = useQueryClient()
 
@@ -127,12 +102,14 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
         }
         
         mutate(PAYLOAD,{
-            onSuccess : (data: Company)=>{
+            onSuccess : (data: Company) => {
+         
                 client.invalidateQueries({
                     queryKey : ["reports"]
                 })
                 cache.set(["subject"], data)
                 toast.info(message)
+                setTouched(true)            
             },
             onError:(error)=>handleAxiosError(error)
         } )
@@ -146,6 +123,7 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
         isPending,
         control,
         errors,
+        touched,
     }
 }
 

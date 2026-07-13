@@ -17,7 +17,8 @@ interface props{
 }
 
 function IndividualDetails({ individual_details, report_id } : props) {
-    const { 
+    const {
+        touched, 
         isPending,
         errors,
         control, 
@@ -108,8 +109,9 @@ function IndividualDetails({ individual_details, report_id } : props) {
                 />
 
                 <CustomSubmitButton
-                    isPending = {isPending}
-                />
+                        state={touched}
+                        isPending={isPending}
+                    />
             </Fieldset>
         </form>
     )

@@ -2,7 +2,7 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { Company, CompanyShareholdingProps, Report, Shareholding } from "@/types/core";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedArray, handleTrackChangedFields } from "@/lib/utils";
 import { toast } from "sonner";
@@ -69,6 +69,7 @@ function useShareholdingDetails({
 
     const client = useQueryClient()
     const { mutate, isPending } = useInstanceMutation()
+    const [touched, setTouched] = useState(false)
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -117,12 +118,15 @@ function useShareholdingDetails({
                         }
                     }
                 )
+
+                setTouched(true)
+
                 reset({
                     id: data_.id,
                     numbers_of_shareholders: data_.numbers_of_shareholders,
                     numbers_of_shares: data_.numbers_of_shares,
-                    paid_up_capital : Number(data_.paid_up_capital),
-                    authorized_capital :Number(data_.authorized_capital),
+                    paid_up_capital: Number(data_.paid_up_capital),
+                    authorized_capital: Number(data_.authorized_capital),
                     shareholders: data_.shareholders.map(item => ({
                         id: item.id ?? undefined,
                         full_name: item.full_name,
@@ -136,7 +140,7 @@ function useShareholdingDetails({
         })
     }
 
-    const onDelete = (id: number) => {
+   const onDelete = (id: number) => {
         mutate({
             url: `/api/shareholders/${id}/`,
             mode: "deletion"
@@ -162,12 +166,14 @@ function useShareholdingDetails({
                         }
                     }
                 )
+                setTouched(true)
             },
             onError: (e) => handleAxiosError(e)
         })
     }
 
     return {
+        touched,
         isPending,
         errors,
         fields,

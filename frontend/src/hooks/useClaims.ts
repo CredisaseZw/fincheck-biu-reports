@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from  "zod"
 import type { SearchEntityRef } from "@/components/general/SearchEntity";
-import { useEffect, useRef } from "react";
+import { useState,  useEffect, useRef } from "react";
 import type { ClaimsProps } from "@/types/core";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
@@ -60,6 +60,7 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
   }, [reset, claims_data])
 
   const {mutate, isPending} = useInstanceMutation()
+  const [touched, setTouched] = useState(false)
   const cache = useDetailCacheUpdate<Report>(['report', subject_type, report_id])
   const refs = useRef<(SearchEntityRef | null)[]>([])
   const {fields, append, remove} = useFieldArray({
@@ -99,9 +100,11 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
       }
     }
     mutate(payload, {
-      onSuccess : (data) =>{
+      onSuccess : (data) => {
         cache.set(["subject", "claims"], data.claims)
         toast.success("Claims updated successfully")
+      
+        setTouched(true)
       },
       onError :(error) => handleAxiosError(error)
     })
@@ -112,9 +115,11 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
       url : `/api/credit-records/claims/${id}/`,
       mode:  "deletion"
     }, {
-      onSuccess:()=>{
+      onSuccess : () => {
         cache.removeFromList(["subject", "claims"], id)
         toast.success("Claim row deleted successfully")
+      
+        setTouched(true)
       },
       onError : (error) => handleAxiosError(error)
     })
@@ -123,6 +128,7 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
   
 
   return {
+    touched,
     getValues,
     setValue,
     watch,

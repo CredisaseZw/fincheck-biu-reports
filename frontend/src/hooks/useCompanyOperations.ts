@@ -1,7 +1,7 @@
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import type { Company, CompanyOperationsProps } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner";
 import { z } from "zod"
@@ -40,6 +40,7 @@ function useCompanyOperations({
         resolver: zodResolver(companyOperationsSchema),
         defaultValues: operations_data
     })
+    const [touched, setTouched] = useState(false)
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
 
@@ -66,10 +67,11 @@ function useCompanyOperations({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data: Company)=>{
+            onSuccess : (data: Company) => {
                 cache.set(["subject", "operations"], data.operations)
                 toast.success("Company Operations updated successfully.")
-            },
+                setTouched(true)
+      },
             onError : (error) => handleAxiosError(error)
         })
     }
@@ -82,7 +84,8 @@ function useCompanyOperations({
         register, 
         control,
         isPending,
-        errors 
+        errors,
+        touched
     }
 }
 

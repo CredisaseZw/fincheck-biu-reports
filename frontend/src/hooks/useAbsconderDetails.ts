@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from  "zod"
 import type { SearchEntityRef } from "@/components/general/SearchEntity";
-import { useEffect, useRef } from "react";
+import { useState,  useEffect, useRef } from "react";
 import type { AbsconderProps, Report } from "@/types/core";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
@@ -63,6 +63,7 @@ function useAbsconderDetails({
     }
   },[reset, absconders_data])
   const { mutate, isPending } = useInstanceMutation()
+  const [touched, setTouched] = useState(false)
   const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
   const refs = useRef<(SearchEntityRef | null)[]>([])
   const {fields, append, remove} = useFieldArray({
@@ -101,9 +102,10 @@ function useAbsconderDetails({
       }
     }
     mutate(payload, {
-      onSuccess : (data) =>{
+      onSuccess : (data) => {
         cache.set(["subject", "absconders"], data.absconders)
         toast.success("Absconders updated successfully")
+        setTouched(true)
       },
       onError :(error) => handleAxiosError(error)
     })
@@ -114,9 +116,10 @@ function useAbsconderDetails({
       url : `/api/credit-records/absconders/${id}/`,
       mode:  "deletion"
     }, {
-      onSuccess:()=>{
+      onSuccess : () => {
         cache.removeFromList(["subject", "absconders"], id)
         toast.success("Absconder row deleted successfully")
+        setTouched(true)
       },
       onError : (error) => handleAxiosError(error)
     })
@@ -137,6 +140,7 @@ function useAbsconderDetails({
     control,
     errors,
     fields,
+    touched
   }
 }
 

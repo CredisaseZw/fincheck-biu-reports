@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ACCEPTED_TYPES, MAX_SIZE } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
+import { useState,  useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { file_api } from "@/axios/api"
@@ -25,9 +25,9 @@ const fileSchema = z.custom<FileList>()
 const financialsSchema = z.object({
     id: z.number().optional(),
     total_assets: z.number().optional(),
-    net_profit: z.number().optional(),
-    net_worth: z.number().optional(),
-    total_revenue: z.number().optional(),
+    net_profit: z.string().optional(),
+    net_worth: z.string().optional(),
+    total_revenue: z.string().optional(),
     asset_ratio : z.number().optional(),
     financial_year: z.number().int().positive().min(2000).max(new Date().getFullYear()),
     financials_file: fileSchema,
@@ -63,7 +63,8 @@ function useFinancialsDetails({
     }, [reset, financials_data])
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
-
+    const [touched, setTouched] = useState(false);
+    
     const { mutate: save, isPending } = useMutation({
         mutationFn: async (formData: FormData) => {
             const id = formData.get("__id")
@@ -77,7 +78,7 @@ function useFinancialsDetails({
         }
     })
 
-    const buildFormData = (
+     const buildFormData = (
         entry: Partial<FinancialEntryFormData>,
     ): FormData => {
         const formData = new FormData()
@@ -90,8 +91,11 @@ function useFinancialsDetails({
         }
 
         const numericKeys = [
-            "total_assets", "net_profit", "net_worth",
-            "total_revenue", "asset_ratio", "financial_year"
+            "total_assets", "asset_ratio", "financial_year"
+        ] as const
+
+        const stringKeys = [
+            "net_profit", "net_worth", "total_revenue"
         ] as const
 
         numericKeys.forEach((key) => {
@@ -105,13 +109,23 @@ function useFinancialsDetails({
             }
         })
 
+        stringKeys.forEach((key) => {
+            if (key in entry) {
+                const val = entry[key]
+                if (val !== undefined && val !== null && val !== "") {
+                    formData.append(key, String(val))
+                } else if (entry.id) {
+                    formData.append(key, "")
+                }
+            }
+        })
+
         if (entry.financials_file instanceof FileList && entry.financials_file.length > 0) {
             formData.append("financials_file", entry.financials_file[0])
         }
 
         return formData
     }
-
     const onSubmit = (data: FinancialEntryFormData) => {
         if (!subject_object_id || !subject_type) {
             toast.error("No working report loaded.")
@@ -151,20 +165,22 @@ function useFinancialsDetails({
 
         const formData = buildFormData(changes)
         save(formData, {
-            onSuccess: ({ data: savedEntry }) => {
+            onSuccess : ({ data: savedEntry }) => {
                 cache.set(["subject", "financials"], savedEntry)
                 toast.success("Financials updated successfully")
                 reset({
                     ...savedEntry,
                     total_assets: savedEntry.total_assets ? Number(savedEntry.total_assets) : undefined,
-                    net_profit: savedEntry.net_profit ? Number(savedEntry.net_profit) : undefined,
-                    net_worth: savedEntry.net_worth ? Number(savedEntry.net_worth) : undefined,
-                    total_revenue: savedEntry.total_revenue ? Number(savedEntry.total_revenue) : undefined,
+                    asset_ratio: savedEntry.asset_ratio ? Number(savedEntry.asset_ratio) : undefined,
+                    net_profit: savedEntry.net_profit ?? undefined,
+                    net_worth: savedEntry.net_worth ?? undefined,
+                    total_revenue: savedEntry.total_revenue ?? undefined,
                     paid_up_capital: savedEntry.paid_up_capital ? Number(savedEntry.paid_up_capital) : undefined,
                     authorized_capital: savedEntry.authorized_capital ? Number(savedEntry.authorized_capital) : undefined,
                     default_file:  savedEntry.financials_file ?? undefined,
                     financials_file:  undefined,
                 }) 
+                setTouched(true)
             },
             onError: (error) => handleAxiosError(error),
         })
@@ -179,6 +195,7 @@ function useFinancialsDetails({
         numericField,
         isPending,
         control,
+        touched
     }
 }
 

@@ -6,9 +6,15 @@ import { OptionButton } from './OptionButton';
 interface props {
     Icon?: LucideIcon,
     mode: "create" | "update",
-    label: string
+    label: string,
+    editLabel?: string
 }
-function CustomDialogueTrigger({Icon, label, mode}: props) {
+function CustomDialogueTrigger({
+    Icon,
+    label,
+    mode,
+    editLabel = "Edit Report"
+}: props) {
     return (
     <DialogTrigger className="self-center">
         {
@@ -21,7 +27,7 @@ function CustomDialogueTrigger({Icon, label, mode}: props) {
                 fullWidth
                 variant={"ghost"}
                 Icon={Edit}
-                label= {"Edit Report"}
+                label= {editLabel}
             />
         }
     </DialogTrigger>

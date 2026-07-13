@@ -14,7 +14,7 @@ function RegistrationAccountsDetails({
     report_id,
     accounts_data
 }:RegistrationsAccountsProps) {
-    const { register, onSubmit, handleSubmit, control, isPending } = useRegistrationAccounts({
+    const { register, onSubmit, handleSubmit, control, isPending, touched } = useRegistrationAccounts({
         subject_object_id,
         subject_type,
         report_id,
@@ -36,7 +36,6 @@ function RegistrationAccountsDetails({
                             <Label>{label}</Label>
                             <div className="flex flex-row items-center gap-2">
                                 <Input
-                                    type="number"
                                     className="flex-1"
                                     {...register(name)}
                                 />
@@ -60,7 +59,10 @@ function RegistrationAccountsDetails({
                         </div>
                     ))}
                 </ColumnsContainer>
-                <CustomSubmitButton isPending ={isPending}/>
+                <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
+                    />
             </Fieldset>
         </form>
     )

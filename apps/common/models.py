@@ -135,24 +135,21 @@ class Financials(BaseModelWithSubject):
         null=True,
         blank=True
     )
-    net_profit = models.DecimalField(
+    net_profit = models.CharField(
         _("Net Profit"),
-        max_digits=20,
-        decimal_places=2,
+        max_length=200,
         null=True,
         blank=True
     )
-    net_worth = models.DecimalField(
+    net_worth = models.CharField(
         _("Net Worth"),
-        max_digits=20,
-        decimal_places=2,
+        max_length=200,
         null=True,
         blank=True
     )
-    total_revenue = models.DecimalField(
+    total_revenue = models.CharField(
         _("Total Revenue"),
-        max_digits=20,
-        decimal_places=2,
+        max_length=200,
         null=True,
         blank=True
     )

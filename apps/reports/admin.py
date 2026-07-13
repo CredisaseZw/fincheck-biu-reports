@@ -9,6 +9,7 @@ class ReportAdmin(admin.ModelAdmin):
         "subject",
         "status",
         "overall_risk_rating",
+        'is_stale',
         "finalized_at",
         "created_at",
     )

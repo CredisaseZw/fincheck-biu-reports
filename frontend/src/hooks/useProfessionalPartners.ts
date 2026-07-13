@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { Company, Individual, ProfessionalsProps, Report } from "@/types/core";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import type { InstanceMutation } from "./api/useInstanceMutation";
@@ -38,6 +38,7 @@ function useProfessionalPartners({
         }
     }, [reset, professionals_data])
 
+    const [touched, setTouched] = useState(false)
     const {mutate, isPending} = useInstanceMutation();
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
 
@@ -63,16 +64,18 @@ function useProfessionalPartners({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data:Company | Individual)=>{
+            onSuccess : (data:Company | Individual) => {
                 cache.set(["subject", "professional_partners"], data.professional_partners)
                 toast.success("Professional Updated successfully.")
-            },
+                setTouched(true)
+      },
             onError : (error) => handleAxiosError(error)
         })
 
     }
 
     return {
+    touched,
         onSubmit,
         register,
         handleSubmit,

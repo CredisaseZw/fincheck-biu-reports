@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
@@ -38,6 +38,7 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
             reset(next_of_kin)
         }
     },[reset, next_of_kin])
+    const [touched, setTouched] = useState(false)
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const {mutate, isPending} = useInstanceMutation()
 
@@ -61,9 +62,10 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
         PAYLOAD.data = { next_of_kin: changes }
     
         mutate(PAYLOAD, {
-            onSuccess: (data:Individual) => {
+            onSuccess : (data:Individual) => {
                 cache.set(["subject", "next_of_kin"], data.next_of_kin)
                 toast.success("Information successfully updated")
+                setTouched(true)
             },
             onError: (error) => handleAxiosError(error)
         })
@@ -74,6 +76,7 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
         register, 
         handleSubmit, 
         errors,
+        touched,
         isPending
     }
 }

@@ -18,6 +18,7 @@ function InsolvencyRecordsDetails({
     insolvency_data
 }: InsolvencyRecordsProps) {
     const {
+        touched,
         register,
         append,
         remove,
@@ -132,7 +133,10 @@ function InsolvencyRecordsDetails({
                 >
                     <Plus size={16} className="mr-2" /> Add Row
                 </Button>
-                <CustomSubmitButton isPending = {isPending}/>
+                <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
+                    />
             </div>
         </Fieldset>
     </form>

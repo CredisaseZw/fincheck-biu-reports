@@ -34,6 +34,7 @@ function AbsconderDetails({
         errors, 
         fields, 
         refs,
+        touched,
     } = useAbsconderDetails({
         absconders_data,
         subject_object_id,
@@ -186,7 +187,8 @@ function AbsconderDetails({
                         <Plus size={16} className="mr-2" /> Add Row
                     </Button>
                     <CustomSubmitButton
-                        isPending = {isPending}
+                        state={touched}
+                        isPending={isPending}
                     />
                 </div>
 

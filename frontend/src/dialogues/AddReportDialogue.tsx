@@ -36,6 +36,8 @@ import ReportHeaderCard from "@/components/general/ReportHeaderCard";
 import LoadingIndicator from "@/components/general/LoadingIndicator";
 import ReportDetails from "@/components/general/ReportDetails";
 import FinalizedReportDialog from "./FinalizedReportDialogue";
+import CompanyOverview from "@/components/general/CompanyOverview";
+import SuspendReportDialog from "./SuspendReportDialog";
 
 interface props {
     report_item?: ListReport
@@ -69,6 +71,7 @@ function AddReportDialogue({ report_item }: props) {
         clientType,
         accounts,
         subjectType,
+        companyInformation,
         financials,
         headerEditMode,
         isLocked,
@@ -137,8 +140,15 @@ function AddReportDialogue({ report_item }: props) {
                                 ? <>
                                     <CompanyDetails
                                         subject_type= {subject_type}
-                                        company_overview = {companyOverview}
+                                        company_overview = {companyInformation}
                                         report_id={report.id}
+                                    />
+                                    <CompanyOverview
+                                        subject_type={subject_type}
+                                        subject_object_id={subject_object_id}
+                                        report_id={report.id}
+                                        company_overview={companyOverview}
+                                    
                                     />
                                     <CompanyStructure 
                                         structure_data = {companyStructure}
@@ -291,11 +301,19 @@ function AddReportDialogue({ report_item }: props) {
                                 </Button>
                                 : 
                                 report &&
-                                <FinalizedReportDialog
-                                    callback = {()=>handleOpenChange(false)}
-                                    id={report.id}
-                                    main
-                                />
+                                <>  
+                                    <SuspendReportDialog
+                                        id={report.id}
+                                        mode = {"suspend"}
+                                        callback = {()=>handleOpenChange(false)}
+                                    />
+                                    <FinalizedReportDialog
+                                        callback = {()=>handleOpenChange(false)}
+                                        id={report.id}
+                                        main
+                                    />
+                                </>
+                                
                             }
                         </DialogFooter>
                     </div>

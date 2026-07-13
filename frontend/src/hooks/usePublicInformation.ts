@@ -1,7 +1,7 @@
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
 import type { PublicInformationProps, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod"
@@ -49,6 +49,7 @@ function usePublicInformation({
     })
 
     const { mutate, isPending } = useInstanceMutation()
+  const [touched, setTouched] = useState(false)
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
 
     useEffect(() => {
@@ -85,9 +86,10 @@ function usePublicInformation({
         }
 
         mutate(payload, {
-            onSuccess: (data) => {
+            onSuccess : (data) => {
                 cache.set(["subject", "public_information"], data.public_information)
                 toast.success("Public information updated successfully")
+                setTouched(true)
             },
             onError: (error) => handleAxiosError(error)
         })
@@ -98,16 +100,18 @@ function usePublicInformation({
             url: `/api/credit-records/public_information/${id}/`,
             mode: "deletion"
         }, {
-            onSuccess: () => {
+            onSuccess : () => {
                 cache.removeFromList(["subject", "public_information"], id)
                 toast.success("Public information row deleted successfully")
-            },
+                setTouched(true)
+      },
             onError: (error) => handleAxiosError(error)
         })
     }
 
     return {
         control,
+        touched,
         errors,
         fields,
         isPending,

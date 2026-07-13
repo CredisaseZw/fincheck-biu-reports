@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form" 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import type { Company, Individual, RegistrationsAccountsProps, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
@@ -44,6 +44,7 @@ function useRegistrationAccounts({
         }
     }, [reset, accounts_data])
 
+    const [touched, setTouched] = useState(false)
     const {mutate, isPending} = useInstanceMutation();
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
 
@@ -69,10 +70,11 @@ function useRegistrationAccounts({
             }
         }
         mutate(PAYLOAD, {
-            onSuccess:(data: Company | Individual)=>{
+            onSuccess : (data: Company | Individual) => {
                 cache.set(["subject", "registration_accounts"], data.registration_accounts)
                 toast.success("Registration accounts Updated successfully.")
-            },
+                setTouched(true)
+      },
             onError : (error) => handleAxiosError(error)
         })
 
@@ -84,6 +86,7 @@ function useRegistrationAccounts({
         onSubmit,
         register,
         control,
+        touched,
         errors,
         isPending, 
   }

@@ -1,6 +1,6 @@
 import type { Report, ReportDetailsProps } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
@@ -32,7 +32,7 @@ function useReportDetails({
     })
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const {mutate, isPending}= useInstanceMutation()
-
+    const [touched, setTouched] = useState(false)
     useEffect(()=>{
         if(report_data){
             reset(report_data)
@@ -52,16 +52,18 @@ function useReportDetails({
             data : changes
         } 
         mutate(p,{
-            onSuccess : (data: Report)=>{
+            onSuccess : (data: Report) => {
                 toast.info("Report details saved.")
                 if(changes.overall_risk_rating)cache.set(["overall_risk_rating"], data.overall_risk_rating);
                 if(changes.summary)cache.set(["summary"], data.summary);
-            },
+                setTouched(true)
+      },
             onError : (e)=> handleAxiosError(e)
         })
     }
 
     return {
+        touched,
         isPending,
         errors,
         register,

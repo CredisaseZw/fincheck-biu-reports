@@ -15,6 +15,7 @@ import type { CompanyOperationsFormData } from "@/hooks/useCompanyOperations";
 import type { ShareholdingsFormData } from "@/hooks/useShareholdingDetails";
 import type { DirectorFormData } from "@/hooks/useDirectors"
 import type { ReportDetailsFormData } from "@/hooks/useReportDetails";
+import type { CompanyOverviewFormData } from "@/hooks/useCompanyOverview";
 export interface RouteItem  {
     name: string;
     link: string;
@@ -80,6 +81,8 @@ export interface ListReport {
   subject: MiniCompany | MiniIndividual;
   subject_type : EntityValue,
   client_type :EntityValue
+  suspension_reason : string | null,
+  is_stale : boolean
   status : "draft" | "finalized" | "in_progress" | "suspended"
   overall_risk_rating : number | null,
   username : string | null,
@@ -106,7 +109,6 @@ type CreditRecordStatus = "open" | "settled" | "disputed" | "written_off"
 export interface CompanyOverview {
   id: number;
   trading_status: "active" | "inactive" | "administration" | "insolvent"
-  date_of_registration: string;
   legal_form: "pvt_ltd" 
   | "plc" 
   | "pbc" 
@@ -315,6 +317,7 @@ export interface Company extends CommonFields{
   company_name: string;
   registration_number: string| null;
   registered_name: string;
+  date_of_registration: string;
   trading_name: string | null;
   refer_type: string;
   address_registered: string;
@@ -357,6 +360,8 @@ export interface Report extends Timestamps {
   subject_type: EntityValue
   overall_risk_rating : number | null,
   summary : string | null
+  suspension_reason : string | null,
+  is_stale : boolean
   status : "draft" | "finalized"
   references: TradeReference[];
 }
@@ -425,4 +430,8 @@ export interface CompanyDirectorsProps extends ReportEntityProps{
 }
 export interface ReportDetailsProps extends ReportEntityProps{
   report_data : ReportDetailsFormData | undefined
+}
+
+export interface CompanyOverviewProps extends ReportEntityProps{
+  company_overview : CompanyOverviewFormData | undefined
 }

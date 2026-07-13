@@ -15,7 +15,7 @@ function Fieldset({legendTitle, children, className, legendTitleVariant = "defau
   : "px-2 text-sm"
   return (
     <fieldset className={cn("border flex flex-col gap-3 relative w-full rounded-md  p-5", className, marginClass)} >
-        <legend className={cn("text-gray-800 dark:text-gray-200","text-[1rem]",  s)}> {legendTitle}  </legend>
+        <legend className={cn("text-primary","text-[1rem]",  s)}> {legendTitle}  </legend>
         {children}
     </fieldset>
   )

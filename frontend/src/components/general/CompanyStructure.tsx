@@ -12,11 +12,12 @@ function CompanyStructure({
     structure_data,
     subject_type
 }:CompanyStructureProps) {
-    const { 
+    const {
         onSubmit,
         handleSubmit,
         register,
-        isPending
+        isPending,
+        touched,
     } = useCompanyStructure({
         report_id,
         subject_object_id,
@@ -76,7 +77,10 @@ function CompanyStructure({
                     </div>
 
                 </ColumnsContainer>
-                <CustomSubmitButton isPending = {isPending}/>
+                <CustomSubmitButton
+                    state={touched}
+                    isPending={isPending}
+                />
             </Fieldset>
         </form>
     )

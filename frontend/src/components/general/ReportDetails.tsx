@@ -16,6 +16,7 @@ function ReportDetails({
     report_id
 }:ReportDetailsProps) {
     const {
+        touched,
         isPending,
         errors,
         register,
@@ -71,7 +72,10 @@ function ReportDetails({
                 errors.summary &&
                 <p className="text-destructive text-sm">{errors.summary.message}</p>
             }
-            <CustomSubmitButton isPending = {isPending}/>
+            <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
+                    />
         </form>
     </Fieldset>
   )

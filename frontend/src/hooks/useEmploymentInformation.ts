@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
@@ -28,7 +28,7 @@ interface props {
 function useEmploymentInformation({employment_information, report_id, subject_type }:props) {
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
-
+    const [touched, setTouched] = useState(false);
     const {
         reset,
         register,
@@ -66,15 +66,17 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         PAYLOAD.data = { employment_information: changes }
     
         mutate(PAYLOAD, {
-            onSuccess: (data: Individual) => {
+            onSuccess : (data: Individual) => {
                 cache.set(["subject", "employment_information"], data.employment_information)
                 toast.success("Information successfully updated")
+                setTouched(true)
             },
             onError: (error) => handleAxiosError(error)
         })
     }
 
-    return { 
+    return {
+    touched, 
         onSubmit,
         register, 
         handleSubmit, 

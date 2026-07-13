@@ -20,6 +20,7 @@ function ClaimsDetails({
     report_id
 }:ClaimsProps) {
     const {
+        touched,
         getValues,
         append, 
         remove, 
@@ -186,7 +187,10 @@ function ClaimsDetails({
                     >
                         <Plus size={16} className="mr-2" /> Add Row
                     </Button>
-                    <CustomSubmitButton isPending = {isPending}/>
+                    <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
+                    />
                 </div>
 
             </Fieldset>

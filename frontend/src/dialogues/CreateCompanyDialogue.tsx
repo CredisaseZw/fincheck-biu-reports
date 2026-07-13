@@ -16,7 +16,6 @@ function CreateCompanyDialogue() {
             <DialogContent className="max-h-[90vh] md:max-w-275 overflow-y-auto">
                 <CustomDialogueHeader title="Add Company"/>
                 <CompanyDetails
-                    isReport ={false}
                     subject_type={null}
                 />        
             </DialogContent>

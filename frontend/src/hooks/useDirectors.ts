@@ -2,7 +2,7 @@ import {useForm, useFieldArray} from "react-hook-form"
 import {zodResolver} from "@hookform/resolvers/zod"
 import {z} from "zod"
 import type { CompanyDirectorsProps, Report } from "@/types/core";
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
@@ -55,7 +55,8 @@ function useDirectors({
     })
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
-    const { mutate, isPending } = useInstanceMutation();
+    const { mutate, isPending } = useInstanceMutation()
+    const [touched, setTouched] = useState(false);
 
     useEffect(()=>{
         if(directors_data){
@@ -108,9 +109,11 @@ function useDirectors({
         }
 
         mutate(payload,{
-            onSuccess : (data) =>{
+            onSuccess : (data) => {
                 cache.set(["subject", "directors"], data.directors)
                 toast.success("Directors successfully updated")
+            
+                setTouched(true)
             },
             onError: (e) => handleAxiosError(e)
         })
@@ -121,9 +124,10 @@ function useDirectors({
             url : `/api/directors/${id}/`,
             mode : "deletion"
         }, {
-            onSuccess : () =>{
+            onSuccess : () => {
                 cache.removeFromList(["subject", "directors"], id)
                 toast.success("Directors successfully removed.")
+                setTouched(true)
             },
             onError: (e) => handleAxiosError(e)})
     }
@@ -139,7 +143,8 @@ function useDirectors({
         errors,
         control,
         fields,
-        isPending
+        isPending,
+        touched
     }
 }
 

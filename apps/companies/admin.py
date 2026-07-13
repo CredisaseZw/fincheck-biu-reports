@@ -23,6 +23,8 @@ class CompanyAdmin(admin.ModelAdmin):
     list_display = (
         "registered_name",
         "trading_name",
+        "registration_number",
+        "date_of_registration",
         "refer_type",
         "email",
         "telephone_number",
@@ -34,6 +36,7 @@ class CompanyAdmin(admin.ModelAdmin):
     search_fields = (
         "registered_name",
         "trading_name",
+        "registration_number",
         "email",
         "telephone_number",
         "mobile_number",
@@ -46,7 +49,6 @@ class CompanyOverviewAdmin(admin.ModelAdmin):
     list_display = (
         "company",
         "trading_status",
-        "date_of_registration",
         "legal_form",
         "condition",
         "trend",

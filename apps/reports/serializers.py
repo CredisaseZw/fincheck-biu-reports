@@ -7,6 +7,8 @@ from apps.utils.helpers import _content_ob_serializer
 # READ SERIALIZERS
 
 class ReportSerializer(serializers.ModelSerializer):
+    is_stale = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Report
         fields = [
@@ -16,6 +18,8 @@ class ReportSerializer(serializers.ModelSerializer):
             'subject',
             'username',
             'status',
+            'is_stale',
+            'suspension_reason',
             'overall_risk_rating',
             'summary',
             'created_at',
@@ -37,6 +41,7 @@ class ReportSerializer(serializers.ModelSerializer):
 
         return data
 class ListReportSerializer(serializers.ModelSerializer):
+    is_stale = serializers.BooleanField(read_only=True)
     class Meta:
         model = Report
         fields = [
@@ -46,6 +51,8 @@ class ListReportSerializer(serializers.ModelSerializer):
             'username',
             'subject',
             'status',
+            'is_stale',
+            'suspension_reason',
             'report_pdf',
             'overall_risk_rating',
             'created_at',

@@ -1,6 +1,6 @@
 import { ADDRESS_OBJECT } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
@@ -41,6 +41,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", report_id])
     const client = useQueryClient()
+    const [touched, setTouched] = useState(false)
 
     const {
         control,
@@ -89,18 +90,21 @@ function useIndividualDetails({individual_details, report_id}:props) {
 
         console.log(PAYLOAD)
         mutate(PAYLOAD, {
-            onSuccess : (data) =>{
+            onSuccess : (data) => {
                 cache.set(["subject"], data)
                 client.invalidateQueries({
                     queryKey : ["reports"]
                 })
                 toast.success("Information successfully updated")
+            
+                setTouched(true)
             },
             onError: (error) => handleAxiosError(error)
         })
     }
 
-    return { 
+    return {
+        touched, 
         errors,
         control, 
         isPending,

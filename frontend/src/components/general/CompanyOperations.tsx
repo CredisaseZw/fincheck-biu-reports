@@ -15,7 +15,8 @@ function CompanyOperations({
     operations_data,
     subject_type
 }:CompanyOperationsProps) {
-    const { 
+    const {
+        touched, 
         register, 
         handleSubmit, 
         onSubmit,
@@ -172,7 +173,10 @@ function CompanyOperations({
                     }
                 </div>
                    
-                <CustomSubmitButton isPending = {isPending}/>
+                <CustomSubmitButton
+                        state={touched}
+                        isPending={isPending}
+                    />
             </Fieldset>
         </form>
     )
