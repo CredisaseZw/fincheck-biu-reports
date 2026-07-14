@@ -6,6 +6,8 @@ from django.conf import settings
 from apps.utils.base_viewset import BaseJSONViewSet
 from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
+from apps.companies.models import Company
+from apps.individuals.models import Individuals
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
 from .filters import ReportSearchFilter,ReportsFilter
@@ -41,6 +43,8 @@ class ReportViewSet(BaseJSONViewSet):
         client_id = request.data.get("client_object_id")
         subject_type = request.data.get("subject_type")
         client_type = request.data.get("client_type")
+        subject_unique_id = request.data.get("subject_unique_id", None)
+        bypass_check = request.data.get("bypass_check", False)
 
         subject_content_type_id = get_content_type_id(subject_id, subject_type)
         client_content_type_id = get_content_type_id(client_id, client_type)
@@ -69,16 +73,34 @@ class ReportViewSet(BaseJSONViewSet):
                 {"error": "This subject has another report currently being edited."},
                 status=STATUS.HTTP_423_LOCKED,
             )
-        status = Report.StatusChoices.IN_PROGRESS if self.request.user.is_staff else Report.StatusChoices.DRAFT
-        report = Report.objects.create(
-            subject_object_id=subject_id,
-            subject_content_type_id=subject_content_type_id,
-            client_object_id=client_id,
-            username = username,
-            client_content_type_id=client_content_type_id,
-            status = status,
-            updated_by = user   
-        )
+        
+        with transaction.atomic():
+            if not bypass_check and subject_unique_id:
+                client = Company.objects.filter(
+                    id = subject_id,
+                    registration_number = subject_unique_id.strip()
+                ).first() if subject_type == "company" else Individuals.objects.filter(
+                    id = subject_id,
+                    national_id = subject_unique_id.strip().replace("-", "").replace(" ", "").upper()
+                ).first()
+
+                if not client:
+                    return Response({
+                        "error":  "Given Subject ID does not match with the subjects",
+                    }, 
+                        status=STATUS.HTTP_409_CONFLICT
+                    )
+
+            status = Report.StatusChoices.IN_PROGRESS if self.request.user.is_staff else Report.StatusChoices.DRAFT
+            report = Report.objects.create(
+                subject_object_id=subject_id,
+                subject_content_type_id=subject_content_type_id,
+                client_object_id=client_id,
+                username = username,
+                client_content_type_id=client_content_type_id,
+                status = status,
+                updated_by = user   
+            )
 
         report.refresh_from_db()
         return Response(
@@ -131,7 +153,6 @@ class ReportViewSet(BaseJSONViewSet):
         release_report_lock(report_id=report.id, user_id= user.id, subject_id=report.subject.id)
         return Response({"url": pdf_url}, status=STATUS.HTTP_200_OK)
         
-
     @action(url_path="acquire-report-lock", detail=True, methods=['POST'])
     def acquire_lock(self, request, *args, **kwargs):
         report = self.get_object()

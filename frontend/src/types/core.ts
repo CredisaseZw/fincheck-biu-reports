@@ -73,7 +73,11 @@ export interface MiniDebtor  {
   extras : Extras,
   name :string
 }
-
+export interface onSelectEntityProps {
+  id: number
+  value: string | null, 
+  uniqueID: string|null|undefined
+}
 export interface ListReport {
   id: number;
   enquiry_reference: string;
@@ -376,7 +380,9 @@ export interface Address {
 
 export interface DefaultHeaderProps{
   client_default_search : string,
+  client_unique_id: string,
   subject_default_search : string,
+  subject_unique_id:string,
   enquiry_reference : string,
   created_at : string
 }

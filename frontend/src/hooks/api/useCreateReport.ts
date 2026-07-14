@@ -8,6 +8,7 @@ export interface CreateReportPayload {
     client_object_id : number,
     client_type : EntityValue,
     username?: string
+    subject_unique_id?: string
 }
 
 function useCreateReport() {

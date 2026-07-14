@@ -215,7 +215,7 @@ COMPANIES = [
 INDIVIDUALS = [
     {
         "full_name": "Tendai Moyo",
-        "national_id": "63-112233-A-12",
+        "national_id": "63112233A12",
         "date_of_birth": "1988-04-21",
         "gender": "Male",
         "marital_status": "married",
@@ -240,7 +240,7 @@ INDIVIDUALS = [
     },
     {
         "full_name": "Nyasha Chikore",
-        "national_id": "08-445566-B-45",
+        "national_id": "08445566B45",
         "date_of_birth": "1994-09-12",
         "gender": "Female",
         "marital_status": "single",
@@ -265,7 +265,7 @@ INDIVIDUALS = [
     },
     {
         "full_name": "Blessing Ncube",
-        "national_id": "12-778899-C-78",
+        "national_id": "12778899C78",
         "date_of_birth": "1985-11-03",
         "gender": "Male",
         "marital_status": "divorced",
@@ -290,7 +290,7 @@ INDIVIDUALS = [
     },
     {
         "full_name": "Chipo Dube",
-        "national_id": "22-334455-D-90",
+        "national_id": "22334455D90",
         "date_of_birth": "1997-06-28",
         "gender": "Female",
         "marital_status": "single",
@@ -315,7 +315,7 @@ INDIVIDUALS = [
     },
     {
         "full_name": "Farai Sibanda",
-        "national_id": "15-556677-E-34",
+        "national_id": "15556677E34",
         "date_of_birth": "1979-02-14",
         "gender": "Male",
         "marital_status": "widowed",

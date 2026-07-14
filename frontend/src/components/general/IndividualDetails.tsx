@@ -42,7 +42,10 @@ function IndividualDetails({ individual_details, report_id } : props) {
 
                     <div className="form-group">
                         <Label className="required">National ID / Passport</Label>
-                        <Input {...register("national_id")} />
+                        <Input 
+                            {...register("national_id")}
+                            placeholder="e.g 111234567M89"
+                        />
                         {errors.national_id && <p className="text-destructive text-sm">{errors.national_id.message}</p>}
                     </div>
 

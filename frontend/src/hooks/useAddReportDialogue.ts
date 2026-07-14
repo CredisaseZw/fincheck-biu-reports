@@ -4,8 +4,8 @@ import { DEFAULT_ADDRESSES } from "@/constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
 import useCreateReport from "./api/useCreateReport";
-import { formatAddressToObject, getEntityName, handleAxiosError } from "@/lib/utils";
-import type { Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, Report} from "@/types/core";
+import { formatAddressToObject, getEntityID, getEntityName, handleAxiosError } from "@/lib/utils";
+import type { Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report} from "@/types/core";
 import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
@@ -27,11 +27,14 @@ import type { DirectorFormData } from "./useDirectors";
 import type { ReportDetailsFormData } from "./useReportDetails";
 import useLockManagement from "./useLockManagement";
 import type { CompanyOverviewFormData } from "./useCompanyOverview";
+import { isAxiosError } from "axios";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const { mutate } = useCreateReport();
   const { setReportLoading } = useReport()
   const [open, setOpen] = useState(false);  
+  const [openMisMatchDialog, setOpenMisMatchDialog] = useState(false)
+  const [subjectUniqueID, setSubjectUniqueID] = useState<string | undefined | null>(undefined)
   const [clientObjectId, setClientObjectId] = useState<number | null>(null);
   const [subjectObjectId, setSubjectObjectId] = useState<number | null>(null);
   const [clientType, setClientType] = useState<EntityValue>("company")
@@ -83,6 +86,15 @@ function useAddReportDialogue(list_report?: ListReport) {
     setSubjectType(value);
   }
 
+  const onSelectEntity = (entity : EntityMode, { id, uniqueID }: onSelectEntityProps ) => {
+    if (entity === "client"){
+      setClientObjectId(id)
+      return;
+    }
+    setSubjectObjectId(id)
+    setSubjectUniqueID(uniqueID)
+  }
+
   const onSetEntityId = (entity : EntityMode, value: number | null) => {
     if (entity === "client"){
       setClientObjectId(value)
@@ -90,6 +102,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     }
     setSubjectObjectId(value)
   }
+
 
   useEffect(() => {
     if (!open) return;
@@ -111,6 +124,8 @@ function useAddReportDialogue(list_report?: ListReport) {
     setDefaultHeader({
       client_default_search : getEntityName(report.client),
       subject_default_search : getEntityName(report.subject),
+      subject_unique_id : getEntityID(report.subject),
+      client_unique_id : getEntityID(report.client),
       enquiry_reference : report.enquiry_reference,
       created_at : report.created_at
     })
@@ -446,26 +461,36 @@ function useAddReportDialogue(list_report?: ListReport) {
 
   }, [report])
 
-  const generateReport = ()=>{
+  const generateReport = (byPassCheck = false)=>{
     if(list_report) return
     if(!clientObjectId || !subjectObjectId) return;
     setReportLoading(true);
-    mutate({
-        ...(username && { username : username,}),
-        client_object_id : clientObjectId,
-        client_type :  clientType,
-        subject_object_id : subjectObjectId,
-        subject_type : subjectType
-    }, {
-        onSuccess : (data: Report) => {
-          setReport(data)   
-          setHeaderEditMode(false)
-          queryClient.invalidateQueries({
-            queryKey : ["reports"]
-          })
-        },
-        onError : (error) => handleAxiosError(error),
-        onSettled :()=> setReportLoading(false)
+
+    const payload = {
+      ...(username && { username : username,}),
+      ...(subjectUniqueID && {subject_unique_id: subjectUniqueID}),
+      ...(byPassCheck && {bypass_check : true}),
+      client_object_id : clientObjectId,
+      client_type :  clientType,
+      subject_object_id : subjectObjectId,
+      subject_type : subjectType,
+    }
+
+    mutate(payload, {
+      onSuccess : (data: Report) => {
+        setReport(data)   
+        setHeaderEditMode(false)
+        queryClient.invalidateQueries({
+          queryKey : ["reports"]
+        })
+      },
+      onError : (error) => {
+        if(isAxiosError(error)){
+          if(error.status === 409) setOpenMisMatchDialog(true)
+        }
+        handleAxiosError(error)
+      },
+      onSettled :()=> setReportLoading(false)
     })
   }
 
@@ -475,6 +500,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     setDefaultHeader(undefined)
     setClientObjectId(null)
     setSubjectObjectId(null)
+    setSubjectUniqueID(undefined)
     setHeaderEditMode(!list_report);
     setCompanyOverview(undefined);
     setIndividualDetails(undefined);
@@ -507,6 +533,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     companyOverview,
     username,
     directors,
+    subjectUniqueID,
     isLocked,
     tradeReferences,
     individualDetails,
@@ -526,14 +553,18 @@ function useAddReportDialogue(list_report?: ListReport) {
     publicInformation,
     bankerDetails,
     financials,
+    openMisMatchDialog,
     accounts,
     companyOperations,
     companyInformation,
     onClear,
+    setSubjectUniqueID,
+    setOpenMisMatchDialog,
     setUsername,
     onEdit,
     setOpen,
     onSetEntityId,
+    onSelectEntity,
     onUpdateEntityTypes,
     generateReport
   };

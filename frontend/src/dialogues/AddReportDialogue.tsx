@@ -38,6 +38,7 @@ import ReportDetails from "@/components/general/ReportDetails";
 import FinalizedReportDialog from "./FinalizedReportDialogue";
 import CompanyOverview from "@/components/general/CompanyOverview";
 import SuspendReportDialog from "./SuspendReportDialog";
+import { SubjectMismatchAlert } from "./SubjectMismatchAlert";
 
 interface props {
     report_item?: ListReport
@@ -72,11 +73,16 @@ function AddReportDialogue({ report_item }: props) {
         accounts,
         subjectType,
         companyInformation,
+        subjectUniqueID,
         financials,
         headerEditMode,
         isLocked,
         shareholding,
+        openMisMatchDialog,
+        setOpenMisMatchDialog,
+        onSelectEntity,
         onClear,
+        setSubjectUniqueID,
         setUsername,
         onEdit,
         generateReport,
@@ -97,6 +103,11 @@ function AddReportDialogue({ report_item }: props) {
 
     return (
         <div className="relative">
+            <SubjectMismatchAlert
+                open = {openMisMatchDialog}
+                onOpenChange={setOpenMisMatchDialog}
+                onContinue={()=>generateReport(true)}
+            />
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <CustomDialogueTrigger
                     mode={isUpdating ? "update" : "create"}
@@ -120,12 +131,15 @@ function AddReportDialogue({ report_item }: props) {
                         headerEditMode 
                         ? <ReportHeaderForm 
                                 username = {username}
-                                setUsername = {setUsername}
-                                default_header={defaultHeader}
                                 clientType={clientType}
                                 subjectType={subjectType}
-                                onSetEntityId={onSetEntityId}
+                                default_header={defaultHeader}
+                                SubjectUniqueID={subjectUniqueID}
                                 onUpdateEntityTypes={onUpdateEntityTypes}
+                                setSubjectUniqueID={setSubjectUniqueID}
+                                onSelectEntity={onSelectEntity}
+                                onSetEntityId={onSetEntityId}
+                                setUsername = {setUsername}
                             />
                             : <ReportHeaderCard
                                 onEdit={onEdit}
@@ -290,7 +304,7 @@ function AddReportDialogue({ report_item }: props) {
                                 <Button 
                                     className={reportLoading ? "cursor-not-allowed" : "cursor-pointer"}
                                     disabled = {reportLoading}
-                                    onClick={generateReport}
+                                    onClick={()=>generateReport()}
                                 >
                                     {
                                         reportLoading 

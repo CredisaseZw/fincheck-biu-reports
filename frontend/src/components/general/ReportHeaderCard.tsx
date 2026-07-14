@@ -12,8 +12,6 @@ export default function ReportHeaderCard({
 }: ReportHeaderCardProps) {
     return (
         <div className="relative w-full rounded-xl border border-border bg-primary text-primary-foreground shadow-sm overflow-hidden dark:bg-gray-900 dark:text-gray-200">
-           
-
             <div className="p-6 md:p-7">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
@@ -22,9 +20,13 @@ export default function ReportHeaderCard({
                         </p>
                         {
                             default_header?.client_default_search ? (
-                                <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
-                                    {default_header.client_default_search}
-                                </h2>
+                                <div className="flex flex-col">
+                                    <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
+                                        {default_header.client_default_search}
+                                    </h2>
+                                    <span>{default_header.client_unique_id}</span>
+                                </div>
+                                
                             ) :  <LoadingIndicator variant="button"/> 
                         }
                     </div>
@@ -35,9 +37,12 @@ export default function ReportHeaderCard({
                         </p>
                         {
                             default_header?.subject_default_search ? (
-                                <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
-                                    {default_header.subject_default_search}
-                                </h2>
+                                <div>
+                                    <h2 className="mt-1 text-2xl font-extrabold tracking-tight uppercase">
+                                        {default_header.subject_default_search}
+                                    </h2>
+                                    <span>{default_header.subject_unique_id}</span>
+                                </div>
                             ) : <LoadingIndicator variant="button"/>   
                         
                         }

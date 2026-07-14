@@ -5,7 +5,7 @@ import { useDebounce } from "use-debounce"
 import { X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
-import type { EntityMode, EntityValue, MiniCompany, MiniIndividual } from "@/types/core";
+import type { EntityMode, EntityValue, MiniCompany, MiniIndividual, onSelectEntityProps } from "@/types/core";
 import useGetEntityObject from "@/hooks/api/useGetEntityObject";
 import { Button } from "../ui/button";
 import { useReport } from "@/contexts/ReportMutationContext";
@@ -14,8 +14,9 @@ interface props {
     entityType: EntityValue,
     entityMode?: EntityMode,
     defaultSearch?: string,
-    onSetEntityId?:(entity : EntityMode, value: number | null)=> void
-    onSelectItem?: (id: number)=>void
+    onSelectEntity? : (entity : EntityMode, props:onSelectEntityProps) => void
+    onSetEntityId?: (entity : EntityMode, value: number | null) => void
+
 }
 export interface SearchEntityRef {
   clear: () => void
@@ -26,7 +27,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     defaultSearch,
     entityMode,
     entityType,
-    onSelectItem,
+    onSelectEntity,
     onSetEntityId
     }, ref) => {
     const {setOpenIndividualFields, setOpenCompanyFields} = useReport()
@@ -51,18 +52,28 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     useEffect(() => {
         if (handleAxiosError(error)) return;
     }, [error])
-
-    const _get_display_value = (item: MiniCompany | MiniIndividual | null) => {
-        return item
-            ? "national_id" in item
-                ? (item as MiniIndividual).full_name
-                : (item as MiniCompany).registered_name
-            : ""
+    
+    const _get_display_value = (item: MiniCompany | MiniIndividual | null): onSelectEntityProps => {
+        if(!item) return { value: "", uniqueID : null, id: 0}
+        if ("national_id" in item){
+            const i = item as MiniIndividual;
+            return {
+                id : i.id,
+                value : i.full_name,
+                uniqueID : i.national_id
+            }
+        } 
+        const i = item as MiniCompany;
+        return {
+            id : i.id,
+            value : i.registered_name,
+            uniqueID : i.registration_number
+        }
     }
 
     const close = useCallback(() => {
         setIsOpen(false)
-        setQuery(_get_display_value(selected) || defaultSearch || "")
+        setQuery(_get_display_value(selected).value || defaultSearch || "")
         setActiveIndex(-1)
     }, [selected, defaultSearch])
 
@@ -85,17 +96,13 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
 
     const select = useCallback((entity: MiniCompany | MiniIndividual) => {
         setSelected(entity)
-        setQuery(_get_display_value(entity) ?? "-")
+        setQuery(_get_display_value(entity).value ?? "-")
         setIsOpen(false)
         setActiveIndex(-1)
-        inputRef.current?.blur()
-        if(entityMode){
-            onSetEntityId?.(entityMode, entity.id)
-        } else{
-            onSelectItem?.(entity.id)
+        if (entityMode) {
+            onSelectEntity?.(entityMode, _get_display_value(entity))
         }
-
-    }, [onSetEntityId, onSelectItem, entityMode])
+    }, [onSelectEntity, entityMode])
 
     const clear = useCallback((e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
@@ -104,8 +111,11 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         setHasInteracted(false)
         inputRef.current?.focus()
 
-        if (entityMode) onSetEntityId?.(entityMode, null)
-    }, [onSetEntityId, entityMode])
+        if (entityMode) {
+            onSetEntityId?.(entityMode, null)
+            onSelectEntity?.(entityMode, { value: "", uniqueID : null, id: 0})
+        }    
+    }, [onSetEntityId, onSelectEntity, entityMode])
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
         if (!isOpen && (e.key === "ArrowDown" || e.key === "Enter")) { open(); return }
@@ -177,6 +187,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         return results.map((result, i) => {
             const isActive = activeIndex === i
             const isSelected = selected?.id === result.id
+            const s = _get_display_value(result)
             return (
                 <button
                     key={result.id}
@@ -188,8 +199,12 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
                         "w-full text-left flex items-center justify-between px-3 py-2.5 text-sm transition-colors duration-75 cursor-pointer",
                         isActive ? "bg-accent" : "bg-popover",
                     )}
-                >
-                    <span className="truncate">{_get_display_value(result)}</span>
+                >   
+                    <div className="flex flex-col gap-1">
+                        <span className="truncate font-semibold">{s.value}</span>
+                        <span>{s.uniqueID}</span>
+                    </div>
+                    
                     {isSelected && (
                         <svg className="w-4 h-4 shrink-0 text-ring" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -206,84 +221,83 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
 
     return (
         <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <div ref={containerRef} 
-            className="form-group w-full relative">
-            <PopoverAnchor asChild>
-            <div className="relative flex items-center mt-1">
+            <div ref={containerRef} 
+                className="form-group w-full relative">
+                <PopoverAnchor asChild>
+                <div className="relative flex items-center mt-1">
 
-                {isLoading && isOpen ? (
-                    <span className="absolute left-3 w-4 h-4 border-2 border-border border-t-ring rounded-full animate-spin pointer-events-none" />
-                ) : (
-                    <svg
-                        className={cn(
-                            "absolute left-3 w-4 h-4 pointer-events-none transition-colors duration-150",
-                            isOpen ? "text-ring" : "text-muted-foreground"
-                        )}
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-                    </svg>
-                )}
-
-                <Input
-                    ref={inputRef}
-                    value={query}
-                    onChange={(e) => {
-                        setHasInteracted(true)
-                        setQuery(e.target.value)
-                        open()
-                    }}
-                    onFocus={open}
-                    onKeyDown={handleKeyDown}
-                    placeholder={entityType === "company" ? "ABC Inc" : "John Doe"}
-                    className="pl-9 pr-14"
-                    aria-haspopup="listbox"
-                    aria-expanded={isOpen}
-                    aria-autocomplete="list"
-                    autoComplete="off"
-                />
-
-                <div className="absolute right-3 flex items-center gap-1">
-                    {selected && !isOpen && (
-                        <button
-                            type="button"
-                            onClick={clear}
-                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                            aria-label="Clear selection"
+                    {isLoading && isOpen ? (
+                        <span className="absolute left-3 w-4 h-4 border-2 border-border border-t-ring rounded-full animate-spin pointer-events-none" />
+                    ) : (
+                        <svg
+                            className={cn(
+                                "absolute left-3 w-4 h-4 pointer-events-none transition-colors duration-150",
+                                isOpen ? "text-ring" : "text-muted-foreground"
+                            )}
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                         >
-                            <X size={15} />
-                        </button>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                        </svg>
                     )}
-                    <svg
-                        className={cn(
-                            "w-4 h-4 text-muted-foreground transition-transform duration-200",
-                            isOpen && "rotate-180 text-ring"
-                        )}
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
-            </div>
-            </PopoverAnchor>
 
-            {/* Dropdown */}
-            <PopoverContent
-                onOpenAutoFocus={(e) => e.preventDefault()}
-                onCloseAutoFocus={(e) => e.preventDefault()}
-                align="start"
-                sideOffset={4}
-                className="w-(--radix-popover-trigger-width) p-1 max-h-60 overflow-y-auto rounded"
-            >
-                <div
-                    ref={listRef}
-                    role="listbox"
-                    className="flex flex-col"
-                >
-                    {renderBody()}
+                    <Input
+                        ref={inputRef}
+                        value={query}
+                        onChange={(e) => {
+                            setHasInteracted(true)
+                            setQuery(e.target.value)
+                            open()
+                        }}
+                        onFocus={open}
+                        onKeyDown={handleKeyDown}
+                        placeholder={entityType === "company" ? "ABC Inc" : "John Doe"}
+                        className="pl-9 pr-14"
+                        aria-haspopup="listbox"
+                        aria-expanded={isOpen}
+                        aria-autocomplete="list"
+                        autoComplete="off"
+                    />
+
+                    <div className="absolute right-3 flex items-center gap-1">
+                        {selected && !isOpen && (
+                            <button
+                                type="button"
+                                onClick={clear}
+                                className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                                aria-label="Clear selection"
+                            >
+                                <X size={15} />
+                            </button>
+                        )}
+                        <svg
+                            className={cn(
+                                "w-4 h-4 text-muted-foreground transition-transform duration-200",
+                                isOpen && "rotate-180 text-ring"
+                            )}
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
                 </div>
-            </PopoverContent>
-        </div>
+                </PopoverAnchor>
+
+                <PopoverContent
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                    onCloseAutoFocus={(e) => e.preventDefault()}
+                    align="start"
+                    sideOffset={4}
+                    className="w-(--radix-popover-trigger-width) p-1 max-h-60 overflow-y-auto rounded"
+                >
+                    <div
+                        ref={listRef}
+                        role="listbox"
+                        className="flex flex-col"
+                    >
+                        {renderBody()}
+                    </div>
+                </PopoverContent>
+            </div>
         </Popover>
     )
 })

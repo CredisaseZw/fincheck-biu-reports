@@ -211,6 +211,11 @@ export const getEntityName =(item :Company | Individual | MiniCompany | MiniIndi
   : item.registered_name
 }
 
+export const getEntityID = (item :Company | Individual | MiniCompany | MiniIndividual) =>{
+  return "national_id" in item
+  ? item.national_id ?? "-"
+  : item.registration_number ?? "-"
+}
 
 export function getFileKind(url?: string): keyof typeof FILE_STYLES {
   if (!url) return "other";

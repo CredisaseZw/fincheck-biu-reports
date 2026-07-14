@@ -185,6 +185,9 @@ class Company(BaseModel):
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)  
 
+    def save(self):
+        self.registration_number = self.registration_number.upper()
+        self.save()
     class Meta:
         app_label = "companies"
         db_table = "companies"
