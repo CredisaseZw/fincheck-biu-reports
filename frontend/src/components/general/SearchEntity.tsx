@@ -14,6 +14,7 @@ interface props {
     entityType: EntityValue,
     entityMode?: EntityMode,
     defaultSearch?: string,
+    onSelectItem?: (id: number)=> void
     onSelectEntity? : (entity : EntityMode, props:onSelectEntityProps) => void
     onSetEntityId?: (entity : EntityMode, value: number | null) => void
 
@@ -27,6 +28,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     defaultSearch,
     entityMode,
     entityType,
+    onSelectItem,
     onSelectEntity,
     onSetEntityId
     }, ref) => {
@@ -101,8 +103,10 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         setActiveIndex(-1)
         if (entityMode) {
             onSelectEntity?.(entityMode, _get_display_value(entity))
+        } else{
+            onSelectItem?.(entity.id)
         }
-    }, [onSelectEntity, entityMode])
+    }, [onSelectEntity,onSelectItem, entityMode])
 
     const clear = useCallback((e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
