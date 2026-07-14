@@ -14,11 +14,12 @@ interface props {
 
 function NextOfKin({next_of_kin, report_id, subject_type}: props) {
     const {
-        touched, 
         onSubmit,
         register,
         handleSubmit, 
-        errors
+        errors,
+        touched, 
+        isPending
      } = useNextOfKin({next_of_kin, report_id, subject_type})
 
     return (
@@ -46,7 +47,10 @@ function NextOfKin({next_of_kin, report_id, subject_type}: props) {
 
                 </ColumnsContainer>
 
-                <CustomSubmitButton/>
+                <CustomSubmitButton
+                    isPending = {isPending}
+                    state = {touched}
+                />
             </Fieldset>
         </form>
     )
