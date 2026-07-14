@@ -60,13 +60,10 @@ export default function useLockManagement(
 
   useEffect(() => {
     if (!enabled || !report_id) return;
-    console.log("lock effect (re)running", Date.now());
-
     acquireLock();
     intervalRef.current = setInterval(heartbeat, 45 * 1000);
 
     return () => {
-      console.log("lock effect cleanup", Date.now());
       if (intervalRef.current) clearInterval(intervalRef.current);
       releaseLock();
     };

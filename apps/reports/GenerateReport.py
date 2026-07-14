@@ -174,6 +174,8 @@ class FincheckReportPDF:
 
     @staticmethod
     def _card(title: str, body: str, page_break: bool = False) -> str:
+        if not body or not body.strip():
+            return ""
         pb = ' style="break-before:page"' if page_break else ""
         return f"""
         <div class="card"{pb}>
@@ -185,10 +187,24 @@ class FincheckReportPDF:
     def _grid_table(rows: list, verified_index: Optional[dict] = None) -> str:
         """rows: [(label, value), ...] — rendered as 4-column pairs."""
         verified_index = verified_index or {}
+        
+        valid_rows = []
+        for r in rows:
+            if not r[0]:
+                continue
+            val = r[1]
+            if val is not None:
+                val_str = str(val).strip()
+                if val_str and val_str not in ("-", "—"):
+                    valid_rows.append(r)
+        
+        if not valid_rows:
+            return ""
+
         cells = ""
-        for i in range(0, len(rows), 2):
-            left = rows[i]
-            right = rows[i + 1] if i + 1 < len(rows) else ("", "—")
+        for i in range(0, len(valid_rows), 2):
+            left = valid_rows[i]
+            right = valid_rows[i + 1] if i + 1 < len(valid_rows) else ("", "")
             extra_l = verified_index.get(left[0], "")
             extra_r = verified_index.get(right[0], "")
             cells += f"""
@@ -202,8 +218,8 @@ class FincheckReportPDF:
 
     @staticmethod
     def _data_table(headers: list, rows_html: str, empty: str = "NOTHING TO SHOW") -> str:
-        if not rows_html:
-            return f'<p class="empty">{empty}</p>'
+        if not rows_html or not rows_html.strip():
+            return ""
         ths = "".join(f"<th>{h}</th>" for h in headers)
         return f"""
         <table class="data-table">
@@ -799,25 +815,37 @@ body {{
     def _render_directors(self) -> str:
         dirs = self._subject.get("directors") or []
         if not dirs:
-            return self._card("Directors", '<p class="empty">No directors recorded</p>', page_break=True)
+            return ""
 
         cards = ""
         for d in dirs:
             insol = self._u(d.get("insolvencies_judgements")) if d.get("insolvencies_judgements") else "NONE RECORDED"
+            
+            dir_rows = [
+                ("National ID", self._e(d.get("national_id"))),
+                ("Gender", self._label(d.get("gender", ""))),
+                ("Date of Birth", self._date(d.get("dob"))),
+                ("Address (Latest)", self._u(d.get("address_latest"))),
+                ("Address (Previous)", self._u(d.get("address_prev"))),
+                ("Email", self._e(d.get("email"))),
+                ("Mobile", self._e(d.get("mobile_phone_number"))),
+                ("Insolvencies", insol),
+            ]
+            
+            rows_html = ""
+            for lbl, val in dir_rows:
+                if val is not None:
+                    val_str = str(val).strip()
+                    if val_str and val_str not in ("-", "—"):
+                        rows_html += f'<div class="dir-row"><span class="dir-l">{lbl}</span><span class="dir-v">{val}</span></div>\n              '
+
             cards += f"""
             <div class="dir-card">
               <div class="dir-name">
                 {self._u(d.get("full_name"))}
                 <span class="dir-pos"> — {self._label(d.get("position", ""))}</span>
               </div>
-              <div class="dir-row"><span class="dir-l">National ID</span><span class="dir-v">{self._e(d.get("national_id"))}</span></div>
-              <div class="dir-row"><span class="dir-l">Gender</span><span class="dir-v">{self._label(d.get("gender", ""))}</span></div>
-              <div class="dir-row"><span class="dir-l">Date of Birth</span><span class="dir-v">{self._date(d.get("dob"))}</span></div>
-              <div class="dir-row"><span class="dir-l">Address (Latest)</span><span class="dir-v">{self._u(d.get("address_latest"))}</span></div>
-              <div class="dir-row"><span class="dir-l">Address (Previous)</span><span class="dir-v">{self._u(d.get("address_prev"))}</span></div>
-              <div class="dir-row"><span class="dir-l">Email</span><span class="dir-v">{self._e(d.get("email"))}</span></div>
-              <div class="dir-row"><span class="dir-l">Mobile</span><span class="dir-v">{self._e(d.get("mobile_phone_number"))}</span></div>
-              <div class="dir-row"><span class="dir-l">Insolvencies</span><span class="dir-v">{insol}</span></div>
+              {rows_html.strip()}
             </div>"""
 
         return self._card("Directors", f'<div class="dir-grid">{cards}</div>', page_break=True)
@@ -981,14 +1009,19 @@ body {{
                 ["Record Date", "Summary", "Link"],
                 rows, "No public information recorded")
 
-        body = f"""
-        <div class="cr-sub"><div class="cr-title">Claims</div>{claims_html()}</div>
-        <div class="cr-sub"><div class="cr-title">Absconders</div>{absconders_html()}</div>
-        <div class="cr-sub"><div class="cr-title">Court Judgements</div>{court_html()}</div>
-        <div class="cr-sub"><div class="cr-title">Insolvency / Judicial Management</div>{insolvency_html()}</div>
-        <div class="cr-sub"><div class="cr-title">Public Information</div>{public_html()}</div>"""
+        parts = []
+        c_html = claims_html()
+        if c_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Claims</div>{c_html}</div>')
+        a_html = absconders_html()
+        if a_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Absconders</div>{a_html}</div>')
+        co_html = court_html()
+        if co_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Court Judgements</div>{co_html}</div>')
+        i_html = insolvency_html()
+        if i_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Insolvency / Judicial Management</div>{i_html}</div>')
+        p_html = public_html()
+        if p_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Public Information</div>{p_html}</div>')
 
-        return self._card("Credit Records", body, page_break=True)
+        return self._card("Credit Records", "".join(parts), page_break=True)
 
     def _render_trade_references(self) -> str:
         refs = self._subject.get("trade_references") or []
