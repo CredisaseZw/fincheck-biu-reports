@@ -46,7 +46,6 @@ function NextOfKin({next_of_kin, report_id, subject_type}: props) {
                     </div>
 
                 </ColumnsContainer>
-
                 <CustomSubmitButton
                     isPending = {isPending}
                     state = {touched}
