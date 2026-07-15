@@ -4,16 +4,18 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from django.conf import settings
 from apps.utils.base_viewset import BaseJSONViewSet
-from apps.utils.helpers import get_content_type_id
 from apps.reports.models import Report
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
 from .filters import ReportSearchFilter,ReportsFilter
+from apps.utils.base_viewset import BaseListDataViewSet
 from rest_framework.decorators import action
 from django.db import transaction
 from django.utils import timezone
+from datetime import date, timedelta
+from collections import Counter
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.reports.GenerateReport import FincheckReportPDF
 from apps.users.models import User
@@ -21,6 +23,11 @@ from .lock_management import (
     acquire_report_lock,
     refresh_report_lock,
     release_report_lock
+)
+from apps.utils.helpers import (
+    get_content_type_id,
+    bucket_date_range,
+    bucket_for_date    
 )
 logger = logging.getLogger(__name__)
 
@@ -213,3 +220,59 @@ class ReportViewSet(BaseJSONViewSet):
             {"detail": "Lock lost or expired — someone else may now be editing."},
             status=STATUS.HTTP_409_CONFLICT,
         )
+
+class ArchivedReportsViewSet(BaseListDataViewSet):
+    queryset = Report.objects.filter(
+        status = Report.StatusChoices.FINALIZED
+    )
+    serializer_class = ReportSerializer
+
+    def cutoff_day(self, request):
+        return int(request.query_params.get("month_end_date", 25))
+
+    def _year(self, request):
+        return int(request.query_params.get("year", date.today().year))
+
+    @action(detail=False, methods=["get"])
+    def monthly_summary(self, request):
+        cutoff = self.cutoff_day(request)
+        year = self._year(request)
+
+        range_start = date(year, 1, 1) - timedelta(days=31)
+        range_end = date(year, 12, 31) + timedelta(days=31)
+
+        qs = self.filter_queryset(self.get_queryset()).filter(
+            created_at__date__gte=range_start,
+            created_at__date__lte=range_end,
+        )
+
+        counter = Counter()
+        for dt in qs.values_list("created_at", flat=True):
+            b_year, b_month = bucket_for_date(dt, cutoff)
+            if b_year == year:
+                counter[(b_year, b_month)] += 1
+
+        results = [
+            {
+                "year": y,
+                "label": f"{date(y, m, 1):%b-%y}",
+                "count": count,
+            }
+            for (y, m), count in sorted(counter.items(), reverse=True)
+        ]
+        return Response(results)
+    
+    @action(detail=False, methods=["get"])
+    def by_month(self, request):
+        year = int(request.query_params["year"])
+        month = int(request.query_params["month"])
+        cutoff = self.cutoff_day(request)
+
+        start, end = bucket_date_range(year, month, cutoff)
+        qs = self.filter_queryset(self.get_queryset()).filter(
+            created_at__date__gte=start, created_at__date__lte=end
+        )
+
+        page = self.paginate_queryset(qs)
+        serializer = self.get_serializer(page or qs, many=True)
+        return self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)

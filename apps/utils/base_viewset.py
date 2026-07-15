@@ -5,7 +5,8 @@ from apps.utils.permissions import IsStaffUser
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import ListModelMixin
 
 class UpdatedByMixin:
     def perform_create(self, serializer):
@@ -47,5 +48,10 @@ class BaseJSONViewSet(UpdatedByMixin, ValidatedCreateUpdateMixin, ModelViewSet):
 class BaseFormDataViewSet(UpdatedByMixin, ValidatedCreateUpdateMixin, ModelViewSet):
     permission_classes = [IsStaffUser]
     parser_classes = [MultiPartParser, FormParser]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering = ["-created_at"]
+
+class BaseListDataViewSet(ListModelMixin, GenericViewSet):
+    permission_classes = [IsStaffUser]
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering = ["-created_at"]

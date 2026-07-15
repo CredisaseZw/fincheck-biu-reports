@@ -7,6 +7,8 @@ from django.contrib.contenttypes.models import ContentType
 from apps.individuals.serializers import IndividualSerializer
 from apps.companies.serializers import CompanySerializer
 from apps.utils.mini_serializers import MiniCompanySerializer, MiniIndividualSerializer
+from calendar import monthrange
+from datetime import date
 
 def clean_error(error):
     if isinstance(error, serializers.ValidationError):
@@ -62,3 +64,22 @@ def _content_ob_serializer(content, mini_serializer=False):
     if isinstance(content, Individuals):
         return IndividualSerializer(content).data if not mini_serializer else MiniIndividualSerializer(content).data
     return CompanySerializer(content).data if not mini_serializer else MiniCompanySerializer(content).data
+
+def bucket_for_date(dt, cutoff_day):
+    year, month = dt.year, dt.month
+    if dt.day > cutoff_day:
+        month += 1
+        if month > 12:
+            month, year = 1, year + 1
+    return year, month
+
+
+def bucket_date_range(year, month, cutoff_day):
+    prev_month = month - 1 or 12
+    prev_year = year if month > 1 else year - 1
+    prev_month_len = monthrange(prev_year, prev_month)[1]
+    start_day = min(cutoff_day + 1, prev_month_len)
+    start = date(prev_year, prev_month, start_day)
+    end_day = min(cutoff_day, monthrange(year, month)[1])
+    end = date(year, month, end_day)
+    return start, end
