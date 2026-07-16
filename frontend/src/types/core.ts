@@ -26,6 +26,7 @@ export interface RouteItem  {
 
 export interface Header {
   name: string,
+  value?: string,
   className?: string,
   colSpan?: number
   textAlign?: "center" | "left" | "end"
@@ -385,6 +386,13 @@ export interface DefaultHeaderProps{
   subject_unique_id:string,
   enquiry_reference : string,
   created_at : string
+}
+
+export interface MonthlySummary {
+  year: number,
+  label: string,
+  count: number,
+  month: number
 }
 interface ReportEntityProps {
   subject_object_id?: number | null

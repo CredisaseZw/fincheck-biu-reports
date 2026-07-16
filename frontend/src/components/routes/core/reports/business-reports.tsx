@@ -1,111 +1,178 @@
-import BaseTable from "@/components/general/BaseTable";
+import ArchivedReportsTable from "@/components/general/ArchivedReportsTable";
+import CollapsableTables from "@/components/general/CollapsableTables";
 import ColumnsContainer from "@/components/general/ColumnsContainer";
-import { OptionButton } from "@/components/general/OptionButton";
-import OptionsWrapper from "@/components/general/OptionsWrapper";
-import SearchBox from "@/components/general/Searchbox";
 import SectionHeader from "@/components/general/SectionHeader";
-import { StatusPill } from "@/components/general/StatusPills";
-import { TableCell, TableRow } from "@/components/ui/table";
-import { REPORT_STATUS_PILL_VARIANTS, ReportHeaders } from "@/constants";
-import FilterOptionsDialogue from "@/dialogues/FilterOptionsDialgue";
-import useReports from "@/hooks/useReports";
-import { getEntityName, getFormattedDate, toCap } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
-import { toast } from "sonner";
+import { CollapsableTableSkeleton } from "@/components/general/Skeletons";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getYearRange, ReportHeaders } from "@/constants";
+import useBusinessReport from "@/hooks/useBusinessReport";
+import { Search, X } from "lucide-react";
 
 function BusinessReports() {
-      const {
-        pagination,
-        reports,
-        isLoading,
+    const {
+        monthEndDate,
+        currentYear,
+        loading,
+        data,
         isError,
-    } = useReports("finalized");
-  return (
+        searchCategory,
+        searchValue,
+        mode,
+        searchedData,
+        paginationData,
+        _searchedIsError,
+        onClear,
+        onSubmit,
+        setSearchValue,
+        setCurrentYear,
+        setMonthEndDate,
+        setSearchCategory
+    } = useBusinessReport()
+    return (
      <div className="flex flex-col gap-6">
         <ColumnsContainer>
-            <SectionHeader
-                label="Finalized Reports"
-                subLabel="reports"
-                total={pagination?.count}
-                subTotal={reports.length}
-            />
+            <div className="flex flex-col">
+                <span className="font-bold text-2xl text-gray-800 dark:text-light">Finalised Reports</span>
+                <span className="text-sm text-gray-500 dark:text-gray-300">Browse completed credit reports grouped by month end date.</span>
+            </div>
         </ColumnsContainer>
-        <div className="main-card">
-            <ColumnsContainer>
-                <SearchBox/>
-                <div className="flex justify-end">
-                    <FilterOptionsDialogue showFinalized/>
+        <div className="card">
+            <ColumnsContainer numberOfCols={2}>
+                <ColumnsContainer>
+                    <div className="form-group">
+                        <Label>Month End Date</Label>
+                        <Input
+                            type="number"
+                            min={"1"}
+                            max={"31"}
+                            value={monthEndDate}
+                            onChange={(e) => setMonthEndDate(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <Label>Current year</Label>
+                        <Select
+                            value={currentYear}
+                            onValueChange={(e) => setCurrentYear(e)}
+                        >
+                            <SelectTrigger className="mt-0.5 w-full">
+                                <SelectValue placeholder="Please Select..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {getYearRange().map((y, i) => (
+                                    <SelectItem value={String(y)} key={i}>
+                                        {y}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </ColumnsContainer>
+
+                <div className="flex justify-start lg:justify-end">
+                    <div className="form-group w-full">
+                        <Label>Search Reports</Label>
+                        <div className="flex flex-col sm:flex-row gap-3 w-full">
+                            <Select
+                                onValueChange={(e) => setSearchCategory(e)}
+                                value={searchCategory}
+                            >
+                                <SelectTrigger className="mt-0.5 w-full sm:w-45 shrink-0">
+                                    <SelectValue placeholder="Please Select..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ReportHeaders.map(
+                                        (item) =>
+                                            item.value && (
+                                                <SelectItem value={item.value} key={item.name}>
+                                                    {item.name}
+                                                </SelectItem>
+                                            )
+                                    )}
+                                </SelectContent>
+                            </Select>
+
+                            <form
+                                className="relative flex items-center justify-center w-full sm:max-w-100"
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    onSubmit();
+                                }}
+                            >
+                                <Search
+                                    size={16}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 self-center text-muted-foreground pointer-events-none"
+                                />
+                                <Input
+                                    type={searchCategory === "created_at" ? "date" : "text"}
+                                    value={searchValue}
+                                    onChange={(e) => setSearchValue(e.target.value)}
+                                    placeholder="Search something"
+                                    className="w-full pl-9 pr-16"
+                                />
+                                {(searchValue || mode === "search") && (
+                                    <button
+                                        type="button"
+                                        onClick={() => onClear()}
+                                        className="absolute right-11 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    className="absolute right-1.5 top-1/2 -translate-y-1/2 outline-0 bg-primary p-2 rounded hover:bg-primary/80 cursor-pointer"
+                                >
+                                    <Search size={15} color="white" />
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </ColumnsContainer>
-
-            <div className="mt-5">
-                <BaseTable
-                    isLoading = {isLoading}
-                    isError = {isError}
-                    isEmpty = {reports.length === 0}
-                    paginationData={pagination}
-                    headers={ReportHeaders}
-                >
-                    {
-                        reports.map((item)=>{
-                            const client_bottom_level = "national_id" in item.client
-                            ? item.client.email ?? "-"
-                            : item.client.registration_number ?? item.client.trading_name ??"-"
-
-                            const subject_bottom_level = "national_id" in item.subject
-                            ? item.subject.email ?? "-"
-                            : item.subject.registration_number ?? item.subject.trading_name ?? "-"
-                                
-                            return (
-                            <TableRow key={item.id}>
-                                <TableCell className="text-center">{item.enquiry_reference}</TableCell>
-                                <TableCell className="text-center">
-                                    {getFormattedDate(item.created_at)}
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex flex-col gap-1 text-center">
-                                        <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
-                                        <span>{client_bottom_level}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex flex-col gap-1 text-center">
-                                        <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.subject)}</span>
-                                        <span>{subject_bottom_level}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{(!item.username || item.username.trim() === "") ? '-' : item.username}</TableCell>
-                                <TableCell className="text-center">
-                                    <StatusPill variant={REPORT_STATUS_PILL_VARIANTS[item.status] as any}>
-                                        {toCap(item.status)}
-                                    </StatusPill>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    {item.overall_risk_rating !== null ? item.overall_risk_rating : "-"}
-                                </TableCell>
-                                <TableCell className="flex items-center justify-center">
-                                    <OptionsWrapper>
-                                        {
-                                            
-                                            (item.status === "finalized")
-                                           &&<OptionButton
-                                                onClick={() =>
-                                                    item.report_pdf
-                                                        ? window.open(item.report_pdf, "_blank", "noopener,noreferrer")
-                                                        : toast.error("Report PDF not available")
-                                                }
-                                                Icon={ExternalLink}
-                                                label="View Report"
-                                            /> 
-                                            }
-                                    </OptionsWrapper>
-                                </TableCell>
-                            </TableRow>
-                        )})
-                    }
-                </BaseTable>
-            </div>
         </div>
+        {
+            loading && 
+            <div className="card">
+                <CollapsableTableSkeleton/>
+            </div>
+        }
+        {
+            !loading &&
+            mode === "normal" &&
+            <CollapsableTables 
+                year={currentYear}
+                monthEndDate={monthEndDate}
+                summaries={data}
+                isEmpty={!data?.length || isError}
+
+            />
+        }
+
+        {
+         !loading &&
+         mode === "search" &&
+         <div className="card flex flex-col gap-5">
+            <SectionHeader
+                label="Results"
+                subLabel="reports"
+                total={paginationData?.count ?? 0}
+                subTotal={searchedData.length}
+            />
+            <ArchivedReportsTable
+                isLoading= {loading}
+                isEmpty = {searchedData?.length === 0}
+                isError = {_searchedIsError}
+                paginationData={paginationData}
+                results={searchedData}
+                headers={ReportHeaders}
+            />
+         </div>   
+        }
+
+
     </div>
   )
 }

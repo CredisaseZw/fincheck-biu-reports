@@ -2,16 +2,11 @@ import type { ListReport, PaginationData } from "@/types/core";
 import { useEffect, useState } from "react";
 import useGetReports from "./api/useGetReports";
 import { handleAxiosError } from "@/lib/utils";
-import useURLParamsFilter from "./useURLParamsFilter";
 
-function useReports(mode: string = "live") {
+function useReports() {
     const [pagination, setPagination] = useState<PaginationData | undefined>(undefined)
     const [reports, setReports] = useState<ListReport[]>([])
-    const {getUrlParams} = useURLParamsFilter()
-    const {data, isLoading, error, isError} = useGetReports({
-        status: mode,
-        ...getUrlParams()
-    })
+    const {data, isLoading, error, isError, isRefetching} = useGetReports()
 
     useEffect(()=>{
         if(handleAxiosError(error)) return;
@@ -24,6 +19,7 @@ function useReports(mode: string = "live") {
     }, [data, error])
     
     return {
+        isRefetching,
         pagination,
         reports,
         isLoading,

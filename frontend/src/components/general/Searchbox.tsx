@@ -2,8 +2,13 @@ import { useEffect, useState } from "react"
 import { Search, X } from "lucide-react"
 import useURLParamsFilter from "@/hooks/useURLParamsFilter"
 import { Input } from "../ui/input";
+import { cn } from "@/lib/utils";
 
-function SearchBox() {
+interface props {
+    className?: string
+}
+
+function SearchBox({className}:props) {
     const [value, setValue] = useState("")
     const { setSingleUrlParam, getUrlParams, removeSingleUrlParam } = useURLParamsFilter()
 
@@ -13,7 +18,14 @@ function SearchBox() {
     }, [getUrlParams])
 
     return (
-        <form className="relative w-full max-w-100 flex items-center justify-center" onSubmit={(e)=>{
+        <form 
+            className={
+                cn( 
+                    "relative w-full max-w-100 flex items-center justify-center",
+                    className
+                )
+            }
+            onSubmit={(e)=>{
             e.preventDefault()
             if(value.length <= 0) return removeSingleUrlParam("search")
             setSingleUrlParam("search", value)

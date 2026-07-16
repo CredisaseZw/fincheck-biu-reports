@@ -13,12 +13,12 @@ export const LiveReportHeaders:Header[] = [
 ]
 
 export const ReportHeaders:Header[] = [
-    { name : "Enquiry Ref", textAlign : "center"},
-    { name : "Request Date", textAlign : "center" },
-    { name : "Client" },
-    { name : "Subject" },
-    { name : "Requestor", textAlign: "left"},
-    { name : "Report Status"},
+    { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
+    { name : "Request Date", textAlign : "center", value : "created_at" },
+    { name : "Client", value : "client"},
+    { name : "Subject", value : "subject"},
+    { name : "Requestor", textAlign: "left", value:"username"},
+    { name : "Report Status", },
     { name : "Overall Risk Rating", textAlign : "center"},
     { name : "Action", textAlign : "center" },
 ]
@@ -30,6 +30,12 @@ export const DEFAULT_ADDRESSES:Address = {
     city: "",
     postal_code : ""
 }
+
+export function getYearRange(yearsBack: number = 50): number[] {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: yearsBack + 1 }, (_, i) => currentYear - i);
+}
+
 export const COUNTRIES =  ["Zimbabwe", "Zambia", "Yemen", "Western Sahara", "Wallis and Futuna", "Virgin Islands, U.S.", "Virgin Islands, British", "Viet Nam", "Venezuela", "Vanuatu", "Uzbekistan", "Uruguay", "United States Minor Outlying Islands", "United States", "United Kingdom", 
 "United Arab Emirates",
 "Ukraine", "Uganda", "Tuvalu", "Turks and Caicos Islands", 

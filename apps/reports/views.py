@@ -9,7 +9,6 @@ from apps.companies.models import Company
 from apps.individuals.models import Individuals
 from .serializers import ReportSerializer, ListReportSerializer
 from rest_framework import status as STATUS
-from .filters import ReportSearchFilter,ReportsFilter
 from apps.utils.base_viewset import BaseListDataViewSet
 from rest_framework.decorators import action
 from django.db import transaction
@@ -19,6 +18,11 @@ from collections import Counter
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.reports.GenerateReport import FincheckReportPDF
 from apps.users.models import User
+from .filters import (
+    ReportSearchFilter,
+    ReportsFilter, 
+    BusinessReportsSearchFilter
+)
 from .lock_management import (
     acquire_report_lock,
     refresh_report_lock,
@@ -34,7 +38,7 @@ logger = logging.getLogger(__name__)
 r = redis.from_url(settings.REDIS_CACHE_LOCATION)
 class ReportViewSet(BaseJSONViewSet):
     filter_backends = [ReportSearchFilter, DjangoFilterBackend]
-    queryset = Report.objects.all()
+    queryset = Report.objects.filter().exclude(status=Report.StatusChoices.FINALIZED)
     filterset_class = ReportsFilter
     serializer_class = ReportSerializer
     
@@ -225,6 +229,7 @@ class ArchivedReportsViewSet(BaseListDataViewSet):
     queryset = Report.objects.filter(
         status = Report.StatusChoices.FINALIZED
     )
+    filter_backends = [BusinessReportsSearchFilter, DjangoFilterBackend]
     serializer_class = ReportSerializer
 
     def cutoff_day(self, request):
@@ -241,13 +246,13 @@ class ArchivedReportsViewSet(BaseListDataViewSet):
         range_start = date(year, 1, 1) - timedelta(days=31)
         range_end = date(year, 12, 31) + timedelta(days=31)
 
-        qs = self.filter_queryset(self.get_queryset()).filter(
+        instance = self.filter_queryset(self.get_queryset()).filter(
             created_at__date__gte=range_start,
             created_at__date__lte=range_end,
         )
 
         counter = Counter()
-        for dt in qs.values_list("created_at", flat=True):
+        for dt in instance.values_list("created_at", flat=True):
             b_year, b_month = bucket_for_date(dt, cutoff)
             if b_year == year:
                 counter[(b_year, b_month)] += 1
@@ -255,8 +260,9 @@ class ArchivedReportsViewSet(BaseListDataViewSet):
         results = [
             {
                 "year": y,
-                "label": f"{date(y, m, 1):%b-%y}",
+                "label": f"{date(y, m, 1):%b} - {cutoff}",
                 "count": count,
+                "month" : m
             }
             for (y, m), count in sorted(counter.items(), reverse=True)
         ]
@@ -269,10 +275,13 @@ class ArchivedReportsViewSet(BaseListDataViewSet):
         cutoff = self.cutoff_day(request)
 
         start, end = bucket_date_range(year, month, cutoff)
-        qs = self.filter_queryset(self.get_queryset()).filter(
+        instance = self.filter_queryset(self.get_queryset()).filter(
             created_at__date__gte=start, created_at__date__lte=end
         )
 
-        page = self.paginate_queryset(qs)
-        serializer = self.get_serializer(page or qs, many=True)
-        return self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
+        # page = self.paginate_queryset(instance)
+        # serializer = self.get_serializer(page or instance, many=True)
+        # return self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
+
+        serializer = self.get_serializer(instance, many = True)
+        return Response(serializer.data, status=STATUS.HTTP_200_OK)

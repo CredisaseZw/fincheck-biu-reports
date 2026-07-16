@@ -171,6 +171,9 @@
     .main-card {
         @apply min-h-[75vh] w-full rounded-md p-5 border bg-light dark:bg-dark;
     }
+    .card {
+        @apply w-full rounded-md p-5 border bg-light dark:bg-dark;
+    }
     .form-group {
         @apply flex flex-col gap-2;
     }

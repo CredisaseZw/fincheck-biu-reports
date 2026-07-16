@@ -1,0 +1,98 @@
+import type { Header, ListReport, PaginationData } from "@/types/core";
+import BaseTable from "./BaseTable";
+import { TableCell, TableRow } from "../ui/table";
+import { REPORT_STATUS_PILL_VARIANTS } from "@/constants";
+import { getEntityName, getFormattedDate, toCap } from "@/lib/utils";
+import { ExternalLink } from "lucide-react";
+import { toast } from "sonner";
+import { OptionButton } from "./OptionButton";
+import OptionsWrapper from "./OptionsWrapper";
+import { StatusPill } from "./StatusPills";
+
+interface props {
+    isLoading : boolean
+    isError : boolean
+    isEmpty: boolean
+    paginationData? : PaginationData | undefined
+    headers : Header[]
+    results: ListReport[]
+}
+
+function ArchivedReportsTable({
+    isLoading,
+    isError,
+    isEmpty,
+    paginationData,
+    headers,
+    results
+}:props) {
+  return (
+    <BaseTable
+        isEmpty = {isEmpty}
+        isError = {isError}
+        isLoading = {isLoading}
+        paginationData={paginationData}  
+        headers={headers}  
+    >
+        {
+            results.map((item)=>{
+            const client_bottom_level = "national_id" in item.client
+            ? item.client.email ?? "-"
+            : item.client.registration_number ?? item.client.trading_name ??"-"
+
+            const subject_bottom_level = "national_id" in item.subject
+            ? item.subject.email ?? "-"
+            : item.subject.registration_number ?? item.subject.trading_name ?? "-"
+                
+            return (
+            <TableRow key={item.id}>
+                <TableCell className="text-center">{item.enquiry_reference}</TableCell>
+                <TableCell className="text-center">
+                    {getFormattedDate(item.created_at)}
+                </TableCell>
+                <TableCell>
+                    <div className="flex flex-col gap-1 text-center">
+                        <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
+                        <span>{client_bottom_level}</span>
+                    </div>
+                </TableCell>
+                <TableCell>
+                    <div className="flex flex-col gap-1 text-center">
+                        <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.subject)}</span>
+                        <span>{subject_bottom_level}</span>
+                    </div>
+                </TableCell>
+                <TableCell>{(!item.username || item.username.trim() === "") ? '-' : item.username}</TableCell>
+                <TableCell className="text-center">
+                    <StatusPill variant={REPORT_STATUS_PILL_VARIANTS[item.status] as any}>
+                        {toCap(item.status)}
+                    </StatusPill>
+                </TableCell>
+                <TableCell className="text-center">
+                    {item.overall_risk_rating !== null ? item.overall_risk_rating : "-"}
+                </TableCell>
+                <TableCell className="flex items-center justify-center">
+                    <OptionsWrapper>
+                        {
+                            
+                            (item.status === "finalized")
+                            &&<OptionButton
+                                onClick={() =>
+                                    item.report_pdf
+                                        ? window.open(item.report_pdf, "_blank", "noopener,noreferrer")
+                                        : toast.error("Report PDF not available")
+                                }
+                                Icon={ExternalLink}
+                                label="View Report"
+                            /> 
+                            }
+                    </OptionsWrapper>
+                </TableCell>
+            </TableRow>
+        )})
+    }
+    </BaseTable>
+  )
+}
+
+export default ArchivedReportsTable

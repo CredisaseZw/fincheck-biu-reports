@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 function LiveReports() {
     const {
+        isRefetching,
         pagination,
         reports,
         isLoading,
@@ -51,7 +52,7 @@ function LiveReports() {
 
             <div className="mt-5">
                 <BaseTable
-                    isLoading = {isLoading}
+                    isLoading = {isLoading || isRefetching}
                     isError = {isError}
                     isEmpty = {reports.length === 0}
                     paginationData={pagination}
