@@ -66,11 +66,11 @@ export default function CollapsableTable({
           <div className="flex items-center gap-2.5">
             <ChevronDown
               className={cn(
-                "h-4 w-4 text-teal-600 transition-transform duration-150",
+                "h-4 w-4 text-primary transition-transform duration-150",
                 !open && "-rotate-90"
               )}
             />
-            <span className="text-sm font-bold text-[#0A2E44]">{label}</span>
+            <span className="text-sm font-bold text-primary">{label}</span>
           </div>
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
             {count} {count === 1 ? "Report" : "Reports"}
