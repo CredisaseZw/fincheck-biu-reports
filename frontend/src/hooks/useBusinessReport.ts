@@ -21,10 +21,9 @@ function useBusinessReport() {
     const [searchCategory, setSearchCategory] = useState("subject");
     const [mode, setMode] = useState<"normal" | "search">("normal");
     const [searchValue, setSearchValue] = useState("");
-    const [debounceSearch, setDebounceSearch] = useState("")
     const [paginationData, setPaginationData] = useState<PaginationData | undefined>()
     const [searchedData, setSearchedData] = useState<ListReport[]>([])
-    const { getUrlParams } = useURLParamsFilter()
+    const { updateFilters, getUrlParams } = useURLParamsFilter()
 
     const monthEndDateValid = useMemo(
         () => isValidMonthEndDate(monthEndDate),
@@ -41,14 +40,17 @@ function useBusinessReport() {
         isLoading: _searchedLoading,
         isError: _searchedIsError,
         error: _searchError
-     } = useGetArchivedReports({
-        params : {
-            page : getUrlParams().page ?? 1,
-            search_category : searchCategory,
-            search : debounceSearch
-        },
-        enabled : Boolean(debounceSearch) && Boolean(searchCategory)
-    })
+     } = useGetArchivedReports(
+        Boolean(searchValue) && Boolean(searchCategory)
+    )
+
+    useEffect(()=>{
+        const params = getUrlParams();
+        if(params.search) setSearchValue(params.search);
+        if(params.search_category) setSearchCategory(params.search_category);
+        if(params.search) setMode("search");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     useEffect(()=>{
         if(handleAxiosError(_searchError)) return;
@@ -71,13 +73,17 @@ function useBusinessReport() {
     };
 
     const onSubmit = () =>{
+        if(searchValue === "") return onClear()
         setMode("search");
-        setDebounceSearch(searchValue)
+        updateFilters({
+            search_category : searchCategory,
+            search : searchValue
+        })
     }
 
     const onClear = () =>{
         setSearchValue("")
-        setDebounceSearch("")
+        setSearchCategory("subject")
         setMode("normal")
     }
 

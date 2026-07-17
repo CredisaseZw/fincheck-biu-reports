@@ -1,12 +1,11 @@
 import { api } from "@/axios/api";
 import { useQuery } from "@tanstack/react-query";
+import useURLParamsFilter from "../useURLParamsFilter";
 
-interface props {
-    params: Record<string, string | number>
-    enabled: boolean
+function useGetArchivedReports(enabled: boolean) {
 
-}
-function useGetArchivedReports({params, enabled}:props) {
+    const {getUrlParams} = useURLParamsFilter()
+    const params = getUrlParams();
     const {
         data, 
         isLoading,
