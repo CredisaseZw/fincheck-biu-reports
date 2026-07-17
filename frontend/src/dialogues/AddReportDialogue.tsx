@@ -108,7 +108,9 @@ function AddReportDialogue({ report_item }: props) {
                 onOpenChange={setOpenMisMatchDialog}
                 onContinue={()=>generateReport(true)}
             />
-            <Dialog open={open} onOpenChange={handleOpenChange}>
+            <Dialog 
+                open={open} 
+                onOpenChange={handleOpenChange}>
                 <CustomDialogueTrigger
                     mode={isUpdating ? "update" : "create"}
                     Icon={Plus}

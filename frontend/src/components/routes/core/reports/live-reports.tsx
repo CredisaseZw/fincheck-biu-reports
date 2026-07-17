@@ -52,7 +52,7 @@ function LiveReports() {
 
             <div className="mt-5">
                 <BaseTable
-                    isLoading = {isLoading || isRefetching}
+                    isLoading = {isLoading}
                     isError = {isError}
                     isEmpty = {reports.length === 0}
                     paginationData={pagination}
