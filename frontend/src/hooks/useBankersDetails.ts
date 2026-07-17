@@ -4,10 +4,11 @@ import { z } from "zod"
 import { CURRENCY } from "@/constants"
 import type { BankerDetailsProps, Company, Individual, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { toast } from "sonner";
-import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
+import { getItem, setItem } from "@/lib/storage";
 
 const AccountTypes = z.enum(["current", "savings", "loan", "fixed_deposit"])
 const Narrations = z.enum(["A", "B", "C", "D", "E"])
@@ -61,8 +62,16 @@ function useBankersDetails({
     }, [reset, banker_accounts])
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "banker_details"), [report_id,subject_type])
     const { mutate, isPending } = useInstanceMutation()
     const [touched, setTouched] = useState(false)
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
     const { fields, append, remove } = useFieldArray({
         control,
         name: "accounts",
@@ -83,7 +92,8 @@ function useBankersDetails({
 
         const changes = handleTrackChangedArray(banker_accounts, data.accounts)
         if(changes.length === 0){
-            toast.info("No changes made")
+            setItem(CACHE_KEY, "touched")
+            setTouched(true)
             return
         }
         const PAYLOAD:InstanceMutation ={
@@ -98,6 +108,7 @@ function useBankersDetails({
         mutate(PAYLOAD, {
             onSuccess : (data: Company | Individual) => {
                 cache.set(["subject", "banker_accounts"], data.banker_accounts)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Banker accounts Updated successfully.")     
                 setTouched(true)
             },

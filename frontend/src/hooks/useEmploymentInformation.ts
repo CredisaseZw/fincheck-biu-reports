@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
-import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
+import { getItem, setItem } from "@/lib/storage";
 import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { EntityValue, Individual, Report } from "@/types/core";
@@ -28,7 +29,15 @@ interface props {
 function useEmploymentInformation({employment_information, report_id, subject_type }:props) {
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "employment_details"), [report_id,subject_type])
     const [touched, setTouched] = useState(false);
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
     const {
         reset,
         register,
@@ -62,12 +71,17 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         }
         
         const changes = handleTrackChangedFields(init, data);
-        if (!changes) return;
+        if (!changes) {
+            setItem(CACHE_KEY, "touched")
+            setTouched(true)
+            return;
+        }
         PAYLOAD.data = { employment_information: changes }
     
         mutate(PAYLOAD, {
             onSuccess : (data: Individual) => {
                 cache.set(["subject", "employment_information"], data.employment_information)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Information successfully updated")
                 setTouched(true)
             },

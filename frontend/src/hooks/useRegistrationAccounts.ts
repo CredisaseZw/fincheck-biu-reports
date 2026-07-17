@@ -1,12 +1,13 @@
 import { useForm } from "react-hook-form" 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import type { Company, Individual, RegistrationsAccountsProps, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { toast } from "sonner";
-import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
+import { getItem, setItem } from "@/lib/storage";
 
 const schema = z.object({
     id : z.number().optional(),
@@ -47,6 +48,14 @@ function useRegistrationAccounts({
     const [touched, setTouched] = useState(false)
     const {mutate, isPending} = useInstanceMutation();
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "registration_accounts_details"), [report_id,subject_type])
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
 
     const onSubmit = (data : RegistrationAccountsFormData) =>{
         if(!subject_object_id || !subject_type){
@@ -56,7 +65,8 @@ function useRegistrationAccounts({
         
         const changes = handleTrackChangedFields(accounts_data, data);
         if(!changes){
-            toast.info("No changes made.")
+            setItem(CACHE_KEY, "touched")
+            setTouched(true)
             return;
         }
 
@@ -72,6 +82,7 @@ function useRegistrationAccounts({
         mutate(PAYLOAD, {
             onSuccess : (data: Company | Individual) => {
                 cache.set(["subject", "registration_accounts"], data.registration_accounts)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Registration accounts Updated successfully.")
                 setTouched(true)
       },

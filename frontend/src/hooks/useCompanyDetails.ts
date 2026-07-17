@@ -1,15 +1,16 @@
 
 import { ADDRESS_OBJECT, OPTIONAL_ADDRESS_OBJECT } from "@/constants";
-import {  cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import {  cleanPayload, formatAddressToString, genStorageKey, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
 import type { Address, Company, EntityValue, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { toast } from "sonner";
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { useQueryClient } from "@tanstack/react-query";
+import { getItem, setItem } from "@/lib/storage";
 
 
 const companySchema = z.object({
@@ -44,6 +45,7 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     const [touched, setTouched] = useState(false)
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const client = useQueryClient()
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "company_details"), [report_id,subject_type])
 
     const {
         reset,
@@ -62,6 +64,13 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
             reset(company_overview);
         }
     }, [company_overview, reset]);
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
 
     const onSubmit = (data: CompanyFormData) => {
         delete data.id;
@@ -87,7 +96,11 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
         else{
             const {id, ...initial_data} = company_overview;
             const changes = handleTrackChangedFields(initial_data, data)
-            if(!changes) return
+            if(!changes) {
+                setItem(CACHE_KEY, "touched")
+                setTouched(true)
+                return
+            }
             
             if(changes.address_registered){
                 changes.address_registered = formatAddressToString(data.address_registered)
@@ -108,8 +121,10 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
                     queryKey : ["reports"]
                 })
                 cache.set(["subject"], data)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.info(message)
-                setTouched(true)            
+                setTouched(true)   
+
             },
             onError:(error)=>handleAxiosError(error)
         } )

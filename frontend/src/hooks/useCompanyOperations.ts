@@ -1,7 +1,8 @@
-import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
+import { getItem, setItem } from "@/lib/storage";
 import type { Company, CompanyOperationsProps } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner";
 import { z } from "zod"
@@ -43,8 +44,15 @@ function useCompanyOperations({
     const [touched, setTouched] = useState(false)
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "operations_details"), [report_id,subject_type])
 
 
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
     useEffect(()=>{
         if(operations_data){
             reset(operations_data)
@@ -52,11 +60,10 @@ function useCompanyOperations({
     }, [reset, operations_data])
 
     const onSubmit = (data: CompanyOperationsFormData) =>{
-        console.log("onSubmit data", data)
-        console.log("onSubmit operations_data", operations_data)
         const changes = handleTrackChangedFields(operations_data, data);
-        if(changes.length === 0){
-            toast.info("No changes made")
+        if(!changes){
+            setItem(CACHE_KEY, "touched")
+            setTouched(true)
             return
         }
         const PAYLOAD:InstanceMutation ={
@@ -69,6 +76,7 @@ function useCompanyOperations({
         mutate(PAYLOAD, {
             onSuccess : (data: Company) => {
                 cache.set(["subject", "operations"], data.operations)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Company Operations updated successfully.")
                 setTouched(true)
       },

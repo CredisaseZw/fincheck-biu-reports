@@ -1,10 +1,11 @@
 import { ADDRESS_OBJECT } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
-import { cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import { cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
+import { getItem, setItem } from "@/lib/storage";
 import useInstanceMutation from "./api/useInstanceMutation";
 import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
@@ -40,8 +41,16 @@ interface props {
 function useIndividualDetails({individual_details, report_id}:props) {
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, "individual", "individual_details"), [report_id])
     const client = useQueryClient()
     const [touched, setTouched] = useState(false)
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, CACHE_KEY])
 
     const {
         control,
@@ -77,7 +86,11 @@ function useIndividualDetails({individual_details, report_id}:props) {
         } else{
             const {id, ...initial_data} = individual_details;
             const changes = handleTrackChangedFields(initial_data, data);
-            if(!changes) return;
+            if(!changes) {
+                setItem(CACHE_KEY, "touched")
+                setTouched(true)
+                return;
+            }
 
             if (changes.residential_address){
                 changes.residential_address = formatAddressToString(data.residential_address)
@@ -88,13 +101,13 @@ function useIndividualDetails({individual_details, report_id}:props) {
             PAYLOAD.data = changes
         }
 
-        console.log(PAYLOAD)
         mutate(PAYLOAD, {
             onSuccess : (data) => {
                 cache.set(["subject"], data)
                 client.invalidateQueries({
                     queryKey : ["reports"]
                 })
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Information successfully updated")
             
                 setTouched(true)

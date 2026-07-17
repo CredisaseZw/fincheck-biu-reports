@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ACCEPTED_TYPES, MAX_SIZE } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect } from "react"
+import { useState,  useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { file_api } from "@/axios/api"
 import { useMutation } from "@tanstack/react-query"
-import { handleAxiosError, handleTrackChangedFields } from "@/lib/utils"
+import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils"
+import { getItem, setItem } from "@/lib/storage"
 import { toast } from "sonner"
 import useDetailCacheUpdate from "./useDetailCacheUpdate"
 import type { FinancialsProps, Report } from "@/types/core"
@@ -63,7 +64,15 @@ function useFinancialsDetails({
     }, [reset, financials_data])
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "financials_details"), [report_id,subject_type])
     const [touched, setTouched] = useState(false);
+    
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
     
     const { mutate: save, isPending } = useMutation({
         mutationFn: async (formData: FormData) => {
@@ -148,11 +157,12 @@ function useFinancialsDetails({
                 ...currentData
             } = data;
             
-            const trackedChanges = handleTrackChangedFields(initialData, currentData, false);
+            const trackedChanges = handleTrackChangedFields(initialData, currentData);
             const hasNewFile = currentFile && currentFile.length > 0;
             
             if (!trackedChanges && !hasNewFile) {
-                toast.info("No changes made.");
+                setItem(CACHE_KEY, "touched");
+                setTouched(true);
                 return;
             }
 
@@ -167,6 +177,7 @@ function useFinancialsDetails({
         save(formData, {
             onSuccess : ({ data: savedEntry }) => {
                 cache.set(["subject", "financials"], savedEntry)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Financials updated successfully")
                 reset({
                     ...savedEntry,

@@ -1,5 +1,5 @@
 import { FILE_STYLES } from "@/constants";
-import type { Address, Company, Individual, MiniCompany, MiniIndividual } from "@/types/core";
+import type { Address, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
@@ -139,7 +139,7 @@ export function cleanPayload<T extends Record<string, unknown>>(data: T): Partia
   ) as Partial<T>
 }
 
-export const handleTrackChangedFields = (initial: any, payloadData: any, toastInfo = true): any => {
+export const handleTrackChangedFields = (initial: any, payloadData: any, toastInfo = false): any => {
   const deepDiff = (obj1: any, obj2: any): any => {
     return Object.entries(obj2).reduce((acc, [key, value]) => {
       const original = obj1?.[key];
@@ -223,4 +223,8 @@ export function getFileKind(url?: string): keyof typeof FILE_STYLES {
   if (ext === "pdf") return "pdf";
   if (["png", "jpg", "jpeg", "webp", "gif"].includes(ext ?? "")) return "image";
   return "other";
+}
+
+export function genStorageKey(report_id:number | undefined, subject_type:EntityValue | null | undefined,  section :string){
+  return `report_${subject_type}_${report_id}_${section}`
 }

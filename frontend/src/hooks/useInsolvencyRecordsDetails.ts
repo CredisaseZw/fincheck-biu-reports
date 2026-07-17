@@ -1,7 +1,8 @@
-import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
+import { getItem, setItem } from "@/lib/storage";
 import type { InsolvencyRecordsProps, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {z} from "zod"
@@ -48,6 +49,14 @@ function useInsolvencyRecordsDetails({
     const { mutate, isPending } = useInstanceMutation()
     const [touched, setTouched] = useState(false)
     const cache =  useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "insolvency_records_details"), [report_id,subject_type])
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
 
     useEffect(()=>{
         if(insolvency_data){
@@ -69,7 +78,8 @@ function useInsolvencyRecordsDetails({
         }
         const changes = handleTrackChangedArray(insolvency_data, data.insolvency_records,)
         if(changes.length === 0){
-            toast.info("No changes made")
+            setItem(CACHE_KEY, "touched")
+            setTouched(true)
             return
         }
         const payload: InstanceMutation = {
@@ -85,6 +95,7 @@ function useInsolvencyRecordsDetails({
         mutate(payload, {
             onSuccess : (data) => {
                 cache.set(["subject", "insolvency_records"], data.insolvency_records)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Insolvency records updated successfully")
                 setTouched(true)
       },
@@ -99,6 +110,7 @@ function useInsolvencyRecordsDetails({
         }, {
             onSuccess : () => {
                 cache.removeFromList(["subject", "insolvency_records"], id)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Insolvency record row deleted successfully")
                 setTouched(true)
       },

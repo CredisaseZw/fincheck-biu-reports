@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
-import { handleTrackChangedFields } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { handleTrackChangedFields, genStorageKey } from "@/lib/utils";
+import { useEffect, useState, useMemo } from "react";
+import { getItem, setItem } from "@/lib/storage";
 import { toast } from "sonner";
 
 const TradingStatus = z.enum(["active", "inactive", "administration", "insolvent"])
@@ -59,12 +60,21 @@ function useCompanyOverview({
     },[company_overview, reset])
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "overview_details"), [report_id,subject_type])
     const {mutate, isPending} = useInstanceMutation()
     const [touched, setTouched] = useState(false)
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
     const onSubmit = (data: CompanyOverviewFormData) =>{
         const changes = handleTrackChangedFields(company_overview, data)
         if(!changes){
-            toast.error("No changes made.")
+            setItem(CACHE_KEY, "touched")
+            setTouched(true)
             return
         }
 
@@ -77,6 +87,7 @@ function useCompanyOverview({
         }, {
             onSuccess: async(data:Company)=>{
                 cache.set(["subject", "overview"], data.overview)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.info("Company overview successfully updated")
                 setTouched(true)
             }

@@ -1,7 +1,8 @@
-import { handleAxiosError, handleTrackChangedArray } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
+import { getItem, setItem } from "@/lib/storage";
 import type { CourtJudgementsProps, Report } from "@/types/core";
 import {zodResolver} from "@hookform/resolvers/zod"
-import { useState,  useEffect } from "react";
+import { useState,  useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod"
@@ -56,8 +57,16 @@ function useCourtDetails({
     }, [reset, court_judgements_data])
 
     const cache = useDetailCacheUpdate<Report>(['report', subject_type, report_id])
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "court_details"), [report_id,subject_type])
     const {mutate, isPending} = useInstanceMutation()
     const [touched, setTouched] = useState(false)
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
     const {fields, append, remove} = useFieldArray({
         control,
         name : "court_judgements"
@@ -70,7 +79,8 @@ function useCourtDetails({
         }
         const changes = handleTrackChangedArray(court_judgements_data, data.court_judgements,)
         if(changes.length === 0){
-            toast.info("No changes made")
+            setItem(CACHE_KEY, "touched")
+            setTouched(true)
             return
         }
         const payload: InstanceMutation = {
@@ -86,6 +96,7 @@ function useCourtDetails({
         mutate(payload, {
             onSuccess : (data) => {
                 cache.set(["subject", "court_judgements"], data.court_judgements)
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Court Judgements updated successfully")
                 setTouched(true)
             },
@@ -99,7 +110,7 @@ function useCourtDetails({
             mode:  "deletion"
         },{
             onSuccess : () => {
-        
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 cache.removeFromList(["subject", "court_judgements"], id)
                 toast.success("Court Judgement row deleted successfully")
                 setTouched(true)            
