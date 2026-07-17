@@ -12,7 +12,7 @@ function useGetArchivedReports(enabled: boolean) {
         isError,
         error
     } = useQuery({
-        queryKey:["reports", params],
+        queryKey:["archived-reports", params],
         queryFn :async()=>{
             const response = await api.get("/api/archived-reports/", {params})
             return response.data;

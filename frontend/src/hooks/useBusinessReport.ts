@@ -23,7 +23,7 @@ function useBusinessReport() {
     const [searchValue, setSearchValue] = useState("");
     const [paginationData, setPaginationData] = useState<PaginationData | undefined>()
     const [searchedData, setSearchedData] = useState<ListReport[]>([])
-    const { updateFilters, getUrlParams } = useURLParamsFilter()
+    const { updateFilters, getUrlParams, resetFilters } = useURLParamsFilter()
 
     const monthEndDateValid = useMemo(
         () => isValidMonthEndDate(monthEndDate),
@@ -85,6 +85,7 @@ function useBusinessReport() {
         setSearchValue("")
         setSearchCategory("subject")
         setMode("normal")
+        resetFilters()
     }
 
     return {
