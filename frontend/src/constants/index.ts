@@ -91,7 +91,7 @@ export const COURT_HEADERS:Header[] = [
 ]
 
 export const INSOLVENCY_HEADERS:Header[] = [
-    {name : "Insolvency Type", textAlign : "end"},
+    {name : "Solvency Type", textAlign : "end"},
     {name : "Start Date", textAlign : "end"},
     {name : "End Date",textAlign : "end"},
     {name : "Court Reference", textAlign : "end"},
