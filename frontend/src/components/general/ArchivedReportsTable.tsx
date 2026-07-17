@@ -1,13 +1,11 @@
 import type { Header, ListReport, PaginationData } from "@/types/core";
 import BaseTable from "./BaseTable";
 import { TableCell, TableRow } from "../ui/table";
-import { REPORT_STATUS_PILL_VARIANTS } from "@/constants";
-import { getEntityName, getFormattedDate, toCap } from "@/lib/utils";
+import { getEntityName, getFormattedDate } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { OptionButton } from "./OptionButton";
 import OptionsWrapper from "./OptionsWrapper";
-import { StatusPill } from "./StatusPills";
 
 interface props {
     isLoading : boolean
@@ -63,11 +61,6 @@ function ArchivedReportsTable({
                     </div>
                 </TableCell>
                 <TableCell>{(!item.username || item.username.trim() === "") ? '-' : item.username}</TableCell>
-                <TableCell className="text-center">
-                    <StatusPill variant={REPORT_STATUS_PILL_VARIANTS[item.status] as any}>
-                        {toCap(item.status)}
-                    </StatusPill>
-                </TableCell>
                 <TableCell className="text-center">
                     {item.overall_risk_rating !== null ? item.overall_risk_rating : "-"}
                 </TableCell>

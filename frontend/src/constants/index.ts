@@ -18,7 +18,6 @@ export const ReportHeaders:Header[] = [
     { name : "Client", value : "client"},
     { name : "Subject", value : "subject"},
     { name : "Requestor", textAlign: "left", value:"username"},
-    { name : "Report Status", },
     { name : "Overall Risk Rating", textAlign : "center"},
     { name : "Action", textAlign : "center" },
 ]
