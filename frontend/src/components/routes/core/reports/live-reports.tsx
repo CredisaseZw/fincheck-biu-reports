@@ -20,7 +20,6 @@ import { toast } from "sonner";
 
 function LiveReports() {
     const {
-        isRefetching,
         pagination,
         reports,
         isLoading,
