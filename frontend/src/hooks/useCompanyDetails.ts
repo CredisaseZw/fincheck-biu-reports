@@ -12,7 +12,6 @@ import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { useQueryClient } from "@tanstack/react-query";
 import { getItem, setItem } from "@/lib/storage";
 
-
 const companySchema = z.object({
     id : z.number().optional(),
     date_of_registration: z.string().optional(),    

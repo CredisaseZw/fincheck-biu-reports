@@ -228,3 +228,28 @@ export function getFileKind(url?: string): keyof typeof FILE_STYLES {
 export function genStorageKey(report_id:number | undefined, subject_type:EntityValue | null | undefined,  section :string){
   return `report_${subject_type}_${report_id}_${section}`
 }
+
+function formatDecimal(n: number): string {
+  const fixed = n.toFixed(1);
+  return parseFloat(fixed).toString().replace(".", ",");
+}
+
+export function formatNumberSign(value: number): string {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+
+  if (abs >= 1_000_000_000) {
+    const n = abs / 1_000_000_000;
+    return `${sign}${formatDecimal(n)}B`;
+  }
+  if (abs >= 1_000_000) {
+    const n = abs / 1_000_000;
+    return `${sign}${formatDecimal(n)}M`;
+  }
+  if (abs >= 1_000) {
+    const n = abs / 1_000;
+    return `${sign}${formatDecimal(n)}K`;
+  }
+
+  return `${sign}${abs}`;
+}

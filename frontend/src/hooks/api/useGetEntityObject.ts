@@ -1,5 +1,5 @@
 import { api } from "@/axios/api";
-import type { MiniCompany, MiniIndividual, DRFResponse,  EntityValue } from "@/types/core";
+import type { DRFResponse,  EntityValue, ListCompany } from "@/types/core";
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -16,7 +16,7 @@ function useGetEntityObject(
     const {data, isLoading, error} = useQuery({
         queryKey : [mode, params],
         queryFn: async()=>{
-            const response = await api.get<DRFResponse<MiniCompany | MiniIndividual>>(ENTITY_LINKS[mode], {
+            const response = await api.get<DRFResponse<ListCompany | ListCompany>>(ENTITY_LINKS[mode], {
                 params 
             })  
             return response.data

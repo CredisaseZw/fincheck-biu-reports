@@ -2,6 +2,7 @@ import redis
 import logging
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 from django.conf import settings
 from apps.utils.base_viewset import BaseJSONViewSet
 from apps.reports.models import Report
@@ -14,7 +15,9 @@ from rest_framework.decorators import action
 from django.db import transaction
 from django.utils import timezone
 from datetime import date, timedelta
+from django.db.models import Q, Count
 from collections import Counter
+from apps.utils.permissions import IsStaffUser
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.reports.GenerateReport import FincheckReportPDF
 from apps.users.models import User
@@ -33,8 +36,8 @@ from apps.utils.helpers import (
     bucket_date_range,
     bucket_for_date    
 )
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 r = redis.from_url(settings.REDIS_CACHE_LOCATION)
 class ReportViewSet(BaseJSONViewSet):
     filter_backends = [ReportSearchFilter, DjangoFilterBackend]
@@ -285,3 +288,28 @@ class ArchivedReportsViewSet(BaseListDataViewSet):
 
         serializer = self.get_serializer(instance, many = True)
         return Response(serializer.data, status=STATUS.HTTP_200_OK)
+
+class DashboardStats(ViewSet):
+    permission_classes = [IsStaffUser]
+
+    def period_stats(self,since):
+        qs = Report.objects.filter(created_at__gte=since)
+        agg = qs.aggregate(
+            active=Count("id", filter=~Q(status=Report.StatusChoices.FINALIZED)),
+            finalized=Count("id", filter=Q(status=Report.StatusChoices.FINALIZED)),
+        )
+        return agg
+    
+    def list(self, request, *args, **kwargs):
+        now = timezone.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        data = {
+            "today": self.period_stats(today_start),
+            "this_month": self.period_stats(month_start),
+            "this_year": self.period_stats(year_start),
+        }
+
+        return Response(data)

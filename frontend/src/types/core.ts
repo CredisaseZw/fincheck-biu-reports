@@ -46,7 +46,30 @@ interface Timestamps {
   created_at: string;
   updated_at: string;
 }
+export interface ListCompany extends Timestamps {
+  id: number;
+  company_name: string;
+  registered_name: string;
+  trading_name: string | null;
+  registration_number: string | null;
+  refer_type: string;
+  email: string | null;
+  telephone_number: string | null;
+  is_active: boolean;
+  is_company_verified: boolean;
+}
 
+export interface ListIndividual extends Timestamps {
+  id: number;
+  full_name: string;
+  national_id: string;
+  gender: string | null;
+  marital_status: string | null;
+  mobile_number: string | null;
+  email: string | null;
+  nationality: string | null;
+  refer_type: string;
+}
 export interface MiniCompany {
   id: number;
   type: "company";
@@ -393,6 +416,17 @@ export interface MonthlySummary {
   label: string,
   count: number,
   month: number
+}
+
+interface StatsPeriod {
+  active: number;
+  finalized: number;
+}
+
+export interface ReportStats {
+  today: StatsPeriod;
+  this_month: StatsPeriod;
+  this_year: StatsPeriod;
 }
 interface ReportEntityProps {
   subject_object_id?: number | null

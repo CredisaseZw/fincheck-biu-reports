@@ -52,3 +52,48 @@ export function CollapsableTableSkeleton({ rows = 4 }: { rows?: number }) {
     </div>
   );
 }
+
+function DashboardCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="flex items-start justify-between p-5">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-8 w-12" />
+        </div>
+        <Skeleton className="h-12 w-12 rounded-xl shrink-0" />
+      </div>
+
+      <div className="grid grid-cols-2 divide-x divide-border border-t border-border bg-muted/40">
+        <div className="flex items-center gap-2 px-5 py-3">
+          <Skeleton className="h-4 w-4 rounded-full shrink-0" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-10" />
+            <Skeleton className="h-4 w-6" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2 px-5 py-3">
+          <Skeleton className="h-4 w-4 rounded-full shrink-0" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-14" />
+            <Skeleton className="h-4 w-6" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DashboardStatsSkeleton (){
+  return (
+    <ColumnsContainer numberOfCols={3}>
+      {
+        Array.from({length : 3}).map((_, idx)=>
+          <DashboardCardSkeleton
+            key ={idx}
+          />
+        )
+      }      
+    </ColumnsContainer>
+  )
+}

@@ -5,7 +5,7 @@ import { useDebounce } from "use-debounce"
 import { X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
-import type { EntityMode, EntityValue, MiniCompany, MiniIndividual, onSelectEntityProps } from "@/types/core";
+import type { EntityMode, EntityValue, ListCompany, ListIndividual, onSelectEntityProps } from "@/types/core";
 import useGetEntityObject from "@/hooks/api/useGetEntityObject";
 import { Button } from "../ui/button";
 import { useReport } from "@/contexts/ReportMutationContext";
@@ -37,7 +37,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     const [isOpen, setIsOpen] = useState(false)
     const [activeIndex, setActiveIndex] = useState(-1)
     const [hasInteracted, setHasInteracted] = useState(false)
-    const [selected, setSelected] = useState<MiniCompany | MiniIndividual | null>(null);
+    const [selected, setSelected] = useState<ListCompany | ListIndividual | null>(null);
     const containerRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
@@ -55,20 +55,20 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         if (handleAxiosError(error)) return;
     }, [error])
     
-    const _get_display_value = (item: MiniCompany | MiniIndividual | null): onSelectEntityProps => {
+    const _get_display_value = (item: ListCompany | ListIndividual | null): onSelectEntityProps => {
         if(!item) return { value: "", uniqueID : null, id: 0}
         if ("national_id" in item){
-            const i = item as MiniIndividual;
+            const i = item as ListIndividual;
             return {
                 id : i.id,
                 value : i.full_name,
                 uniqueID : i.national_id
             }
         } 
-        const i = item as MiniCompany;
+        const i = item as ListCompany;
         return {
             id : i.id,
-            value : i.registered_name,
+            value : i.company_name,
             uniqueID : i.registration_number
         }
     }
@@ -96,7 +96,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
 
     const open = useCallback(() => { setIsOpen(true); setActiveIndex(-1) }, [])
 
-    const select = useCallback((entity: MiniCompany | MiniIndividual) => {
+    const select = useCallback((entity: ListCompany | ListIndividual) => {
         setSelected(entity)
         setQuery(_get_display_value(entity).value ?? "-")
         setIsOpen(false)

@@ -11,7 +11,6 @@ export const LiveReportHeaders:Header[] = [
     { name : "Report Status"},
     { name : "Action", textAlign : "center" },
 ]
-
 export const ReportHeaders:Header[] = [
     { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
     { name : "Request Date", textAlign : "center", value : "created_at" },
@@ -20,6 +19,22 @@ export const ReportHeaders:Header[] = [
     { name : "Requestor", textAlign: "left", value:"username"},
     { name : "Overall Risk Rating", textAlign : "center"},
     { name : "Action", textAlign : "center" },
+]
+export const CompanyListHeaders:Header[] = [
+    { name : "Registered Name", textAlign:"left" },
+    { name : "Trading Name", textAlign:"left" },
+    { name : "Registration Number", textAlign:"center" },
+    { name : "email", textAlign:"left" },
+    { name : "Telephone Number", textAlign:"left" },
+    { name : "Action", textAlign:"center" },
+]
+export const IndividualListHeaders:Header[] = [
+    { name : "Full name", textAlign:"left" },
+    { name : "National ID", textAlign:"left" },
+    { name : "Gender", textAlign:"center" },
+    { name : "Mobile Number", textAlign:"center" },
+    { name : "Email", textAlign:"left" },
+    { name : "Action", textAlign:"center" },
 ]
 export const DEFAULT_ADDRESSES:Address = {
     street_address : "",
@@ -35,16 +50,19 @@ export function getYearRange(yearsBack: number = 50): number[] {
   return Array.from({ length: yearsBack + 1 }, (_, i) => currentYear - i);
 }
 
-export const COUNTRIES =  ["Zimbabwe", "Zambia", "Yemen", "Western Sahara", "Wallis and Futuna", "Virgin Islands, U.S.", "Virgin Islands, British", "Viet Nam", "Venezuela", "Vanuatu", "Uzbekistan", "Uruguay", "United States Minor Outlying Islands", "United States", "United Kingdom", 
-"United Arab Emirates",
-"Ukraine", "Uganda", "Tuvalu", "Turks and Caicos Islands", 
+export const COUNTRIES =  ["Zimbabwe", "Zambia", "Yemen", "Western Sahara", "Wallis and Futuna", 
+"Virgin Islands, U.S.", "Virgin Islands, British", "Viet Nam", "Venezuela", "Vanuatu", "Uzbekistan",
+"Uruguay", "United States Minor Outlying Islands", "United States", "United Kingdom", 
+"United Arab Emirates", "Ukraine", "Uganda", "Tuvalu", "Turks and Caicos Islands", 
 "Turkmenistan", "Turkey", "Tunisia", "Trinidad and Tobago", "Tonga",
 "Tokelau", "Togo", "Timor-Leste", "Thailand", "Tanzania, United Republic of",
 "Tajikistan", "Taiwan, Province of China", "Syrian Arab Republic", "Switzerland",
 "Sweden", "Swaziland", "Svalbard and Jan Mayen", "Surivalue", "Sudan", "Sri Lanka",
 "Spain", "South Georgia and the South Sandwich Islands", "South Africa", "Somalia",
-"Solomon Islands", "Slovenia", "Slovakia", "Singapore", "Sierra Leone", "Seychelles", "Serbia", "Senegal", "Saudi Arabia", "Sao Tome and Principe", "San Marino", "Samoa", "Saint Vincent and the Grenadines", "Saint Pierre and Miquelon", "Saint Lucia", "Saint Kitts and Nevis", "Saint Helena", "RWANDA", "Russian Federation", "Romania", "Reunion", "Qatar", "Puerto Rico", "Portugal", "Poland", "Pitcairn", "Philippines", "Peru", "Paraguay", "Papua New Guinea", "Panama", "Palestinian Territory, Occupied", "Palau", "Pakistan", "Oman", "Norway", "Northern Mariana Islands", "Norfolk Island", "Niue", "Nigeria", "Niger", "Nicaragua", "New Zealand", "New Caledonia", "Netherlands Antilles", "Netherlands", "Nepal", "Nauru", "Namibia", "Myanmar", "Mozambique", "Morocco", "Montserrat", "Montenegro", "Mongolia", "Monaco", "Moldova, Republic of", "Micronesia, Federated States of", "Mexico", "Mayotte", "Mauritius", "Mauritania", "Martinique", "Marshall Islands", "Malta", "Mali", "Maldives", "Malaysia", "Malawi", "Madagascar", "Macedonia, The Former Yugoslav Republic of", "Macao", "Luxembourg", "Lithuania", "Liechtenstein", "Libyan Arab Jamahiriya", "Liberia", "Lesotho", "Lebanon", "Latvia", "Lao People's Democratic Republic", "Kyrgyzstan", "Kuwait", "Korea, Republic of", "Korea, Democratic People's Republic of", "Kiribati", "Kenya", "Kazakhstan", "Jordan", "Jersey", "Japan", "Jamaica", "Italy", "Israel", "Isle of Man", "Ireland", "Iraq", "Iran, Islamic Republic Of", "Indonesia", "India", "Iceland", "Hungary", "Hong Kong", "Honduras", "Holy See (Vatican City State)", "Heard Island and Mcdonald Islands", "Haiti", "Guyana", "Guinea-Bissau", "Guinea", "Guernsey", "Guatemala", "Guam", "Guadeloupe", "Grenada", "Greenland", "Greece", "Gibraltar", "Ghana", "Germany", "Georgia", "Gambia", "Gabon", "French Southern Territories", "French Polynesia", "French Guiana", "France", "Finland", "Fiji", "Faroe Islands", "Falkland Islands (Malvinas)", "Ethiopia", "Estonia", "Eritrea", "Equatorial Guinea", "El Salvador", "Egypt", "Ecuador", "Dominican Republic", "Dominica", "Djibouti", "Denmark", "Czech Republic", "Cyprus", "Cuba", "Croatia", "Cote D'Ivoire", "Costa Rica", "Cook Islands", "Congo, The Democratic Republic of the", "Congo", "Comoros", "Colombia", "Cocos (Keeling) Islands", "Christmas Island", "China", "Chile", "Chad", "Central African Republic", "Cayman Islands", "Cape Verde", "Canada", "Cameroon", "Cambodia", "Burundi", "Burkina Faso", "Bulgaria", "Brunei Darussalam", "British Indian Ocean Territory", "Brazil", "Bouvet Island", "Botswana", "Bosnia and Herzegovina", "Bolivia", "Bhutan", "Bermuda", "Benin", "Belize", "Belgium", "Belarus", "Barbados", "Bangladesh", "Bahrain", "Bahamas", "Azerbaijan", "Austria", "Australia", "Aruba", "Armenia", "Argentina", "Antigua and Barbuda", "Antarctica", "Anguilla", "Angola", "AndorrA", "American Samoa", "Algeria", "Albania", "land Islands", "Afghanistan"] 
-
+"Solomon Islands", "Slovenia", "Slovakia", "Singapore", "Sierra Leone", "Seychelles", "Serbia",
+"Senegal", "Saudi Arabia", "Sao Tome and Principe", "San Marino", "Samoa", "Saint Vincent and the Grenadines",
+"Saint Pierre and Miquelon", "Saint Lucia", "Saint Kitts and Nevis", "Saint Helena", "RWANDA", "Russian Federation",
+"Romania", "Reunion", "Qatar", "Puerto Rico", "Portugal", "Poland", "Pitcairn", "Philippines", "Peru", "Paraguay", "Papua New Guinea", "Panama", "Palestinian Territory, Occupied", "Palau", "Pakistan", "Oman", "Norway", "Northern Mariana Islands", "Norfolk Island", "Niue", "Nigeria", "Niger", "Nicaragua", "New Zealand", "New Caledonia", "Netherlands Antilles", "Netherlands", "Nepal", "Nauru", "Namibia", "Myanmar", "Mozambique", "Morocco", "Montserrat", "Montenegro", "Mongolia", "Monaco", "Moldova, Republic of", "Micronesia, Federated States of", "Mexico", "Mayotte", "Mauritius", "Mauritania", "Martinique", "Marshall Islands", "Malta", "Mali", "Maldives", "Malaysia", "Malawi", "Madagascar", "Macedonia, The Former Yugoslav Republic of", "Macao", "Luxembourg", "Lithuania", "Liechtenstein", "Libyan Arab Jamahiriya", "Liberia", "Lesotho", "Lebanon", "Latvia", "Lao People's Democratic Republic", "Kyrgyzstan", "Kuwait", "Korea, Republic of", "Korea, Democratic People's Republic of", "Kiribati", "Kenya", "Kazakhstan", "Jordan", "Jersey", "Japan", "Jamaica", "Italy", "Israel", "Isle of Man", "Ireland", "Iraq", "Iran, Islamic Republic Of", "Indonesia", "India", "Iceland", "Hungary", "Hong Kong", "Honduras", "Holy See (Vatican City State)", "Heard Island and Mcdonald Islands", "Haiti", "Guyana", "Guinea-Bissau", "Guinea", "Guernsey", "Guatemala", "Guam", "Guadeloupe", "Grenada", "Greenland", "Greece", "Gibraltar", "Ghana", "Germany", "Georgia", "Gambia", "Gabon", "French Southern Territories", "French Polynesia", "French Guiana", "France", "Finland", "Fiji", "Faroe Islands", "Falkland Islands (Malvinas)", "Ethiopia", "Estonia", "Eritrea", "Equatorial Guinea", "El Salvador", "Egypt", "Ecuador", "Dominican Republic", "Dominica", "Djibouti", "Denmark", "Czech Republic", "Cyprus", "Cuba", "Croatia", "Cote D'Ivoire", "Costa Rica", "Cook Islands", "Congo, The Democratic Republic of the", "Congo", "Comoros", "Colombia", "Cocos (Keeling) Islands", "Christmas Island", "China", "Chile", "Chad", "Central African Republic", "Cayman Islands", "Cape Verde", "Canada", "Cameroon", "Cambodia", "Burundi", "Burkina Faso", "Bulgaria", "Brunei Darussalam", "British Indian Ocean Territory", "Brazil", "Bouvet Island", "Botswana", "Bosnia and Herzegovina", "Bolivia", "Bhutan", "Bermuda", "Benin", "Belize", "Belgium", "Belarus", "Barbados", "Bangladesh", "Bahrain", "Bahamas", "Azerbaijan", "Austria", "Australia", "Aruba", "Armenia", "Argentina", "Antigua and Barbuda", "Antarctica", "Anguilla", "Angola", "AndorrA", "American Samoa", "Algeria", "Albania", "land Islands", "Afghanistan"] 
 
 const Countries = z.enum(COUNTRIES, {message : "Country is required"})
 export const ADDRESS_OBJECT = z.object({
