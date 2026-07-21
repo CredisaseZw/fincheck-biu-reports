@@ -87,7 +87,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
             const {id, ...initial_data} = individual_details;
             const changes = handleTrackChangedFields(initial_data, data);
             if(!changes) {
-                setItem(CACHE_KEY, "touched")
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 setTouched(true)
                 return;
             }

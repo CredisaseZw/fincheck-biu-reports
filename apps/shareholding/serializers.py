@@ -14,9 +14,8 @@ class ShareholdingsSerializers(UpdatedBySerializerMixin,serializers.ModelSeriali
         model = CompanyShareholding
         fields = [
             'id',
-            'numbers_of_shares',
+            'issued_share_capital',
             'numbers_of_shareholders',
-            'paid_up_capital',
             'authorized_capital',
             'shareholders',
             'created_at',
@@ -34,9 +33,8 @@ class CompanyShareholdingsSerializer(UpdatedBySerializerMixin, serializers.Model
         model = CompanyShareholding
         fields = [
             'company',
-            'numbers_of_shares',
+            'issued_share_capital',
             'numbers_of_shareholders',
-            'paid_up_capital',
             'authorized_capital',
             'shareholders',
             'created_at',

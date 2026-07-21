@@ -19,6 +19,7 @@ const director = z.object({
     gender : Genders,
     dob : z.string().optional(),
     address_latest : z.string(),
+    is_pep : z.boolean(),
     address_prev : z.string().optional(),
     national_id : z.string().refine((val) => {
         if (!val) return true
@@ -107,7 +108,7 @@ function useDirectors({
 
         const changes = handleTrackChangedArray(directors_data, data.directors)
         if(changes.length === 0){
-            setItem(CACHE_KEY, "touched")
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
             setTouched(true)
             return
         }

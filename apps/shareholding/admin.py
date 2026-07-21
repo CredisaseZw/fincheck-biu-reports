@@ -1,7 +1,5 @@
 from django.contrib import admin
-
 from apps.shareholding.models import CompanyShareholding, Shareholder
-
 
 class ShareholderInline(admin.TabularInline):
     model = Shareholder
@@ -12,7 +10,8 @@ class ShareholderInline(admin.TabularInline):
 class CompanyShareholdingAdmin(admin.ModelAdmin):
     list_display = (
         "company",
-        "numbers_of_shares",
+        "issued_share_capital",
+        "authorized_capital",
         "numbers_of_shareholders",
         "created_at",
     )

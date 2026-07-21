@@ -102,7 +102,7 @@ export interface onSelectEntityProps {
   value: string | null, 
   uniqueID: string|null|undefined
 }
-export interface ListReport {
+export interface ListReport extends Timestamps{
   id: number;
   enquiry_reference: string;
   client: MiniCompany | MiniIndividual;
@@ -115,8 +115,6 @@ export interface ListReport {
   overall_risk_rating : number | null,
   username : string | null,
   report_pdf : string | null,
-  created_at: string;
-  updated_at: string;
 }
 
 export interface User {
@@ -145,14 +143,8 @@ export interface CompanyOverview {
   | "joint_venture" 
   | "cooperative" 
   | "sole_trader";
-  condition: "good" | "fair" | "poor";
-  trend: "improving" | "stable" | "declining";
   number_of_employees: number;
-  last_financial_result: string;
-  net_asset_value: string;
-  authorized_share_capital: string;
-  issued_share_capital: string;
-}
+  }
 
 export interface CompanyStructure {
   holding_company: string;
@@ -175,7 +167,7 @@ export interface CompanyOperations {
   purchases_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
 }
 
-export interface  CompanyDirector {
+export interface  CompanyDirector extends Timestamps {
   id: number;
   full_name: string;
   position: "director" | "secretary" | "other";
@@ -187,20 +179,16 @@ export interface  CompanyDirector {
   address_prev: string | null;
   email: string | null;
   mobile_phone_number: string | null;
-  created_at: string;
-  updated_at: string;
+  is_pep : boolean
 }
 
 
-export interface Shareholding {
+export interface Shareholding extends Timestamps {
   id: number;
-  numbers_of_shares: number;
+  issued_share_capital : string | null;
   numbers_of_shareholders: number;
-  paid_up_capital: string | null;
   authorized_capital: string | null;
   shareholders: Shareholder[];
-  created_at: string;
-  updated_at: string;
 }
 
 export interface Shareholder {
@@ -209,6 +197,7 @@ export interface Shareholder {
   address: string;
   number_of_shares: number;
   percentage_ownership: string;
+  is_pep : boolean
 }
 
 export interface RegistrationAccount {

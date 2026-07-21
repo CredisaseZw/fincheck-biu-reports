@@ -663,7 +663,7 @@ body {{
             ref = self._e(self._snapshot.get("enquiry_reference"))
             created = self._date(self._snapshot.get("created_at"))
             fin = self._snapshot.get("finalized_at")
-        dlbl = "FINALIZED ON" if fin else "REPORT GENERATED ON"
+        dlbl = "FINALISED ON" if fin else "REPORT GENERATED ON"
         dval = self._date(fin) if fin else created
         wm = '<div class="watermark">DRAFT</div>' if self._status == "draft" else ""
         subject_name = self._subject_name()
@@ -778,10 +778,8 @@ body {{
             ("Registered Name", self._u(s.get("registered_name"))),
             ("Trading Name", self._u(s.get("trading_name"))),
             ("Registration Number", self._u(s.get("registration_number"))),
-            ("Legal Form", self._label((s.get("overview") or {}).get("legal_form", ""))),
             ("Registration Number", self._e(s.get("registration_number", "N/A"))),
-            ("Year Registered", self._date((s.get("overview") or {}).get("date_of_registration"))),
-            ("Trading Status", self._label((s.get("overview") or {}).get("trading_status", ""))),
+            ("Year Registered", self._date((s.get("date_of_registration")))),
             ("Industry Sector", self._u((s.get("operations") or {}).get("industry"))),
         ]
         return self._card("Company Details", self._grid_table(rows, verified))
@@ -801,13 +799,9 @@ body {{
     def _render_company_overview(self) -> str:
         ov = self._subject.get("overview") or {}
         rows = [
-            ("Condition", self._label(ov.get("condition", ""))),
-            ("Trend", self._label(ov.get("trend", ""))),
+            ("Legal Form", self._e(ov.get("legal_form"))),
+            ("Trading Status", self._e(ov.get("trading_status"))),
             ("Number of Employees", self._e(ov.get("number_of_employees"))),
-            ("Last Financial Result", self._money(ov.get("last_financial_result"))),
-            ("Net Asset Value", self._money(ov.get("net_asset_value"))),
-            ("Authorised Share Capital", self._money(ov.get("authorized_share_capital"))),
-            ("Issued Share Capital", self._money(ov.get("issued_share_capital"))),
             ("", ""),
         ]
         return self._card("Company Overview", self._grid_table(rows))
@@ -825,6 +819,7 @@ body {{
                 ("National ID", self._e(d.get("national_id"))),
                 ("Gender", self._label(d.get("gender", ""))),
                 ("Date of Birth", self._date(d.get("dob"))),
+                ("PEP", "YES" if d.get("is_pep") else "NO"),
                 ("Address (Latest)", self._u(d.get("address_latest"))),
                 ("Address (Previous)", self._u(d.get("address_prev"))),
                 ("Email", self._e(d.get("email"))),
@@ -855,7 +850,8 @@ body {{
         shs = sh.get("shareholders") or []
 
         totals = self._grid_table([
-            ("Total Shares", self._e(sh.get("numbers_of_shares"))),
+            ("Authorised Capital", self._e(sh.get("authorized_capital"))),
+            ("Issued Share Capital", self._e(sh.get("issued_share_capital"))),
             ("Shareholders", self._e(sh.get("numbers_of_shareholders"))),
         ])
 
@@ -865,9 +861,10 @@ body {{
           <td>{self._u(s.get("address"))}</td>
           <td class="ta-r">{self._e(s.get("number_of_shares"))}</td>
           <td class="ta-r">{self._e(s.get("percentage_ownership"))}%</td>
+          <td class="ta-r">{"YES" if s.get("is_pep") else "NO"}</td>
         </tr>""" for s in shs) if shs else ""
 
-        tbl = self._data_table(["Name", "Address", "No. of Shares", "% Ownership"], rows_html, "No shareholders on record")
+        tbl = self._data_table(["Name", "Address", "No. of Shares", "% Ownership", "PEP"], rows_html, "No shareholders on record")
         return self._card("Shareholding", totals + tbl)
 
     def _render_structure(self) -> str:

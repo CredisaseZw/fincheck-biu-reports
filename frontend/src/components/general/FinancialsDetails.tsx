@@ -33,6 +33,19 @@ function FinancialsDetails({
         <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Financials" className="flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
+                    <div className="form-group">
+                        <Label>Financial Year</Label>
+                        <Input
+                            type="number"
+                            placeholder="e.g. 2024"
+                            {...register("financial_year", numericField)}
+                        />
+                        {errors.financial_year && (
+                            <p className="text-destructive text-sm">
+                                {errors.financial_year?.message as string}
+                            </p>
+                        )}
+                    </div>
                     <ColumnsContainer numberOfCols={3} gapClass="gap-4">
                         <div className="form-group">
                             <Label>Revenue</Label>
@@ -94,20 +107,6 @@ function FinancialsDetails({
                             )}
                         </div>
                     </ColumnsContainer>
-
-                    <div className="form-group">
-                        <Label>Financial Year</Label>
-                        <Input
-                            type="number"
-                            placeholder="e.g. 2024"
-                            {...register("financial_year", numericField)}
-                        />
-                        {errors.financial_year && (
-                            <p className="text-destructive text-sm">
-                                {errors.financial_year?.message as string}
-                            </p>
-                        )}
-                    </div>
 
                     <FileUploadField
                         label="Financials File"

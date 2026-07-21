@@ -27,7 +27,7 @@ function useReportsDashboard() {
     ) {setCurrentSubject(params.entity_value)}
     else{ setSingleUrlParam("entity_value", currentSubject) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getUrlParams]);
 
   useEffect(()=>{
     if(handleAxiosError(error)) return;

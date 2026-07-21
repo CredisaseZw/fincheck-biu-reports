@@ -153,13 +153,7 @@ function useAddReportDialogue(list_report?: ListReport) {
       setCompanyOverview({
         trading_status: company?.overview?.trading_status ?? "active",
         legal_form: company?.overview?.legal_form ?? undefined,
-        condition: company?.overview?.condition ?? "good",
-        trend: company?.overview?.trend ?? "stable",
         number_of_employees: company?.overview?.number_of_employees ?? undefined,
-        last_financial_result: company?.overview?.last_financial_result ?? undefined,
-        net_asset_value: company?.overview?.net_asset_value ?? undefined,
-        authorized_share_capital: company?.overview?.authorized_share_capital ?? undefined,
-        issued_share_capital: company?.overview?.issued_share_capital ?? undefined,
       })
       setCompanyStructure({
         holding_company : company.structure?.holding_company,
@@ -181,9 +175,8 @@ function useAddReportDialogue(list_report?: ListReport) {
       })
       setShareholding({
         id :  company.shareholdings?.id ?? undefined,
+        issued_share_capital : company.shareholdings?.issued_share_capital ? Number(company.shareholdings.issued_share_capital) : undefined,
         numbers_of_shareholders : company.shareholdings?.numbers_of_shareholders ?? 0,
-        numbers_of_shares : company.shareholdings?.numbers_of_shares ?? 0,
-        paid_up_capital: company.shareholdings?.paid_up_capital ? Number(company.shareholdings?.paid_up_capital) : undefined,
         authorized_capital: company.shareholdings?.authorized_capital ? Number(company.shareholdings?.authorized_capital) : undefined,
        
         shareholders: 
@@ -192,6 +185,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         ? company.shareholdings?.shareholders.map(item => ({
           id : item.id ?? undefined,
           full_name :item.full_name,
+          is_pep : item.is_pep,
           address  :item.address,
           number_of_shares :item.number_of_shares,
           percentage_ownership :Number(item.percentage_ownership)
@@ -199,6 +193,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         : [{
             full_name : "",
             address : "",
+            is_pep : false,
             number_of_shares: 0,   
           percentage_ownership: 0,    
         }]
@@ -212,6 +207,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           gender : item.gender ?? "",
           dob : item.dob ?? "",
           position : item.position,
+          is_pep : item.is_pep,
           address_latest :  item.address_latest ?? "",
           address_prev : item.address_prev ?? "",
           national_id : item.national_id ?? "",
@@ -224,6 +220,7 @@ function useAddReportDialogue(list_report?: ListReport) {
             gender: "male",
             position : "director",
             national_id : "",
+            is_pep : false,
             address_latest : "",
             email :"",
         }]

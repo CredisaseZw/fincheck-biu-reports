@@ -15,7 +15,7 @@ import type { FinancialsProps, Report } from "@/types/core"
 const fileSchema = z.custom<FileList>()
     .refine(
         (files) => !files || files.length === 0 || ACCEPTED_TYPES.includes(files[0]?.type),
-        "Only PDF, image, Word or Excel files accepted"
+        "Only PDF and image files accepted"
     )
     .refine(
         (files) => !files || files.length === 0 || files[0]?.size <= MAX_SIZE,
@@ -161,7 +161,7 @@ function useFinancialsDetails({
             const hasNewFile = currentFile && currentFile.length > 0;
             
             if (!trackedChanges && !hasNewFile) {
-                setItem(CACHE_KEY, "touched");
+                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3);
                 setTouched(true);
                 return;
             }

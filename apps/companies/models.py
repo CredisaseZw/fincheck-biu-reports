@@ -228,17 +228,7 @@ class CompanyOverview(BaseModel):
         JOINT_VENTURE = "joint_venture", "Joint Venture"
         COOPERATIVE = "cooperative", "Cooperative"
         SOLE_TRADER = "sole_trader", "Sole Trader"
-
-    class Condition(models.TextChoices):
-        GOOD = "good", "Good"
-        FAIR = "fair", "Fair"
-        POOR = "poor", "Poor"
-
-    class Trend(models.TextChoices):
-        IMPROVING = "improving", "Improving"
-        STABLE = "stable", "Stable"
-        DECLINING = "declining", "Declining"
-    
+   
     company = models.OneToOneField(
         Company,
         related_name="overview",
@@ -256,43 +246,11 @@ class CompanyOverview(BaseModel):
         null=True,
         blank=True
     )
-    condition = models.CharField(
-        max_length=20,
-        choices=Condition.choices,
-        blank=True,
-        null=True,
-
-    )
-    trend = models.CharField(
-        max_length=20,
-        choices=Trend.choices,
-        null=True,
-        blank=True
-    )
     number_of_employees = models.PositiveIntegerField(
         null=True,
         blank=True
     )
-    last_financial_result = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        null=True,
-        blank=True
-    )
-    net_asset_value = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        null=True,
-        blank=True
-    )
-    authorized_share_capital = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        null=True,
-        blank=True
-    )
-    issued_share_capital = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-
+    
     def __str__(self):
         return f"Company overview for {self.company.company_name}" 
     

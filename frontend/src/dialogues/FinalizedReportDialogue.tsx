@@ -39,19 +39,19 @@ function FinalizedReportDialog({ id, main = false, callback }: FinalizedReportDi
             Finalize Report
           </Button>
         ) : (
-          <OptionButton Icon={CheckCheck} label="Finalize Report" variant={"secondary"} />
+          <OptionButton Icon={CheckCheck} label="Finalise Report" variant={"secondary"} />
         )}
       </AlertDialogTrigger>
       <AlertDialogContent className="rounded-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-green-800 dark:text-green-400">
             <CheckCircle2 className="size-5" />
-            {url ? "Report Finalized" : "Finalize Report"}
+            {url ? "Report Finalised" : "Finalise Report"}
           </AlertDialogTitle>
 
           <AlertDialogDescription className="text-muted-foreground">
             {url ? (
-              "Your report has been finalized. Click below to open it."
+              "Your report has been finalised. Click below to open it."
             ) : (
               <>
                 Once finalized, this report will be locked and marked as complete.
@@ -92,7 +92,7 @@ function FinalizedReportDialog({ id, main = false, callback }: FinalizedReportDi
                 disabled={isPending}
                 className="bg-green-800 hover:bg-green-700 focus:ring-green-500 text-white"
               >
-                {isPending ? "Finalizing..." : "Confirm Finalize"}
+                {isPending ? "Finalising..." : "Confirm Finalise"}
               </Button>
             </>
           )}

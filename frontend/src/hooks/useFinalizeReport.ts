@@ -3,7 +3,7 @@ import useInstanceMutation from "./api/useInstanceMutation";
 import { useQueryClient } from "@tanstack/react-query";
 import { handleAxiosError } from "@/lib/utils";
 
-function useFinalizeReport(c?:()=> void) {
+function useFinalizeReport(callBack?:()=> void) {
     const client = useQueryClient()
     const [url, setUrl] = useState<undefined | string>()
     const [open, setOpenState] = useState(false)
@@ -27,7 +27,7 @@ function useFinalizeReport(c?:()=> void) {
         setOpenState(next);
         if (!next && url) {
             client.invalidateQueries({ queryKey: ["reports"] });
-            c?.()
+            callBack?.()
         }
     };
 

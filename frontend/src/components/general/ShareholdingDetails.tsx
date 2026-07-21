@@ -8,6 +8,8 @@ import Fieldset from "./FieldSet"
 import { numericField } from "@/constants";
 import type { CompanyShareholdingProps } from "@/types/core";
 import CustomSubmitButton from "./CustomSubmitButton";
+import { Controller } from "react-hook-form";
+import { Checkbox } from "../ui/checkbox";
 
 function ShareholdingDetails({
     subject_object_id,
@@ -16,6 +18,7 @@ function ShareholdingDetails({
     shareholdings_data
 }:CompanyShareholdingProps) {
     const {
+        control,
         touched, 
         isPending,
         errors,
@@ -37,16 +40,21 @@ function ShareholdingDetails({
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Shareholding Details" className="flex flex-col gap-4">
-
-                <ColumnsContainer numberOfCols={3} gapClass="gap-4">
+                <ColumnsContainer numberOfCols={3}>
                     <div className="form-group">
-                        <Label className="required">Number of Shares</Label>
-                        <Input type="number" {...register("numbers_of_shares", numericField)} />
-                        {errors.numbers_of_shares && (
-                            <p className="text-destructive text-sm">{errors.numbers_of_shares.message}</p>
+                        <Label>Authorised Capital</Label>
+                        <Input type="number" {...register("authorized_capital", numericField)}/>
+                        {errors.authorized_capital && (
+                            <p className="text-destructive text-sm">{errors.authorized_capital.message}</p>
                         )}
-                    </div>
-
+                    </div> 
+                    <div className="form-group">
+                        <Label>Issued Share Capital</Label>
+                        <Input type="number" {...register("issued_share_capital", numericField)}/>
+                        {errors.issued_share_capital && (
+                            <p className="text-destructive text-sm">{errors.issued_share_capital.message}</p>
+                        )}
+                    </div> 
                     <div className="form-group">
                         <Label className="required">Number of Shareholders</Label>
                         <Input type="number" {...register("numbers_of_shareholders", numericField)} />
@@ -54,21 +62,8 @@ function ShareholdingDetails({
                             <p className="text-destructive text-sm">{errors.numbers_of_shareholders.message}</p>
                         )}
                     </div>
-                    <div className="form-group">
-                        <Label>Paid-up Capital</Label>
-                        <Input type="number" {...register("paid_up_capital", numericField)}/>
-                        {errors.paid_up_capital && (
-                            <p className="text-destructive text-sm">{errors.paid_up_capital.message}</p>
-                        )}
-                    </div>
+                
                 </ColumnsContainer>
-                <div className="form-group">
-                    <Label>Authorized Capital</Label>
-                    <Input type="number" {...register("authorized_capital", numericField)}/>
-                    {errors.authorized_capital && (
-                        <p className="text-destructive text-sm">{errors.authorized_capital.message}</p>
-                    )}
-                </div>
                 <div>
 
                 </div>
@@ -113,7 +108,8 @@ function ShareholdingDetails({
                                     <p className="text-destructive text-sm">{errors.shareholders[index].address.message}</p>
                                 )}
                             </div>
-
+                        </ColumnsContainer>
+                        <ColumnsContainer>
                             <div className="form-group">
                                 <Label className="required">Number of Shares</Label>
                                 <Input
@@ -124,18 +120,34 @@ function ShareholdingDetails({
                                     <p className="text-destructive text-sm">{errors.shareholders[index].number_of_shares.message}</p>
                                 )}
                             </div>
-
-                            <div className="form-group">
-                                <Label className="required">Percentage Ownership</Label>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    {...register(`shareholders.${index}.percentage_ownership`, numericField)}
+                            <div className="flex flex-row gap-3">
+                                <div className="form-group flex-1">
+                                    <Label className="required">Percentage Ownership</Label>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        {...register(`shareholders.${index}.percentage_ownership`, numericField)}
+                                    />
+                                    {errors.shareholders?.[index]?.percentage_ownership && (
+                                        <p className="text-destructive text-sm">{errors.shareholders[index].percentage_ownership.message}</p>
+                                    )}
+                                </div>
+                                <Controller
+                                    control={control}
+                                    name={`shareholders.${index}.is_pep`}
+                                    render={({ field }) => (
+                                    <div className="flex items-center gap-2 mt-4">
+                                        <Checkbox
+                                            id={`is_pep_s_${index}`}
+                                            checked={field.value}
+                                            onCheckedChange={(val) => field.onChange(val === true)}
+                                        />
+                                        <label className="text-sm" htmlFor={`is_pep_s_${index}`}>PEP</label>
+                                    </div>
+                                    )}
                                 />
-                                {errors.shareholders?.[index]?.percentage_ownership && (
-                                    <p className="text-destructive text-sm">{errors.shareholders[index].percentage_ownership.message}</p>
-                                )}
                             </div>
+                            
                         </ColumnsContainer>
                     </div>
                 ))
@@ -150,6 +162,7 @@ function ShareholdingDetails({
                         onClick={() => append({
                             full_name: "",
                             address: "",
+                            is_pep: false,
                             number_of_shares: 0,
                             percentage_ownership: 0,
                         })}

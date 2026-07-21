@@ -10,8 +10,7 @@ import { getItem, setItem } from "@/lib/storage";
 import { toast } from "sonner";
 
 const TradingStatus = z.enum(["active", "inactive", "administration", "insolvent"])
-const Condition = z.enum(["good", "fair", "poor"])
-const Trend = z.enum(["improving", "stable", "declining"])
+
 const LegalForm = z.enum([
     "pvt_ltd",
     "plc",
@@ -28,14 +27,8 @@ export const LegalForms = LegalForm.options;
 const schema = z.object({
     legal_form: LegalForm.optional(),
     trading_status: TradingStatus.optional(),
-    condition: Condition.optional(),
-    trend: Trend.optional(),
     number_of_employees: z.number().optional(),
-    last_financial_result: z.string().optional(),
-    net_asset_value: z.string().optional(),
-    authorized_share_capital: z.string().optional(),
-    issued_share_capital: z.string().optional()
-})
+   })
 export type CompanyOverviewFormData = z.infer<typeof schema>;
 function useCompanyOverview({
     company_overview,
@@ -73,7 +66,7 @@ function useCompanyOverview({
     const onSubmit = (data: CompanyOverviewFormData) =>{
         const changes = handleTrackChangedFields(company_overview, data)
         if(!changes){
-            setItem(CACHE_KEY, "touched")
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
             setTouched(true)
             return
         }

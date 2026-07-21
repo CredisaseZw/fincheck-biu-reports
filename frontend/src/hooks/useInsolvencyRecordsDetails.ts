@@ -78,7 +78,7 @@ function useInsolvencyRecordsDetails({
         }
         const changes = handleTrackChangedArray(insolvency_data, data.insolvency_records,)
         if(changes.length === 0){
-            setItem(CACHE_KEY, "touched")
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
             setTouched(true)
             return
         }

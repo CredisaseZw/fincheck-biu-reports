@@ -3,7 +3,7 @@ import { FileText, Image, File } from "lucide-react";
 import {z} from "zod"
 
 export const LiveReportHeaders:Header[] = [
-    { name : "Enquiry Ref", textAlign : "center"},
+    { name : "Request Ref", textAlign : "center"},
     { name : "Request Date", textAlign : "center" },
     { name : "Client" },
     { name : "Subject" },
@@ -12,8 +12,8 @@ export const LiveReportHeaders:Header[] = [
     { name : "Action", textAlign : "center" },
 ]
 export const ReportHeaders:Header[] = [
-    { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
-    { name : "Request Date", textAlign : "center", value : "created_at" },
+    { name : "Request Ref", textAlign : "center", value : "enquiry_reference"},
+    { name : "Report Date", textAlign : "center", value : "created_at" },
     { name : "Client", value : "client"},
     { name : "Subject", value : "subject"},
     { name : "Requestor", textAlign: "left", value:"username"},
@@ -153,11 +153,7 @@ export const ACCEPTED_TYPES = [
     "application/pdf",
     "image/jpeg",
     "image/png",
-    "image/webp",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "image/webp"
 ]
 
 export const ACCOUNT_TYPES = [

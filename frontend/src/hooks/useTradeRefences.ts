@@ -78,7 +78,7 @@ function useTradeReferences({
     }   
     const changes = handleTrackChangedArray(trade_references_data, data.trade_references);
     if(changes.length === 0){
-      setItem(CACHE_KEY, "touched")
+      setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
       setTouched(true)
       return;
     } 

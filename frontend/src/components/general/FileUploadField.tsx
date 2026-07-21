@@ -78,7 +78,7 @@ export default function FileUploadField({
                 ) : (
                     <p className="text-sm text-muted-foreground">Click to upload document or image</p>
                 )}
-                <Input type="file" accept=".pdf,image/*,.doc,.docx,.xls,.xlsx" className="cursor-pointer" {...inputProps} />
+                <Input type="file" accept=".pdf,image/*" className="cursor-pointer" {...inputProps} />
             </div>
             {error && <p className="text-destructive text-sm">{error}</p>}
         </div>

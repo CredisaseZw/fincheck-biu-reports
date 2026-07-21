@@ -13,6 +13,7 @@ import Fieldset from "./FieldSet"
 import { Textarea } from "../ui/textarea";
 import type { CompanyDirectorsProps } from "@/types/core";
 import CustomSubmitButton from "./CustomSubmitButton";
+import { Checkbox } from "../ui/checkbox";
 
 function DirectorDetails({
     directors_data,
@@ -128,17 +129,33 @@ function DirectorDetails({
                                 />
                             </div>
                         </ColumnsContainer>
-                        <ColumnsContainer>
+                        <ColumnsContainer numberOfCols={2}>
                             <div className="form-group">
                                 <Label>Date of Birth</Label>
                                 <Input type="date" {...register(`directors.${index}.dob`)} />
                             </div>
-                            <div className="form-group">
-                                <Label className="required">National ID / Passport ID</Label>
-                                <Input {...register(`directors.${index}.national_id`)} placeholder="69235489C67 or ZN1234567" />
-                                {errors.directors?.[index]?.national_id && (
-                                    <p className="text-destructive text-sm">{errors.directors[index].national_id.message}</p>
-                                )}
+                            <div className="flex flex-row gap-3">
+                                <div className="form-group flex-1">
+                                    <Label className="required">National ID / Passport ID</Label>
+                                    <Input {...register(`directors.${index}.national_id`)} placeholder="69235489C67 or ZN1234567" />
+                                    {errors.directors?.[index]?.national_id && (
+                                        <p className="text-destructive text-sm">{errors.directors[index].national_id.message}</p>
+                                    )}
+                                </div>
+                                <Controller
+                                    control={control}
+                                    name={`directors.${index}.is_pep`}
+                                    render={({ field }) => (
+                                    <div className="flex items-center gap-2 mt-4">
+                                        <Checkbox
+                                            id={`is_pep_d_${index}`}
+                                            checked={field.value}
+                                            onCheckedChange={(val) => field.onChange(val === true)}
+                                        />
+                                        <label className="text-sm" htmlFor={`is_pep_d_${index}`}>PEP</label>
+                                    </div>
+                                    )}
+                                />
                             </div>
                         </ColumnsContainer>
                     
@@ -173,6 +190,7 @@ function DirectorDetails({
                         className="self-start"
                         onClick={() => append({
                             full_name: "",
+                            is_pep : false,
                             position: "director",
                             gender: "male",
                             dob: "",

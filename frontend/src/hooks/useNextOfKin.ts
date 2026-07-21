@@ -68,7 +68,7 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
         
         const changes = handleTrackChangedFields(init, data);
         if (!changes) {
-            setItem(CACHE_KEY, "touched")
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
             setTouched(true)
             return;
         }

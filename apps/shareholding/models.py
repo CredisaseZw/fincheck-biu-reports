@@ -10,15 +10,14 @@ class CompanyShareholding(BaseModel):
         on_delete=models.CASCADE,
         related_name="shareholdings"
     )
-    numbers_of_shares = models.PositiveIntegerField()
-    numbers_of_shareholders = models.PositiveIntegerField()
-    paid_up_capital = models.DecimalField(
-        _("Paid Up Capital"),
+    issued_share_capital = models.DecimalField(
+         _("Issued Share Capital"),
         max_digits=20,
         decimal_places=2,
         null=True,
         blank=True
     )
+    numbers_of_shareholders = models.PositiveIntegerField()
     authorized_capital = models.DecimalField(
         _("Authorized Capital"),
         max_digits=20,
@@ -32,7 +31,6 @@ class CompanyShareholding(BaseModel):
         db_table = "company_shareholding"
         verbose_name = "Company Shareholding"
         verbose_name_plural = "Company Shareholdings"
-        ordering = ["-numbers_of_shares"]
 
     def __str__(self):
         return f"{self.company} | Shares: {self.numbers_of_shares} | Shareholders: {self.numbers_of_shareholders}"
@@ -47,7 +45,7 @@ class Shareholder(BaseModel):
     address = models.TextField()
     number_of_shares = models.PositiveIntegerField()
     percentage_ownership = models.DecimalField(max_digits=5, decimal_places=2)
-
+    is_pep = models.BooleanField(default= False)
     class Meta:
         app_label = "shareholding"
         db_table = "shareholders"

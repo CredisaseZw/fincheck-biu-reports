@@ -11,15 +11,15 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const schema = z.object({
     id: z.number().optional(),
-    numbers_of_shares: z.number("Enter a valid number of shares").positive("Positive numbers required"),
+    issued_share_capital: z.number().optional(),
     numbers_of_shareholders: z.number("Enter a valid number of shareholders").positive("Positive numbers required"),
-    paid_up_capital: z.number().optional(),
     authorized_capital: z.number().optional(),
     shareholders: z.array(
         z.object({
             id: z.number().optional(),
             full_name: z.string(),
             address: z.string(),
+            is_pep: z.boolean(),
             number_of_shares: z.number("Enter a valid number of shares").positive("Positive numbers required"),
             percentage_ownership: z.number("Enter a valid percentage")
                 .min(0, "Min value is 0")
@@ -53,14 +53,14 @@ function useShareholdingDetails({
         if(shareholdings_data){
             reset({
                 id: shareholdings_data.id,
+                issued_share_capital : shareholdings_data.issued_share_capital,
                 numbers_of_shareholders: shareholdings_data.numbers_of_shareholders,
-                numbers_of_shares: shareholdings_data.numbers_of_shares,
-                paid_up_capital :shareholdings_data.paid_up_capital,
                 authorized_capital : shareholdings_data.authorized_capital,
                 shareholders: shareholdings_data.shareholders.map(item => ({
                     id: item.id,
                     full_name: item.full_name,
                     address  :item.address,
+                    is_pep: item.is_pep,
                     number_of_shares :item.number_of_shares,
                     percentage_ownership :item.percentage_ownership
                 }))
@@ -95,7 +95,7 @@ function useShareholdingDetails({
         const shareholderChanges = handleTrackChangedArray(initShareholders ?? [], currentShareholders);
 
         if (!topLevelChanges && shareholderChanges.length === 0) {
-            setItem(CACHE_KEY, "touched")
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
             setTouched(true)
             return;
         }
@@ -134,14 +134,14 @@ function useShareholdingDetails({
 
                 reset({
                     id: data_.id,
+                    issued_share_capital :  Number(data_.issued_share_capital),
                     numbers_of_shareholders: data_.numbers_of_shareholders,
-                    numbers_of_shares: data_.numbers_of_shares,
-                    paid_up_capital: Number(data_.paid_up_capital),
                     authorized_capital: Number(data_.authorized_capital),
                     shareholders: data_.shareholders.map(item => ({
                         id: item.id ?? undefined,
                         full_name: item.full_name,
                         address: item.address,
+                        is_pep: item.is_pep,
                         number_of_shares: item.number_of_shares,
                         percentage_ownership: Number(item.percentage_ownership)
                     }))
@@ -189,6 +189,7 @@ function useShareholdingDetails({
         isPending,
         errors,
         fields,
+        control,
         getValues,
         append,
         remove,

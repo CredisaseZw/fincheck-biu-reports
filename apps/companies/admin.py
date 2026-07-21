@@ -50,11 +50,9 @@ class CompanyOverviewAdmin(admin.ModelAdmin):
         "company",
         "trading_status",
         "legal_form",
-        "condition",
-        "trend",
         "number_of_employees",
     )
-    list_filter = ("trading_status", "legal_form", "condition", "trend")
+    list_filter = ("trading_status", "legal_form")
     search_fields = ("company__registered_name", "company__trading_name")
     readonly_fields = ("created_at", "updated_at")
     raw_id_fields = ("company",)

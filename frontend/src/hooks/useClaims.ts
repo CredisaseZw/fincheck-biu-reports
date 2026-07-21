@@ -96,7 +96,7 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
 
     const changes = handleTrackChangedArray(initial_data, current_data)
     if(changes.length === 0){
-      setItem(CACHE_KEY, "touched")
+      setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
       setTouched(true)
       return
     }

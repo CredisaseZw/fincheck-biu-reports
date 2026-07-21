@@ -79,7 +79,7 @@ function useCourtDetails({
         }
         const changes = handleTrackChangedArray(court_judgements_data, data.court_judgements,)
         if(changes.length === 0){
-            setItem(CACHE_KEY, "touched")
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
             setTouched(true)
             return
         }

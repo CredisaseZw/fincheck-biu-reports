@@ -67,6 +67,7 @@ class CompanyDirector(BaseModel):
         null=True,
         help_text=_("Director Mobile Phone Number")
     )
+    is_pep = models.BooleanField(default= False)
     
     class Meta:
         ordering = ["-created_at"]

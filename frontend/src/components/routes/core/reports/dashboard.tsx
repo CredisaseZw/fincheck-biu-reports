@@ -8,11 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { CompanyListHeaders, IndividualListHeaders } from "@/constants";
+import ViewEntityDialog from "@/dialogues/ViewEntityDialog";
 import useGetDashboardStats from "@/hooks/api/useGetDashboardStats"
 import useReportsDashboard from "@/hooks/useReportsDashboard";
 import { toCap } from "@/lib/utils";
 import type { ListCompany, ListIndividual } from "@/types/core";
-import { Calendar1, CalendarDays, CalendarRange, Eye, X } from "lucide-react";
+import { Calendar1, CalendarDays, CalendarRange, X } from "lucide-react";
 
 function _render_list_individual_rows(data: ListIndividual[]){
     return (
@@ -24,11 +25,10 @@ function _render_list_individual_rows(data: ListIndividual[]){
                 <TableCell className="text-center">{item.mobile_number ?? "-"}</TableCell>
                 <TableCell>{item.email ?? "-"}</TableCell>
                 <TableCell className="flex justify-center">
-                    <div
-                        className="rounded-full self-center cursor-pointer flex dark:bg-[#1A2330] bg-gray-100 border p-2"
-                    >
-                        <Eye size={15}/>
-                    </div>
+                    <ViewEntityDialog
+                        entity_type={"individual"}
+                        id={item.id}
+                    />
                 </TableCell>
             </TableRow>
         ))
@@ -42,15 +42,13 @@ function _render_list_company_rows(data: ListCompany[]){
                 <TableCell>{item.registered_name}</TableCell>
                 <TableCell>{item.trading_name ?? "-"}</TableCell>
                 <TableCell className="text-center">{item.registration_number ?? "-"}</TableCell>
-                <TableCell>{item.registration_number ?? "-"}</TableCell>
                 <TableCell>{item.email}</TableCell>
                 <TableCell>{item.telephone_number}</TableCell>
                 <TableCell className="flex justify-center">
-                    <div
-                        className="rounded-full self-center cursor-pointer flex dark:bg-[#1A2330] bg-gray-100 border p-2"
-                    >
-                        <Eye size={15}/>
-                    </div>
+                   <ViewEntityDialog
+                        entity_type={"company"}
+                        id = {item.id}
+                   />
                 </TableCell>
             </TableRow>
         ))
@@ -105,15 +103,15 @@ function Dashboard() {
             : <></>
         }
         <div className="card p-5 flex flex-col gap-8">
-            <form className="flex flex-row gap-3" onSubmit={handleSearchSubmit}>
-                <div className="form-group">
+            <form className="flex flex-col md:flex-row gap-3" onSubmit={handleSearchSubmit}>
+                <div className="form-group w-full">
                     <label className="text-xl font-bold text-primary dark:text-white">Enquire {toCap(currentSubject)}</label>
-                    <div className="flex flex-row gap-2">
+                    <div className="flex flex-col md:flex-row gap-2">
                         <Select
                             value={currentSubject}
                             onValueChange={setCurrentSubject}
                         >
-                            <SelectTrigger className="mt-[0.9px] w-35">
+                            <SelectTrigger className="mt-[0.8px] w-full md:w-35">
                                 <SelectValue placeholder="Please select"/>
                             </SelectTrigger>
                             <SelectContent>
@@ -121,9 +119,9 @@ function Dashboard() {
                                 <SelectItem value="individual">Individual</SelectItem>
                             </SelectContent>
                         </Select>
-                        <div className="relative">
+                        <div className="relative w-full md:w-md">
                             <Input
-                                className="md:w-xl w-full"
+                                className="w-full"
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 placeholder={
@@ -132,26 +130,22 @@ function Dashboard() {
                                     : "e.g Full name, national ID/Passport Number"
                                 }
                             />
-                             {searchValue && (
+                            {searchValue && (
                                 <button
                                     type="button"
-                                    onClick={() =>onClear()}
+                                    onClick={() => onClear()}
                                     className="absolute right-5 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                 > <X size={16} /> </button>
                             )}
                         </div>
-                        <Button 
-                            className={ isLoading ? "cursor-not-allowed" : ""}
-                            disabled = {isLoading}
+                        <Button
+                            className={`w-full md:w-auto ${isLoading ? "cursor-not-allowed" : ""}`}
+                            disabled={isLoading}
                             type="submit"
-
                         >
-                            {
-                                isLoading && 
-                                <LoadingIndicator variant="button"/>
-                            }
+                            {isLoading && <LoadingIndicator variant="button"/>}
                             Submit
-                        </Button> 
+                        </Button>
                     </div>
                 </div>
             </form>

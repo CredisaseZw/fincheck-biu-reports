@@ -72,7 +72,7 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         
         const changes = handleTrackChangedFields(init, data);
         if (!changes) {
-            setItem(CACHE_KEY, "touched")
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
             setTouched(true)
             return;
         }
