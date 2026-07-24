@@ -120,8 +120,10 @@ export interface ListReport extends Timestamps{
 export interface User {
   full_name: string;
   email: string;
-  is_active: boolean;
+  i_a: boolean | string;
+  i_s: boolean | string
 }
+
 export interface SignInResponse extends User {
   tokens : {
       access: string,

@@ -4,6 +4,7 @@ import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge"
+import CryptoJS from "crypto-js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -252,4 +253,15 @@ export function formatNumberSign(value: number): string {
   }
 
   return `${sign}${abs}`;
+}
+export function decrypt(value: string, secret: string) {
+  return CryptoJS.AES.decrypt(value, secret).toString(CryptoJS.enc.Utf8)
+}
+
+export function encrypt(value: unknown, secret: string): string{
+    const encryption = CryptoJS.AES.encrypt(
+      String(value),
+      secret
+    ).toString();
+    return encryption
 }

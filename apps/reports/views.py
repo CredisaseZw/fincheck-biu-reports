@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from django.conf import settings
-from apps.utils.base_viewset import BaseJSONViewSet
+from apps.utils.base_viewset import BaseAuthJSONViewSet
 from apps.reports.models import Report
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
@@ -39,7 +39,7 @@ from apps.utils.helpers import (
 
 logger = logging.getLogger(__name__)
 r = redis.from_url(settings.REDIS_CACHE_LOCATION)
-class ReportViewSet(BaseJSONViewSet):
+class ReportViewSet(BaseAuthJSONViewSet):
     filter_backends = [ReportSearchFilter, DjangoFilterBackend]
     queryset = Report.objects.filter().exclude(status=Report.StatusChoices.FINALIZED)
     filterset_class = ReportsFilter
@@ -121,6 +121,12 @@ class ReportViewSet(BaseJSONViewSet):
             ReportSerializer(report).data,
             status=STATUS.HTTP_201_CREATED
         )
+    def retrieve(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            return super().retrieve(request, *args, **kwargs)
+        return Response({
+            "error": "Access error."
+        }, status=STATUS.HTTP_403_FORBIDDEN)
     
     def destroy(self, request, *args, **kwargs):
         report = self.get_object()
@@ -129,6 +135,11 @@ class ReportViewSet(BaseJSONViewSet):
         return super().destroy(request, *args, **kwargs) 
 
     def partial_update(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return Response({
+                    "error": "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        
         report = self.get_object()
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
@@ -136,6 +147,11 @@ class ReportViewSet(BaseJSONViewSet):
         return super().partial_update(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return Response({
+                    "error": "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        
         report = self.get_object()
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
@@ -145,8 +161,12 @@ class ReportViewSet(BaseJSONViewSet):
     @action(url_path="finalize-report", detail=True, methods=["POST"])
     def finalize_report(self, request, *args, **kwargs):
         user  = request.user
-        report = self.get_object()
+        if not user.is_staff:
+            return Response({
+                "error": "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
 
+        report = self.get_object()
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error": "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
 

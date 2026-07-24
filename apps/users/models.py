@@ -3,6 +3,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     username = None
+    company_name = models.TextField(
+        blank=True,
+        null=True
+    )
     email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
     USERNAME_FIELD = "email"
@@ -11,7 +15,7 @@ class User(AbstractUser):
     class Meta:
         indexes = [
             models.Index(
-                fields=["first_name", "last_name", "email"]
+                fields=["first_name", "last_name", "email", "company_name"]
             )
         ]
 

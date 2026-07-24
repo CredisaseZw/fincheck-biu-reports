@@ -7,6 +7,7 @@ import SectionHeader from "@/components/general/SectionHeader";
 import { StatusPill } from "@/components/general/StatusPills";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { REPORT_STATUS_PILL_VARIANTS, LiveReportHeaders } from "@/constants";
+import { useAuth } from "@/contexts/AuthContext";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
 import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
 import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
@@ -19,6 +20,7 @@ import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 function LiveReports() {
+    const { user } = useAuth()
     const {
         pagination,
         reports,
@@ -37,8 +39,12 @@ function LiveReports() {
             />
             <div className="flex flex-col gap-3 md:flex-row md:justify-end self-center">
                 <AddReportDialogue/>
-                <CreateCompanyDialogue/>
-                <CreateIndividualDialogue/>
+                {
+                    user?.i_s &&<>
+                        <CreateCompanyDialogue/>
+                        <CreateIndividualDialogue/>                    
+                    </>
+                }
             </div>
         </ColumnsContainer>
         <div className="main-card">
@@ -96,30 +102,34 @@ function LiveReports() {
                                 <TableCell className="flex items-center justify-center">
                                     <OptionsWrapper>
                                         {
-                                            
-                                            (item.status === "finalized")
-                                            ? <OptionButton
-                                                onClick={() =>
-                                                    item.report_pdf
-                                                        ? window.open(item.report_pdf, "_blank", "noopener,noreferrer")
-                                                        : toast.error("Report PDF not available")
-                                                }
-                                                Icon={ExternalLink}
-                                                label="View Report"
-                                            /> 
-                                            :<> 
+                                            user?.i_s &&
+                                            <>
                                                 {
-                                                    item.status === "suspended"
-                                                    ? <SuspendReportDialog 
-                                                        mode={"unsuspend"} 
-                                                        reason={item.suspension_reason}
-                                                        id={item.id}
-                                                    />
-                                                    : <AddReportDialogue report_item={item}/>
+                                                    (item.status === "finalized")
+                                                    ? <OptionButton
+                                                        onClick={() =>
+                                                            item.report_pdf
+                                                                ? window.open(item.report_pdf, "_blank", "noopener,noreferrer")
+                                                                : toast.error("Report PDF not available")
+                                                        }
+                                                        Icon={ExternalLink}
+                                                        label="View Report"
+                                                    /> 
+                                                    :<> 
+                                                        {
+                                                            item.status === "suspended"
+                                                            ? <SuspendReportDialog 
+                                                                mode={"unsuspend"} 
+                                                                reason={item.suspension_reason}
+                                                                id={item.id}
+                                                            />
+                                                            : <AddReportDialogue report_item={item}/>
+                                                        }
+                                                    </>
                                                 }
-                                                <DeleteReportAlert id={item.id}/>
                                             </>
                                         }
+                                        <DeleteReportAlert id={item.id}/>
                                     </OptionsWrapper>
                                 </TableCell>
                             </TableRow>

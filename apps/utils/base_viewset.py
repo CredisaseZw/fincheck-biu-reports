@@ -2,6 +2,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.utils.permissions import IsStaffUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
@@ -16,8 +17,8 @@ class UpdatedByMixin:
     def perform_update(self, serializer):
         instance = serializer.save(updated_by=self.request.user)
         return instance
-class ValidatedCreateUpdateMixin:
     
+class ValidatedCreateUpdateMixin:    
     def create(self, request, *args, **kwargs):
         from apps.utils.helpers import validate_serializer
 
@@ -42,6 +43,11 @@ class ValidatedCreateUpdateMixin:
     
 class BaseJSONViewSet(UpdatedByMixin, ValidatedCreateUpdateMixin, ModelViewSet):
     permission_classes = [IsStaffUser]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering = ["-created_at"]
+
+class BaseAuthJSONViewSet(UpdatedByMixin, ValidatedCreateUpdateMixin, ModelViewSet):
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering = ["-created_at"]
 

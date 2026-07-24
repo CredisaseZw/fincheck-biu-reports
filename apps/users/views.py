@@ -2,10 +2,15 @@ from .models import User
 from rest_framework import status as STATUS
 from rest_framework.response import Response
 from apps.utils.permissions import IsStaffUser
+from apps.utils.base_viewset import UpdatedByMixin
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.filters import OrderingFilter, SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.exceptions import TokenError
 from apps.utils.helpers import validate_serializer
 import logging
@@ -81,3 +86,16 @@ def change_password(request, *args, **kwargs):
     request.user.save()
 
     return Response({"message": "Password changed successfully."}, status=STATUS.HTTP_200_OK)
+
+class UsersViewset(
+    UpdatedByMixin,
+    UpdateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    DestroyModelMixin,
+    GenericViewSet
+):
+    permission_classes = [IsStaffUser]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

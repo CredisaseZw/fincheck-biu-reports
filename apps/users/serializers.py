@@ -5,18 +5,26 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
-
+    i_a = serializers.SerializerMethodField()
+    i_s = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = [
+            'company_name',
             'full_name',
             'email',
-            'is_active'
+            'i_a',
+            'i_s'
         ]
 
     def get_full_name(self, instance: User) -> str:
         return instance.get_full_name()
-    
+
+    def get_i_a(self, instance:User)-> bool:
+        return instance.is_active
+
+    def get_i_s(self, instance: User)-> bool:
+        return instance.is_staff
 class UserSignInSerializers(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(required=True)
@@ -44,14 +52,13 @@ class UserSignInSerializers(serializers.Serializer):
                 "refresh": str(token),
             }
         }    
-
-
 class CreateUserSerializer(serializers.Serializer):
+    company_name= serializers.CharField(required=False)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
-
+    is_staff = serializers.BooleanField(required=False)
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
