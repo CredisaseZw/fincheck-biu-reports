@@ -1,22 +1,28 @@
 from apps.users.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from apps.utils.helpers import _content_ob_serializer
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     i_a = serializers.SerializerMethodField()
     i_s = serializers.SerializerMethodField()
+    client = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = [
-            'company_name',
+            'client',
             'full_name',
             'email',
             'i_a',
             'i_s'
         ]
 
+    def get_client(self, instance: User):
+        if instance.client:
+            return _content_ob_serializer(instance.client, True)
+        return None
+    
     def get_full_name(self, instance: User) -> str:
         return instance.get_full_name()
 
@@ -25,6 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_i_s(self, instance: User)-> bool:
         return instance.is_staff
+    
 class UserSignInSerializers(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(required=True)
@@ -53,12 +60,10 @@ class UserSignInSerializers(serializers.Serializer):
             }
         }    
 class CreateUserSerializer(serializers.Serializer):
-    company_name= serializers.CharField(required=False)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
-    is_staff = serializers.BooleanField(required=False)
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)

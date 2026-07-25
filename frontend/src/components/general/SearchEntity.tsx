@@ -14,6 +14,7 @@ interface props {
     entityType: EntityValue,
     entityMode?: EntityMode,
     defaultSearch?: string,
+    onClear?: ()=> void
     onSelectItem?: (id: number)=> void
     onSelectEntity? : (entity : EntityMode, props:onSelectEntityProps) => void
     onSetEntityId?: (entity : EntityMode, value: number | null) => void
@@ -62,14 +63,17 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
             return {
                 id : i.id,
                 value : i.full_name,
-                uniqueID : i.national_id
+                uniqueID : i.national_id,
+                email : i.email
             }
         } 
         const i = item as ListCompany;
         return {
             id : i.id,
             value : i.company_name,
-            uniqueID : i.registration_number
+            uniqueID : i.registration_number,
+            email : i.email
+        
         }
     }
 
@@ -114,12 +118,12 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         setQuery("")
         setHasInteracted(false)
         inputRef.current?.focus()
-
+        
         if (entityMode) {
             onSetEntityId?.(entityMode, null)
-            onSelectEntity?.(entityMode, { value: "", uniqueID : null, id: 0})
+            onSelectEntity?.(entityMode, { value: "", uniqueID : null, id: 0, email: null})
         }    
-    }, [onSetEntityId, onSelectEntity, entityMode])
+    }, [onSetEntityId, onSelectEntity,entityMode])
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
         if (!isOpen && (e.key === "ArrowDown" || e.key === "Enter")) { open(); return }

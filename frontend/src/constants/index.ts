@@ -131,6 +131,14 @@ export const TRADE_REFERENCES_HEADERS: Header[] = [
     {name : "Reference Date", textAlign: "end"},
 
 ]
+export const USER_HEADERS: Header[] = [
+    { name: "Full Name", textAlign : "left"},
+    { name: "National-ID / Passport / Reg No", textAlign : "center"},
+    { name: "Email", textAlign : "left"},
+    { name: "Activision Status", textAlign : "center"},
+    { name: "Is Stuff", textAlign : "center"},
+    { name: "Action", textAlign: "center"}
+]
 
 export const REPORT_STATUS_PILL_VARIANTS = {
     draft : "outline",

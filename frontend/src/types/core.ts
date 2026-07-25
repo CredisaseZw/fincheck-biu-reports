@@ -100,7 +100,8 @@ export interface MiniDebtor  {
 export interface onSelectEntityProps {
   id: number
   value: string | null, 
-  uniqueID: string|null|undefined
+  uniqueID: string|null|undefined,
+  email?: string | null
 }
 export interface ListReport extends Timestamps{
   id: number;
@@ -120,6 +121,7 @@ export interface ListReport extends Timestamps{
 export interface User {
   full_name: string;
   email: string;
+  client: MiniCompany | MiniIndividual | null;
   i_a: boolean | string;
   i_s: boolean | string
 }
