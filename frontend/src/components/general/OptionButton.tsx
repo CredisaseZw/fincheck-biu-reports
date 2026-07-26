@@ -63,6 +63,7 @@ const optionButtonVariants = cva(
         danger: [
           "bg-red-200 text-red-500 border-red-500 dark:bg-red-800/20",
           "hover:bg-red-100 dark:hover:bg-red-800/10",
+          "text-red-800",
           "shadow-sm",
         ],
       },
@@ -92,6 +93,7 @@ interface OptionButtonProps
   Icon?: LucideIcon;
   label: string;
   className?: string;
+  disabled?: boolean
   onClick?: ()=>void
 }
 export function OptionButton({
@@ -99,12 +101,14 @@ export function OptionButton({
   label,
   variant,
   size,
+  disabled,
   fullWidth,
   className,
   onClick
 }: OptionButtonProps) {
   return (
     <Button
+      disabled = {disabled}
       type="button"
       size={"sm"}
       onClick={onClick}

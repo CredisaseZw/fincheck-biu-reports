@@ -9,10 +9,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.exceptions import TokenError
-from apps.users.filters import UsersSearchFilter
+from apps.users.filters import UsersSearchFilter, UserFilterSet
 from apps.utils.helpers import validate_serializer, get_content_type_id
 import logging
 
@@ -58,7 +58,7 @@ def refresh_token(request, *args, **kwargs):
 
 
 @api_view(['POST'])
-@permission_classes([IsStaffUser])
+@permission_classes([IsAuthenticated])
 def verify_token(request, *args, **kwargs):
     return Response({
         "message" : "User valid"
@@ -150,6 +150,22 @@ class UsersViewset(
     GenericViewSet
 ):
     permission_classes = [IsStaffUser]
-    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, UsersSearchFilter]
     queryset = User.objects.all()
+    filterset_class = UserFilterSet
+    ordering = ["-created_at"]
     serializer_class = UserSerializer
+
+    def perform_update(self, serializer):
+        password = self.request.data.get("password", None)
+        is_active = self.request.data.get("is_active", None)
+        instance = serializer.save()
+        changed = False
+        if password:
+            instance.set_password(password)
+            changed = True
+        if is_active is not None:
+            instance.is_active = is_active
+            changed = True
+        if changed:
+            instance.save()

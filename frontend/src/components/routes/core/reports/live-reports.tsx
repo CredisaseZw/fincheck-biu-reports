@@ -6,9 +6,10 @@ import SearchBox from "@/components/general/Searchbox";
 import SectionHeader from "@/components/general/SectionHeader";
 import { StatusPill } from "@/components/general/StatusPills";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { REPORT_STATUS_PILL_VARIANTS, LiveReportHeaders } from "@/constants";
+import { REPORT_STATUS_PILL_VARIANTS, LiveReportHeaders, LiveClientReportHeaders } from "@/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
+import ClientRequestReportsDialog from "@/dialogues/ClientRequestReportsDialog";
 import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
 import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
 import DeleteReportAlert from "@/dialogues/DeleteReportDialogue";
@@ -38,7 +39,11 @@ function LiveReports() {
                 subTotal={reports.length}
             />
             <div className="flex flex-col gap-3 md:flex-row md:justify-end self-center">
-                <AddReportDialogue/>
+                {
+                    user?.i_s 
+                    ?<AddReportDialogue/>
+                    : <ClientRequestReportsDialog/>
+                }
                 {
                     user?.i_s &&<>
                         <CreateCompanyDialogue/>
@@ -61,12 +66,16 @@ function LiveReports() {
                     isError = {isError}
                     isEmpty = {reports.length === 0}
                     paginationData={pagination}
-                    headers={LiveReportHeaders}
+                    headers={
+                        user?.i_s 
+                        ? LiveReportHeaders
+                        : LiveClientReportHeaders
+                    }
                 >
                     {
                         reports.map((item)=>{
                             const client_bottom_level = "national_id" in item.client
-                        ? item.client.email ?? "-"
+                            ? item.client.email ?? "-"
                             : item.client.registration_number ?? item.client.trading_name ??"-"
 
                             const subject_bottom_level = "national_id" in item.subject
@@ -81,12 +90,15 @@ function LiveReports() {
                                 <TableCell className="text-center">
                                     {getFormattedDate(item.created_at)}
                                 </TableCell>
-                                <TableCell>
-                                    <div className="flex flex-col gap-1 text-center">
-                                        <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
-                                        <span>{client_bottom_level}</span>
-                                    </div>
-                                </TableCell>
+                                {
+                                    user?.i_s &&
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1 text-center">
+                                            <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
+                                            <span>{client_bottom_level}</span>
+                                        </div>
+                                    </TableCell>
+                                }
                                 <TableCell>
                                     <div className="flex flex-col gap-1 text-center">
                                         <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.subject)}</span>
@@ -129,7 +141,10 @@ function LiveReports() {
                                                 }
                                             </>
                                         }
-                                        <DeleteReportAlert id={item.id}/>
+                                        <DeleteReportAlert 
+                                            id={item.id}
+                                            disabled={!user?.i_s && ["in_progress", "suspended", "finalized"].includes(item.status)}
+                                        />
                                     </OptionsWrapper>
                                 </TableCell>
                             </TableRow>

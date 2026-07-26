@@ -3,15 +3,19 @@ from .serializers import (
     IndividualSerializer,
     IndividualListSerializer,
     IndividualCreateSerializer,
+    ClientIndividualSerializer,
     IndividualUpdateSerializer,
 )
-from apps.utils.base_viewset import BaseJSONViewSet
+from apps.users.models import User
+from rest_framework.response import Response
+from rest_framework import status as STATUS 
+from apps.utils.base_viewset import BaseAuthJSONViewSet
 import logging
 
 logger = logging.getLogger(__name__)
 
 # Create your views here.
-class IndividualsViewSet(BaseJSONViewSet):
+class IndividualsViewSet(BaseAuthJSONViewSet):
     """
     A viewset for viewing and editing individual instances.
     """
@@ -42,4 +46,39 @@ class IndividualsViewSet(BaseJSONViewSet):
             return IndividualCreateSerializer
         elif self.action in ["update", "partial_update"]:
             return IndividualUpdateSerializer
-        return super().get_serializer_class()
+
+        if self.request.user.is_staff:
+            return IndividualSerializer
+        return ClientIndividualSerializer
+    
+    def create(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)

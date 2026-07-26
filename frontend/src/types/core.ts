@@ -119,6 +119,7 @@ export interface ListReport extends Timestamps{
 }
 
 export interface User {
+  id: number;
   full_name: string;
   email: string;
   client: MiniCompany | MiniIndividual | null;

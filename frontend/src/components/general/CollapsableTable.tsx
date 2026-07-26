@@ -9,7 +9,6 @@ import {
 } from "../ui/collapsible";
 import { cn, handleAxiosError } from "@/lib/utils";
 import { api } from "@/axios/api";
-import { ReportHeaders } from "@/constants";
 import ArchivedReportsTable from "./ArchivedReportsTable";
 import type { ListReport } from "@/types/core";
 
@@ -82,7 +81,6 @@ export default function CollapsableTable({
         <ArchivedReportsTable
             isEmpty = {reports.length === 0}
             isError = {isError}
-            headers={ReportHeaders}
             isLoading = {loading}
             results={reports}
         />

@@ -18,24 +18,22 @@ import { toast } from "sonner";
 
 interface props {
     id: number
-    disabled?: boolean
 }
 
-function DeleteReportAlert({
-  id,
-  disabled
+function DeleteUserDialog({
+  id
 }: props) {
     const [open, setOpen] = useState(false)
     const queryClient = useQueryClient()
     const {mutate, isPending} = useInstanceMutation()
 
     const onDelete =()=>{
-        mutate({url : `/api/reports/${id}/`, mode: "deletion"}, {
+        mutate({url : `/api/users/${id}/`, mode: "deletion"}, {
             onSuccess : ()=>{
                 queryClient.invalidateQueries({
-                    queryKey : ["reports"]
+                    queryKey : ["users"]
                 })
-                toast.success("Report deleted successfully")
+                toast.success("User deleted successfully")
                 setOpen(false)
             },
             onError : (e)=> handleAxiosError(e)
@@ -44,23 +42,21 @@ function DeleteReportAlert({
 
     return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogTrigger disabled= {disabled}>
+        <AlertDialogTrigger>
             <OptionButton
-                disabled = {disabled}
                 variant={"danger"}
                 Icon={Trash2}
-                label="Delete Report"
+                label="Delete User"
             />
         </AlertDialogTrigger>
         <AlertDialogContent className="rounded-md">
             <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-                <Trash2 className="size-5" />
-                Delete Report
+            <AlertDialogTitle className="flex items-center gap-2 ">
+                Delete User
             </AlertDialogTitle>
 
             <AlertDialogDescription className="text-muted-foreground">
-                This action cannot be undone. The report and all associated data
+                This action cannot be undone. The user and all associated data
                 will be permanently deleted.
             </AlertDialogDescription>
             </AlertDialogHeader>
@@ -75,7 +71,7 @@ function DeleteReportAlert({
                 onClick={onDelete}
                 className="bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white"
             >
-                {isPending ? "Deleting..." : "Delete Report"}
+                {isPending ? "Deleting..." : "Delete User"}
             </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -83,4 +79,4 @@ function DeleteReportAlert({
   );
 }
 
-export default DeleteReportAlert;
+export default DeleteUserDialog;

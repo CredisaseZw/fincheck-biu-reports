@@ -41,24 +41,108 @@ logger = logging.getLogger(__name__)
 r = redis.from_url(settings.REDIS_CACHE_LOCATION)
 class ReportViewSet(BaseAuthJSONViewSet):
     filter_backends = [ReportSearchFilter, DjangoFilterBackend]
-    queryset = Report.objects.filter().exclude(status=Report.StatusChoices.FINALIZED)
     filterset_class = ReportsFilter
     serializer_class = ReportSerializer
+
+    def get_queryset(self):
+        user:User = self.request.user
+        if user.is_staff or user.is_superuser:
+            return Report.objects.filter().exclude(status=Report.StatusChoices.FINALIZED)
+        else:
+            return Report.objects.filter(
+                client_object_id = user.client_object_id,
+                client_content_type = user.client_content_type,
+            ).exclude(status=Report.StatusChoices.FINALIZED)
     
     def get_serializer_class(self):
         if self.action == "list":
             return ListReportSerializer
         return ReportSerializer
 
+    @action(detail=False, methods=["POST"], url_path="request-report")
+    def request_report(self, request, *args, **kwargs):
+        user: User = request.user
+        requestor = request.data.get("requestor", "")
+        rows = request.data.get("rows", [])
+
+        if not rows:
+            return Response(
+                {"error": "No rows provided."},
+                status=STATUS.HTTP_400_BAD_REQUEST
+            )
+
+        client_id = user.client_object_id
+        client_type_id = user.client_content_type_id
+
+        instances = []
+        content_type_cache = {}
+
+        with transaction.atomic():
+            now = timezone.now()
+            prefix = now.strftime("%y%m")
+
+            last = (
+                Report.objects.filter(enquiry_reference__startswith=prefix)
+                .select_for_update()
+                .order_by("-enquiry_reference")
+                .first()
+            )
+            next_seq = int(last.enquiry_reference[4:]) + 1 if last else 1
+
+            for index, r in enumerate(rows):
+                subject_id = r.get("subject_object_id")
+                subject_type = r.get("subject_type")
+
+                if subject_type not in content_type_cache:
+                    content_type_cache[subject_type] = get_content_type_id(subject_id, subject_type)
+                subject_content_type_id = content_type_cache[subject_type]
+
+                if not subject_content_type_id:
+                    return Response(
+                        {"error": f"Invalid subject_object_id or subject_type for row {index + 1}"},
+                        status=STATUS.HTTP_400_BAD_REQUEST
+                    )
+
+                if subject_id == client_id and subject_content_type_id == client_type_id:
+                    return Response(
+                        {"error": f"Subject & client cannot be the same for row {index + 1}."},
+                        status=STATUS.HTTP_400_BAD_REQUEST
+                    )
+
+                instances.append(
+                    Report(
+                        subject_object_id=subject_id,
+                        subject_content_type_id=subject_content_type_id,
+                        client_content_type_id=client_type_id,
+                        client_object_id=client_id,
+                        status=Report.StatusChoices.DRAFT,
+                        username=requestor,
+                        updated_by=user,
+                        enquiry_reference=f"{prefix}{next_seq + index:04d}",
+                    )
+                )
+
+            created = Report.objects.bulk_create(instances)
+
+        return Response({
+            "message": "Reports successfully requested.",
+            "report_ids": [r.id for r in created]
+        }, status=STATUS.HTTP_201_CREATED)
+
     def create(self, request: Request, *args, **kwargs):
-        user = request.user
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        
         username = request.data.get("username", "")
+        bypass_check = request.data.get("bypass_check", False)     
         subject_id = request.data.get("subject_object_id")
         client_id = request.data.get("client_object_id")
         subject_type = request.data.get("subject_type")
         client_type = request.data.get("client_type")
         subject_unique_id = request.data.get("subject_unique_id", None)
-        bypass_check = request.data.get("bypass_check", False)
 
         subject_content_type_id = get_content_type_id(subject_id, subject_type)
         client_content_type_id = get_content_type_id(client_id, client_type)
@@ -121,6 +205,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
             ReportSerializer(report).data,
             status=STATUS.HTTP_201_CREATED
         )
+    
     def retrieve(self, request, *args, **kwargs):
         if request.user.is_staff:
             return super().retrieve(request, *args, **kwargs)
@@ -129,9 +214,13 @@ class ReportViewSet(BaseAuthJSONViewSet):
         }, status=STATUS.HTTP_403_FORBIDDEN)
     
     def destroy(self, request, *args, **kwargs):
-        report = self.get_object()
+        report:Report = self.get_object()
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        if not self.request.user.is_staff:
+            if report.status != Report.StatusChoices.DRAFT:
+                return Response({"error" : "Report already being worked on."}, status=STATUS.HTTP_400_BAD_REQUEST)
         return super().destroy(request, *args, **kwargs) 
 
     def partial_update(self, request, *args, **kwargs):
@@ -189,7 +278,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
         
     @action(url_path="acquire-report-lock", detail=True, methods=['POST'])
     def acquire_lock(self, request, *args, **kwargs):
-        report = self.get_object()
+        report:Report = self.get_object()
         subject_id  = report.subject.id
 
         if report.status == Report.StatusChoices.FINALIZED:
@@ -212,6 +301,11 @@ class ReportViewSet(BaseAuthJSONViewSet):
                 message = f"{holder_name} is currently editing this report."
 
             return Response({"detail": message, "locked_on": info["locked_on"]}, status=STATUS.HTTP_423_LOCKED)
+
+        with transaction.atomic():
+            if report.status == Report.StatusChoices.DRAFT:
+                report.status = Report.StatusChoices.IN_PROGRESS
+                report.save(update_fields = ["status"])
 
         return Response({"detail": "Lock acquired"}, status=STATUS.HTTP_200_OK)
 
@@ -249,11 +343,20 @@ class ReportViewSet(BaseAuthJSONViewSet):
         )
 
 class ArchivedReportsViewSet(BaseListDataViewSet):
-    queryset = Report.objects.filter(
-        status = Report.StatusChoices.FINALIZED
-    )
     filter_backends = [BusinessReportsSearchFilter, DjangoFilterBackend]
     serializer_class = ReportSerializer
+
+    def get_queryset(self):
+        user:User = self.request.user
+        if user.is_staff or user.is_superuser:
+            return Report.objects.filter(
+                status = Report.StatusChoices.FINALIZED
+            )
+        return Report.objects.filter(
+            client_object_id = user.client_object_id,
+            client_content_type = user.client_content_type,
+            status = Report.StatusChoices.FINALIZED
+        )
 
     def cutoff_day(self, request):
         return int(request.query_params.get("month_end_date", 25))

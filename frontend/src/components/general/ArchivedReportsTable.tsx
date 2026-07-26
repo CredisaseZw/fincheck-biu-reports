@@ -1,4 +1,4 @@
-import type { Header, ListReport, PaginationData } from "@/types/core";
+import type { ListReport, PaginationData } from "@/types/core";
 import BaseTable from "./BaseTable";
 import { TableCell, TableRow } from "../ui/table";
 import { getEntityName, getFormattedDate } from "@/lib/utils";
@@ -6,13 +6,14 @@ import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { OptionButton } from "./OptionButton";
 import OptionsWrapper from "./OptionsWrapper";
+import { ClientReportHeaders, ReportHeaders } from "@/constants";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface props {
     isLoading : boolean
     isError : boolean
     isEmpty: boolean
     paginationData? : PaginationData | undefined
-    headers : Header[]
     results: ListReport[]
 }
 
@@ -21,16 +22,20 @@ function ArchivedReportsTable({
     isError,
     isEmpty,
     paginationData,
-    headers,
     results
 }:props) {
-  return (
+    const {user} = useAuth()
+    return (
     <BaseTable
         isEmpty = {isEmpty}
         isError = {isError}
         isLoading = {isLoading}
         paginationData={paginationData}  
-        headers={headers}  
+        headers={
+            user?.i_s
+            ?ReportHeaders
+            :ClientReportHeaders
+        }  
     >
         {
             results.map((item)=>{
@@ -48,12 +53,15 @@ function ArchivedReportsTable({
                 <TableCell className="text-center">
                     {getFormattedDate(item.created_at)}
                 </TableCell>
-                <TableCell>
-                    <div className="flex flex-col gap-1 text-center">
-                        <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
-                        <span>{client_bottom_level}</span>
-                    </div>
-                </TableCell>
+                {
+                    user?.i_s &&     
+                    <TableCell>  
+                        <div className="flex flex-col gap-1 text-center">
+                            <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
+                            <span>{client_bottom_level}</span>
+                        </div>
+                    </TableCell>
+                }
                 <TableCell>
                     <div className="flex flex-col gap-1 text-center">
                         <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.subject)}</span>

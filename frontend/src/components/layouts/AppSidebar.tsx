@@ -24,7 +24,7 @@ import {
 import { CORE_ROUTES, USERS_LINKS } from "@/constants/routes"
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import ChangePasswordDialogue from '@/dialogues/ChangePasswordDialogue';
 import CustomSidebarMenuItem from '../general/CustomSidebarMenuItem';
 
@@ -32,7 +32,13 @@ export function AppSidebar() {
     const navigate = useNavigate()
     const {user , signOut} = useAuth()
     const [changePasswordOpen, setChangePasswordOpen] = useState(false)
-
+    const name =  useMemo(()=>{
+        return user?.client
+        ? "national_id" in user.client
+            ? user.client.full_name
+            : user.client.registered_name
+        : user?.full_name
+    }, [user])
     return (
     <Sidebar>
         <SidebarHeader className="px-4 pt-5 pb-3">
@@ -82,14 +88,14 @@ export function AppSidebar() {
                 <DropdownMenuTrigger asChild>
                     <SidebarMenuButton className="h-auto py-3">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                        {   user &&
-                            user.full_name.length > 0
-                            ? user?.full_name.at(0)?.toLocaleUpperCase()
+                        {   user && name &&
+                            name.length > 0
+                            ? name.at(0)?.toLocaleUpperCase()
                             : user?.email.at(0)?.toLocaleUpperCase()
                         }
                     </div>
                     <div className="flex min-w-0 flex-col text-left">
-                        <span className="truncate text-sm font-medium">{user && user.full_name ? user.full_name : "-"}</span>
+                        <span className="truncate text-sm font-medium">{name?.length === 0 ? "-" : name}</span>
                         <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
                     </div>
                     <ChevronUp className="ml-auto h-4 w-4 shrink-0" />

@@ -1,15 +1,20 @@
+import { useState } from "react";
 import BaseTable from "@/components/general/BaseTable";
 import ColumnsContainer from "@/components/general/ColumnsContainer";
+import OptionsWrapper from "@/components/general/OptionsWrapper";
 import SearchBox from "@/components/general/Searchbox";
 import SectionHeader from "@/components/general/SectionHeader";
 import { StatusPill } from "@/components/general/StatusPills";
-import { Button } from "@/components/ui/button";
+import { UsersFilterPopover } from "@/components/general/UsersFilterPopover";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { USER_HEADERS } from "@/constants";
 import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
 import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
 import CreateUserDialog from "@/dialogues/CreateUserDialog";
+import DeleteUserDialog from "@/dialogues/DeleteUserDialog";
 import useInternalUsers from "@/hooks/api/useInternalUsers";
+import type { User } from "@/types/core";
+import { Pencil } from "lucide-react";
 
 function InternalUsers() {
     const {
@@ -18,6 +23,21 @@ function InternalUsers() {
       isLoading,
       isError
     } = useInternalUsers();
+
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+      
+    const handleEditUser = (user: User) => {
+      setEditingUser(user);
+      setEditDialogOpen(true);
+    };
+
+    const handleEditDialogClose = (open: boolean) => {
+      setEditDialogOpen(open);
+      if (!open) {
+        setEditingUser(null);
+      }
+    };
 
     return (
     <div className="flex flex-col gap-5">
@@ -37,7 +57,7 @@ function InternalUsers() {
         <ColumnsContainer>
           <SearchBox/>
           <div className="flex w-full md:justify-end">
-            <Button variant={"outline"}>Filters</Button>
+            <UsersFilterPopover/>
           </div>
         </ColumnsContainer>
         <BaseTable
@@ -89,11 +109,34 @@ function InternalUsers() {
                     <StatusPill variant={item.i_s ?"success" : "warning"}>{item.i_s ? "Stuff" : "Client"}</StatusPill>
                   </div>
                 </TableCell>
+                <TableCell>
+                  <div className="flex justify-center items-center">
+                    <OptionsWrapper>
+                      <>
+                        <button
+                          type="button"
+                          className="flex items-center gap-2 text-sm px-2 py-1.5 rounded-md hover:bg-accent cursor-pointer w-full text-left"
+                          onClick={() => handleEditUser(item)}
+                        >
+                          <Pencil size={14} />
+                          Edit User
+                        </button>
+                        <DeleteUserDialog id={item.id} />
+                      </>
+                    </OptionsWrapper>
+                  </div>
+                </TableCell>
               </TableRow>
             )})
           } 
         </BaseTable>
       </div>
+
+      <CreateUserDialog
+        editingUser={editingUser}
+        externalOpen={editDialogOpen}
+        onExternalOpenChange={handleEditDialogClose}
+      />
 
     </div>
   )

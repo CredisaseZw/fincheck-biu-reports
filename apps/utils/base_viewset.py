@@ -58,6 +58,6 @@ class BaseFormDataViewSet(UpdatedByMixin, ValidatedCreateUpdateMixin, ModelViewS
     ordering = ["-created_at"]
 
 class BaseListDataViewSet(ListModelMixin, GenericViewSet):
-    permission_classes = [IsStaffUser]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering = ["-created_at"]

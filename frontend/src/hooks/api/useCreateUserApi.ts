@@ -10,8 +10,8 @@ function useCreateUserApi() {
     const { mutate, isPending } = useMutation({
         mutationFn: async({mode, data}: CreateUserInterface) => {
             const l: Record<"external" | "internal", string> = {
-                external : "/api/auth/register-external/",
-                internal : "/api/auth/register-internal/"
+                external : "/api/users/register-external/",
+                internal : "/api/users/register-internal/"
             }
             const response = await api.post(l[mode], data)
             return response.data;

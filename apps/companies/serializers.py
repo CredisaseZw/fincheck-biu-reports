@@ -72,6 +72,26 @@ class CompanyOperationsSerializer(UpdatedBySerializerMixin,serializers.ModelSeri
             "updated_at",
             "company",
         ]
+class ClientCompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
+    overview = CompanyOverviewSerializer(read_only=True)
+    structure = CompanyStructureSerializer(read_only=True)
+    operations = CompanyOperationsSerializer(read_only=True)
+    
+    class Meta:
+        model = Company
+        exclude = [
+            "directors",
+            "shareholdings",
+            "claims",
+            "court_judgements",
+            "absconders",
+            "insolvency_records",
+            "public_information",
+            "trade_references",
+            "banker_accounts",
+            "refer_type"
+        ]
+
 class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)
     structure = CompanyStructureSerializer(read_only=True)

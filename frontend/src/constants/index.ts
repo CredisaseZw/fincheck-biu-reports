@@ -11,6 +11,14 @@ export const LiveReportHeaders:Header[] = [
     { name : "Report Status"},
     { name : "Action", textAlign : "center" },
 ]
+export const LiveClientReportHeaders:Header[] = [
+    { name : "Request Ref", textAlign : "center"},
+    { name : "Request Date", textAlign : "center" },
+    { name : "Subject" },
+    { name : "Requestor", textAlign: "left"},
+    { name : "Report Status"},
+    { name : "Action", textAlign : "center" },   
+]
 export const ReportHeaders:Header[] = [
     { name : "Request Ref", textAlign : "center", value : "enquiry_reference"},
     { name : "Report Date", textAlign : "center", value : "created_at" },
@@ -20,6 +28,15 @@ export const ReportHeaders:Header[] = [
     { name : "Overall Risk Rating", textAlign : "center"},
     { name : "Action", textAlign : "center" },
 ]
+export const ClientReportHeaders:Header[] = [
+    { name : "Request Ref", textAlign : "center", value : "enquiry_reference"},
+    { name : "Report Date", textAlign : "center", value : "created_at" },
+    { name : "Subject", value : "subject"},
+    { name : "Requestor", textAlign: "left", value:"username"},
+    { name : "Overall Risk Rating", textAlign : "center"},
+    { name : "Action", textAlign : "center" },
+]
+
 export const CompanyListHeaders:Header[] = [
     { name : "Registered Name", textAlign:"left" },
     { name : "Trading Name", textAlign:"left" },
@@ -35,6 +52,13 @@ export const IndividualListHeaders:Header[] = [
     { name : "Mobile Number", textAlign:"center" },
     { name : "Email", textAlign:"left" },
     { name : "Action", textAlign:"center" },
+]
+export const ReportRequestHeaders: Header[] = [
+    { name : "Report No", textAlign:"center" },
+    { name : "Company / Individual", textAlign:"center" },
+    { name : "Company No / National Id / Passport", textAlign:"center" },
+    { name : "Remove", textAlign :"center"}
+
 ]
 export const DEFAULT_ADDRESSES:Address = {
     street_address : "",

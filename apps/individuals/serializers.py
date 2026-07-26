@@ -38,6 +38,23 @@ class NextOfKinSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer)
         model = NextOfKin
         exclude = ["created_at", "updated_at", "individual"]
 
+class ClientIndividualSerializer(serializers.ModelSerializer):
+    next_of_kin = NextOfKinSerializer(read_only=True)
+    employment_information = EmploymentInformationSerializer(read_only=True)
+
+    class Meta:
+        model = Individuals
+        exclude = [
+            "claims",
+            "court_judgements",
+            "absconders",
+            "insolvency_records",
+            "public_information",
+            "trade_references",
+            "banker_accounts",
+            "refer_type"
+        ]
+
 class IndividualSerializer(serializers.ModelSerializer):
     claims = ClaimsSerializer(read_only= True, many = True)
     absconders = AbscondersSerializer(read_only= True, many = True)

@@ -1,4 +1,4 @@
-from apps.utils.base_viewset import BaseJSONViewSet
+from apps.utils.base_viewset import BaseAuthJSONViewSet
 from .models import (
     Company
 )
@@ -6,11 +6,13 @@ from .serializers import (
     CompanyCreateSerializer,
     CompanyListSerializer,
     CompanySerializer,
+    ClientCompanySerializer,
     CompanyUpdateSerializer,
 )
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status as STATUS
+from apps.users.models import User
 from apps.directors.models import CompanyDirector
 from apps.utils.helpers import validate_serializer
 from apps.directors.serializers import CompanyDirectorWriteSerializer, CompanyDirectorsSerializer
@@ -26,12 +28,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class CompaniesViewSet(BaseJSONViewSet):
+class CompaniesViewSet(BaseAuthJSONViewSet):
     filterset_fields = ["refer_type"]
     search_fields = ["registered_name", "trading_name", "registration_number"]   
     ordering_fields = ["created_at", "registered_name", "trading_name"]
 
-    serializer_class = CompanySerializer
     queryset = Company.objects.prefetch_related(
         "claims",
         "absconders",
@@ -50,8 +51,8 @@ class CompaniesViewSet(BaseJSONViewSet):
         "operations",
         "overview",
         "shareholdings"
-).filter(is_deleted = False)
-    
+    ).filter(is_deleted = False)
+
     def get_serializer_class(self):
         if self.action == "list":
             return CompanyListSerializer
@@ -59,12 +60,50 @@ class CompaniesViewSet(BaseJSONViewSet):
             return CompanyCreateSerializer
         elif self.action in [ "update", "partial_update"]:
             return CompanyUpdateSerializer
-        return CompanySerializer
+        if self.request.user.is_staff:
+            return CompanySerializer
+        return ClientCompanySerializer
     
+    def create(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
 
+    def destroy(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+    
     @action(detail=True, methods=["POST"], url_path="directors")
     def update_or_create_directors(self, request: Request, *args, **kwargs):
-        user = request.user
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)        
+
         company = self.get_object()
         directors = request.data.get("directors", [])
 
@@ -99,7 +138,12 @@ class CompaniesViewSet(BaseJSONViewSet):
 
     @action(detail=True, methods=["POST"], url_path="shareholders")
     def update_or_create_shareholders(self, request:Request, *args, **kwargs):
-        user = request.user
+        user:User = request.user
+        if not user.is_staff:
+            return Response({
+                "error" : "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
+        
         company = self.get_object()
         data = request.data.copy()
         shareholders = data.pop("shareholders", [])

@@ -23,7 +23,9 @@ class User(AbstractUser):
         "client_content_type", 
         "client_object_id"
     )
- 
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = UserManager()    

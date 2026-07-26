@@ -167,7 +167,6 @@ function BusinessReports() {
                 isError = {_searchedIsError}
                 paginationData={paginationData}
                 results={searchedData}
-                headers={ReportHeaders}
             />
          </div>   
         }
