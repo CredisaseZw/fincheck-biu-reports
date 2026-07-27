@@ -3,9 +3,11 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTrigger } from 
 import type { EntityValue, Company, Individual, Claim, Absconder, CourtJudgement, InsolvencyRecord, PublicInformation, TradeReference, BankerAccount, Financial, RegistrationAccount, ProfessionalPartner, CompanyDirector, Shareholding, CompanyOverview, CompanyStructure, CompanyOperations, EmploymentInformation, NextOfKin } from "@/types/core";
 import { Eye, Printer, Loader2, Paperclip, EyeOff } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import useGetSingleEntity from "@/hooks/api/useGetSingleEntity";
 import { API_END_POINT } from "@/axios/api";
+import { useAuth } from "@/contexts/AuthContext";
+import useCreateEnquiry, { type CreateEnquiryProps } from "@/hooks/api/useCreateEnquiry";
 
 function _val(val: string | number | null | undefined, fallback = "—"): string {
   if (val === null || val === undefined || String(val).trim() === "") return fallback;
@@ -588,13 +590,25 @@ function ViewEntityDialog({entity_type, id}:props) {
     data, 
     isLoading,
     error
-  } = useGetSingleEntity({
-    entity_type,
-    id
-  })
+  } = useGetSingleEntity({ entity_type, id })
+  const {user} = useAuth()
   const [openControl, setOpenControl] = useState(false);
   const [showAttachment, setShowAttachment] = useState(false);
+  const { mutate } = useCreateEnquiry()  
   const printRef = useRef(null);
+
+  useEffect(()=>{
+    if(user?.i_s) return; // means ts internal
+    if(!data) return; 
+
+    const payload: CreateEnquiryProps = {
+      client_object_id : id,
+      client_type :entity_type
+    }
+    mutate(payload);
+    return
+  },[data, entity_type, id, user, mutate])
+
   const handlePrint = useReactToPrint({
     contentRef: printRef,
   });
@@ -635,7 +649,6 @@ function ViewEntityDialog({entity_type, id}:props) {
             </div>
           </div>
 
-          {/* Loading state */}
           {isLoading && (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="animate-spin text-gray-400" size={32} />
@@ -643,7 +656,6 @@ function ViewEntityDialog({entity_type, id}:props) {
             </div>
           )}
 
-          {/* Error state */}
           {error && (
             <div className="text-center py-10">
               <p className="text-red-500 text-sm font-medium">Failed to load entity information.</p>
@@ -651,7 +663,6 @@ function ViewEntityDialog({entity_type, id}:props) {
             </div>
           )}
 
-          {/* Entity information */}
           {data && !isLoading && !error && (
             <EntityContent
               entity_type={entity_type}

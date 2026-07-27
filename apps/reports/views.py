@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from django.conf import settings
 from apps.utils.base_viewset import BaseAuthJSONViewSet
+from django.db.models.functions import TruncMonth
 from apps.reports.models import Report
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
@@ -17,7 +18,7 @@ from django.utils import timezone
 from datetime import date, timedelta
 from django.db.models import Q, Count
 from collections import Counter
-from apps.utils.permissions import IsStaffUser
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.reports.GenerateReport import FincheckReportPDF
 from apps.users.models import User
@@ -413,10 +414,18 @@ class ArchivedReportsViewSet(BaseListDataViewSet):
         return Response(serializer.data, status=STATUS.HTTP_200_OK)
 
 class DashboardStats(ViewSet):
-    permission_classes = [IsStaffUser]
-
+    permission_classes = [IsAuthenticated]
+    
     def period_stats(self,since):
-        qs = Report.objects.filter(created_at__gte=since)
+        user:User = self.request.user
+        qs = Report.objects.filter(
+            created_at__gte=since
+        ) if user.is_staff else Report.objects.filter(
+            client_object_id = user.client_object_id,
+            client_content_type = user.client_content_type,
+            created_at__gte=since
+        ) 
+        
         agg = qs.aggregate(
             active=Count("id", filter=~Q(status=Report.StatusChoices.FINALIZED)),
             finalized=Count("id", filter=Q(status=Report.StatusChoices.FINALIZED)),
@@ -434,5 +443,38 @@ class DashboardStats(ViewSet):
             "this_month": self.period_stats(month_start),
             "this_year": self.period_stats(year_start),
         }
+
+        return Response(data)
+class ClientMonthlyStats(ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        user: User = request.user
+        year = timezone.now().year
+
+        qs = (
+            Report.objects.filter(
+                client_object_id=user.client_object_id,
+                client_content_type=user.client_content_type,
+                created_at__year=year,
+            )
+            .annotate(month=TruncMonth("created_at"))
+            .values("month")
+            .annotate(
+                finalized=Count("id", filter=Q(status=Report.StatusChoices.FINALIZED)),
+                active=Count("id", filter=~Q(status=Report.StatusChoices.FINALIZED)),
+            )
+            .order_by("month")
+        )
+
+        by_month = {row["month"].month: row for row in qs}
+        data = [
+            {
+                "month": month,
+                "finalized": by_month.get(month, {}).get("finalized", 0),
+                "active": by_month.get(month, {}).get("active", 0),
+            }
+            for month in range(1, 13)
+        ]
 
         return Response(data)

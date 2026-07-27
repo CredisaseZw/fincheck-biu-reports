@@ -44,16 +44,7 @@ class ClientIndividualSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Individuals
-        exclude = [
-            "claims",
-            "court_judgements",
-            "absconders",
-            "insolvency_records",
-            "public_information",
-            "trade_references",
-            "banker_accounts",
-            "refer_type"
-        ]
+        fields = '__all__'
 
 class IndividualSerializer(serializers.ModelSerializer):
     claims = ClaimsSerializer(read_only= True, many = True)

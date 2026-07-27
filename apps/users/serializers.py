@@ -1,4 +1,4 @@
-from apps.users.models import User
+from apps.users.models import User, Enquiries
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from apps.utils.helpers import _content_ob_serializer
@@ -32,7 +32,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_i_s(self, instance: User)-> bool:
         return instance.is_staff
-    
+
+class EnquirySerializer(serializers.ModelSerializer):
+    enquirer= UserSerializer(read_only=True)
+    client= serializers.SerializerMethodField()
+    class Meta:
+        model = Enquiries
+        fields = [
+            'enquirer',
+            'client',
+            'created_at'
+        ]
+
+    def get_client(self, instance):
+        if instance.client:
+            return _content_ob_serializer(instance.client, True)    
+        return None
 class UserSignInSerializers(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(required=True)

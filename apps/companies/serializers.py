@@ -79,18 +79,7 @@ class ClientCompanySerializer(UpdatedBySerializerMixin, serializers.ModelSeriali
     
     class Meta:
         model = Company
-        exclude = [
-            "directors",
-            "shareholdings",
-            "claims",
-            "court_judgements",
-            "absconders",
-            "insolvency_records",
-            "public_information",
-            "trade_references",
-            "banker_accounts",
-            "refer_type"
-        ]
+        fields = '__all__'
 
 class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)

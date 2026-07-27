@@ -6,12 +6,14 @@ from .views import (
     create_external_user,
     verify_token,
     change_password,
-    UsersViewset
+    UsersViewset,
+    EnquiriesViewSet
 )
 from rest_framework.routers import SimpleRouter
 
 router = SimpleRouter()
 router.register(r'users', UsersViewset, basename="users")
+router.register(r'enquiries', EnquiriesViewSet, basename='enquiries')
 
 urlpatterns = [
     path("auth/login/", auth_user, name="auth-login"),

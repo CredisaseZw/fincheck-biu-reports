@@ -1,17 +1,22 @@
 import { api } from "@/axios/api";
-import type { ReportStats } from "@/types/core";
 import { useQuery } from "@tanstack/react-query";
 
-function useGetDashboardStats() {
+export interface ClientMonthlyStat {
+  month: number;
+  finalized: number;
+  active: number;
+}
+
+function useGetClientMonthlyStats() {
   const {
     data,
     isError,
     error,
     isLoading
   } = useQuery({
-    queryKey : ["dashboard-stats"],
+    queryKey : ["client-monthly"],
     queryFn : async() =>{
-      const response = await api.get<ReportStats>("/api/dashboard-stats/")
+      const response = await api.get<ClientMonthlyStat[]>("/api/client-monthly/")
       return response.data;
     },
     staleTime: 30_000,
@@ -24,4 +29,4 @@ function useGetDashboardStats() {
   }
 }
 
-export default useGetDashboardStats
+export default useGetClientMonthlyStats

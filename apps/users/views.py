@@ -1,13 +1,14 @@
-from .models import User
+from .models import User, Enquiries
 from rest_framework import status as STATUS
 from rest_framework.response import Response
 from apps.utils.permissions import IsStaffUser
-from apps.utils.base_viewset import UpdatedByMixin
+from apps.utils.base_viewset import UpdatedByMixin, BaseAuthJSONViewSet
 from rest_framework.viewsets import GenericViewSet
+from django.contrib.contenttypes.models import ContentType
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer
+from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer, EnquirySerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -169,3 +170,42 @@ class UsersViewset(
             changed = True
         if changed:
             instance.save()
+
+class EnquiriesViewSet(BaseAuthJSONViewSet):
+    serializer_class = EnquirySerializer
+    queryset = Enquiries.objects.prefetch_related(
+        "enquiries",
+        "enquiry_client"
+    ).all()
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve", "update", "destroy"]:
+            return [IsStaffUser()]
+        else:
+            return [IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        user:User = request.user
+        client_object_id = request.data.get("client_object_id", None)
+        client_type = request.data.get("client_type", None)
+
+        if not client_type:
+            return Response({
+                "error" : "Invalid client type."
+            }, status=STATUS.HTTP_400_BAD_REQUEST)
+        
+        if not client_object_id:
+            return Response({
+                "error" : "Invalid client id."
+            }, status=STATUS.HTTP_400_BAD_REQUEST)    
+
+        content_type_id = get_content_type_id(client_object_id, client_type)
+        client_content_type = ContentType.objects.get(id=content_type_id)
+
+        enquiry = Enquiries.objects.create(
+            enquirer=user,
+            client_content_type=client_content_type,
+            client_object_id=client_object_id,
+        )
+
+        return Response(EnquirySerializer(enquiry).data, status=STATUS.HTTP_200_OK)
