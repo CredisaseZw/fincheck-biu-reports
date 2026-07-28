@@ -44,7 +44,7 @@ class CompanyDirector(BaseModel):
         blank=True,
         null=True
     )
-    dob = models.DateTimeField(
+    dob = models.DateField(
         help_text= _("Director Date of birth"),
         blank = True,
         null = True
