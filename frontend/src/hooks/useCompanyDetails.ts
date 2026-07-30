@@ -21,8 +21,8 @@ const companySchema = z.object({
     address_registered: ADDRESS_OBJECT,
     address_operations: OPTIONAL_ADDRESS_OBJECT.optional(),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
-    telephone_number: z.string().max(20).optional(),
-    mobile_number: z.string().max(20).optional(),
+    telephone_number: z.string().optional(),
+    mobile_number: z.string().optional(),
     website: z.string()
     .refine(
         val => !val || /^(https?:\/\/)?[\w-]+(\.[\w-]+)+/.test(val),
@@ -68,6 +68,7 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
         const state = getItem(CACHE_KEY)
         if(state === "touched"){
             setTouched(true)
+            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
         }
     }, [report_id, subject_type, CACHE_KEY])
 
@@ -115,7 +116,6 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
         
         mutate(PAYLOAD,{
             onSuccess : (data: Company) => {
-         
                 client.invalidateQueries({
                     queryKey : ["reports"]
                 })

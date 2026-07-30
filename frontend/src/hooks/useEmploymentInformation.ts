@@ -32,12 +32,6 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "employment_details"), [report_id,subject_type])
     const [touched, setTouched] = useState(false);
 
-    useEffect(()=>{
-        const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
     const {
         reset,
         register,
@@ -49,6 +43,13 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         defaultValues: employment_information,
     })
 
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, subject_type, CACHE_KEY])
+    
     useEffect(()=>{
         if(employment_information){
             reset(employment_information)
@@ -96,7 +97,7 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         handleSubmit, 
         errors, 
         control,
-        isPending
+        isPending,
     }
 }
 

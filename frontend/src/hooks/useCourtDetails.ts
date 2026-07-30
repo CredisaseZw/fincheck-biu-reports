@@ -40,7 +40,7 @@ function useCourtDetails({
         register,
         handleSubmit,
         control,
-        formState : {errors}
+        formState : { errors }
     } = useForm({
         resolver : zodResolver(courtsSchema),
         defaultValues :{
@@ -67,6 +67,8 @@ function useCourtDetails({
             setTouched(true)
         }
     }, [report_id, subject_type, CACHE_KEY])
+
+
     const {fields, append, remove} = useFieldArray({
         control,
         name : "court_judgements"

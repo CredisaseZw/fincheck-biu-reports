@@ -206,7 +206,7 @@ function useFinancialsDetails({
         numericField,
         isPending,
         control,
-        touched
+        touched,
     }
 }
 

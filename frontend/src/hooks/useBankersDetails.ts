@@ -1,7 +1,6 @@
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { CURRENCY } from "@/constants"
 import type { BankerDetailsProps, Company, Individual, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { useState,  useEffect, useMemo } from "react";
@@ -19,7 +18,6 @@ const accountSchema = z.object({
     branch: z.string().optional(),
     account_name: z.string(),
     account_type: AccountTypes,
-    account_currency: CURRENCY,
     account_number: z.string(),
     date_of_acquirement: z.string().date(),
     bank_code: z.string(),
@@ -72,6 +70,7 @@ function useBankersDetails({
             setTouched(true)
         }
     }, [report_id, subject_type, CACHE_KEY])
+
     const { fields, append, remove } = useFieldArray({
         control,
         name: "accounts",

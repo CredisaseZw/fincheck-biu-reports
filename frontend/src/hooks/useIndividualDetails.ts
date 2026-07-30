@@ -45,13 +45,6 @@ function useIndividualDetails({individual_details, report_id}:props) {
     const client = useQueryClient()
     const [touched, setTouched] = useState(false)
 
-    useEffect(()=>{
-        const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, CACHE_KEY])
-
     const {
         control,
         reset,
@@ -68,6 +61,13 @@ function useIndividualDetails({individual_details, report_id}:props) {
             reset(individual_details)
         }
     }, [individual_details, reset])
+
+    useEffect(()=>{
+        const state = getItem(CACHE_KEY)
+        if(state === "touched"){
+            setTouched(true)
+        }
+    }, [report_id, CACHE_KEY])
 
     const onSubmit = (data: IndividualFormData) => {
         delete data.id;

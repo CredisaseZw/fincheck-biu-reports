@@ -154,7 +154,7 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
     isPending,
     control,
     errors,
-    fields,
+    fields
   }
 }
 

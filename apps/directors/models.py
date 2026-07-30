@@ -13,6 +13,7 @@ class CompanyDirector(BaseModel):
     class Positions(models.TextChoices):
         DIRECTOR = "director", "Director"
         SECRETARY = "secretary", "Secretary"
+        CHAIRMAN = "chairman", "Chairman"
         OTHER = "other", "Other"
 
     company = models.ForeignKey(
@@ -68,7 +69,6 @@ class CompanyDirector(BaseModel):
         help_text=_("Director Mobile Phone Number")
     )
     is_pep = models.BooleanField(default= False)
-    
     class Meta:
         ordering = ["-created_at"]
         db_table = 'company_directors'

@@ -5,11 +5,11 @@ import type { CompanyDirectorsProps, Report } from "@/types/core";
 import { useState,  useEffect, useMemo } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
-import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedArray, genStorageKey, cleanPayload } from "@/lib/utils";
 import { getItem, setItem } from "@/lib/storage";
 import { toast } from "sonner";
 
-const Positions = z.enum(["director", "secretary", "other"])
+const Positions = z.enum(["director", "secretary", "chairman","other"])
 const Genders = z.enum(["male", "female"])
 
 const director = z.object({
@@ -27,7 +27,7 @@ const director = z.object({
         const passportRegex =/^[A-Za-z]{2}\d{7}$/
         return nidRegex.test(val) || passportRegex.test(val)
     }, { message: "A valid Zimbabwe national ID or passport number is required" }),
-    email : z.string().email("A valid email is required"),
+    email : z.string().optional(),
     mobile_phone_number :z.string().optional(),
     insolvencies_judgements : z.string().optional()
 })
@@ -48,7 +48,7 @@ function useDirectors({
         getValues,
         handleSubmit, 
         control,
-        formState : {errors}
+        formState : { errors }
     } = useForm<DirectorsFormData>({
         resolver :zodResolver(schema),
         defaultValues : {
@@ -112,11 +112,11 @@ function useDirectors({
             setTouched(true)
             return
         }
-
+        const payload_data = changes.map((item) => cleanPayload(item));
         const payload:InstanceMutation = {
             url : `/api/companies/${subject_object_id}/directors/`,
             mode : "create",
-            data :{ directors : changes }
+            data :{ directors : payload_data }
         }
 
         mutate(payload,{
@@ -156,7 +156,7 @@ function useDirectors({
         control,
         fields,
         isPending,
-        touched
+        touched,
     }
 }
 

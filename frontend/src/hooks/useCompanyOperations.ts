@@ -53,6 +53,7 @@ function useCompanyOperations({
             setTouched(true)
         }
     }, [report_id, subject_type, CACHE_KEY])
+
     useEffect(()=>{
         if(operations_data){
             reset(operations_data)

@@ -63,6 +63,7 @@ function useCompanyOverview({
             setTouched(true)
         }
     }, [report_id, subject_type, CACHE_KEY])
+
     const onSubmit = (data: CompanyOverviewFormData) =>{
         const changes = handleTrackChangedFields(company_overview, data)
         if(!changes){
@@ -95,8 +96,8 @@ function useCompanyOverview({
         touched,
         isPending,
         control,
-        errors,
-  }
+        errors
+    }
 }
 
 export default useCompanyOverview

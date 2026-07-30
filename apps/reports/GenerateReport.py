@@ -1076,13 +1076,12 @@ body {{
           <td>{self._u(b.get("branch"))}</td>
           <td>{self._u(b.get("account_name"))}</td>
           <td>{self._label(b.get("account_type", ""))}</td>
-          <td>{self._e(b.get("account_currency"))}</td>
           <td>{self._e(b.get("account_number"))}</td>
           <td class="ta-c">{self._e(b.get("bank_code"))}</td>
           <td class="nowrap">{self._date(b.get("date_of_acquirement"))}</td>
         </tr>""" for b in banks) if banks else ""
         body = self._data_table(
-            ["Bank", "Branch", "Account Name", "Type", "Currency", "Account No.", "Code", "Date Acquired"],
+            ["Bank", "Branch", "Account Name", "Type", "Account No.", "Code", "Date Acquired"],
             rows, "No banking records")
         return self._card("Bankers", body)
 

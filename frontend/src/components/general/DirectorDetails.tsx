@@ -59,9 +59,7 @@ function DirectorDetails({
                                 onClick={() => {
                                     const id = getValues(`directors.${index}.id`)
                                     remove(index)
-                                    if(id){
-                                        onDelete(id)
-                                    }
+                                    if(id){ onDelete(id) }
                                 }}
                             >
                                 <Trash2 size={16} className="text-destructive" />
@@ -78,7 +76,7 @@ function DirectorDetails({
                             </div>
 
                             <div className="form-group">
-                                <Label className="required">Email</Label>
+                                <Label>Email</Label>
                                 <Input type="email" {...register(`directors.${index}.email`)} />
                                 {errors.directors?.[index]?.email && (
                                     <p className="text-destructive text-sm">{errors.directors[index].email.message}</p>
@@ -103,6 +101,7 @@ function DirectorDetails({
                                             <SelectContent>
                                                 <SelectItem value="director">Director</SelectItem>
                                                 <SelectItem value="secretary">Secretary</SelectItem>
+                                                <SelectItem value="chairman">Chairman</SelectItem>
                                                 <SelectItem value="other">Other</SelectItem>
                                             </SelectContent>
                                         </Select>

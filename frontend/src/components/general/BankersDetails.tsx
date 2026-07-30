@@ -11,8 +11,9 @@ import { Trash2, Plus } from "lucide-react"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import CustomSubmitButton from "./CustomSubmitButton";
-import { ACCOUNT_TYPES, CURRENCY_OPTIONS, NARRATIONS } from "@/constants";
+import { ACCOUNT_TYPES, NARRATIONS } from "@/constants";
 import type { BankerDetailsProps } from "@/types/core";
+import { Textarea } from "../ui/textarea";
 
 function BankerDetails({
     subject_object_id,
@@ -92,46 +93,22 @@ function BankerDetails({
                                 )}
                             </div>
 
-                            <ColumnsContainer gapClass="gap-4">
-                                <div className="form-group">
-                                    <Label className="required">Account Number</Label>
-                                    <div className="flex flex-row gap-3">
-                                        <Controller
-                                            control={control}
-                                            key={getValues(`accounts.${index}.account_currency`)}
-                                            name={`accounts.${index}.account_currency`}
-                                            render={({ field }) => (
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select currency" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {CURRENCY_OPTIONS.map((c) => (
-                                                            <SelectItem key={c} value={c}>
-                                                                {c}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            )}
-                                        />
-                                        <Input {...register(`accounts.${index}.account_number`)} />   
-                                    </div>
-                                    {errors.accounts?.[index]?.account_number && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].account_number.message}</p>
-                                    )}
-                                    {errors.accounts?.[index]?.account_currency && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].account_currency.message}</p>
-                                    )}
-                                </div>
-                                <div className="form-group">
-                                    <Label className="required">Bank Code</Label>
-                                    <Input {...register(`accounts.${index}.bank_code`)} />
-                                    {errors.accounts?.[index]?.bank_code && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].bank_code.message}</p>
-                                    )}
-                                </div>
-                            </ColumnsContainer>
+                            <div className="form-group">
+                                <Label className="required">Bank Code</Label>
+                                <Input {...register(`accounts.${index}.bank_code`)} />
+                                {errors.accounts?.[index]?.bank_code && (
+                                    <p className="text-destructive text-sm">{errors.accounts[index].bank_code.message}</p>
+                                )}
+                            </div>
+
+                            <div className="form-group">
+                                <Label className="required">Account Number</Label>
+                                <Textarea {...register(`accounts.${index}.account_number`)} />   
+                                
+                                {errors.accounts?.[index]?.account_number && (
+                                    <p className="text-destructive text-sm">{errors.accounts[index].account_number.message}</p>
+                                )}
+                            </div>
 
                             <ColumnsContainer numberOfCols={3} gapClass="gap-4">
                                 <div className="form-group">
@@ -211,7 +188,6 @@ function BankerDetails({
                             branch: "",
                             account_name: "",
                             account_type: "current",
-                            account_currency: "ZiG",
                             account_number: "",
                             date_of_acquirement: "",
                             bank_code: "",

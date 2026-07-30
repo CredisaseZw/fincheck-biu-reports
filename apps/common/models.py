@@ -73,19 +73,14 @@ class BankerAccounts(BaseModelWithSubject):
     bank = models.CharField(max_length=255)
     branch = models.CharField(max_length=255, blank=True)
     account_name = models.CharField(max_length=255)
-    account_currency = models.CharField(
-        max_length=5,
-        choices=Currency.choices,
-        default=Currency.USD
-    )
     account_type = models.CharField(
         max_length=20,
         choices=AccountType.choices,
     )
-    account_number = models.CharField(max_length=50)
+    account_number = models.CharField(max_length=250)
     date_of_acquirement = models.DateField(auto_now=True)
     bank_code = models.CharField(
-        max_length=10,
+        max_length=50,
         blank=True,
         null=True
     )

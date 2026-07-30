@@ -123,7 +123,6 @@ function useTradeReferences({
   }
 
   return {
-    touched,
     append,
     remove,
     onSubmit,
@@ -131,6 +130,7 @@ function useTradeReferences({
     handleSubmit,
     register,
     onDelete,
+    touched,
     fields,
     errors,
     control,

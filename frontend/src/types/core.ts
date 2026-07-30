@@ -222,7 +222,6 @@ export interface BankerAccount {
   bank: string;
   branch: string;
   account_name: string;
-  account_currency : Currencies
   account_type: "current" | "savings" | "loan" | "fixed_deposit";
   account_number: string;
   date_of_acquirement : string,

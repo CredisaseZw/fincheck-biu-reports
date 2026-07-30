@@ -42,6 +42,7 @@ function useReportDetails({
             setTouched(true)
         }
     }, [report_id, subject_type, CACHE_KEY])
+
     useEffect(()=>{
         if(report_data){
             reset(report_data)
@@ -79,7 +80,7 @@ function useReportDetails({
         errors,
         register,
         handleSubmit,
-        onSubmit
+        onSubmit,
     }
 }
 

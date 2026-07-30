@@ -100,7 +100,7 @@ function useRegistrationAccounts({
         touched,
         errors,
         isPending, 
-  }
+    }
 }
 
 export default useRegistrationAccounts

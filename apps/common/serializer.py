@@ -60,7 +60,6 @@ class BankerAccountsWriteSerializer(serializers.ModelSerializer):
             "bank",
             "branch",
             "account_name",
-            "account_currency",
             "account_type",
             "account_number",
             "date_of_acquirement",

@@ -91,7 +91,7 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
         handleSubmit, 
         errors,
         touched,
-        isPending
+        isPending,
     }
 }
 

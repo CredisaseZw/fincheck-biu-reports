@@ -91,7 +91,7 @@ function useProfessionalPartners({
         register,
         handleSubmit,
         errors,
-        isPending
+        isPending,
     }
 }
 

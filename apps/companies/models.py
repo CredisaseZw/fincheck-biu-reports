@@ -99,13 +99,13 @@ class Company(BaseModel):
         help_text=_("General email address for the company."),
     )
     telephone_number = models.CharField(
-        max_length=20,
+        max_length=200,
         blank=True,
         null=True,
         help_text=_("General telephone number for the company."),
     )
     mobile_number = models.CharField(
-        max_length=20,
+        max_length=200,
         blank=True,
         null=True,
         help_text=_("General phone number for the company."),

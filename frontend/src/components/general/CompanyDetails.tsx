@@ -80,6 +80,9 @@ function CompanyDetails({
                         <div className="form-group">
                             <Label>Telephone</Label>
                             <Input {...register("telephone_number")} />
+                            {errors.telephone_number && (
+                                <p className="text-destructive text-sm">{errors.telephone_number.message}</p>
+                            )}
                         </div>
 
                         <div className="form-group">

@@ -39,7 +39,7 @@ function useInsolvencyRecordsDetails({
         getValues,
         handleSubmit,
         control,
-        formState : {errors}
+        formState : { errors }
     } = useForm({
         resolver : zodResolver(insolvencyRecordsSchema),
         defaultValues :{
@@ -131,7 +131,7 @@ function useInsolvencyRecordsDetails({
         handleSubmit,
         remove,
         onSubmit,
-        getValues
+        getValues,
     }
 }
 
