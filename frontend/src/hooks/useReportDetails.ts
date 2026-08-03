@@ -11,7 +11,7 @@ import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 
 const schema = z.object({
-    overall_risk_rating :z.number().positive(),
+    overall_risk_rating :z.string().min(1, "Overall risk rating is required"),
     summary:z.string().optional()
 })
 

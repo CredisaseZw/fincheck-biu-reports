@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { Company, Individual, ProfessionalsProps, Report } from "@/types/core";
 import { useState,  useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedFields, genStorageKey, cleanPayload } from "@/lib/utils";
 import { getItem, setItem } from "@/lib/storage";
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
@@ -39,8 +39,8 @@ function useProfessionalPartners({
         }
     }, [reset, professionals_data])
 
-    const [touched, setTouched] = useState(false)
-    const {mutate, isPending} = useInstanceMutation();
+    const [ touched, setTouched ] = useState(false)
+    const { isPending, mutate } = useInstanceMutation();
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "professional_partners_details"), [report_id,subject_type])
 
@@ -70,7 +70,7 @@ function useProfessionalPartners({
             : `/api/individuals/${subject_object_id}/`,
             mode : "update",
             data : {
-                professional_partners :  changes
+                professional_partners :  cleanPayload(changes)
             }
         }
         mutate(PAYLOAD, {
@@ -79,7 +79,7 @@ function useProfessionalPartners({
                 setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Professional Updated successfully.")
                 setTouched(true)
-      },
+            },
             onError : (error) => handleAxiosError(error)
         })
 

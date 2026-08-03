@@ -219,15 +219,12 @@ class ReportViewSet(BaseAuthJSONViewSet):
         if report.status == report.StatusChoices.FINALIZED:
             return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
 
-        if not self.request.user.is_staff:
-            if report.status != Report.StatusChoices.DRAFT:
-                return Response({"error" : "Report already being worked on."}, status=STATUS.HTTP_400_BAD_REQUEST)
         return super().destroy(request, *args, **kwargs) 
 
     def partial_update(self, request, *args, **kwargs):
         if not request.user.is_staff:
             return Response({
-                    "error": "Access error."
+                "error": "Access error."
             }, status=STATUS.HTTP_403_FORBIDDEN)
         
         report = self.get_object()
@@ -347,7 +344,13 @@ class ArchivedReportsViewSet(BaseListDataViewSet):
     filter_backends = [BusinessReportsSearchFilter, DjangoFilterBackend]
     serializer_class = ReportSerializer
 
-    def get_queryset(self):
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ListReportSerializer
+        return ReportSerializer
+
+
+    def get_queryset(self): 
         user:User = self.request.user
         if user.is_staff or user.is_superuser:
             return Report.objects.filter(

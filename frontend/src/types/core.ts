@@ -336,8 +336,10 @@ export interface CommonFields extends Timestamps{
 
 export interface Company extends CommonFields{
   company_name: string;
+  re_registration_number: string | null;
   registration_number: string| null;
   registered_name: string;
+  date_of_incorporation: string | null;
   date_of_registration: string;
   trading_name: string | null;
   refer_type: string;
@@ -379,7 +381,7 @@ export interface Report extends Timestamps {
   subject: Individual | Company;
   client_type : EntityValue;
   subject_type: EntityValue
-  overall_risk_rating : number | null,
+  overall_risk_rating : string | null,
   summary : string | null
   suspension_reason : string | null,
   is_stale : boolean

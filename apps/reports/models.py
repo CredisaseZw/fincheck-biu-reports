@@ -43,7 +43,7 @@ class Report(BaseModelWithSubject):
     status = models.CharField(
         max_length=20, 
         choices=StatusChoices.choices, 
-        default=StatusChoices.DRAFT
+        default=StatusChoices.IN_PROGRESS,
     )
     overall_risk_rating = models.CharField(
         max_length=50,

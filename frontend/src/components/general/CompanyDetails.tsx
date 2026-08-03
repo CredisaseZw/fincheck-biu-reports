@@ -4,7 +4,7 @@ import { Label } from "../ui/label"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import { Controller } from "react-hook-form"
-import AddressFieldset from "./AddressFields";
+import {Textarea} from "../ui/textarea"
 import CustomSubmitButton from "./CustomSubmitButton";
 import type { EntityValue } from "@/types/core";
 import { Switch } from "../ui/switch";
@@ -59,13 +59,24 @@ function CompanyDetails({
                         </div>
                     </ColumnsContainer>
                     <ColumnsContainer>
+                     <div className="form-group">
+                            <Label>Re-Registration Number</Label>
+                            <Input {...register("re_registration_number")} />    
+                        </div>
                         <div className="form-group">
                             <Label>Registration Number</Label>
                             <Input {...register("registration_number")} />    
                         </div>
+                      
+                    </ColumnsContainer>
+                    <ColumnsContainer>
                         <div className="form-group">
                             <Label>Date of Registration</Label>
                             <Input type="date" {...register("date_of_registration")} />
+                        </div>
+                        <div className="form-group">
+                            <Label>Date of Incorporation</Label>
+                            <Input type="date" {...register("date_of_incorporation")} />
                         </div>
                     </ColumnsContainer>
                     <ColumnsContainer numberOfCols={3}>
@@ -97,16 +108,20 @@ function CompanyDetails({
                             <p className="text-destructive text-sm">{errors.website.message}</p>
                         )}
                     </div>
-                    <AddressFieldset
-                        showRequired
-                        register={register}
-                        errors={errors}
-                        control={control}
-                        primaryPrefix="address_registered"
-                        secondaryPrefix="address_operations"
-                        secondaryLabel="Add Operations Address"
-                        initialOpen={false}
-                    />
+                    <div className="form-group">
+                        <Label className="required">Registered Address</Label>
+                        <Textarea {...register("address_registered")} />
+                        {errors.address_registered && (
+                            <p className="text-destructive text-sm">{errors.address_registered.message}</p>     
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <Label>Operational Address</Label>
+                        <Textarea {...register("address_operations")} />
+                        {errors.address_operations && (
+                            <p className="text-destructive text-sm">{errors.address_operations.message}</p>     
+                        )}
+                    </div>
                     <Controller
                         control={control}
                         name={"is_address_registered_verified"}

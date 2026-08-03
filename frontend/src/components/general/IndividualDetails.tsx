@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/select"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
-import AddressFieldset from "./AddressFields";
 import CustomSubmitButton from "./CustomSubmitButton";
+import { Textarea } from "../ui/textarea";
 
 interface props{
     report_id?: number | undefined
@@ -102,14 +102,11 @@ function IndividualDetails({ individual_details, report_id } : props) {
                     </div>
 
                 </ColumnsContainer>
-                <AddressFieldset
-                    showRequired
-                    control={control}
-                    register={register}
-                    errors={errors}
-                    primaryPrefix="residential_address"
-                    showSecondary = {false}
-                />
+                <div className="form-group">
+                    <Label className="required">Residential Address</Label>
+                    <Textarea {...register("residential_address")} />
+                    {errors.residential_address && <p className="text-destructive text-sm">{errors.residential_address.message}</p>}
+                </div>
 
                 <CustomSubmitButton
                         state={touched}

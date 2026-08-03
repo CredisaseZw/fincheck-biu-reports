@@ -2,11 +2,10 @@ import useLockManagement from "./useLockManagement";
 import useCreateReport from "./api/useCreateReport";
 import useGetSingleReport from "./api/useGetSingleReport";
 import { useEffect, useState} from "react";
-import { DEFAULT_ADDRESSES } from "@/constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
 import { isAxiosError } from "axios";
-import { formatAddressToObject, getEntityID, getEntityName, handleAxiosError } from "@/lib/utils";
+import { getEntityID, getEntityName, handleAxiosError } from "@/lib/utils";
 import type { Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report } from "@/types/core";
 import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
@@ -136,14 +135,12 @@ function useAddReportDialogue(list_report?: ListReport) {
         id: company.id,
         registration_number: company?.registration_number ?? "",
         registered_name: company?.registered_name ?? "",
+        re_registration_number: company?.re_registration_number ?? "",
         trading_name: company?.trading_name ?? "",
+        date_of_incorporation: company?.date_of_incorporation ?? "",
         date_of_registration: company?.date_of_registration ?? "",
-        address_registered: company?.address_registered 
-        ? formatAddressToObject(company.address_registered)
-        : DEFAULT_ADDRESSES,
-        address_operations: company?.address_operations 
-        ? formatAddressToObject(company.address_operations)
-        : undefined,
+        address_registered: company?.address_registered ?? "", 
+        address_operations: company?.address_operations ?? "", 
         email: company?.email ?? "",
         telephone_number: company?.telephone_number ?? "",
         mobile_number: company?.mobile_number ?? "",
@@ -237,7 +234,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         gender: individual.gender ?? "",
         marital_status: individual.marital_status ?? undefined,
         nationality: individual.nationality ?? "",
-        residential_address: formatAddressToObject(individual.residential_address),
+        residential_address: individual.residential_address ??"",
         mobile_number: individual.mobile_number ?? "",
         email: individual.email ?? "",
       })
@@ -444,7 +441,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     )
 
     setReportDetails({
-      overall_risk_rating : Number(report.overall_risk_rating),
+      overall_risk_rating : report.overall_risk_rating ?? "",
       summary  :report.summary ?? ""
     })
   

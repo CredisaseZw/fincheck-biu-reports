@@ -1,4 +1,3 @@
-import { ADDRESS_OBJECT } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState,  useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
@@ -28,7 +27,7 @@ export const individualSchema = z.object({
     nationality: z.string().min(1, "Nationality is required").max(100),
     mobile_number: z.string().min(1, "Mobile number is required").max(50),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
-    residential_address: ADDRESS_OBJECT,
+    residential_address: z.string().min(1, "Residential address is required"),
 })
 
 export type IndividualFormData = z.infer<typeof individualSchema>
@@ -91,11 +90,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
                 setTouched(true)
                 return;
             }
-
-            if (changes.residential_address){
-                changes.residential_address = formatAddressToString(data.residential_address)
-            }
-
+            
             PAYLOAD.url = `/api/individuals/${id}/`
             PAYLOAD.mode = "update"
             PAYLOAD.data = changes

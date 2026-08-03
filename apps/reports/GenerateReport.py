@@ -39,13 +39,6 @@ class FincheckReportPDF:
     RED = "#B91C1C"
     AMBER = "#D97706"
 
-    RISK_COLORS = [
-        ("SAFE", "#22C55E"),        
-        ("MEDIUM", "#F97316"),      
-        ("HIGH", "#EC4899"),      
-        ("VERY HIGH", "#DC2626"),
-    ]
-
     def __init__(self, report) -> None:
         from apps.reports.serializers import ReportSerializer
 
@@ -125,16 +118,28 @@ class FincheckReportPDF:
         return report.report_pdf.url
 
     @staticmethod
+    def _format_multiline(val_str: str, upper: bool = False) -> str:
+        if '\n' in val_str:
+            lines = [line.strip() for line in val_str.split('\n') if line.strip()]
+            if upper:
+                lines = [line.upper() for line in lines]
+            escaped_lines = [html.escape(line) for line in lines]
+            return '<ul style="margin-left: 15px; margin-top: 4px; margin-bottom: 4px; padding-left: 10px;">' + "".join(f"<li>{line}</li>" for line in escaped_lines) + '</ul>'
+        if upper:
+            val_str = val_str.upper()
+        return html.escape(val_str)
+
+    @staticmethod
     def _u(val, default: str = "—") -> str:
         if val is None or str(val).strip() == "":
             return default
-        return html.escape(str(val).upper())
+        return FincheckReportPDF._format_multiline(str(val).strip(), upper=True)
 
     @staticmethod
     def _e(val, default: str = "—") -> str:
         if val is None or str(val).strip() == "":
             return default
-        return html.escape(str(val))
+        return FincheckReportPDF._format_multiline(str(val).strip(), upper=False)
 
     @staticmethod
     def _date(val) -> str:
@@ -185,7 +190,7 @@ class FincheckReportPDF:
 
     @staticmethod
     def _grid_table(rows: list, verified_index: Optional[dict] = None) -> str:
-        """rows: [(label, value), ...] — rendered as 4-column pairs."""
+        """rows: [(label, value, [is_full_width]), ...] — rendered as 4-column pairs."""
         verified_index = verified_index or {}
         
         valid_rows = []
@@ -196,24 +201,39 @@ class FincheckReportPDF:
             if val is not None:
                 val_str = str(val).strip()
                 if val_str and val_str not in ("-", "—"):
-                    valid_rows.append(r)
+                    is_full = r[2] if len(r) > 2 else False
+                    valid_rows.append((r[0], r[1], is_full))
         
         if not valid_rows:
             return ""
 
         cells = ""
-        for i in range(0, len(valid_rows), 2):
+        i = 0
+        while i < len(valid_rows):
             left = valid_rows[i]
-            right = valid_rows[i + 1] if i + 1 < len(valid_rows) else ("", "")
             extra_l = verified_index.get(left[0], "")
-            extra_r = verified_index.get(right[0], "")
-            cells += f"""
-            <tr>
-              <td class="lbl">{left[0]}</td>
-              <td class="val">{left[1]}{extra_l}</td>
-              <td class="lbl">{right[0]}</td>
-              <td class="val">{right[1]}{extra_r}</td>
-            </tr>"""
+            
+            if left[2]:
+                cells += f"""
+                <tr>
+                  <td class="lbl">{left[0]}</td>
+                  <td class="val" colspan="3">{left[1]}{extra_l}</td>
+                </tr>"""
+                i += 1
+            else:
+                right = valid_rows[i + 1] if i + 1 < len(valid_rows) and not valid_rows[i + 1][2] else ("", "", False)
+                extra_r = verified_index.get(right[0], "") if right[0] else ""
+                r_lbl = right[0] if right[0] else ""
+                r_val = right[1] if right[0] else ""
+                cells += f"""
+                <tr>
+                  <td class="lbl">{left[0]}</td>
+                  <td class="val">{left[1]}{extra_l}</td>
+                  <td class="lbl">{r_lbl}</td>
+                  <td class="val">{r_val}{extra_r}</td>
+                </tr>"""
+                i += 2 if right[0] else 1
+
         return f'<table class="grid-table"><tbody>{cells}</tbody></table>'
 
     @staticmethod
@@ -257,17 +277,6 @@ class FincheckReportPDF:
         text = str(rating).upper()
         cls_map = ["badge-ok", "badge-warn", "badge-fail", "badge-fail"]
         return text, cls_map[idx]
-
-    def _risk_scale(self, rating) -> str:
-        active_idx, _ = self._risk_level(rating)
-        cells = ""
-        for i, (label, color) in enumerate(self.RISK_COLORS):
-            opacity = "1" if i == active_idx else "0.55"
-            cells += f"""
-            <div class="risk-cell" style="background:{color};opacity:{opacity}">
-              {label}
-            </div>"""
-        return f'<div class="risk-scale">{cells}</div>'
 
     def _css(self) -> str:
         c = self
@@ -456,7 +465,6 @@ body {{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }}
 .risk-row h4 {{
   font-size: 9.5pt;
@@ -464,22 +472,6 @@ body {{
   color: {c.PRIMARY};
   text-transform: uppercase;
   letter-spacing: .3px;
-}}
-.risk-scale {{
-  display: flex;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid {c.BORDER};
-}}
-.risk-cell {{
-  flex: 1;
-  padding: 12px 6px;
-  text-align: center;
-  font-size: 6.5pt;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: .2px;
-  line-height: 1.3;
 }}
 
 /* ── Grid table (4-col) ── */
@@ -680,7 +672,7 @@ body {{
               <div class="header-col-right">
                 <div class="header-ref">ENQUIRY REF: <b>{ref}</b></div>
                 <div class="header-client">CLIENT: <b>{self._client_name()}</b></div>
-                <div class="header-client">USER NAME: <b>{self._username()}</b></div>
+                <div class="header-client">REQUESTOR: <b>{self._username()}</b></div>
               
               </div>
             </div>
@@ -699,26 +691,20 @@ body {{
         insolvency = self._subject.get("insolvency_records", [])
         directors = self._subject.get("directors", [])
         banks = self._subject.get("banker_accounts", [])
-        refs = self._subject.get("trade_references", [])
-
-        trend = "—"
-        if refs:
-            trend = self._u(refs[0].get("payment_trend_display") or refs[0].get("payment_trend"))
 
         codes = ", ".join(b["bank_code"] for b in banks if b.get("bank_code")) or "—"
 
         reg_years = "—"
         if self._subject_type == "company":
-            ov = self._subject.get("overview") or {}
-            rd = ov.get("date_of_registration")
+            rd = self._subject.get("date_of_incorporation")
             if rd:
                 try:
                     reg_years = str((date.today() - datetime.fromisoformat(str(rd)).date()).days // 365)
                 except (ValueError, TypeError):
                     pass
 
-        badge_text, badge_cls = self._risk_badge(rating)
-        rating_html = f'<span class="badge {badge_cls}">{html.escape(badge_text)}</span>'
+        score_val = str(rating) if rating is not None else "N/A"
+        rating_html = f'<span style="font-size: 13pt; font-weight: 800; color: {self.PRIMARY};">{html.escape(score_val)}</span>'
 
         def metric_cell(label: str, value: str, val_style: str = "") -> str:
             style_attr = f' style="{val_style}"' if val_style else ""
@@ -730,7 +716,6 @@ body {{
         metrics = f"""
         <table class="summary-metrics">
           <tr>
-            {metric_cell("Payment Trend", trend, "font-size:10pt")}
             {metric_cell("Credit Defaults", str(len(claims) + len(absconders)))}
             {metric_cell("Insolvencies", str(len(insolvency)))}
             {metric_cell("Bank Code(s)", html.escape(codes.upper()), "font-size:8.5pt")}
@@ -738,8 +723,7 @@ body {{
           <tr>
             {metric_cell("Directors", str(len(directors)))}
             {metric_cell("Court Judgements", str(len(court)))}
-            {metric_cell("Registration (Yrs)", reg_years)}
-            {metric_cell("Subject Type", self._subject_type.upper(), "font-size:9pt")}
+            {metric_cell("Years Incorporated", reg_years)}
           </tr>
         </table>"""
 
@@ -749,13 +733,17 @@ body {{
             <h4>Overall Risk Classification</h4>
             {rating_html}
           </div>
-          {self._risk_scale(rating)}
         </div>"""
+
+        if comment and str(comment).strip():
+            comment_html = self._u(comment)
+        else:
+            comment_html = '<span style="color:#94A3B8">NO SUMMARY PROVIDED.</span>'
 
         comment_block = f"""
         <div class="summary-comment">
           <strong>SUMMARY COMMENT</strong>
-          {html.escape(comment.upper()) if comment else '<span style="color:#94A3B8">NO SUMMARY PROVIDED.</span>'}
+          {comment_html}
         </div>"""
 
         body = f"""
@@ -777,10 +765,10 @@ body {{
         rows = [
             ("Registered Name", self._u(s.get("registered_name"))),
             ("Trading Name", self._u(s.get("trading_name"))),
+            ("Re-Registration Number", self._u(s.get("re_registration_number"))),
             ("Registration Number", self._u(s.get("registration_number"))),
-            ("Registration Number", self._e(s.get("registration_number", "N/A"))),
-            ("Year Registered", self._date((s.get("date_of_registration")))),
-            ("Industry Sector", self._u((s.get("operations") or {}).get("industry"))),
+            ("Registration Date", self._date((s.get("date_of_registration")))),
+            ("Date of Incorporation", self._date((s.get("date_of_incorporation")))),
         ]
         return self._card("Company Details", self._grid_table(rows, verified))
 
@@ -791,15 +779,15 @@ body {{
             ("Mobile", self._e(s.get("mobile_number"))),
             ("Email", self._e(s.get("email"))),
             ("Website", self._e(s.get("website"))),
-            ("Address (Registered)", self._u(s.get("address_registered"))),
-            ("Address (Operations)", self._u(s.get("address_operations"))),
+            ("Address (Registered)", self._u(s.get("address_registered")), True),
+            ("Address (Operations)", self._u(s.get("address_operations")), True),
         ]
         return self._card("Contact Details", self._grid_table(rows))
 
     def _render_company_overview(self) -> str:
         ov = self._subject.get("overview") or {}
         rows = [
-            ("Legal Form", self._e(ov.get("legal_form"))),
+            ("Legal Form", self._label(self._e(ov.get("legal_form")))),
             ("Trading Status", self._e(ov.get("trading_status"))),
             ("Number of Employees", self._e(ov.get("number_of_employees"))),
             ("", ""),
@@ -813,7 +801,7 @@ body {{
 
         cards = ""
         for d in dirs:
-            insol = self._u(d.get("insolvencies_judgements")) if d.get("insolvencies_judgements") else "NONE RECORDED"
+            solvencies = self._u(d.get("insolvencies_judgements")) if d.get("insolvencies_judgements") else "NONE RECORDED"
             
             dir_rows = [
                 ("National ID", self._e(d.get("national_id"))),
@@ -824,7 +812,7 @@ body {{
                 ("Address (Previous)", self._u(d.get("address_prev"))),
                 ("Email", self._e(d.get("email"))),
                 ("Mobile", self._e(d.get("mobile_phone_number"))),
-                ("Insolvencies", insol),
+                ("Insolvencies", solvencies),
             ]
             
             rows_html = ""
@@ -882,8 +870,8 @@ body {{
     def _render_operations(self) -> str:
         op = self._subject.get("operations") or {}
         rows = [
-            ("Industry", self._u(op.get("industry"))),
-            ("Target Markets", self._u(op.get("target_markets"))),
+            ("Industry", self._u(op.get("industry")), True),
+            ("Target Markets", self._u(op.get("target_markets")), True),
             ("Operations Territories", self._u(op.get("operations_territories"))),
             ("Property Ownership", self._u(op.get("property_ownership"))),
             ("Operational Areas", self._u(op.get("operational_areas"))),
@@ -1091,8 +1079,7 @@ body {{
         def fmt(raw: str) -> str:
             if not raw:
                 return "—"
-            parts = [p.strip().upper() for p in raw.replace(",", "\n").split("\n") if p.strip()]
-            return "<br>".join(html.escape(p) for p in parts)
+            return self._u(raw.replace(",", "\n"))
 
         rows = [
             ("Auditors", fmt(pp.get("auditors", ""))),
@@ -1106,11 +1093,6 @@ body {{
     def _render_footer() -> str:
         return """
         <div class="footer">
-          <div class="rk">
-            <strong>RATING KEY:</strong>
-            <span>0–100 = SAFE</span><span>101–220 = MEDIUM</span>
-            <span>221–500 = HIGH</span><span>500+ = VERY HIGH</span>
-          </div>
           <p>This report is confidential and intended solely for the individual or entity to whom it is addressed. Information on this report is valid at the time of enquiry only.</p>
           <p>Terms and Conditions apply.</p>
           <p>© FINCHECK. All rights reserved.</p>

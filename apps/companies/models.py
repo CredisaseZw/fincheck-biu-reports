@@ -54,6 +54,15 @@ class Company(BaseModel):
         blank=True, 
         null=True
     )
+    re_registration_number = models.CharField(
+        _("Company Re-Registration Number"),
+        blank=True, 
+        null=True
+    )
+    date_of_incorporation = models.DateField(
+        null=True,
+        blank=True
+    )
     date_of_registration = models.DateField(
         null=True,
         blank=True

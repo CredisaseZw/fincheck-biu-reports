@@ -1,7 +1,5 @@
-
-import { ADDRESS_OBJECT, OPTIONAL_ADDRESS_OBJECT } from "@/constants";
-import {  cleanPayload, formatAddressToString, genStorageKey, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
-import type { Address, Company, EntityValue, Report } from "@/types/core";
+import {  cleanPayload, genStorageKey, handleAxiosError, handleTrackChangedFields } from "@/lib/utils";
+import type { Company, EntityValue, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { z } from "zod"
@@ -15,11 +13,13 @@ import { getItem, setItem } from "@/lib/storage";
 const companySchema = z.object({
     id : z.number().optional(),
     date_of_registration: z.string().optional(),    
+    date_of_incorporation: z.string().optional(),
     registered_name: z.string().min(1, "Registered name is required").max(50, "Company Name too long."),
     registration_number: z.string().optional(),
+    re_registration_number: z.string().optional(),
     trading_name: z.string().max(255),
-    address_registered: ADDRESS_OBJECT,
-    address_operations: OPTIONAL_ADDRESS_OBJECT.optional(),
+    address_registered: z.string().min(1, "Registered address is required"),
+    address_operations: z.string().optional(),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
     telephone_number: z.string().optional(),
     mobile_number: z.string().optional(),
@@ -82,14 +82,6 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
 
         if(!company_overview){ 
             const DATA:any = cleanPayload(data)
-            if(DATA.address_registered){
-                DATA.address_registered = formatAddressToString(DATA.address_registered)
-            }
-
-            if(DATA.address_operations){
-                DATA.address_operations = formatAddressToString(DATA.address_operations)
-            }
-
             PAYLOAD.url = "/api/companies/"
             PAYLOAD.data = DATA
         }
@@ -102,12 +94,6 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
                 return
             }
             
-            if(changes.address_registered){
-                changes.address_registered = formatAddressToString(data.address_registered)
-            }
-            if(changes.address_operations){
-                changes.address_operations = formatAddressToString(data.address_operations as Address)
-            }
             message = "Information successfully updated."
             PAYLOAD.url = `/api/companies/${id}/`
             PAYLOAD.mode = "update"
