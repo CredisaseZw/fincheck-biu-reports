@@ -8,6 +8,7 @@ from apps.utils.helpers import validate_serializer, get_content_type_id
 from .models import Financials, TradeReferences, BankerAccounts
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
 from apps.utils.base_viewset import UpdatedByMixin
+from .models import FinancialFiles
 import logging
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class FinancialsViewSet(
 ):
     permission_classes = [IsStaffUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    queryset = Financials.objects.all()
+    queryset = Financials.objects.prefetch_related("financial_files").all()
     serializer_class = FinancialsSerializer
 
     def get_serializer_class(self):
@@ -27,8 +28,36 @@ class FinancialsViewSet(
             return FinancialsWriteSerializer
         return FinancialsSerializer
 
+    def _handle_financial_files(self, request, instance):
+        # Handle updates to existing files
+        for key in request.data.keys():
+            if key.startswith('existing_files[') and key.endswith('].id'):
+                idx = key.split('[')[1].split(']')[0]
+                file_id = request.data.get(key)
+                title = request.data.get(f'existing_files[{idx}].file_title')
+                if file_id and title is not None:
+                    FinancialFiles.objects.filter(id=file_id, financial=instance).update(file_title=title)
+
+        # Handle new files
+        for key in request.data.keys():
+            if key.startswith('new_files_titles['):
+                idx = key.split('[')[1].split(']')[0]
+                title = request.data.get(key)
+                file_obj = request.FILES.get(f'new_files[{idx}]')
+                
+                if file_obj and getattr(file_obj, 'size', 0) == 0 and file_obj.name == 'empty':
+                    file_obj = None
+
+                if title or file_obj:
+                    FinancialFiles.objects.create(
+                        financial=instance,
+                        file=file_obj,
+                        file_title=title
+                    )
+
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
+        
         content_type_id = get_content_type_id(
             data.get("subject_object_id"),
             data.get("subject_type")
@@ -45,8 +74,10 @@ class FinancialsViewSet(
         error = validate_serializer(serializer=serializer)
         if error:
             return error
-        self.perform_create(serializer=serializer)
-
+        instance = self.perform_create(serializer=serializer)
+        
+        self._handle_financial_files(request, instance)
+        
         return Response(
             FinancialsSerializer(serializer.instance).data,
             status=STATUS.HTTP_201_CREATED
@@ -55,10 +86,6 @@ class FinancialsViewSet(
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data.copy()
-
-        if "financials_file" in request.FILES:
-            if instance.financials_file:
-                instance.financials_file.delete(save=False)
 
         if subject_object_id := data.get("subject_object_id"):
             content_type_id = get_content_type_id(
@@ -84,11 +111,18 @@ class FinancialsViewSet(
             return error
 
         self.perform_update(serializer=serializer)
+        self._handle_financial_files(request, instance)
+        
+        # Refresh instance to get updated files
+        instance.refresh_from_db()
         return Response(
             FinancialsSerializer(serializer.instance).data,
             status=STATUS.HTTP_200_OK
         )
-    
+
+class DeleteFinancialFile(GenericViewSet, DestroyModelMixin):
+    queryset = FinancialFiles.objects.all()
+    permission_classes = [IsStaffUser]
 class DeleteTradeReferenceViewSet(GenericViewSet, DestroyModelMixin):
     queryset =  TradeReferences.objects.all()
     permission_classes = [IsStaffUser]

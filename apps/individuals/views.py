@@ -6,6 +6,8 @@ from .serializers import (
     ClientIndividualSerializer,
     IndividualUpdateSerializer,
 )
+from django_filters.rest_framework import DjangoFilterBackend
+from apps.utils.filters import IndividualSearchFilter
 from apps.users.models import User
 from rest_framework.response import Response
 from rest_framework import status as STATUS 
@@ -35,9 +37,8 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
         "employment_information",
         "next_of_kin"
     ).filter(is_deleted = False)
-
+    filter_backends = [IndividualSearchFilter, DjangoFilterBackend]
     serializer_class = IndividualSerializer
-    search_fields = ["full_name", "national_id", "email"]
 
     def get_serializer_class(self):
         if self.action == "list":

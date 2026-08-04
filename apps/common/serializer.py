@@ -4,7 +4,8 @@ from .models import (
     BankerAccounts, 
     ProfessionalPartners, 
     Financials,
-    TradeReferences
+    FinancialFiles,
+    TradeReferences,
 )
 from apps.utils.base_serialisers import UpdatedBySerializerMixin
 # READ SERIALIZERS
@@ -22,12 +23,15 @@ class ProfessionalPartnersSerializer(UpdatedBySerializerMixin, serializers.Model
     class Meta:
         model = ProfessionalPartners
         exclude = ["subject_content_type", "subject_object_id"]
-
+class FinancialFilesSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
+    class Meta: 
+        model = FinancialFiles
+        exclude  = ['financial']
 class FinancialsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
+    files = FinancialFilesSerializer(many=True, source="financial_files", read_only=True)
     class Meta:
         model = Financials
         exclude = ["subject_content_type", "subject_object_id"]
-
 class TradeReferencesSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     payment_trend_display = serializers.CharField(source="get_payment_trend_display", read_only=True)
     class Meta:
@@ -87,12 +91,8 @@ class FinancialsWriteSerializer(serializers.ModelSerializer):
             "net_worth",
             "total_revenue",
             "asset_ratio",
-            "financials_file",
             "financial_year",
         ]
-        extra_kwargs = {
-            "financials_file": {"required": False},
-        }
 
 class TradeReferencesWriteSerializer(serializers.ModelSerializer):
     payment_trend = serializers.ChoiceField(

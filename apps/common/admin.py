@@ -3,6 +3,7 @@ from apps.common.models import (
     BankerAccounts,
     TradeReferences,
     Financials,
+    FinancialFiles,
     ProfessionalPartners,
     RegistrationAccounts,
 )
@@ -64,7 +65,6 @@ class FinancialsAdmin(GenericSubjectMixin, admin.ModelAdmin):
         "net_profit",
         "net_worth",
         "total_revenue",
-        "financials_file",
         "created_at",
     )
     list_filter = ("financial_year",)
@@ -81,4 +81,14 @@ class TradeReferencesAdmin(admin.ModelAdmin):
     )
     list_filter = ("payment_trend",)
     search_fields = ("name", "contact_info", "reference_source")
+    readonly_fields = ("created_at", "updated_at")
+
+@admin.register(FinancialFiles)
+class FinancialFilesAdmin(admin.ModelAdmin):
+    list_display = (
+        "financial",
+        "file_title",
+        "created_at",
+    )
+    search_fields = ("file_title",)
     readonly_fields = ("created_at", "updated_at")

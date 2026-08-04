@@ -42,7 +42,11 @@ class Individuals(BaseModel):
         choices=MaritalStatus.choices
     )
     nationality = models.CharField(_("Nationality"), max_length=100)
-    residential_address = models.TextField(_("Residential address"))
+    residential_address = models.TextField(
+        _("Residential address"),
+        blank=True, 
+        null=True
+    )
     mobile_number = models.CharField(_("Mobile number"), max_length=50)
     email = models.EmailField(_("Email"), blank=True, null=True)
     is_deleted = models.BooleanField(_("Is deleted"), default=False)

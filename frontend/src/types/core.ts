@@ -234,7 +234,11 @@ export interface ProfessionalPartner {
   auditors: string;
   lawyers: string;
 }
-
+export interface FinancialFile{
+  id: number,
+  file : string | null;
+  file_title : string | null
+}
 export interface Financial {
   id: number;
   total_assets: string | null;
@@ -242,8 +246,8 @@ export interface Financial {
   net_worth: string | null;
   asset_ratio : string | null;
   total_revenue: string | null;
-  financials_file : string | null
   financial_year: number;
+  files: FinancialFile[]
 }
 
 // Subject (Individual)

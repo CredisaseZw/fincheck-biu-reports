@@ -503,8 +503,8 @@ body {{
 .data-table thead tr {{ background: {c.ACCENT}; }}
 .data-table th {{
   color: #ffffff;
-  padding: 10px 16px;
-  font-size: 7.5pt;
+  padding: 8px 10px;
+  font-size: 7pt;
   font-weight: 700;
   text-align: left;
   text-transform: uppercase;
@@ -514,12 +514,14 @@ body {{
 .data-table tbody tr:last-child {{ border-bottom: none; }}
 .data-table tbody tr:nth-child(even) {{ background: {c.ROW}; }}
 .data-table td {{
-  padding: 11px 16px;
-  font-size: 8.5pt;
+  padding: 8px 10px;
+  font-size: 8pt;
   vertical-align: middle;
   color: {c.TEXT};
   font-weight: 500;
   text-transform: uppercase;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }}
 .ta-r {{ text-align: right; }}
 .ta-c {{ text-align: center; }}
@@ -1027,7 +1029,7 @@ body {{
 
     def _render_financials(self) -> str:
         fin = self._subject.get("financials") or {}
-        has_file = bool(fin.get("financials_file"))
+        has_file = bool(fin.get("files"))
         rows = [
             ("Financial Year", self._e(fin.get("financial_year"))),
             ("Total Assets", self._money(fin.get("total_assets"))),
@@ -1059,19 +1061,41 @@ body {{
 
     def _render_bankers(self) -> str:
         banks = self._subject.get("banker_accounts") or []
-        rows = "".join(f"""<tr>
-          <td>{self._u(b.get("bank"))}</td>
-          <td>{self._u(b.get("branch"))}</td>
-          <td>{self._u(b.get("account_name"))}</td>
-          <td>{self._label(b.get("account_type", ""))}</td>
-          <td>{self._e(b.get("account_number"))}</td>
-          <td class="ta-c">{self._e(b.get("bank_code"))}</td>
-          <td class="nowrap">{self._date(b.get("date_of_acquirement"))}</td>
-        </tr>""" for b in banks) if banks else ""
-        body = self._data_table(
-            ["Bank", "Branch", "Account Name", "Type", "Account No.", "Code", "Date Acquired"],
-            rows, "No banking records")
-        return self._card("Bankers", body)
+        if not banks:
+            return self._card("Bankers", '<div class="empty">No banking records</div>')
+
+        cards = ""
+        for b in banks:
+            bank_rows = [
+                ("Account Name", self._u(b.get("account_name"))),
+                ("Type", self._label(b.get("account_type", ""))),
+                ("Code", self._e(b.get("bank_code"))),
+                ("Narration", self._e(b.get("narration"))),
+                ("Date Acquired", self._date(b.get("date_of_acquirement"))),
+                ("Account No.", self._e(b.get("account_number"))),
+            ]
+            
+            rows_html = ""
+            for lbl, val in bank_rows:
+                if val is not None:
+                    val_str = str(val).strip()
+                    if val_str and val_str not in ("-", "—"):
+                        rows_html += f'<div class="dir-row"><span class="dir-l">{lbl}</span><span class="dir-v">{val}</span></div>\n              '
+
+            bank_name = self._u(b.get("bank"))
+            branch = self._label(b.get("branch", ""))
+            branch_html = f'<span class="dir-pos"> — {branch}</span>' if branch and branch != "—" else ""
+
+            cards += f"""
+            <div class="dir-card">
+              <div class="dir-name">
+                {bank_name}
+                {branch_html}
+              </div>
+              {rows_html.strip()}
+            </div>"""
+
+        return self._card("Bankers", f'<div class="dir-grid">{cards}</div>')
 
     def _render_professionals(self) -> str:
         pp = self._subject.get("professional_partners") or {}
@@ -1148,43 +1172,62 @@ body {{
 
     # ── Financial attachment ──────────────────────────────────────────────────
 
-    def _resolve_storage_name(self) -> Optional[str]:
+    def _resolve_storage_names(self) -> list[tuple[str, str]]:
         fin = self._subject.get("financials") or {}
-        file_url = fin.get("financials_file")
-        if not file_url:
-            return None
-
+        files_data = fin.get("files") or []
+        
         media_url = _media_url().rstrip("/")
+        results = []
+        for f_data in files_data:
+            file_url = f_data.get("file")
+            title = f_data.get("file_title") or "Financial Document"
+            if not file_url:
+                continue
 
-        if file_url.startswith(("http://", "https://")):
-            path = urlparse(file_url).path
-        else:
-            path = file_url
+            if file_url.startswith(("http://", "https://")):
+                path = urlparse(file_url).path
+            else:
+                path = file_url
 
-        rel = path[len(media_url):] if path.startswith(media_url) else path
-        rel = rel.lstrip("/")
+            rel = path[len(media_url):] if path.startswith(media_url) else path
+            rel = rel.lstrip("/")
 
-        return rel if default_storage.exists(rel) else None
+            if default_storage.exists(rel):
+                results.append((rel, title))
+                
+        return results
 
-    def _attachment_as_pdf(self) -> Optional[bytes]:
-        name = self._resolve_storage_name()
-        if not name:
-            return None
-        ext = os.path.splitext(name)[1].lower()
-        try:
-            if ext == ".pdf":
-                with default_storage.open(name, "rb") as fh:
-                    return fh.read()
-            if ext in (".jpg", ".jpeg", ".png", ".gif", ".webp"):
-                return self._image_to_pdf(name, ext)
-            if ext in (".xlsx", ".xls"):
-                return self._excel_to_pdf(name)
-        except Exception:
-            return None
-        return None
+    def _attachments_as_pdfs(self) -> list[bytes]:
+        files_info = self._resolve_storage_names()
+        pdfs = []
+        for name, title in files_info:
+            ext = os.path.splitext(name)[1].lower()
+            try:
+                if ext == ".pdf":
+                    cover = weasyprint.HTML(string=f"""<!DOCTYPE html><html><head>
+                        <style>@page{{size:A4;margin:20mm}}body{{font-family:Arial;text-align:center;padding-top:80mm;color:#374151}}</style>
+                        </head><body><h2 style="color:#051C2C">{html.escape(title)}</h2>
+                        </body></html>""").write_pdf()
+                    with default_storage.open(name, "rb") as fh:
+                        pdf_bytes = fh.read()
+                        writer = PdfWriter()
+                        for page in PdfReader(io.BytesIO(cover)).pages:
+                            writer.add_page(page)
+                        for page in PdfReader(io.BytesIO(pdf_bytes)).pages:
+                            writer.add_page(page)
+                        buf = io.BytesIO()
+                        writer.write(buf)
+                        pdfs.append(buf.getvalue())
+                elif ext in (".jpg", ".jpeg", ".png", ".gif", ".webp"):
+                    pdfs.append(self._image_to_pdf(name, ext, title))
+                elif ext in (".xlsx", ".xls"):
+                    pdfs.append(self._excel_to_pdf(name, title))
+            except Exception:
+                pass
+        return pdfs
 
     @staticmethod
-    def _image_to_pdf(name: str, ext: str) -> bytes:
+    def _image_to_pdf(name: str, ext: str, title: str) -> bytes:
         mime = {
             ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
             ".png": "image/png", ".gif": "image/gif",
@@ -1194,12 +1237,13 @@ body {{
             b64 = base64.b64encode(fh.read()).decode()
         src = f"data:{mime};base64,{b64}"
         return weasyprint.HTML(string=f"""<!DOCTYPE html><html><head>
-    <style>@page{{size:A4;margin:10mm}}body{{margin:0;display:flex;justify-content:center}}
-    img{{max-width:100%;max-height:267mm;object-fit:contain}}</style></head>
-    <body><img src="{src}" alt="Financial Statements"></body></html>""").write_pdf()
+    <style>@page{{size:A4;margin:10mm}}body{{margin:0;display:flex;flex-direction:column;align-items:center}}
+    h2{{color:#051C2C;font-family:Arial;margin-top:10mm;margin-bottom:10mm}}
+    img{{max-width:100%;max-height:230mm;object-fit:contain}}</style></head>
+    <body><h2>{html.escape(title)}</h2><img src="{src}" alt="{html.escape(title)}"></body></html>""").write_pdf()
 
     @staticmethod
-    def _excel_to_pdf(name: str) -> bytes:
+    def _excel_to_pdf(name: str, title: str) -> bytes:
         try:
             import openpyxl
             with default_storage.open(name, "rb") as fh:
@@ -1221,24 +1265,25 @@ body {{
     <style>@page{{size:A4 landscape;margin:10mm}}body{{font-family:Arial;font-size:8pt}}
     table{{border-collapse:collapse;width:100%}}th{{background:#051C2C;color:#fff;padding:5px 8px}}
     td{{border:1px solid #E2E8F0;padding:4px 8px}}tr:nth-child(even) td{{background:#F8FAFC}}</style>
-    </head><body><h3 style="color:#051C2C;margin-bottom:8px">Financial Statements</h3>
+    </head><body><h3 style="color:#051C2C;margin-bottom:8px">{html.escape(title)}</h3>
     <table><thead><tr>{ths}</tr></thead><tbody>{trs}</tbody></table></body></html>""").write_pdf()
         except ImportError:
-            return weasyprint.HTML(string="""<!DOCTYPE html><html><head>
-    <style>@page{size:A4;margin:20mm}body{font-family:Arial;text-align:center;padding-top:80mm;color:#374151}</style>
-    </head><body><h2 style="color:#051C2C">Financial Statements</h2>
+            return weasyprint.HTML(string=f"""<!DOCTYPE html><html><head>
+    <style>@page{{size:A4;margin:20mm}}body{{font-family:Arial;text-align:center;padding-top:80mm;color:#374151}}</style>
+    </head><body><h2 style="color:#051C2C">{html.escape(title)}</h2>
     <p style="margin-top:10px">Excel file attached — please refer to the original spreadsheet.</p>
     </body></html>""").write_pdf()
 
     def _append_financial_attachment(self, main_pdf: bytes) -> bytes:
-        attachment = self._attachment_as_pdf()
-        if not attachment:
+        attachments = self._attachments_as_pdfs()
+        if not attachments:
             return main_pdf
         writer = PdfWriter()
         for page in PdfReader(io.BytesIO(main_pdf)).pages:
             writer.add_page(page)
-        for page in PdfReader(io.BytesIO(attachment)).pages:
-            writer.add_page(page)
+        for attachment in attachments:
+            for page in PdfReader(io.BytesIO(attachment)).pages:
+                writer.add_page(page)
         buf = io.BytesIO()
         writer.write(buf)
         return buf.getvalue()

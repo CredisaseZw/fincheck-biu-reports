@@ -143,6 +143,7 @@ function CompanyDetails({
                         )}
                     />
                     <CustomSubmitButton
+                        label = {!subject_type ?"Add Company" : "Update"}
                         state={touched}
                         isPending={isPending}
                     />

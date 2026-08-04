@@ -18,6 +18,8 @@ from apps.utils.helpers import validate_serializer
 from apps.directors.serializers import CompanyDirectorWriteSerializer, CompanyDirectorsSerializer
 from rest_framework.decorators import action
 from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
+from apps.utils.filters import CompanySearchFilter
 from apps.shareholding.models import CompanyShareholding, Shareholder
 from apps.shareholding.serializers import (
     CompanyShareholdingWriteSerializer,
@@ -30,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 class CompaniesViewSet(BaseAuthJSONViewSet):
     filterset_fields = ["refer_type"]
-    search_fields = ["registered_name", "trading_name", "registration_number"]   
+    filter_backends = [CompanySearchFilter, DjangoFilterBackend]
     ordering_fields = ["created_at", "registered_name", "trading_name"]
 
     queryset = Company.objects.prefetch_related(

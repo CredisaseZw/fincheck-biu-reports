@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('total_revenue', models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True, verbose_name='Total Revenue')),
                 ('paid_up_capital', models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True, verbose_name='Paid Up Capital')),
                 ('authorized_capital', models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True, verbose_name='Authorized Capital')),
-                ('financials_file', models.FileField(blank=True, null=True, upload_to=apps.common.models.Financials.financials_file_path, verbose_name='Financials File')),
+                ('financials_file', models.FileField(blank=True, null=True, upload_to=apps.common.models.FinancialFiles.financials_file_path, verbose_name='Financials File')),
                 ('financial_year', models.PositiveIntegerField(blank=True, null=True, verbose_name='Financial Year')),
             ],
             options={

@@ -11,6 +11,7 @@ import { getItem, setItem } from "@/lib/storage"
 import { toast } from "sonner"
 import useDetailCacheUpdate from "./useDetailCacheUpdate"
 import type { FinancialsProps, Report } from "@/types/core"
+import useInstanceMutation from "./api/useInstanceMutation";
 
 const fileSchema = z.custom<FileList>()
     .refine(
@@ -23,6 +24,13 @@ const fileSchema = z.custom<FileList>()
     )
     .optional()
 
+const fileRowSchema = z.object({
+    id: z.number().optional(),
+    file_title: z.string().min(1, "Title is required"),
+    file: fileSchema.optional(),
+    default_file: z.string().optional()
+})
+
 const financialsSchema = z.object({
     id: z.number().optional(),
     total_assets: z.number().optional(),
@@ -31,8 +39,7 @@ const financialsSchema = z.object({
     total_revenue: z.string().optional(),
     asset_ratio : z.number().optional(),
     financial_year: z.number().int().positive().min(2000).max(new Date().getFullYear()),
-    financials_file: fileSchema,
-    default_file :z.string().optional()
+    files: z.array(fileRowSchema).optional()
 })
 
 export type FinancialEntryFormData = z.infer<typeof financialsSchema>
@@ -46,6 +53,7 @@ function useFinancialsDetails({
     report_id,
 }: FinancialsProps) {
     const {
+        getValues,
         register,
         handleSubmit,
         watch,
@@ -54,7 +62,7 @@ function useFinancialsDetails({
         formState: { errors },
     } = useForm<FinancialEntryFormData>({
         resolver: zodResolver(financialsSchema),
-        defaultValues: financials_data ?? undefined
+        defaultValues: financials_data ?? { files: [] }
     })
 
     useEffect(() => {
@@ -73,7 +81,8 @@ function useFinancialsDetails({
             setTouched(true)
         }
     }, [report_id, subject_type, CACHE_KEY])
-    
+
+    const {mutate: onDelete, isPending: isDeleting} = useInstanceMutation();
     const { mutate: save, isPending } = useMutation({
         mutationFn: async (formData: FormData) => {
             const id = formData.get("__id")
@@ -87,7 +96,7 @@ function useFinancialsDetails({
         }
     })
 
-     const buildFormData = (
+    const buildFormData = (
         entry: Partial<FinancialEntryFormData>,
     ): FormData => {
         const formData = new FormData()
@@ -129,10 +138,25 @@ function useFinancialsDetails({
             }
         })
 
-        if (entry.financials_file instanceof FileList && entry.financials_file.length > 0) {
-            formData.append("financials_file", entry.financials_file[0])
+        if (entry.files) {
+            let newFileIndex = 0;
+            entry.files.forEach((fileRow, index) => {
+                if (fileRow.id) {
+                    formData.append(`existing_files[${index}].id`, String(fileRow.id));
+                    formData.append(`existing_files[${index}].file_title`, fileRow.file_title);
+                } else {
+                    formData.append(`new_files_titles[${newFileIndex}]`, fileRow.file_title);
+                    if (fileRow.file instanceof FileList && fileRow.file.length > 0) {
+                        formData.append(`new_files[${newFileIndex}]`, fileRow.file[0]);
+                    } else {
+                        // Empty file append to keep indices aligned if needed, though FileList should be present
+                        formData.append(`new_files[${newFileIndex}]`, new File([""], "empty"));
+                    }
+                    newFileIndex++;
+                }
+            });
         }
-
+        
         return formData
     }
     const onSubmit = (data: FinancialEntryFormData) => {
@@ -146,31 +170,20 @@ function useFinancialsDetails({
         if (financials_data && data.id) {
             const { 
                 id, 
-                financials_file, 
-                default_file,
+                files: initialFiles,
                 ...initialData 
             } = financials_data;
             const { 
                 id: current_id,
-                financials_file: currentFile, 
-                default_file: current_default_file,
+                files: currentFiles,
                 ...currentData
             } = data;
             
             const trackedChanges = handleTrackChangedFields(initialData, currentData);
-            const hasNewFile = currentFile && currentFile.length > 0;
             
-            if (!trackedChanges && !hasNewFile) {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3);
-                setTouched(true);
-                return;
-            }
-
             changes = trackedChanges || {};
             changes.id = data.id;
-            if (hasNewFile) {
-                changes.financials_file = currentFile;
-            }
+            changes.files = currentFiles; // Always send files for backend to process deletions and additions
         }
 
         const formData = buildFormData(changes)
@@ -186,22 +199,39 @@ function useFinancialsDetails({
                     net_profit: savedEntry.net_profit ?? undefined,
                     net_worth: savedEntry.net_worth ?? undefined,
                     total_revenue: savedEntry.total_revenue ?? undefined,
-                    paid_up_capital: savedEntry.paid_up_capital ? Number(savedEntry.paid_up_capital) : undefined,
-                    authorized_capital: savedEntry.authorized_capital ? Number(savedEntry.authorized_capital) : undefined,
-                    default_file:  savedEntry.financials_file ?? undefined,
-                    financials_file:  undefined,
+                    files: savedEntry.files?.map((f: any) => ({
+                        id: f.id,
+                        file_title: f.file_title,
+                        default_file: f.file
+                    })) || [],
                 }) 
                 setTouched(true)
             },
             onError: (error) => handleAxiosError(error),
         })
     }
-
+    const deleteFile = (id: number) =>{
+        onDelete({
+            url : `/api/financial-files/${id}/`,
+            mode : "deletion"
+        }, {
+            onSuccess : () => {
+                cache.removeFromList(["subject", "financials", "files"], id)
+                toast.success("Financial file deleted successfully")
+                setTouched(true)
+            },
+            onError : (error) => handleAxiosError(error)
+        })
+        
+    }
     return {
+        deleteFile,
         register,
         handleSubmit,
         onSubmit,
         watch,
+        getValues,
+        isDeleting,
         errors,
         numericField,
         isPending,

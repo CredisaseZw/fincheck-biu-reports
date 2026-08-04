@@ -13,7 +13,7 @@ function useGetEntityObject(
         "individual": "/api/individuals/"
     }
     
-    const {data, isLoading, error} = useQuery({
+    const {data, isLoading, error, isFetching} = useQuery({
         queryKey : [mode, params],
         queryFn: async()=>{
             const response = await api.get<DRFResponse<ListCompany | ListCompany>>(ENTITY_LINKS[mode], {
@@ -25,6 +25,7 @@ function useGetEntityObject(
     })
     return {
         data,
+        isFetching,
         isLoading,
         error
     }

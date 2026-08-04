@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from apps.utils.base_models import BaseModelWithSubject
+from apps.utils.base_models import BaseModelWithSubject, BaseModel
 import os
 import uuid
 from django.conf import settings
@@ -117,12 +117,7 @@ class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON
         ]
 
 
-class Financials(BaseModelWithSubject):
-    def financials_file_path(instance, filename):
-        from django.conf import settings
-        ext = os.path.splitext(filename)[1]
-        return f"{'l' if not settings.DEBUG else 't'}/financials/{uuid.uuid4().hex}{ext}" # l = live, t = test
-    
+class Financials(BaseModelWithSubject):    
     total_assets = models.DecimalField(
         _("Total Assets"),
         max_digits=20,
@@ -156,12 +151,6 @@ class Financials(BaseModelWithSubject):
         blank=True   
     )
 
-    financials_file = models.FileField(
-        _("Financials File"),
-        upload_to=financials_file_path,
-        null=True,
-        blank=True
-    )
     financial_year = models.PositiveIntegerField(
         _("Financial Year"),
         null=True,
@@ -182,7 +171,33 @@ class Financials(BaseModelWithSubject):
 
     def __str__(self):
         return f"{self.subject} - {self.financial_year}"
-    
+
+class FinancialFiles(BaseModel):
+    def financials_file_path(instance, filename):
+        from django.conf import settings
+        ext = os.path.splitext(filename)[1]
+        return f"{'l' if not settings.DEBUG else 't'}/financials/{uuid.uuid4().hex}{ext}" # l = live, t = test
+
+    financial = models.ForeignKey(
+        Financials,
+        on_delete=models.CASCADE,
+        related_name='financial_files'
+    )
+    file = models.FileField(
+        _("Financials File"),
+        upload_to=financials_file_path,
+        null=True,
+        blank=True
+    )
+    file_title = models.TextField(
+        _("File Title"),
+        blank = True,
+        null =True
+    )
+
+    def __str__(self):
+        return f"{self.financial.subject} -  {self.financial.financial_year} | {self.file_title}"
+
 class TradeReferences(BaseModelWithSubject):
     class PaymentTrend(models.TextChoices):
         GOOD = "good", "Good"

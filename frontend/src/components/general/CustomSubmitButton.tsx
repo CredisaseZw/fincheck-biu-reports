@@ -2,15 +2,19 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import LoadingIndicator from './LoadingIndicator';
 
-interface props { 
+interface props {
+    label?: string 
     isPending?: boolean
     state?: boolean
 }
 
-function CustomSubmitButton({isPending, state}:props) {
-  return (
+function CustomSubmitButton({
+        label = "Update",
+        isPending, 
+        state
+    }:props) {
+    return (
     <Button
-
         className={
             cn(
                 "self-end text-gray-200",
@@ -26,7 +30,7 @@ function CustomSubmitButton({isPending, state}:props) {
             isPending && 
             <LoadingIndicator variant="button"/>
         }
-        Update
+        {label}
     </Button>
   )
 }

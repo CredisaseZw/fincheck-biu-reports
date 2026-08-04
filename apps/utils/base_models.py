@@ -50,13 +50,28 @@ class BaseFinancialRecord(BaseModelWithDebtor):
         CAD = "CAD", "Canadian Dollar"
         CHF = "CHF", "Swiss Franc"
         ZAR = "ZAR", "South African Rand"
-    creditor_name = models.CharField(max_length=255)
+        
+    account_number = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    creditor_name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
     currency = models.CharField(
         max_length=5,
         choices=Currency.choices,
         default=Currency.USD
     )
     amount = models.DecimalField(max_digits=18, decimal_places=2)
-
+    overdue_balance = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
     class Meta:
         abstract = True

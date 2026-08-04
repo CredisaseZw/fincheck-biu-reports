@@ -133,14 +133,14 @@ function DataTable({ headers, children }: { headers: string[]; children: React.R
 // ── Company-specific sections ────────────────────────────────────────────────
 
 function CompanyDetailsSection({ data }: { data: Company }) {
-  const ops = data.operations as CompanyOperations | null;
   return (
     <SectionCard title="Company Details">
       <GridRow label="Registered Name" value={_upper(data.registered_name)} extra={data.is_verified !== undefined ? _badge(!!data.is_verified) : undefined} />
       <GridRow label="Trading Name" value={_upper(data.trading_name)} />
+      <GridRow label="Re-Registration Number" value={_upper(data.re_registration_number)} />
       <GridRow label="Registration Number" value={_upper(data.registration_number)} />
       <GridRow label="Date Registered" value={_date(data.date_of_registration)} />
-      <GridRow label="Industry Sector" value={_upper(ops?.industry)} />
+      <GridRow label="Date of incorporation" value={_upper(data.date_of_incorporation)} />
     </SectionCard>
   );
 }
@@ -434,11 +434,14 @@ function TradeReferencesSection({ refs }: { refs: TradeReference[] }) {
   );
 }
 
-function FinancialsSection({ data, showAttachment, onToggle }: { data: Financial; showAttachment: boolean; onToggle: () => void }) {
-  const fileUrl = resolveFileUrl(data?.financials_file);
-  const hasImage = fileUrl && isImageFile(fileUrl);
-  const hasPdf = fileUrl && isPdfFile(fileUrl);
-  const hasOtherFile = fileUrl && !hasImage && !hasPdf;
+function FinancialsSection({ data }: { data: Financial }) {
+  const [showAttachments, setShowAttachments] = useState<Record<number, boolean>>({});
+
+  const toggleAttachment = (id: number) => {
+    setShowAttachments(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const files = data?.files || [];
 
   return (
     <SectionCard title="Financials">
@@ -448,49 +451,65 @@ function FinancialsSection({ data, showAttachment, onToggle }: { data: Financial
       <GridRow label="Net Profit" value={_money(data?.net_profit)} />
       <GridRow label="Net Worth" value={_money(data?.net_worth)} />
       <GridRow label="Asset Ratio" value={_val(data?.asset_ratio)} />
-      {hasPdf && (
-        <div className="py-3 px-5 bg-blue-50 border-t border-gray-200 flex items-center justify-between">
-          <span className="text-[8.5pt] font-semibold text-[#1E5474] uppercase tracking-wide">
-            Financial Statements {showAttachment ? "Shown Below" : "Available"}
-          </span>
-          <button
-            type="button"
-            onClick={onToggle}
-            className={`print:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[8pt] font-bold uppercase tracking-wide border transition-colors cursor-pointer ${
-              showAttachment
-                ? "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-                : "bg-[#1E5474] border-[#1E5474] text-white hover:bg-[#164060]"
-            }`}
-          >
-            {showAttachment ? <><EyeOff size={12} /> Hide</> : <><Paperclip size={12} /> Show Attachment</>}
-          </button>
-        </div>
-      )}
-      {hasOtherFile && (
-        <div className="py-3 px-5 bg-blue-50 border-t border-gray-200 flex items-center justify-between">
-          <span className="text-[8.5pt] font-semibold text-[#1E5474] uppercase tracking-wide">
-            Financial Statements Available
-          </span>
-          <a
-            href={fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="print:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[8pt] font-bold uppercase tracking-wide border transition-colors cursor-pointer bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-          >
-            <Paperclip size={12} /> Open File
-          </a>
-        </div>
-      )}
-      {hasImage && (
-        <div className="p-4 border-t border-gray-200">
-          <img src={fileUrl} alt="Financial Statements" className="max-w-full h-auto mx-auto" />
-        </div>
-      )}
-      {showAttachment && hasPdf && (
-        <div className="p-4 border-t border-gray-200">
-          <iframe src={fileUrl} title="Financial Statements" className="w-full h-150 border border-gray-200 rounded" />
-        </div>
-      )}
+      
+      {files.map((fileData) => {
+        const fileUrl = resolveFileUrl(fileData.file);
+        if (!fileUrl) return null;
+        
+        const hasImage = isImageFile(fileUrl);
+        const hasPdf = isPdfFile(fileUrl);
+        const hasOtherFile = !hasImage && !hasPdf;
+        const isShown = !!showAttachments[fileData.id];
+        const title = fileData.file_title || "Financial Statements";
+
+        return (
+          <div key={fileData.id} className="border-t border-gray-200">
+            {hasPdf && (
+              <div className="py-3 px-5 bg-blue-50 flex items-center justify-between border-b border-gray-200 last:border-b-0">
+                <span className="text-[8.5pt] font-semibold text-[#1E5474] uppercase tracking-wide">
+                  {title} {isShown ? "Shown Below" : "Available"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => toggleAttachment(fileData.id)}
+                  className={`print:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[8pt] font-bold uppercase tracking-wide border transition-colors cursor-pointer ${
+                    isShown
+                      ? "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                      : "bg-[#1E5474] border-[#1E5474] text-white hover:bg-[#164060]"
+                  }`}
+                >
+                  {isShown ? <><EyeOff size={12} /> Hide</> : <><Paperclip size={12} /> Show Attachment</>}
+                </button>
+              </div>
+            )}
+            {hasOtherFile && (
+              <div className="py-3 px-5 bg-blue-50 flex items-center justify-between border-b border-gray-200 last:border-b-0">
+                <span className="text-[8.5pt] font-semibold text-[#1E5474] uppercase tracking-wide">
+                  {title} Available
+                </span>
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="print:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[8pt] font-bold uppercase tracking-wide border transition-colors cursor-pointer bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                >
+                  <Paperclip size={12} /> Open File
+                </a>
+              </div>
+            )}
+            {hasImage && (
+              <div className="p-4 border-b border-gray-200 last:border-b-0">
+                <img src={fileUrl} alt={title} className="max-w-full h-auto mx-auto" />
+              </div>
+            )}
+            {isShown && hasPdf && (
+              <div className="p-4 border-b border-gray-200 last:border-b-0">
+                <iframe src={fileUrl} title={title} className="w-full h-150 border border-gray-200 rounded" />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </SectionCard>
   );
 }
@@ -511,7 +530,7 @@ function BankersSection({ accounts }: { accounts: BankerAccount[] }) {
   if (!accounts || accounts.length === 0) return null;
   return (
     <SectionCard title="Bankers">
-      <DataTable headers={["Bank", "Branch", "Account Name", "Type", "Account No.", "Code", "Date Acquired"]}>
+      <DataTable headers={["Bank", "Branch", "Account Name", "Type", "Account No.", "Code","Narration", "Date Acquired"]}>
         {accounts.map((b) => (
           <tr key={b.id} className="border-b border-gray-100 even:bg-gray-50">
             <td className="py-2.5 px-4">{_upper(b.bank)}</td>
@@ -519,6 +538,7 @@ function BankersSection({ accounts }: { accounts: BankerAccount[] }) {
             <td className="py-2.5 px-4">{_upper(b.account_name)}</td>
             <td className="py-2.5 px-4">{_label(b.account_type)}</td>
             <td className="py-2.5 px-4">{_val(b.account_number)}</td>
+            <td className="py-2.5 px-4 text-center">{_val(b.bank_code)}</td>
             <td className="py-2.5 px-4 text-center">{_val(b.narration)}</td>
             <td className="py-2.5 px-4 whitespace-nowrap">{_date(b.date_of_acquirement)}</td>
           </tr>
@@ -538,7 +558,7 @@ function ProfessionalsSection({ data }: { data: ProfessionalPartner }) {
   );
 }
 
-function EntityContent({ entity_type, data, showAttachment, onToggleAttachment }: { entity_type: EntityValue; data: Company | Individual; showAttachment: boolean; onToggleAttachment: () => void }) {
+function EntityContent({ entity_type, data }: { entity_type: EntityValue; data: Company | Individual }) {
   const commonData = data as Company & Individual;
 
   return (
@@ -572,7 +592,7 @@ function EntityContent({ entity_type, data, showAttachment, onToggleAttachment }
         publicInformation={commonData.public_information || []}
       />
       <TradeReferencesSection refs={commonData.trade_references || []} />
-      {commonData.financials && <FinancialsSection data={commonData.financials} showAttachment={showAttachment} onToggle={onToggleAttachment} />}
+      {commonData.financials && <FinancialsSection data={commonData.financials} />}
       {commonData.registration_accounts && <RegistrationsSection data={commonData.registration_accounts} />}
       <BankersSection accounts={commonData.banker_accounts || []} />
       {commonData.professional_partners && <ProfessionalsSection data={commonData.professional_partners} />}
@@ -592,7 +612,6 @@ function ViewEntityDialog({entity_type, id}:props) {
   } = useGetSingleEntity({ entity_type, id })
   const {user} = useAuth()
   const [openControl, setOpenControl] = useState(false);
-  const [showAttachment, setShowAttachment] = useState(false);
   const { mutate } = useCreateEnquiry()  
   const printRef = useRef(null);
 
@@ -666,8 +685,6 @@ function ViewEntityDialog({entity_type, id}:props) {
             <EntityContent
               entity_type={entity_type}
               data={data}
-              showAttachment={showAttachment}
-              onToggleAttachment={() => setShowAttachment(prev => !prev)}
             />
           )}
         </div>

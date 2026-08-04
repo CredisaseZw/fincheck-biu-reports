@@ -6,6 +6,9 @@ import Fieldset from "./FieldSet"
 import FileUploadField from "./FileUploadField"
 import type { FinancialsProps } from "@/types/core"
 import CustomSubmitButton from "./CustomSubmitButton"
+import { useFieldArray } from "react-hook-form"
+import { Button } from "@/components/ui/button"
+import { Plus, Trash2 } from "lucide-react"
 
 function FinancialsDetails({
     report_id,
@@ -14,19 +17,28 @@ function FinancialsDetails({
     financials_data,
 }: FinancialsProps) {
     const {
-        touched,
         register,
         handleSubmit,
         onSubmit,
         watch,
+        getValues,
+        deleteFile, 
+        isDeleting,
+        touched,
         errors,
         numericField,
         isPending,
+        control,
     } = useFinancialsDetails({
         report_id,
         subject_object_id,
         subject_type,
         financials_data,
+    })
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "files"
     })
 
     return (
@@ -108,13 +120,62 @@ function FinancialsDetails({
                         </div>
                     </ColumnsContainer>
 
-                    <FileUploadField
-                        label="Financials File"
-                        error={errors.financials_file?.message as string}
-                        preview={watch("financials_file")}
-                        inputProps={register("financials_file")}
-                        default_file={watch("default_file")}
-                    />
+                    <div className="flex flex-col gap-4 mt-4 border-t pt-4">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-base font-semibold">Financial Files</Label>
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => append({ file_title: "" })}
+                                className="flex items-center gap-2"
+                            >
+                                <Plus className="h-4 w-4" /> Add File
+                            </Button>
+                        </div>
+                        
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="flex items-start gap-4 p-4 border rounded-md relative">
+                                <div className="flex-1 space-y-4">
+                                    <div className="form-group">
+                                        <Label>File Title</Label>
+                                        <Input 
+                                            placeholder="e.g. Audit Report 2024" 
+                                            {...register(`files.${index}.file_title` as const)} 
+                                        />
+                                        {errors?.files?.[index]?.file_title && (
+                                            <p className="text-destructive text-sm">
+                                                {errors.files[index]?.file_title?.message as string}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <FileUploadField
+                                        label="File"
+                                        error={errors?.files?.[index]?.file?.message as string}
+                                        preview={watch(`files.${index}.file` as const)}
+                                        inputProps={register(`files.${index}.file` as const)}
+                                        default_file={watch(`files.${index}.default_file` as const)}
+                                    />
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    disabled = {isDeleting}
+                                    onClick={() => {
+                                        const id = getValues(`files.${index}.id`)
+                                        remove(index)
+                                        if(id){
+                                            deleteFile(id)
+                                        }
+                                    }}
+                                    className="text-destructive mt-8"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="flex justify-end">

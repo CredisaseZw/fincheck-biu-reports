@@ -164,7 +164,6 @@ function AddReportDialogue({ report_item }: props) {
                                         subject_object_id={subject_object_id}
                                         report_id={report.id}
                                         company_overview={companyOverview}
-                                    
                                     />
                                     <CompanyStructure 
                                         structure_data = {companyStructure}

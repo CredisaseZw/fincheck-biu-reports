@@ -109,6 +109,7 @@ function IndividualDetails({ individual_details, report_id } : props) {
                 </div>
 
                 <CustomSubmitButton
+                        label = {!individual_details ?"Add Individual" : "Update"}
                         state={touched}
                         isPending={isPending}
                     />

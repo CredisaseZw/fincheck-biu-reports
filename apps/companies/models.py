@@ -73,7 +73,6 @@ class Company(BaseModel):
         help_text=_("Where was company data retrieved from, default is BIU."),
         default= ReferType.BIU
     )
-
     location = models.CharField(
         max_length=20,
         choices=Locations.choices,
@@ -86,10 +85,13 @@ class Company(BaseModel):
         blank=True,
         null=True,
     )
-
-    address_registered = models.TextField()
+    address_registered = models.TextField(
+        blank=True, 
+        null=True
+    )
     address_operations = models.TextField(  
         blank=True, 
+        null=True
     )
     prev_addresses = models.JSONField(_("""
         prev[]: address : '....',
