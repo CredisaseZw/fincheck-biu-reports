@@ -267,6 +267,8 @@ function useAddReportDialogue(list_report?: ListReport) {
         amount: Number(item.amount),
         claim_date: item.claim_date,
         status: item.status,
+        ...(item.overdue_balance && { overdue_balance : Number(item.overdue_balance)}),
+        account_number : item.account_number ?? "",
         debtor_object_id: item.debtor.extras.debtor_object_id,
         debtor_type: item.debtor.extras.debtor_type,   
         debtor_default : item.debtor.name
@@ -293,6 +295,8 @@ function useAddReportDialogue(list_report?: ListReport) {
         amount : Number(item.amount),
         start_date: item.start_date,
         status : item.status,
+        ...(item.overdue_balance && { overdue_balance : Number(item.overdue_balance)}),
+        account_number : item.account_number ?? "",
         default_search : item.debtor.name,
         debtor_object_id: item.debtor.extras.debtor_object_id,
         debtor_type: item.debtor.extras.debtor_type, 
@@ -315,6 +319,8 @@ function useAddReportDialogue(list_report?: ListReport) {
         case_number: item.case_number,
         court_name: item.court_name,
         currency : item.currency,
+        status : item.status,
+        plaintf_name : item.plaintf_name ?? "",
         amount : Number(item.amount),
         judgement_date : item.judgement_date
       }))
@@ -323,6 +329,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         court_name: "",
         currency : "USD",
         amount : 0,
+        status : "open",
         judgement_date : ""
       }]
     )

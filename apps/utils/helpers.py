@@ -41,7 +41,7 @@ def validate_serializer(serializer):
         )
     return None
 
-def get_content_type_id(subject_object_id, subject_type: str) -> int | None:
+def get_content_type_id(subject_object_id, subject_type: str, return_id= True) -> int | None:
     model_map = {
         "company": Company,
         "individual": Individuals,
@@ -49,14 +49,18 @@ def get_content_type_id(subject_object_id, subject_type: str) -> int | None:
 
     model = model_map.get(subject_type)
     if not model:
-        return None
+        raise ValueError(f"Unknown subject_type: {subject_type!r}")
 
     subject = model.objects.filter(pk=subject_object_id).first()
     if not subject:
-        return None
-
-    return ContentType.objects.get_for_model(subject).id
-
+        raise LookupError(
+            f"No {model.__name__} found with pk={subject_object_id!r} "
+            f"(subject_type={subject_type!r})"
+        )
+    if return_id:
+        return ContentType.objects.get_for_model(subject).id
+    return ContentType.objects.get_for_model(subject)
+    
 def _content_ob_serializer(content, mini_serializer=False):
     if not content:
         return None

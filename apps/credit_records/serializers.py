@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from apps.utils.mini_serializers import MiniIndividualDebtorSerializers, MiniCompanyDebtorSerializers
 from .models import Claims, Absconders, CourtJudgement, InsolvencyRecord, PublicInformation
+from apps.individuals.models import Individuals
 
 def _get_debtor_data(debtor):
     if not debtor:
         return None
-    if hasattr(debtor, "next_of_kin"):
+    if isinstance(debtor, Individuals):
         return MiniIndividualDebtorSerializers(debtor).data
     return MiniCompanyDebtorSerializers(debtor).data
 
@@ -20,6 +21,8 @@ class ClaimsSerializer(serializers.ModelSerializer):
             "creditor_name",
             "currency",
             "amount",
+            "account_number",
+            "overdue_balance",            
             "claim_date",
             "status",
         ]
@@ -37,6 +40,8 @@ class AbscondersSerializer(serializers.ModelSerializer):
             "creditor_name",
             "currency",
             "amount",
+            "account_number",
+            "overdue_balance",
             "start_date",
             "status",
         ]
@@ -54,6 +59,8 @@ class CourtJudgementSerializer(serializers.ModelSerializer):
             "judgement_date",
             "currency",
             "amount",
+            "status",
+            "plaintf_name"
         ]
 
 class InsolvencyRecordSerializer(serializers.ModelSerializer):
@@ -90,6 +97,8 @@ class ClaimsWriteSerializer(serializers.ModelSerializer):
             "debtor_object_id",
             "creditor_name",
             "currency",
+            "account_number",
+            "overdue_balance",            
             "amount",
             "claim_date",
             "status",
@@ -104,6 +113,8 @@ class AbscondersWriteSerializer(serializers.ModelSerializer):
             "debtor_object_id",
             "creditor_name",
             "currency",
+            "account_number",
+            "overdue_balance",                       
             "amount",
             "start_date",
             "status",
@@ -120,6 +131,8 @@ class CourtJudgementWriteSerializer(serializers.ModelSerializer):
             "case_number",
             "judgement_date",
             "currency",
+            "status",
+            "plaintf_name",
             "amount",
         ]
 

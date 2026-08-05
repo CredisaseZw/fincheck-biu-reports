@@ -937,13 +937,15 @@ body {{
             rows = "".join(f"""<tr>
               <td>{self._u(c.get("creditor_name"))}</td>
               <td>{self._u((c.get("debtor") or {}).get("name"))}</td>
+              <td>{self._e(c.get("account_number"))}</td>
               <td>{self._e(c.get("currency"))}</td>
               <td class="ta-r">{self._money(c.get("amount"))}</td>
+              <td class="ta-r">{self._money(c.get("overdue_balance"))}</td>
               <td class="nowrap">{self._date(c.get("claim_date"))}</td>
               <td class="ta-c">{self._status_badge(c.get("status", "open"))}</td>
             </tr>""" for c in recs) if recs else ""
             return self._data_table(
-                ["Creditor", "Debtor", "Currency", "Amount", "Claim Date", "Status"],
+                ["Creditor", "Debtor", "A/C No.", "Currency", "Amount", "Overdue", "Claim Date", "Status"],
                 rows, "No claims recorded")
 
         def absconders_html() -> str:
@@ -951,13 +953,15 @@ body {{
             rows = "".join(f"""<tr>
               <td>{self._u(a.get("creditor_name"))}</td>
               <td>{self._u((a.get("debtor") or {}).get("name"))}</td>
+              <td>{self._e(a.get("account_number"))}</td>
               <td>{self._e(a.get("currency"))}</td>
               <td class="ta-r">{self._money(a.get("amount"))}</td>
+              <td class="ta-r">{self._money(a.get("overdue_balance"))}</td>
               <td class="nowrap">{self._date(a.get("start_date"))}</td>
               <td class="ta-c">{self._status_badge(a.get("status", "open"))}</td>
             </tr>""" for a in recs) if recs else ""
             return self._data_table(
-                ["Creditor", "Debtor", "Currency", "Amount", "Start Date", "Status"],
+                ["Creditor", "Debtor", "A/C No.", "Currency", "Amount", "Overdue", "Start Date", "Status"],
                 rows, "No absconder records")
 
         def court_html() -> str:
@@ -965,12 +969,14 @@ body {{
             rows = "".join(f"""<tr>
               <td>{self._u(c.get("court_name"))}</td>
               <td>{self._e(c.get("case_number"))}</td>
+              <td>{self._u(c.get("plaintf_name"))}</td>
               <td>{self._e(c.get("currency"))}</td>
               <td class="ta-r">{self._money(c.get("amount"))}</td>
               <td class="nowrap">{self._date(c.get("judgement_date"))}</td>
+              <td class="ta-c">{self._status_badge(c.get("status", "open"))}</td>
             </tr>""" for c in recs) if recs else ""
             return self._data_table(
-                ["Court", "Case No.", "Currency", "Amount", "Judgement Date"],
+                ["Court", "Case No.", "Plaintiff", "Currency", "Amount", "Judgement Date", "Status"],
                 rows, "No court judgements recorded")
 
         def insolvency_html() -> str:

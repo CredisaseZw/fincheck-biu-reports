@@ -39,7 +39,7 @@ function ArchivedReportsTable({
     >
         {
             results.map((item)=>{
-            const client_bottom_level = "national_id" in item.client
+            const client_bottom_level = "national_id" in  item.client
             ? item.client.email ?? "-"
             : item.client.registration_number ?? item.client.trading_name ??"-"
 

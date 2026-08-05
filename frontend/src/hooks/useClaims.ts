@@ -21,6 +21,8 @@ const claim = z.object({
   amount : z.number("A valid number is needed").positive("A positive number is required"),
   claim_date: z.string().optional(),
   status : SETTLEMENT_OPTIONS,
+  account_number : z.string().optional(),
+  overdue_balance : z.number().optional(),
   debtor_object_id : z.number().positive("A valid debtor object id is required"),
   debtor_type : DEBTOR_TYPE,
   debtor_default :z.string().optional()

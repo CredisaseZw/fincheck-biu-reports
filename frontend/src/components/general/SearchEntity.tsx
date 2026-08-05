@@ -56,7 +56,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
 
     const _get_display_value = (item: ListCompany | ListIndividual | null): onSelectEntityProps => {
         if (!item) return { value: "", uniqueID: null, id: 0 }
-        if ("national_id" in item) {
+        if ("national_id" in  item) {
             const i = item as ListIndividual;
             return {
                 id: i.id,

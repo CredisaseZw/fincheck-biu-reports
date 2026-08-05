@@ -207,13 +207,13 @@ export const handleTrackChangedArray = (initial: any[], current: any[]): any[] =
 };
 
 export const getEntityName =(item :Company | Individual | MiniCompany | MiniIndividual) =>{
-  return "national_id" in item
+  return "national_id" in  item
   ? item.full_name
   : item.registered_name
 }
 
 export const getEntityID = (item :Company | Individual | MiniCompany | MiniIndividual) =>{
-  return "national_id" in item
+  return "national_id" in  item
   ? item.national_id ?? "-"
   : item.registration_number ?? "-"
 }
@@ -265,3 +265,52 @@ export function encrypt(value: unknown, secret: string): string{
     ).toString();
     return encryption
 }
+
+export const summarizeClaims = (claims?: any[]) => {
+  if (!claims || claims.length === 0) return "";
+  return claims.map(c => {
+    let summary = `Claim on ${c.claim_date || 'unknown date'}`;
+    if (c.creditor_name) summary += ` by creditor ${c.creditor_name}`;
+    if (c.amount) summary += ` for ${c.currency || 'USD'} ${c.amount}`;
+    if (c.overdue_balance) summary += ` (Overdue: ${c.currency || 'USD'} ${c.overdue_balance})`;
+    summary += ` with status ${c.status || 'open'}.`;
+    return summary;
+  }).join("\n");
+};
+
+export const summarizeAbsconders = (absconders?: any[]) => {
+  if (!absconders || absconders.length === 0) return "";
+  return absconders.map(a => {
+    let summary = `Absconder record from ${a.start_date || 'unknown date'}`;
+    if (a.creditor_name) summary += ` by creditor ${a.creditor_name}`;
+    if (a.amount) summary += ` for ${a.currency || 'USD'} ${a.amount}`;
+    if (a.overdue_balance) summary += ` (Overdue: ${a.currency || 'USD'} ${a.overdue_balance})`;
+    summary += ` with status ${a.status || 'open'}.`;
+    return summary;
+  }).join("\n");
+};
+
+export const summarizeCourtJudgements = (judgements?: any[]) => {
+  if (!judgements || judgements.length === 0) return "";
+  return judgements.map(j => {
+    let summary = `Court judgement from ${j.court_name || 'unknown court'} on ${j.judgement_date || 'unknown date'}`;
+    if (j.amount) summary += ` for ${j.currency || 'USD'} ${j.amount}`;
+    if (j.plaintf_name) summary += ` by plaintiff ${j.plaintf_name}`;
+    summary += ` with status ${j.status || 'open'}.`;
+    return summary;
+  }).join("\n");
+};
+
+export const summarizePublicInfo = (publicInfo?: any[]) => {
+  if (!publicInfo || publicInfo.length === 0) return "";
+  return publicInfo.map(p => `Public info on ${p.record_date || 'unknown date'}: ${p.summary || ''}.`).join("\n");
+};
+
+export const combineInsolvencies = (individual: any) => {
+  const parts = [];
+  if (individual.claims?.length) parts.push(summarizeClaims(individual.claims));
+  if (individual.absconders?.length) parts.push(summarizeAbsconders(individual.absconders));
+  if (individual.court_judgements?.length) parts.push(summarizeCourtJudgements(individual.court_judgements));
+  if (individual.public_information?.length) parts.push(summarizePublicInfo(individual.public_information));
+  return parts.join("\n").trim();
+};

@@ -110,8 +110,9 @@ export const COMMON_RECORD_HEADERS: Header[] =[
     { name : "Debtor" ,textAlign : "end"},
     { name : "Creditor Name" ,textAlign : "end"},
     { name : "Currency" },
-    { name : "Amount"},
-
+    { name : "Amount", textAlign : "end"},
+    { name : "Overdue Balance" ,textAlign : "end"},
+    { name : "Account Number",},
 ]
 export const CLAIMS_HEADERS:Header[] = [...COMMON_RECORD_HEADERS,
     { name : "Claim Date" },
@@ -126,6 +127,7 @@ export const ABSCONDERS_HEADERS:Header [] = [
 export const COURT_HEADERS:Header[] = [
     {name : "Court Name", textAlign : "end"},
     {name : "Case Number", textAlign : "end"},
+    {name : "Plaintiff Name"},
     {name : "Currency" },
     {name : "Amount",},
     {name : "Judgement Date", textAlign : "end"},

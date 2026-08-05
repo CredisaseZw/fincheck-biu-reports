@@ -46,6 +46,8 @@ function useDirectors({
         reset,
         register,
         getValues,
+        setValue,
+        watch,
         handleSubmit, 
         control,
         formState : { errors }
@@ -152,6 +154,8 @@ function useDirectors({
         remove,
         onDelete,
         getValues,
+        setValue,
+        watch,
         errors,
         control,
         fields,

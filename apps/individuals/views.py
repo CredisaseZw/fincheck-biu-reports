@@ -12,6 +12,8 @@ from apps.users.models import User
 from rest_framework.response import Response
 from rest_framework import status as STATUS 
 from apps.utils.base_viewset import BaseAuthJSONViewSet
+from rest_framework.decorators import action
+from apps.utils.entity_lookup import entity_look_up
 import logging
 
 logger = logging.getLogger(__name__)
@@ -37,7 +39,8 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
         "employment_information",
         "next_of_kin"
     ).filter(is_deleted = False)
-    filter_backends = [IndividualSearchFilter, DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IndividualSearchFilter
     serializer_class = IndividualSerializer
 
     def get_serializer_class(self):
@@ -83,3 +86,31 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
                 "error" : "Access error."
             }, status=STATUS.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
+
+    @action(detail=False, methods=["get"], url_path="lookup")
+    def _lookup_individual(self, request, *args, **kwargs):
+        national_id = request.query_params.get("national_id", None)
+
+        if not national_id:
+            return Response(
+                {"error": "Missing national_id parameter."},
+                status=STATUS.HTTP_400_BAD_REQUEST
+            )
+
+        individual = Individuals.objects.filter(
+            national_id=national_id.strip().upper()
+        ).first()
+
+        if not individual:
+            instance = entity_look_up(type="individual", value=national_id.strip())
+            if instance:
+                individual = instance
+
+        if not individual:
+            return Response(
+                {"error": "Individual not found."},
+                status=STATUS.HTTP_404_NOT_FOUND
+            )
+            
+        serializer = IndividualSerializer(individual)
+        return Response(serializer.data, status=STATUS.HTTP_200_OK)

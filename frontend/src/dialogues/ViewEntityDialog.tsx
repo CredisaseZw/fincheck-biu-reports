@@ -324,13 +324,15 @@ function CreditRecordsSection({ claims, absconders, courtJudgements, insolvencyR
       {claims.length > 0 && (
         <div className="px-5 py-3 border-t border-gray-200 first:border-t-0">
           <div className="text-[8pt] font-extrabold uppercase tracking-wider text-[#1E5474] mb-2">Claims</div>
-          <DataTable headers={["Creditor", "Debtor", "Currency", "Amount", "Claim Date", "Status"]}>
+          <DataTable headers={["Creditor", "Debtor", "A/C No.", "Currency", "Amount", "Overdue", "Claim Date", "Status"]}>
             {claims.map((c) => (
               <tr key={c.id} className="border-b border-gray-100 even:bg-gray-50">
                 <td className="py-2.5 px-4">{_upper(c.creditor_name)}</td>
                 <td className="py-2.5 px-4">{_upper(c.debtor?.name)}</td>
+                <td className="py-2.5 px-4">{_val(c.account_number)}</td>
                 <td className="py-2.5 px-4">{_val(c.currency)}</td>
                 <td className="py-2.5 px-4 text-right">{_money(c.amount)}</td>
+                <td className="py-2.5 px-4 text-right">{_money(c.overdue_balance)}</td>
                 <td className="py-2.5 px-4 whitespace-nowrap">{_date(c.claim_date)}</td>
                 <td className="py-2.5 px-4 text-center">{_statusBadge(c.status)}</td>
               </tr>
@@ -343,13 +345,15 @@ function CreditRecordsSection({ claims, absconders, courtJudgements, insolvencyR
       {absconders.length > 0 && (
         <div className="px-5 py-3 border-t border-gray-200">
           <div className="text-[8pt] font-extrabold uppercase tracking-wider text-[#1E5474] mb-2">Absconders</div>
-          <DataTable headers={["Creditor", "Debtor", "Currency", "Amount", "Start Date", "Status"]}>
+          <DataTable headers={["Creditor", "Debtor", "A/C No.", "Currency", "Amount", "Overdue", "Start Date", "Status"]}>
             {absconders.map((a) => (
               <tr key={a.id} className="border-b border-gray-100 even:bg-gray-50">
                 <td className="py-2.5 px-4">{_upper(a.creditor_name)}</td>
                 <td className="py-2.5 px-4">{_upper(a.debtor?.name)}</td>
+                <td className="py-2.5 px-4">{_val(a.account_number)}</td>
                 <td className="py-2.5 px-4">{_val(a.currency)}</td>
                 <td className="py-2.5 px-4 text-right">{_money(a.amount)}</td>
+                <td className="py-2.5 px-4 text-right">{_money(a.overdue_balance)}</td>
                 <td className="py-2.5 px-4 whitespace-nowrap">{_date(a.start_date)}</td>
                 <td className="py-2.5 px-4 text-center">{_statusBadge(a.status)}</td>
               </tr>
@@ -362,14 +366,16 @@ function CreditRecordsSection({ claims, absconders, courtJudgements, insolvencyR
       {courtJudgements.length > 0 && (
         <div className="px-5 py-3 border-t border-gray-200">
           <div className="text-[8pt] font-extrabold uppercase tracking-wider text-[#1E5474] mb-2">Court Judgements</div>
-          <DataTable headers={["Court", "Case No.", "Currency", "Amount", "Judgement Date"]}>
+          <DataTable headers={["Court", "Case No.", "Plaintiff", "Currency", "Amount", "Judgement Date", "Status"]}>
             {courtJudgements.map((c) => (
               <tr key={c.id} className="border-b border-gray-100 even:bg-gray-50">
                 <td className="py-2.5 px-4">{_upper(c.court_name)}</td>
                 <td className="py-2.5 px-4">{_val(c.case_number)}</td>
+                <td className="py-2.5 px-4">{_upper(c.plaintf_name)}</td>
                 <td className="py-2.5 px-4">{_val(c.currency)}</td>
                 <td className="py-2.5 px-4 text-right">{_money(c.amount)}</td>
                 <td className="py-2.5 px-4 whitespace-nowrap">{_date(c.judgement_date)}</td>
+                <td className="py-2.5 px-4 text-center">{_statusBadge(c.status)}</td>
               </tr>
             ))}
           </DataTable>
@@ -605,13 +611,13 @@ interface props {
   id: number
 }
 function ViewEntityDialog({entity_type, id}:props) {
+  const [openControl, setOpenControl] = useState(false);
   const {
     data, 
     isLoading,
     error
-  } = useGetSingleEntity({ entity_type, id })
+  } = useGetSingleEntity({ entity_type, id, enabled: openControl });
   const {user} = useAuth()
-  const [openControl, setOpenControl] = useState(false);
   const { mutate } = useCreateEnquiry()  
   const printRef = useRef(null);
 

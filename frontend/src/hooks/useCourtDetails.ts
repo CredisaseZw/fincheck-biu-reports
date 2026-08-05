@@ -9,13 +9,15 @@ import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
-import { CURRENCY } from "@/constants";
+import { CURRENCY, SETTLEMENT_OPTIONS } from "@/constants";
 
 const schema = z.object({
     id : z.number().optional(),
     court_name : z.string().min(1,"Court name is required"),
     case_number : z.string().min(1,"A valid case number is required"),
+    plaintf_name :  z.string().optional(),
     currency :CURRENCY,
+    status: SETTLEMENT_OPTIONS,
     amount : z.number("Please enter a valid amount").positive("Value should be a positive number"),
     judgement_date :  z.string().min(1, "Date is required")
 })

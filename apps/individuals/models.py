@@ -108,6 +108,13 @@ class Individuals(BaseModel):
         content_type_field="subject_content_type",
         object_id_field="subject_object_id",
     )
+
+    def save(self, *args, **kwargs):
+        if self.full_name:
+            self.full_name = self.full_name.title()
+        if self.national_id:
+            self.national_id = self.national_id.strip().upper()
+        super().save(*args, **kwargs)
     class Meta:
         verbose_name = _("Individual")
         verbose_name_plural = _("Individuals")

@@ -70,13 +70,13 @@ function InternalUsers() {
           {
             users.map((item, idx)=>{
               const name = item.client
-              ? "national_id" in item.client
+              ? "national_id" in  item.client
                 ? `${item.client.full_name}`
                 :`${item.client.registered_name}`
               : item.full_name
 
               const uniqueId = item.client
-              ? "national_id" in item.client
+              ? "national_id" in  item.client
                 ? `${item.client.national_id ?? "-"}`
                 :`${item.client.registration_number ?? "-"}`
               : "-"

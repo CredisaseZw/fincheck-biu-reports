@@ -16,6 +16,7 @@ from apps.users.models import User
 from apps.directors.models import CompanyDirector
 from apps.utils.helpers import validate_serializer
 from apps.directors.serializers import CompanyDirectorWriteSerializer, CompanyDirectorsSerializer
+from apps.directors.tasks import sync_director_to_individual_task
 from rest_framework.decorators import action
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
@@ -32,7 +33,8 @@ logger = logging.getLogger(__name__)
 
 class CompaniesViewSet(BaseAuthJSONViewSet):
     filterset_fields = ["refer_type"]
-    filter_backends = [CompanySearchFilter, DjangoFilterBackend]
+    filter_backends = [ DjangoFilterBackend ]
+    filterset_class = CompanySearchFilter
     ordering_fields = ["created_at", "registered_name", "trading_name"]
 
     queryset = Company.objects.prefetch_related(
@@ -126,11 +128,15 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                         pk=director_id,
                         company=company,
                     ).update(**validated_data)
+                    d_id = director_id
                 else:
-                    CompanyDirector.objects.create(
+                    director = CompanyDirector.objects.create(
                         company=company,
                         **validated_data,
                     )
+                    d_id = director.id
+                
+                transaction.on_commit(lambda d=d_id: sync_director_to_individual_task.delay(d))
 
         company.refresh_from_db()
         return Response(

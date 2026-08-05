@@ -302,6 +302,9 @@ CACHES = {
 }
 
 # LOGGING
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "ERROR").upper()
 LOGGING = {
     "version": 1,
@@ -318,10 +321,18 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
+        "error_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "errors.log"),
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "verbose",
+            "level": "ERROR",
+        },
     },
     "loggers": {
         "apps": {
-            "handlers": ["console"],
+            "handlers": ["console", "error_file"],
             "level": LOG_LEVEL,
             "propagate": True,
         },

@@ -74,11 +74,11 @@ function LiveReports() {
                 >
                     {
                         reports.map((item)=>{
-                            const client_bottom_level = "national_id" in item.client
+                            const client_bottom_level = "national_id" in  item.client
                             ? item.client.email ?? "-"
                             : item.client.registration_number ?? item.client.trading_name ??"-"
 
-                            const subject_bottom_level = "national_id" in item.subject
+                            const subject_bottom_level = "national_id" in  item.subject
                             ? item.subject.email ?? "-"
                             : item.subject.registration_number ?? item.subject.trading_name ?? "-"
                             

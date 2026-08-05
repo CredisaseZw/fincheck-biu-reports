@@ -3,9 +3,10 @@ import type { Company, EntityValue, Individual } from "@/types/core";
 import { useQuery } from "@tanstack/react-query";
 interface props {
   entity_type : EntityValue,
-  id: number
+  id: number,
+  enabled : boolean
 }
-function useGetSingleEntity({entity_type, id}:props) {
+function useGetSingleEntity({entity_type, id, enabled}:props) {
     const {
         data, 
         isLoading,
@@ -20,7 +21,8 @@ function useGetSingleEntity({entity_type, id}:props) {
             const response = await api.get<Company | Individual>(LINKS[entity_type]);
             return response.data
 
-        }
+        },
+        enabled : enabled
     })
     return {
         data, 

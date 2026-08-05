@@ -275,6 +275,8 @@ export interface Claim {
   claim_date: string;
   status: CreditRecordStatus;
   debtor : MiniDebtor
+  account_number : string | null,
+  overdue_balance : string | null
 }
 
 export interface Absconder {
@@ -285,6 +287,8 @@ export interface Absconder {
   start_date: string;
   status: CreditRecordStatus;
   debtor : MiniDebtor
+  account_number : string | null,
+  overdue_balance : string | null
 }
 
 export interface CourtJudgement {
@@ -294,6 +298,8 @@ export interface CourtJudgement {
   currency: Currencies;
   judgement_date: string;
   amount: string;
+  status: CreditRecordStatus;
+  plaintf_name:  string | null
 }
 
 export interface InsolvencyRecord {

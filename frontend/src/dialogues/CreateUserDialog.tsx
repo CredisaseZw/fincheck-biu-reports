@@ -70,7 +70,7 @@ function CreateUserDialog({ editingUser, externalOpen, onExternalOpenChange }: C
     const renderExternalClientCard = () => {
         if (!isEditMode || userType !== "external" || !editingUser?.client) return null;
         const client = editingUser.client;
-        const isIndividual = "national_id" in client;
+        const isIndividual = "national_id" in  client;
         const displayName = isIndividual ? client.full_name : client.registered_name;
         const displayId = isIndividual ? client.national_id : (client.registration_number ?? "-");
 

@@ -66,6 +66,15 @@ function CourtDetails({
                   )}
                 </TableCell>
                 <TableCell>
+                  <Input
+                    variant="sm"  
+                    {...register(`court_judgements.${idx}.plaintf_name`)} 
+                  />
+                  {errors.court_judgements?.[idx]?.plaintf_name && (
+                      <p className="text-destructive text-sm">{errors.court_judgements[idx].plaintf_name.message}</p>
+                  )}
+                </TableCell>
+                <TableCell>
                   <Controller
                       control={control}
                       name={`court_judgements.${idx}.currency`}
@@ -106,6 +115,25 @@ function CourtDetails({
                   )}
                 </TableCell>
                 <TableCell>
+                    <Controller
+                        control={control}
+                        name={`court_judgements.${idx}.status`}
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="open">Open</SelectItem>
+                                    <SelectItem value="settled">Settled</SelectItem>
+                                    <SelectItem value="disputed">Disputed</SelectItem>
+                                    <SelectItem value="written_off">Written Off</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                </TableCell>
+                <TableCell>
                   <Button
                     type="button"
                     variant="ghost"
@@ -134,6 +162,7 @@ function CourtDetails({
                   case_number: "",
                   currency :"USD",
                   amount: 0,
+                  status:  "open",
                   judgement_date: "",
               })}
           >

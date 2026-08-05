@@ -2,6 +2,7 @@ from django.db.models import Model
 from django.db import IntegrityError
 from apps.individuals.models import Individuals
 from apps.companies.models import Company
+from django.contrib.contenttypes.models import ContentType
 from apps.credit_records.models import Claims, Absconders, CourtJudgement
 from typing import List, Optional
 from pydantic import BaseModel
@@ -12,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Individual(BaseModel):
+class IndividualInterface(BaseModel):
     fins_number: str
     national_id: str
     firstname: str
@@ -23,7 +24,7 @@ class Individual(BaseModel):
     address: Optional[str] = None
     risk_class: Optional[str] = None
 
-class Company(BaseModel):
+class CompanyInterface(BaseModel):
     fins_number: str
     registration_number: Optional[str] = None
     registration_name: Optional[str] = None
@@ -62,14 +63,14 @@ class CourtRecord(BaseModel):
 
 class LookupCompanyResponse(BaseModel):
     found: bool
-    company: Company
+    company: CompanyInterface
     summary: Summary
     claims: List[Claim]
     court_records: List[CourtRecord]
 
 class LookupIndividualResponse(BaseModel):
     found: bool
-    individual: Individual
+    individual: IndividualInterface
     summary: Summary
     claims: List[Claim]
     court_records: List[CourtRecord]
@@ -84,13 +85,24 @@ LINKS = {
     "individual": "/lookup-person/"
 }
 
+def _handle_currency_type(value: str) -> str:
+    if not value:
+        return "USD"
+    if value == "Not Given" or value == "Not Specified" or len(value) > 4:
+        return "USD"
+    if value[:2] == "ZW":
+        return "ZiG"
+    if value[:2] == "US":
+        return "USD"
+    return value.upper()
 
 def _save_claims_absconder(claims: List[Claim], debtor_object_id: int, debtor_type: str):
-    for claim in claims:
-        debtor_content_type = get_content_type_id(
-            subject_object_id=debtor_object_id,
-            subject_type=debtor_type
-        )
+    debtor_content_type = get_content_type_id(
+        subject_object_id=debtor_object_id,
+        subject_type=debtor_type,
+        return_id=False
+    )
+    for claim in claims:    
         claim_data = {
             'debtor_content_type': debtor_content_type,
             'debtor_object_id': debtor_object_id,
@@ -100,7 +112,7 @@ def _save_claims_absconder(claims: List[Claim], debtor_object_id: int, debtor_ty
             'status': 'settled' if claim.is_closed else 'open',
             **({'account_number': claim.account_number} if claim.account_number else {}),
             **({'creditor_name': claim.company_creditor_fins__registration_name} if claim.company_creditor_fins__registration_name else {}),
-            **({'currency': claim.currency_type.upper()} if claim.currency_type else {}),
+            **({'currency': _handle_currency_type(claim.currency_type.upper())} if claim.currency_type else {}),
             **({'overdue_balance': claim.overdue_balance} if claim.overdue_balance else {}),
         }
         try:
@@ -122,17 +134,19 @@ def _save_claims_absconder(claims: List[Claim], debtor_object_id: int, debtor_ty
 
 
 def _save_court_judgement(courts: List[CourtRecord], debtor_object_id: int, debtor_type: str):
+    debtor_content_type = get_content_type_id(
+        subject_object_id=debtor_object_id,
+        subject_type=debtor_type,
+        return_id=False
+    )
+    
     for record in courts:
-        debtor_content_type = get_content_type_id(
-            subject_object_id=debtor_object_id,
-            subject_type=debtor_type
-        )
         record_data = {
             'subject_content_type': debtor_content_type,
             'subject_object_id': debtor_object_id,
             'amount': record.amount,
             'status': 'settled' if record.is_closed else 'open',
-            **({'currency': record.currency_type.upper()} if record.currency_type else {}),
+            **({'currency': _handle_currency_type(record.currency_type.upper())} if record.currency_type else {}),
             **({'case_number': record.case_number} if record.case_number else {}),
             **({'court_name': record.court_name} if record.court_name else {}),
             **({'judgement_date': record.judgement_date} if record.judgement_date else {}),

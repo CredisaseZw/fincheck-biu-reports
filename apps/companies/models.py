@@ -308,7 +308,7 @@ class CompanyOperations(BaseModel):
         on_delete=models.CASCADE,
         related_name="operations"
     )
-    industry = models.CharField(max_length=255, blank=True)
+    industry = models.CharField(max_length=300, blank=True)
     target_markets = models.TextField(blank=True)
     operations_territories = models.TextField(blank=True)
     property_ownership = models.TextField(blank=True)

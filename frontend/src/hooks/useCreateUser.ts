@@ -110,7 +110,7 @@ function useCreateUser(options?: UseCreateUserOptions) {
 
       if (isExternal && editingUser.client) {
         const client = editingUser.client;
-        const isIndividual = "national_id" in client;
+        const isIndividual = "national_id" in  client;
         setSelectedClient({
           id: client.id,
           value: isIndividual ? client.full_name : client.registered_name,

@@ -7,10 +7,12 @@ class Claims(BaseFinancialRecord):
     class SettlementOptions(models.TextChoices):
         OPEN = "open", "Open"
         SETTLED = "settled", "Settled"
+        DISPUTED = "disputed", "Disputed"
+        WRITTEN_OFF = "written_off", "Written Off"
 
     claim_date = models.DateField()
     status = models.CharField(
-        max_length=10,
+        max_length=25,
         choices=SettlementOptions.choices,
         default=SettlementOptions.OPEN
     )

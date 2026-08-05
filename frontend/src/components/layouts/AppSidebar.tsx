@@ -34,7 +34,7 @@ export function AppSidebar() {
     const [changePasswordOpen, setChangePasswordOpen] = useState(false)
     const name =  useMemo(()=>{
         return user?.client
-        ? "national_id" in user.client
+        ? "national_id" in  user.client
             ? user.client.full_name
             : user.client.registered_name
         : user?.full_name
