@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { Report } from "@/types/core";
 import { useQueryClient } from "@tanstack/react-query";
+import { GENDERS } from "@/constants";
 
 const MaritalStatus = z.enum(["single", "married", "divorced", "widowed"], {message : "Marital Status is required"})
 
@@ -22,7 +23,7 @@ export const individualSchema = z.object({
         const passportRegex =/^[A-Za-z]{2}\d{7}$/
         return nidRegex.test(val) || passportRegex.test(val)
     }, { message: "A valid Zimbabwe national ID or passport number is required" }),    date_of_birth: z.string().min(1, "Date of birth is required"),
-    gender: z.string().min(1, "Gender is required").max(50),
+    gender: GENDERS,
     marital_status: MaritalStatus.optional(),
     nationality: z.string().min(1, "Nationality is required").max(100),
     mobile_number: z.string().min(1, "Mobile number is required").max(50),

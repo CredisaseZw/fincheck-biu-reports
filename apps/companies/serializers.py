@@ -42,6 +42,8 @@ from django.contrib.contenttypes.models import ContentType
 from apps.directors.serializers import DirectorSerializer
 from apps.utils.base_serialisers import UpdatedBySerializerMixin
 from apps.shareholding.serializers import ShareholdingsSerializers
+from apps.utils.entity_lookup import EntityLookUp
+entity =  EntityLookUp()
 # GET OPERATIONS
 class CompanyOverviewSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
     class Meta:
@@ -98,8 +100,12 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
    
     def to_representation(self, instance):
-        data =  super().to_representation(instance)
+        payload = entity.hit_endpoint("company", instance.registration_number)
+        if payload:
+            chained_data = entity._prepare_serializer_individual_data(payload, instance.pk)
+            entity.sync_individual_records(instance, chained_data)
 
+        data =  super().to_representation(instance)
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
         financials = instance.financials.first()

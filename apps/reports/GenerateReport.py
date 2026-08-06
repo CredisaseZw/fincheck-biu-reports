@@ -308,9 +308,13 @@ body {{
 }}
 
 .report {{
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+  display: block;
+}}
+.report > * {{
+  margin-bottom: 22px;
+}}
+.report > *:last-child {{
+  margin-bottom: 0;
 }}
 
 /* ── Header ── */
@@ -386,7 +390,6 @@ body {{
   border-radius: 8px;
   overflow: hidden;
   background: #ffffff;
-  break-inside: avoid;
 }}
 .card-title {{
   background: {c.PRIMARY};
@@ -476,7 +479,7 @@ body {{
 
 /* ── Grid table (4-col) ── */
 .grid-table {{ width: 100%; border-collapse: collapse; }}
-.grid-table tr {{ border-bottom: 1px solid #F1F5F9; }}
+.grid-table tr {{ border-bottom: 1px solid #F1F5F9; break-inside: avoid; }}
 .grid-table tr:last-child {{ border-bottom: none; }}
 .grid-table td {{
   padding: 13px 20px;
@@ -500,7 +503,7 @@ body {{
 
 /* ── Data tables ── */
 .data-table {{ width: 100%; border-collapse: collapse; }}
-.data-table thead tr {{ background: {c.ACCENT}; }}
+.data-table thead tr {{ background: {c.ACCENT}; break-inside: avoid; }}
 .data-table th {{
   color: #ffffff;
   padding: 8px 10px;
@@ -510,7 +513,7 @@ body {{
   text-transform: uppercase;
   letter-spacing: .4px;
 }}
-.data-table tbody tr {{ border-bottom: 1px solid #F1F5F9; }}
+.data-table tbody tr {{ border-bottom: 1px solid #F1F5F9; break-inside: avoid; }}
 .data-table tbody tr:last-child {{ border-bottom: none; }}
 .data-table tbody tr:nth-child(even) {{ background: {c.ROW}; }}
 .data-table td {{
@@ -552,11 +555,24 @@ body {{
   padding: 18px 20px;
   border-right: 1px solid {c.BORDER};
   border-bottom: 1px solid {c.BORDER};
-  page-break-inside: avoid;
 }}
 .dir-card:nth-child(even) {{ border-right: none; }}
 .dir-card:last-child {{ border-bottom: none; }}
 .dir-card:nth-last-child(2):nth-child(odd) {{ border-bottom: none; }}
+
+/* ── Bankers ── */
+.bank-grid {{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}}
+.bank-card {{
+  padding: 18px 20px;
+  border-right: 1px solid {c.BORDER};
+  border-bottom: 1px solid {c.BORDER};
+}}
+.bank-card:nth-child(even) {{ border-right: none; }}
+.bank-card:last-child {{ border-bottom: none; }}
+.bank-card:nth-last-child(2):nth-child(odd) {{ border-bottom: none; }}
 .dir-name {{
   font-size: 10pt;
   font-weight: 800;
@@ -573,10 +589,18 @@ body {{
   text-transform: uppercase;
   letter-spacing: .3px;
   color: {c.MUTED};
-  min-width: 100px;
+  min-width: 80px;
   flex-shrink: 0;
 }}
-.dir-v {{ font-size: 8.5pt; font-weight: 600; color: {c.TEXT}; text-transform: uppercase; }}
+.dir-v {{
+  font-size: 8.5pt;
+  font-weight: 600;
+  color: {c.TEXT};
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  min-width: 0;
+}}
 
 /* ── Credit sub-sections ── */
 .cr-sub {{ padding: 16px 20px 12px; border-top: 1px solid {c.BORDER}; }}
@@ -777,12 +801,12 @@ body {{
     def _render_company_contact(self) -> str:
         s = self._subject
         rows = [
+            ("Address (Registered)", self._u(s.get("address_registered")), True),
+            ("Address (Operations)", self._u(s.get("address_operations")), True),
             ("Telephone", self._e(s.get("telephone_number"))),
             ("Mobile", self._e(s.get("mobile_number"))),
             ("Email", self._e(s.get("email"))),
             ("Website", self._e(s.get("website"))),
-            ("Address (Registered)", self._u(s.get("address_registered")), True),
-            ("Address (Operations)", self._u(s.get("address_operations")), True),
         ]
         return self._card("Contact Details", self._grid_table(rows))
 
@@ -803,18 +827,31 @@ body {{
 
         cards = ""
         for d in dirs:
-            solvencies = self._u(d.get("insolvencies_judgements")) if d.get("insolvencies_judgements") else "NONE RECORDED"
-            
+            # Support both nested individual_detail and flat structure
+            ind = d.get("individual_detail") or d
+
+            solvencies = self._u(ind.get("insolvencies_judgements")) if ind.get("insolvencies_judgements") else "CLEAR TO DATE IN THE NAME OF THE BUSINESS PRINCIPALS"
+
+            # Support both old and new field names
+            full_name = ind.get("full_name") or d.get("full_name", "")
+            national_id = ind.get("national_id") or d.get("national_id")
+            gender = ind.get("gender") or d.get("gender", "")
+            dob = ind.get("date_of_birth") or ind.get("dob") or d.get("dob")
+            is_pep = ind.get("is_pep") if ind.get("is_pep") is not None else d.get("is_pep")
+            address_latest = ind.get("residential_address") or ind.get("address_latest") or d.get("address_latest")
+            address_prev = ind.get("address_prev") or d.get("address_prev")
+            email = ind.get("email") or d.get("email")
+            mobile = ind.get("mobile_number") or ind.get("mobile_phone_number") or d.get("mobile_phone_number")
+
             dir_rows = [
-                ("National ID", self._e(d.get("national_id"))),
-                ("Gender", self._label(d.get("gender", ""))),
-                ("Date of Birth", self._date(d.get("dob"))),
-                ("PEP", "YES" if d.get("is_pep") else "NO"),
-                ("Address (Latest)", self._u(d.get("address_latest"))),
-                ("Address (Previous)", self._u(d.get("address_prev"))),
-                ("Email", self._e(d.get("email"))),
-                ("Mobile", self._e(d.get("mobile_phone_number"))),
-                ("Insolvencies", solvencies),
+                ("National ID", self._e(national_id)),
+                ("Gender", self._label(gender)),
+                ("Date of Birth", self._date(dob)),
+                ("PEP", "YES" if is_pep else "NO"),
+                ("Address (Latest)", self._u(address_latest)),
+                ("Address (Previous)", self._u(address_prev)),
+                ("Email", self._e(email)),
+                ("Mobile", self._e(mobile)),
             ]
             
             rows_html = ""
@@ -824,16 +861,19 @@ body {{
                     if val_str and val_str not in ("-", "—"):
                         rows_html += f'<div class="dir-row"><span class="dir-l">{lbl}</span><span class="dir-v">{val}</span></div>\n              '
 
+            position = d.get("position", "")
+
             cards += f"""
             <div class="dir-card">
               <div class="dir-name">
-                {self._u(d.get("full_name"))}
-                <span class="dir-pos"> — {self._label(d.get("position", ""))}</span>
+                {self._u(full_name)}
+                <span class="dir-pos"> — {self._label(position)}</span>
               </div>
               {rows_html.strip()}
+              <div class="dir-v" style="margin-top: 10px; display: block; border-top: 1px dashed #E2E8F0; padding-top: 10px;">{solvencies}</div>
             </div>"""
 
-        return self._card("Directors", f'<div class="dir-grid">{cards}</div>', page_break=True)
+        return self._card("Directors", f'<div class="dir-grid">{cards}</div>')
 
     def _render_shareholding(self) -> str:
         sh = self._subject.get("shareholdings") or {}
@@ -1014,7 +1054,7 @@ body {{
         p_html = public_html()
         if p_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Public Information</div>{p_html}</div>')
 
-        return self._card("Credit Records", "".join(parts), page_break=True)
+        return self._card("Credit Records", "".join(parts))
 
     def _render_trade_references(self) -> str:
         refs = self._subject.get("trade_references") or []
@@ -1093,7 +1133,7 @@ body {{
             branch_html = f'<span class="dir-pos"> — {branch}</span>' if branch and branch != "—" else ""
 
             cards += f"""
-            <div class="dir-card">
+            <div class="bank-card">
               <div class="dir-name">
                 {bank_name}
                 {branch_html}
@@ -1101,7 +1141,7 @@ body {{
               {rows_html.strip()}
             </div>"""
 
-        return self._card("Bankers", f'<div class="dir-grid">{cards}</div>')
+        return self._card("Bankers", f'<div class="bank-grid">{cards}</div>')
 
     def _render_professionals(self) -> str:
         pp = self._subject.get("professional_partners") or {}

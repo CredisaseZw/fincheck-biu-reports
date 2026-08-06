@@ -15,7 +15,9 @@ from rest_framework import status as STATUS
 from apps.users.models import User
 from apps.directors.models import CompanyDirector
 from apps.utils.helpers import validate_serializer
-from apps.directors.serializers import CompanyDirectorWriteSerializer, CompanyDirectorsSerializer
+from apps.directors.serializers import CompanyDirectorsSerializer
+from apps.individuals.models import Individuals
+from apps.individuals.serializers import IndividualDirectorSerializer
 from apps.directors.tasks import sync_director_to_individual_task
 from rest_framework.decorators import action
 from django.db import transaction
@@ -102,46 +104,57 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
     
     @action(detail=True, methods=["POST"], url_path="directors")
     def update_or_create_directors(self, request: Request, *args, **kwargs):
-        user:User = request.user
+        user: User = request.user
         if not user.is_staff:
             return Response({
-                "error" : "Access error."
-            }, status=STATUS.HTTP_403_FORBIDDEN)        
+                "error": "Access error."
+            }, status=STATUS.HTTP_403_FORBIDDEN)
 
         company = self.get_object()
         directors = request.data.get("directors", [])
 
-        validated_directors = []
+        validated_data = []
         for d in directors:
-            serializer = CompanyDirectorWriteSerializer(data=d)
-            error = validate_serializer(serializer=serializer)
-            if error:
-                logger.error(f"Validation error for director: {serializer.errors}")
-                return error
-            validated_directors.append((d.get("id"), serializer.validated_data))
+            position = d.pop("position", None)
+            if not position:
+                logger.error(f"Missing position for director: {d}")
+                return Response({
+                    "error": "Position is required for each director."
+                }, status=STATUS.HTTP_400_BAD_REQUEST)
 
+            individual_id = d.get("id")
+            director_serializer = IndividualDirectorSerializer(data=d)
+            error = validate_serializer(serializer=director_serializer)
+            if error:
+                logger.error(f"Validation error for director: {d}, Error: {error.data}")
+                return error
+
+            i_data = director_serializer.validated_data
+            i_data.pop("id", None) 
+            individual = None
+            if individual_id:
+                individual = Individuals.objects.filter(
+                    pk=individual_id,
+                ).first()
+            if individual is None:
+                individual = Individuals.objects.create(**i_data)
+            else:
+                Individuals.objects.filter(pk=individual.pk).update(**i_data)
+                individual.refresh_from_db()
+
+            validated_data.append((individual, position))
         with transaction.atomic():
-            for director_id, validated_data in validated_directors:
-                validated_data['updated_by'] = user
-                if director_id:
-                    CompanyDirector.objects.filter(
-                        pk=director_id,
-                        company=company,
-                    ).update(**validated_data)
-                    d_id = director_id
-                else:
-                    director = CompanyDirector.objects.create(
-                        company=company,
-                        **validated_data,
-                    )
-                    d_id = director.id
-                
-                transaction.on_commit(lambda d=d_id: sync_director_to_individual_task.delay(d))
+            for individual, position in validated_data:
+                CompanyDirector.objects.update_or_create(
+                    company=company,
+                    individual=individual,
+                    defaults={"position": position},
+                )
 
         company.refresh_from_db()
         return Response(
-            CompanyDirectorsSerializer(instance=company).data,  
-            status=STATUS.HTTP_200_OK
+            CompanyDirectorsSerializer(instance=company).data,
+            status=STATUS.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["POST"], url_path="shareholders")

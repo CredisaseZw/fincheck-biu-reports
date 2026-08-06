@@ -21,9 +21,12 @@ class CompanyDirector(BaseModel):
         on_delete=models.CASCADE,
         related_name='directors'
     )
-    full_name = models.CharField(
-        max_length=50,
-        help_text=_("Director full name")
+    individual = models.ForeignKey(
+        "individuals.Individuals",
+        on_delete=models.CASCADE,
+        related_name='directorship',
+        blank=True,
+        null=True
     )
     position = models.CharField(
         max_length=20,
@@ -31,44 +34,6 @@ class CompanyDirector(BaseModel):
         default=Positions.DIRECTOR,
         help_text=_("Director position in the company")
     )
-    gender = models.CharField(
-        max_length=10,
-        choices=DirectorGender.choices,
-        default=DirectorGender.MALE
-    )
-    national_id = models.CharField(
-        _("National ID | Passport Number"),
-        max_length=15,
-    )
-    insolvencies_judgements = models.TextField(
-        _("Insolvencies, Judgements, Defaults"),
-        blank=True,
-        null=True
-    )
-    dob = models.DateField(
-        help_text= _("Director Date of birth"),
-        blank = True,
-        null = True
-    )
-    address_latest = models.TextField(help_text= _("Director Primary Address"))
-    address_prev = models.TextField(
-        help_text= _("Director Prev Address"),
-        blank = True,
-        null = True
-    )
-    email = models.EmailField(
-        max_length=50,
-        blank=True, 
-        null=True,
-        help_text=_("Director Email"),
-    )
-    mobile_phone_number = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        help_text=_("Director Mobile Phone Number")
-    )
-    is_pep = models.BooleanField(default= False)
     class Meta:
         ordering = ["-created_at"]
         db_table = 'company_directors'
@@ -76,4 +41,4 @@ class CompanyDirector(BaseModel):
         verbose_name_plural = "Company Directors"
 
     def __str__(self):
-        return f"{self.full_name} | ({self.company})"
+        return f"{self.individual.full_name} | ({self.company})"

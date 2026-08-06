@@ -199,18 +199,18 @@ function useAddReportDialogue(list_report?: ListReport) {
         company.directors&&
         company.directors.length > 0
         ? company.directors.map(item=>({
-          id : item.id,
-          full_name : item.full_name,
-          gender : item.gender ?? "",
-          dob : item.dob ?? "",
+          id : item.individual_detail.id,
+          full_name : item.individual_detail.full_name,
+          gender : item.individual_detail.gender ?? "",
+          dob : item.individual_detail.dob ?? "",
           position : item.position,
-          is_pep : item.is_pep,
-          address_latest :  item.address_latest ?? "",
-          address_prev : item.address_prev ?? "",
-          national_id : item.national_id ?? "",
-          email : item.email ?? "",
-          mobile_phone_number : item.mobile_phone_number ?? "",
-          insolvencies_judgements : item.insolvencies_judgements ?? ""
+          is_pep : item.individual_detail.is_pep,
+          residential_address :  item.individual_detail.residential_address ?? "",
+          address_prev : item.individual_detail.address_prev ?? "",
+          national_id : item.individual_detail.national_id ?? "",
+          email : item.individual_detail.email ?? "",
+          mobile_number : item.individual_detail.mobile_phone_number ?? "",
+          insolvencies_judgements : item.individual_detail.insolvencies_judgements ?? ""
         }))
         : [{
             full_name :"",
@@ -218,7 +218,7 @@ function useAddReportDialogue(list_report?: ListReport) {
             position : "director",
             national_id : "",
             is_pep : false,
-            address_latest : "",
+            residential_address : "",
             email :"",
         }]
       )

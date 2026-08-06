@@ -174,22 +174,22 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
     <SectionCard title="Directors">
       <div className="grid grid-cols-1 md:grid-cols-2">
         {directors.map((d) => (
-          <div key={d.id} className="p-4 border-b border-r border-gray-200 last:border-b-0">
+          <div key={d.individual_detail.id} className="p-4 border-b border-r border-gray-200 last:border-b-0">
             <div className="text-[10pt] font-extrabold text-[#051C2C] mb-2 pb-2 border-b border-blue-50">
-              {_upper(d.full_name)}
+              {_upper(d.individual_detail.full_name)}
               <span className="font-medium text-[8.5pt] text-[#1E5474] ml-2">— {_label(d.position)}</span>
             </div>
             <div className="space-y-1">
               {[
-                ["National ID", _val(d.national_id)],
-                ["Gender", _label(d.gender)],
-                ["Date of Birth", _date(d.dob)],
-                ["PEP", d.is_pep ? "YES" : "NO"],
-                ["Address (Latest)", _upper(d.address_latest)],
-                ["Address (Previous)", _upper(d.address_prev)],
-                ["Email", _val(d.email)],
-                ["Mobile", _val(d.mobile_phone_number)],
-                ["Insolvencies", d.insolvencies_judgements ? _upper(d.insolvencies_judgements) : "NONE RECORDED"],
+                ["National ID", _val(d.individual_detail.national_id)],
+                ["Gender", _label(d.individual_detail.gender)],
+                ["Date of Birth", _date(d.individual_detail.dob)],
+                ["PEP", d.individual_detail.is_pep ? "YES" : "NO"],
+                ["Address (Latest)", _upper(d.individual_detail.residential_address)],
+                ["Address (Previous)", _upper(d.individual_detail.address_prev)],
+                ["Email", _val(d.individual_detail.email)],
+                ["Mobile", _val(d.individual_detail.mobile_phone_number)],
+                ["Insolvencies", d.individual_detail.insolvencies_judgements ? _upper(d.individual_detail.insolvencies_judgements) : "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"],
               ].map(([lbl, val]) => {
                 const v = String(val).trim();
                 if (!v || v === "—") return null;

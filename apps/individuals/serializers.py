@@ -27,7 +27,8 @@ from apps.credit_records.serializers import (
     PublicInformationSerializer,
 )
 from apps.utils.base_serialisers import UpdatedBySerializerMixin
-
+from apps.utils.entity_lookup import EntityLookUp
+entity = EntityLookUp()
 class EmploymentInformationSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
     class Meta:
         model = EmploymentInformation
@@ -47,7 +48,7 @@ class ClientIndividualSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class IndividualSerializer(serializers.ModelSerializer):
-    claims = ClaimsSerializer(read_only= True, many = True)
+    claims = ClaimsSerializer(read_only=True, many=True)
     absconders = AbscondersSerializer(read_only= True, many = True)
     court_judgements = CourtJudgementSerializer(read_only= True, many = True)
     insolvency_records = InsolvencyRecordSerializer(read_only= True, many = True)
@@ -59,8 +60,12 @@ class IndividualSerializer(serializers.ModelSerializer):
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
 
     def to_representation(self, instance):
-        data =  super().to_representation(instance)
-    
+        payload = entity.hit_endpoint("individual", instance.national_id)
+        if payload:
+            chained_data = entity._prepare_serializer_individual_data(payload, instance.pk)
+            entity.sync_individual_records(instance, chained_data)
+
+        data = super().to_representation(instance)
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
         financials = instance.financials.first()
@@ -83,6 +88,22 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "nationality", "refer_type", "created_at",
         ]
 
+class IndividualDirectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individuals
+        fields = [
+            "id",
+            "full_name",
+            "national_id",
+            "gender",
+            "date_of_birth",
+            "residential_address",
+            "mobile_number",
+            "email",
+            "address_prev",
+            "insolvencies_judgements",
+            "is_pep",
+        ]
 
 # Write Serializers 
 class IndividualCreateSerializer(serializers.ModelSerializer):

@@ -13,9 +13,10 @@ from rest_framework.response import Response
 from rest_framework import status as STATUS 
 from apps.utils.base_viewset import BaseAuthJSONViewSet
 from rest_framework.decorators import action
-from apps.utils.entity_lookup import entity_look_up
+from apps.utils.entity_lookup import EntityLookUp
 import logging
 
+entity = EntityLookUp()
 logger = logging.getLogger(__name__)
 
 # Create your views here.
@@ -97,15 +98,17 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
                 status=STATUS.HTTP_400_BAD_REQUEST
             )
 
-        individual = Individuals.objects.filter(
-            national_id=national_id.strip().upper()
-        ).first()
-
+        individual = None
+        search_value = national_id.strip().upper()
+        instance = entity.entity_look_up(type="individual", value=search_value)
+        if instance:
+            individual = instance
+        
         if not individual:
-            instance = entity_look_up(type="individual", value=national_id.strip())
-            if instance:
-                individual = instance
-
+            individual = Individuals.objects.filter(
+                national_id=search_value
+            ).first()
+        
         if not individual:
             return Response(
                 {"error": "Individual not found."},

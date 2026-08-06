@@ -16,8 +16,8 @@ function isValidMonthEndDate(value: string) {
 }
 
 function useBusinessReport() {
-    const [monthEndDate, setMonthEndDateState] = useState("25");
-    const [currentYear, setCurrentYear] = useState("2026");
+    const [monthEndDate, setMonthEndDateState] = useState("26");
+    const [currentYear, setCurrentYear] = useState(String(new Date().getFullYear()));
     const [searchCategory, setSearchCategory] = useState("subject");
     const [mode, setMode] = useState<"normal" | "search">("normal");
     const [searchValue, setSearchValue] = useState("");

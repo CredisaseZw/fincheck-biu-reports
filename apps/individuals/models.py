@@ -28,7 +28,7 @@ class Individuals(BaseModel):
         DIVORCED = "divorced", "Divorced"
         WIDOWED = "widowed", "Widowed"
     
-    full_name = models.CharField(_("Full name"), max_length=255, unique = True)
+    full_name = models.CharField(_("Full name"), max_length=255)
     national_id = models.CharField(_("National ID / Passport"), max_length=100, unique=True)
     date_of_birth = models.DateField(_("Date of birth"),
         blank = True,
@@ -42,11 +42,22 @@ class Individuals(BaseModel):
         choices=MaritalStatus.choices
     )
     nationality = models.CharField(_("Nationality"), max_length=100)
+    insolvencies_judgements = models.TextField(
+        _("Insolvencies, Judgements, Defaults"),
+        blank=True,
+        null=True
+    )
     residential_address = models.TextField(
         _("Residential address"),
         blank=True, 
         null=True
     )
+    address_prev = models.TextField(
+        help_text= _("Director Prev Address"),
+        blank = True,
+        null = True
+    )
+    is_pep = models.BooleanField(default= False)
     mobile_number = models.CharField(_("Mobile number"), max_length=50)
     email = models.EmailField(_("Email"), blank=True, null=True)
     is_deleted = models.BooleanField(_("Is deleted"), default=False)

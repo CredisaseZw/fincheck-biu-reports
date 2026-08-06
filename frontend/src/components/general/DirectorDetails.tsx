@@ -15,8 +15,9 @@ import type { CompanyDirectorsProps } from "@/types/core";
 import CustomSubmitButton from "./CustomSubmitButton";
 import { Checkbox } from "../ui/checkbox";
 import { useState, useEffect } from "react";
-import { combineInsolvencies } from "@/lib/utils";
+import { combineInsolvencies, toCap } from "@/lib/utils";
 import { api } from "@/axios/api";
+import { GENDER_OPTIONS } from "@/constants";
 
 const DirectorRow = ({ 
     index, 
@@ -46,24 +47,31 @@ const DirectorRow = ({
                     const res = await api.get(`/api/individuals/lookup/?national_id=${nationalId}`);
                     if (res.data) {
                         const ind = res.data;
+                        if (ind.id) setValue(`directors.${index}.id`, ind.id)
                         if (ind.full_name) setValue(`directors.${index}.full_name`, ind.full_name, { shouldValidate: true });
                         if (ind.gender) setValue(`directors.${index}.gender`, ind.gender.toLocaleLowerCase(), { shouldValidate: true });
                         if (ind.date_of_birth) setValue(`directors.${index}.dob`, ind.date_of_birth, { shouldValidate: true });
-                        if (ind.mobile_number) setValue(`directors.${index}.mobile_phone_number`, ind.mobile_number, { shouldValidate: true });
+                        if (ind.mobile_number) setValue(`directors.${index}.mobile_number`, ind.mobile_number, { shouldValidate: true });
                         if (ind.email) setValue(`directors.${index}.email`, ind.email, { shouldValidate: true });
-                        if (ind.residential_address) setValue(`directors.${index}.address_latest`, ind.residential_address, { shouldValidate: true });
+                        if (ind.residential_address) setValue(`directors.${index}.residential_address`, ind.residential_address, { shouldValidate: true });
                         
                         const insolvencies = combineInsolvencies(ind);
                         if (insolvencies) {
                             setValue(`directors.${index}.insolvencies_judgements`, insolvencies, { shouldValidate: true });
                         }
                     }
-                } catch (error) { console.log(error)
+                } catch (error) { 
+                    console.log(error)
+                    // setValue(`directors.${index}.full_name`, "", { shouldValidate: true });
+                    // setValue(`directors.${index}.gender`, "male", { shouldValidate: true });
+                    // setValue(`directors.${index}.dob`, { shouldValidate: true });
+                    // setValue(`directors.${index}.mobile_number`, "", { shouldValidate: true });
+                    // setValue(`directors.${index}.email`, "", { shouldValidate: true });
+                    // setValue(`directors.${index}.residential_address`, "", { shouldValidate: true });
                 } finally {
                     setIsChecking(false);
                 }
-            };
-            
+            };            
             checkData();
         }
     }, [nationalId, index, setValue, field.national_id]);
@@ -154,8 +162,11 @@ const DirectorRow = ({
                                     <SelectValue placeholder="Select gender" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="male">Male</SelectItem>
-                                    <SelectItem value="female">Female</SelectItem>
+                                    {
+                                        GENDER_OPTIONS.map((genderOption) => (
+                                            <SelectItem key={genderOption} value={genderOption}>{toCap(genderOption)}</SelectItem>
+                                        ))
+                                    }
                                 </SelectContent>
                             </Select>
                         )}
@@ -177,9 +188,9 @@ const DirectorRow = ({
                 <div className="flex flex-row gap-3">
                     <div className="form-group flex-1">
                         <Label>Mobile Number</Label>
-                        <Input {...register(`directors.${index}.mobile_phone_number`)} disabled={isChecking} />
-                        {errors.directors?.[index]?.mobile_phone_number && (
-                            <p className="text-destructive text-sm">{errors.directors[index].mobile_phone_number.message}</p>
+                        <Input {...register(`directors.${index}.mobile_number`)} disabled={isChecking} />
+                        {errors.directors?.[index]?.mobile_number && (
+                            <p className="text-destructive text-sm">{errors.directors[index].mobile_number.message}</p>
                         )}
                     </div>
                     <Controller
@@ -203,9 +214,9 @@ const DirectorRow = ({
             <ColumnsContainer>
                 <div className="form-group">
                     <Label className="required">Latest Address</Label>
-                    <Textarea {...register(`directors.${index}.address_latest`)} disabled={isChecking} />
-                    {errors.directors?.[index]?.address_latest && (
-                        <p className="text-destructive text-sm">{errors.directors[index].address_latest.message}</p>
+                    <Textarea {...register(`directors.${index}.residential_address`)} disabled={isChecking} />
+                    {errors.directors?.[index]?.residential_address && (
+                        <p className="text-destructive text-sm">{errors.directors[index].residential_address.message}</p>
                     )}
                 </div>
 
@@ -291,10 +302,10 @@ function DirectorDetails({
                             gender: "male",
                             dob: "",
                             national_id : "",
-                            address_latest: "",
+                            residential_address: "",
                             address_prev: "",
                             email: "",
-                            mobile_phone_number: "",
+                            mobile_number: "",
                         })}
                     >
                         <Plus size={16} className="mr-2" /> Add Director

@@ -5,7 +5,6 @@ from .models import CompanyDirector
 from .serializers import DirectorSerializer
 
 class CompanyDirectorViewSet(DestroyModelMixin, GenericViewSet):
-    queryset = CompanyDirector.objects.all()
+    queryset = CompanyDirector.objects.prefetch_related('company', 'individual').all()
     serializer_class = DirectorSerializer
     permission_classes = [IsStaffUser]
-

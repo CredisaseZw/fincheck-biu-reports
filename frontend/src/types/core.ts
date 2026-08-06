@@ -173,20 +173,21 @@ export interface CompanyOperations {
 }
 
 export interface  CompanyDirector extends Timestamps {
-  id: number;
-  full_name: string;
   position: "director" | "secretary" | "other";
-  gender: "male" | "female";
-  national_id: string;
-  insolvencies_judgements: string | null;
-  dob: string;
-  address_latest: string;
-  address_prev: string | null;
-  email: string | null;
-  mobile_phone_number: string | null;
-  is_pep : boolean
+  individual_detail : {
+    id: number;
+    full_name: string;
+    gender: "male" | "female";
+    national_id: string;
+    insolvencies_judgements: string | null;
+    dob: string;
+    residential_address: string;
+    address_prev: string | null;
+    email: string | null;
+    mobile_phone_number: string | null;
+    is_pep : boolean
+  } 
 }
-
 
 export interface Shareholding extends Timestamps {
   id: number;
@@ -373,7 +374,7 @@ export interface Individual extends CommonFields {
   full_name: string;
   national_id: string;
   date_of_birth: string;
-  gender: string;
+  gender: "male" | "female" | "unknown";
   marital_status: "single" | "married" | "divorced" | "widowed";
   nationality: string;
   residential_address: string;

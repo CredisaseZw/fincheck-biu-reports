@@ -1,5 +1,5 @@
 import { FILE_STYLES } from "@/constants";
-import type { Address, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
+import type { Absconder, Address, Claim, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
@@ -306,11 +306,13 @@ export const summarizePublicInfo = (publicInfo?: any[]) => {
   return publicInfo.map(p => `Public info on ${p.record_date || 'unknown date'}: ${p.summary || ''}.`).join("\n");
 };
 
-export const combineInsolvencies = (individual: any) => {
+export const combineInsolvencies = (individual: Individual) => {
   const parts = [];
-  if (individual.claims?.length) parts.push(summarizeClaims(individual.claims));
-  if (individual.absconders?.length) parts.push(summarizeAbsconders(individual.absconders));
+  const claims = summarizeClaims(individual.claims?.map((c: Claim) => c.status === "open" && c));
+  const absconders = summarizeAbsconders(individual.absconders?.map((a: Absconder) => a.status==="open" && a));
   if (individual.court_judgements?.length) parts.push(summarizeCourtJudgements(individual.court_judgements));
   if (individual.public_information?.length) parts.push(summarizePublicInfo(individual.public_information));
+  if (absconders) parts.push(absconders);
+  if (claims) parts.push(claims);
   return parts.join("\n").trim();
 };

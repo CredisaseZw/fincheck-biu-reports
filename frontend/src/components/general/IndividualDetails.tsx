@@ -10,6 +10,8 @@ import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import CustomSubmitButton from "./CustomSubmitButton";
 import { Textarea } from "../ui/textarea";
+import { GENDER_OPTIONS } from "@/constants";
+import { toCap } from "@/lib/utils";
 
 interface props{
     report_id?: number | undefined
@@ -63,10 +65,26 @@ function IndividualDetails({ individual_details, report_id } : props) {
                 <ColumnsContainer>
                     <div className="form-group">
                         <Label className="required">Gender</Label>
-                        <Input {...register("gender")} placeholder="e.g. Male, Female" />
+                        <Controller
+                            name="gender"   
+                            control={control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {
+                                            GENDER_OPTIONS.map((genderOption) => (
+                                                <SelectItem key={genderOption} value={genderOption}>{toCap(genderOption)}</SelectItem>
+                                            ))
+                                        }  
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
                         {errors.gender && <p className="text-destructive text-sm">{errors.gender.message}</p>}
                     </div>
-
                     <div className="form-group">
                         <Label className="required">Nationality</Label>
                         <Input {...register("nationality")} />

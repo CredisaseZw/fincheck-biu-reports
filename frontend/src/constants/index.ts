@@ -3,7 +3,7 @@ import { FileText, Image, File } from "lucide-react";
 import {z} from "zod"
 
 export const LiveReportHeaders:Header[] = [
-    { name : "Request Ref", textAlign : "center"},
+    { name : "Enquiry Ref", textAlign : "center"},
     { name : "Request Date", textAlign : "center" },
     { name : "Client" },
     { name : "Subject" },
@@ -12,7 +12,7 @@ export const LiveReportHeaders:Header[] = [
     { name : "Action", textAlign : "center" },
 ]
 export const LiveClientReportHeaders:Header[] = [
-    { name : "Request Ref", textAlign : "center"},
+    { name : "Enquiry Ref", textAlign : "center"},
     { name : "Request Date", textAlign : "center" },
     { name : "Subject" },
     { name : "Requestor", textAlign: "left"},
@@ -20,7 +20,7 @@ export const LiveClientReportHeaders:Header[] = [
     { name : "Action", textAlign : "center" },   
 ]
 export const ReportHeaders:Header[] = [
-    { name : "Request Ref", textAlign : "center", value : "enquiry_reference"},
+    { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
     { name : "Report Date", textAlign : "center", value : "created_at" },
     { name : "Client", value : "client"},
     { name : "Subject", value : "subject"},
@@ -29,7 +29,7 @@ export const ReportHeaders:Header[] = [
     { name : "Action", textAlign : "center" },
 ]
 export const ClientReportHeaders:Header[] = [
-    { name : "Request Ref", textAlign : "center", value : "enquiry_reference"},
+    { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
     { name : "Report Date", textAlign : "center", value : "created_at" },
     { name : "Subject", value : "subject"},
     { name : "Requestor", textAlign: "left", value:"username"},
@@ -171,7 +171,11 @@ export const REPORT_STATUS_PILL_VARIANTS = {
     finalized : "success",
     in_progress : "warning",
     suspended : "black"
+
 }
+export const GENDERS = z.enum(["male", "female", "unknown"], {message : "Gender is required"})
+export const GENDER_OPTIONS = GENDERS.options
+
 export const DEBTOR_TYPE = z.enum(["company", "individual"])
 
 export const SETTLEMENT_OPTIONS = z.enum(["open", "settled", "disputed", "written_off"])

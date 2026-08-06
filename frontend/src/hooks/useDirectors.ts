@@ -8,17 +8,16 @@ import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMut
 import { handleAxiosError, handleTrackChangedArray, genStorageKey, cleanPayload } from "@/lib/utils";
 import { getItem, setItem } from "@/lib/storage";
 import { toast } from "sonner";
+import { GENDERS } from "@/constants";
 
 const Positions = z.enum(["director", "secretary", "chairman","other"])
-const Genders = z.enum(["male", "female"])
-
 const director = z.object({
     id : z.number().optional(),
     full_name : z.string().min(1,"A valid name is required"),
     position: Positions,
-    gender : Genders,
+    gender : GENDERS,
     dob : z.string().optional(),
-    address_latest : z.string(),
+    residential_address : z.string(),
     is_pep : z.boolean(),
     address_prev : z.string().optional(),
     national_id : z.string().refine((val) => {
@@ -28,7 +27,7 @@ const director = z.object({
         return nidRegex.test(val) || passportRegex.test(val)
     }, { message: "A valid Zimbabwe national ID or passport number is required" }),
     email : z.string().optional(),
-    mobile_phone_number :z.string().optional(),
+    mobile_number :z.string().optional(),
     insolvencies_judgements : z.string().optional()
 })
 const schema = z.object({ directors : z.array(director) })
