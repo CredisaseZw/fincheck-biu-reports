@@ -105,6 +105,7 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
             chained_data = entity._prepare_serializer_company_data(payload, instance.pk)
             entity.sync_company_records(instance, chained_data)
 
+        instance.refresh_from_db()
         data =  super().to_representation(instance)
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
