@@ -103,15 +103,13 @@ class EntityLookUp:
 
     @staticmethod
     def _handle_gender(value: str) -> str:
-        if not value:
-            return "unknown"
-
         value = value.lower()
         if value in ["male", "m"]:
             return "male"
         if value in ["female", "f"]:
             return "female"
-
+        return "unknown"
+    
     @staticmethod
     def _get_existing_company(
             registered_name: Optional[str], 
