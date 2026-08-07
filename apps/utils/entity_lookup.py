@@ -183,7 +183,7 @@ class EntityLookUp:
     def _prepare_individual_data(self, individual: IndividualInterface) -> dict:
         return {
             **({'date_of_birth': individual.dob} if individual.dob else {}),
-            **({'gender': self._handle_gender(individual.gender)} if individual.gender else {}),
+            **({'gender': self._handle_gender(individual.gender)} if self._handle_gender(individual.gender) else {}),
             **({'mobile_number': individual.mobile} if individual.mobile else {}),
             **({'residential_address': individual.address} if individual.address else {}),
             'full_name': f"{individual.firstname} {individual.surname}",
