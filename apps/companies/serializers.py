@@ -102,8 +102,8 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     def to_representation(self, instance):
         payload = entity.hit_endpoint("company", instance.registration_number)
         if payload:
-            chained_data = entity._prepare_serializer_individual_data(payload, instance.pk)
-            entity.sync_individual_records(instance, chained_data)
+            chained_data = entity._prepare_serializer_company_data(payload, instance.pk)
+            entity.sync_company_records(instance, chained_data)
 
         data =  super().to_representation(instance)
         professional_partners = instance.professional_partners.first()

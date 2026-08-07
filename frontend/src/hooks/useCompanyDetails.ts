@@ -5,10 +5,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { toast } from "sonner";
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { useQueryClient } from "@tanstack/react-query";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
+import useSectionTouched from "./useSectionTouched";
 
 const companySchema = z.object({
     id : z.number().optional(),
@@ -41,11 +42,10 @@ interface props {
 }
 function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     const {mutate, isPending } = useInstanceMutation()
-    const [touched, setTouched] = useState(false)
-    const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const client = useQueryClient()
+    const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "company_details"), [report_id,subject_type])
-
+    const { onTouched, touched } = useSectionTouched(CACHE_KEY)
     const {
         reset,
         getValues,
@@ -66,11 +66,8 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     const onSubmit = (data: CompanyFormData) => {
         delete data.id;
@@ -89,8 +86,7 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
             const {id, ...initial_data} = company_overview;
             const changes = handleTrackChangedFields(initial_data, data)
             if(!changes) {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-                setTouched(true)
+                onTouched()
                 return
             }
             
@@ -106,9 +102,8 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
                     queryKey : ["reports"]
                 })
                 cache.set(["subject"], data)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.info(message)
-                setTouched(true)   
+                onTouched()
 
             },
             onError:(error)=>handleAxiosError(error)
@@ -119,6 +114,7 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
         onSubmit,
         register,
         getValues,
+        onTouched,
         handleSubmit,
         isPending,
         control,

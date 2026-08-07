@@ -6,8 +6,9 @@ import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { toast } from "sonner";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
-import { useEffect, useState, useMemo } from "react";
+import { getItem } from "@/lib/storage";
+import { useEffect, useMemo } from "react";
+import useSectionTouched from "./useSectionTouched";
 
 const PaymentTrends = z.enum(["good", "fair", "poor"])
 const PaymentTrendsOptions = PaymentTrends.options;
@@ -61,15 +62,13 @@ function useTradeReferences({
 
   const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
   const {mutate, isPending} = useInstanceMutation();
-  const [touched, setTouched] = useState(false);
   const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "trade_references_details"), [report_id,subject_type])
+  const {onTouched, touched} = useSectionTouched(CACHE_KEY);
 
   useEffect(()=>{
       const state = getItem(CACHE_KEY)
-      if(state === "touched"){
-          setTouched(true)
-      }
-  }, [report_id, subject_type, CACHE_KEY])
+      if(state === "touched") onTouched()
+  }, [report_id, subject_type, CACHE_KEY, onTouched])
 
   const onSubmit = (data: TradeReferencesFormData) => {
     if(!subject_object_id || !subject_type){
@@ -78,8 +77,7 @@ function useTradeReferences({
     }   
     const changes = handleTrackChangedArray(trade_references_data, data.trade_references);
     if(changes.length === 0){
-      setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-      setTouched(true)
+      onTouched();
       return;
     } 
     const payload: InstanceMutation = {
@@ -94,9 +92,8 @@ function useTradeReferences({
     mutate(payload, {
       onSuccess: (data : Company | Individual) =>{
         cache.set(["subject", "trade_references"], data.trade_references)
-        setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
         toast.success("Trade references updated successfully.");
-        setTouched(true);
+        onTouched()
       },
       onError : (e)=> handleAxiosError(e)
     })
@@ -115,9 +112,8 @@ function useTradeReferences({
     mutate(payload, {
       onSuccess : ()=>{
         cache.removeFromList(["subject", "trade_references"],id)
-        setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
         toast.success("Trade references deleted successfully.");
-        setTouched(true)
+        onTouched()
       }
     })
   }
@@ -127,6 +123,7 @@ function useTradeReferences({
     remove,
     onSubmit,
     getValues,
+    onTouched,
     handleSubmit,
     register,
     onDelete,

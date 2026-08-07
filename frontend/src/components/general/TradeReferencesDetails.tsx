@@ -15,7 +15,6 @@ function TradeReferencesDetails({
   trade_references_data
 }:TradeReferencesProps) {
     const {
-        touched,
         append,
         remove,
         onSubmit,
@@ -23,7 +22,9 @@ function TradeReferencesDetails({
         onDelete,
         register,
         getValues,
+        onTouched,
         PaymentTrendsOptions,
+        touched,
         fields,
         errors,
         control,
@@ -42,7 +43,7 @@ function TradeReferencesDetails({
           <div key={idx} className="rounded-lg border p-4 space-y-3">
             <div className="grid grid-cols-4 gap-3">
               <div className="form-group">
-                <label>Name</label>
+                <label className="required">Name</label>
                 <Input placeholder="e.g John" {...register(`trade_references.${idx}.name`)} />
                 {errors.trade_references?.[idx]?.name && (
                   <p className="text-destructive text-sm">{errors.trade_references[idx].name.message}</p>
@@ -94,7 +95,7 @@ function TradeReferencesDetails({
                 )}
               </div>
               <div className="form-group">
-                <label>Reference Date</label>
+                <label className="required">Reference Date</label>
                 <Input type="date" {...register(`trade_references.${idx}.referenced_date`)} />
                 {errors.trade_references?.[idx]?.referenced_date && (
                   <p className="text-destructive text-sm">{errors.trade_references[idx].referenced_date.message}</p>
@@ -130,7 +131,9 @@ function TradeReferencesDetails({
           >
               <Plus size={16} className="mr-2" /> Add Row
           </Button>
-          <CustomSubmitButton 
+          <CustomSubmitButton
+              showFine
+              onFine={onTouched} 
               state={touched}
               isPending={isPending} 
           />

@@ -14,6 +14,7 @@ interface props {
 
 function NextOfKin({next_of_kin, report_id, subject_type}: props) {
     const {
+        onTouched,
         onSubmit,
         register,
         handleSubmit, 
@@ -47,6 +48,8 @@ function NextOfKin({next_of_kin, report_id, subject_type}: props) {
 
                 </ColumnsContainer>
                 <CustomSubmitButton
+                    showFine
+                    onFine={onTouched}
                     isPending = {isPending}
                     state = {touched}
                 />

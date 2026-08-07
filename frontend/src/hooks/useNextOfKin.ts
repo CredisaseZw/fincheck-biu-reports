@@ -1,14 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { EntityValue, Individual, Report } from "@/types/core";
+import useSectionTouched from "./useSectionTouched";
 
 const nextOfKinSchema = z.object({
     individual_id : z.number().optional(),
@@ -39,17 +40,15 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
             reset(next_of_kin)
         }
     },[reset, next_of_kin])
-    const [touched, setTouched] = useState(false)
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "next_of_kin_details"), [report_id,subject_type])
+    const {onTouched, touched} =useSectionTouched(CACHE_KEY);
     const {mutate, isPending} = useInstanceMutation()
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     const onSubmit = (data: NextOfKinFormData) => {
         if(!next_of_kin){
@@ -68,8 +67,7 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
         
         const changes = handleTrackChangedFields(init, data);
         if (!changes) {
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return;
         }
         PAYLOAD.data = { next_of_kin: changes }
@@ -77,15 +75,15 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
         mutate(PAYLOAD, {
             onSuccess : (data:Individual) => {
                 cache.set(["subject", "next_of_kin"], data.next_of_kin)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Information successfully updated")
-                setTouched(true)
+                onTouched()
             },
             onError: (error) => handleAxiosError(error)
         })
     }
 
     return { 
+        onTouched,
         onSubmit,
         register, 
         handleSubmit, 

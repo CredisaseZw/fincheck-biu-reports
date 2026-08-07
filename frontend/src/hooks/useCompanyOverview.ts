@@ -5,9 +5,10 @@ import { z } from "zod";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { handleTrackChangedFields, genStorageKey } from "@/lib/utils";
-import { useEffect, useState, useMemo } from "react";
-import { getItem, setItem } from "@/lib/storage";
+import { useEffect,  useMemo } from "react";
+import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
+import useSectionTouched from "./useSectionTouched";
 
 const TradingStatus = z.enum(["active", "inactive", "administration", "insolvent"])
 
@@ -55,20 +56,17 @@ function useCompanyOverview({
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "overview_details"), [report_id,subject_type])
     const {mutate, isPending} = useInstanceMutation()
-    const [touched, setTouched] = useState(false)
+    const {onTouched, touched} = useSectionTouched(CACHE_KEY);
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched")onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     const onSubmit = (data: CompanyOverviewFormData) =>{
         const changes = handleTrackChangedFields(company_overview, data)
         if(!changes){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched()
             return
         }
 
@@ -81,9 +79,8 @@ function useCompanyOverview({
         }, {
             onSuccess: async(data:Company)=>{
                 cache.set(["subject", "overview"], data.overview)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.info("Company overview successfully updated")
-                setTouched(true)
+                onTouched()
             }
         })
     }
@@ -93,6 +90,7 @@ function useCompanyOverview({
         register,
         getValues,
         handleSubmit,
+        onTouched,
         touched,
         isPending,
         control,

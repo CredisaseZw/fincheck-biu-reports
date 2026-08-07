@@ -32,12 +32,12 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     onSetEntityId
 }, ref) => {
     const { setOpenIndividualFields, setOpenCompanyFields } = useReport()
-    const [query, setQuery] = useState(defaultSearch ?? "")
-    const [searchTerm, setSearchTerm] = useState(defaultSearch ?? "")
-
-    const [isOpen, setIsOpen] = useState(false)
-    const [activeIndex, setActiveIndex] = useState(-1)
-    const [selected, setSelected] = useState<ListCompany | ListIndividual | null>(null);
+    const [ query, setQuery ] = useState(defaultSearch ?? "")
+    const [ searchTerm, setSearchTerm ] = useState(defaultSearch ?? "")
+    const [ hasInteracted, setHasInteracted ] = useState(false)
+    const [ isOpen, setIsOpen ] = useState(false)
+    const [ activeIndex, setActiveIndex ] = useState(-1)
+    const [ selected, setSelected ] = useState<ListCompany | ListIndividual | null>(null);
     const containerRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
@@ -45,7 +45,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     const { data, error, isLoading, isFetching } = useGetEntityObject(
         entityType,
         { search: searchTerm },
-        !!searchTerm
+        !!searchTerm && hasInteracted
     )
 
     const results = data?.results ?? []
@@ -108,6 +108,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         } else {
             onSelectItem?.(entity.id)
         }
+        setHasInteracted(false)
     }, [onSelectEntity, onSelectItem, entityMode])
 
     const clear = useCallback((e?: React.MouseEvent) => {
@@ -125,6 +126,7 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
 
     const handleSubmit = useCallback((e?: FormEvent) => {
         e?.preventDefault()
+        setHasInteracted(true)
         const trimmed = query.trim()
         if (!trimmed) return
         setIsOpen(true)

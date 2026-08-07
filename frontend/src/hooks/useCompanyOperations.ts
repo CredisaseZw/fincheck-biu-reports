@@ -1,13 +1,14 @@
-import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { handleAxiosError, handleTrackChangedFields, genStorageKey, cleanPayload } from "@/lib/utils";
+import { getItem } from "@/lib/storage";
 import type { Company, CompanyOperationsProps } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner";
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import useSectionTouched from "./useSectionTouched";
 
 const PaymentScope =  z.enum(["cash_only", "cash_and_credit", "credit_only",])
 
@@ -41,18 +42,15 @@ function useCompanyOperations({
         resolver: zodResolver(companyOperationsSchema),
         defaultValues: operations_data
     })
-    const [touched, setTouched] = useState(false)
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "operations_details"), [report_id,subject_type])
-
+    const { onTouched, touched }= useSectionTouched(CACHE_KEY)
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     useEffect(()=>{
         if(operations_data){
@@ -63,23 +61,22 @@ function useCompanyOperations({
     const onSubmit = (data: CompanyOperationsFormData) =>{
         const changes = handleTrackChangedFields(operations_data, data);
         if(!changes){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return
         }
+        
         const PAYLOAD:InstanceMutation ={
             url :`/api/companies/${subject_object_id}/`,
             mode : "update",
             data : {
-                operations :  changes
+                operations :  cleanPayload(changes)
             }
         }
         mutate(PAYLOAD, {
             onSuccess : (data: Company) => {
                 cache.set(["subject", "operations"], data.operations)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Company Operations updated successfully.")
-                setTouched(true)
+                onTouched();
       },
             onError : (error) => handleAxiosError(error)
         })
@@ -91,6 +88,7 @@ function useCompanyOperations({
         onSubmit,
         getValues,
         register, 
+        onTouched,
         control,
         isPending,
         errors,

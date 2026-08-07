@@ -231,7 +231,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         full_name: individual.full_name ?? "",
         national_id: individual.national_id ?? "",
         date_of_birth: individual.date_of_birth ?? "",
-        gender: individual.gender ?? "",
+        gender: individual.gender.length < 2 ? "unknown" : individual.gender,
         marital_status: individual.marital_status ?? undefined,
         nationality: individual.nationality ?? "",
         residential_address: individual.residential_address ??"",
@@ -273,17 +273,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         debtor_type: item.debtor.extras.debtor_type,   
         debtor_default : item.debtor.name
       }))
-      : [
-        { 
-          creditor_name: "",
-          currency: "USD",
-          amount: 0,
-          claim_date: "",
-          status: "open",
-          debtor_object_id: 0,
-          debtor_type: "company",   
-        } 
-      ]
+      : []
     )
 
     setAbsconders(
@@ -301,15 +291,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         debtor_object_id: item.debtor.extras.debtor_object_id,
         debtor_type: item.debtor.extras.debtor_type, 
       }))
-      : [{
-        creditor_name : "",
-        currency :"USD",
-        amount : 0,
-        start_date :"",
-        status :"open",
-        debtor_object_id: 0,
-        debtor_type: "company", 
-      }]
+      : []
     )
 
     setCourtJudgements(
@@ -324,14 +306,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         amount : Number(item.amount),
         judgement_date : item.judgement_date
       }))
-      : [{
-        case_number: "",
-        court_name: "",
-        currency : "USD",
-        amount : 0,
-        status : "open",
-        judgement_date : ""
-      }]
+      : []
     )
     
     setInsolvencyRecords(

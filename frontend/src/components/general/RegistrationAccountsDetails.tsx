@@ -14,7 +14,15 @@ function RegistrationAccountsDetails({
     report_id,
     accounts_data
 }:RegistrationsAccountsProps) {
-    const { register, onSubmit, handleSubmit, control, isPending, touched } = useRegistrationAccounts({
+    const { 
+        register, 
+        onSubmit,
+        onTouched,
+        handleSubmit,
+        control,
+        isPending,
+        touched
+    } = useRegistrationAccounts({
         subject_object_id,
         subject_type,
         report_id,
@@ -60,8 +68,10 @@ function RegistrationAccountsDetails({
                     ))}
                 </ColumnsContainer>
                 <CustomSubmitButton
-                        state={touched}
-                        isPending={isPending}
+                    showFine
+                    onFine={onTouched}
+                    state={touched}
+                    isPending={isPending}
                     />
             </Fieldset>
         </form>

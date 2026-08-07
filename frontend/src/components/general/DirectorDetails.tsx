@@ -257,6 +257,7 @@ function DirectorDetails({
         watch,
         register, 
         handleSubmit,
+        onTouched,
         onSubmit,
         append,
         remove 
@@ -270,7 +271,6 @@ function DirectorDetails({
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Directors" className="flex flex-col gap-4">
-
                 {fields.map((field, index) => (
                     <DirectorRow 
                         key={field.id}
@@ -311,6 +311,8 @@ function DirectorDetails({
                         <Plus size={16} className="mr-2" /> Add Director
                     </Button>
                     <CustomSubmitButton
+                        onFine={onTouched}
+                        showFine
                         state={touched}
                         isPending={isPending}
                     />

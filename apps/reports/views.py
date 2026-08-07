@@ -342,13 +342,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
 
 class ArchivedReportsViewSet(BaseListDataViewSet):
     filter_backends = [BusinessReportsSearchFilter, DjangoFilterBackend]
-    serializer_class = ReportSerializer
-
-    def get_serializer_class(self):
-        if self.action == "list":
-            return ListReportSerializer
-        return ReportSerializer
-
+    serializer_class = ListReportSerializer
 
     def get_queryset(self): 
         user:User = self.request.user

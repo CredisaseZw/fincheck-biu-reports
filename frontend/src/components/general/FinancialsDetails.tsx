@@ -22,6 +22,7 @@ function FinancialsDetails({
         onSubmit,
         watch,
         getValues,
+        onTouched,
         deleteFile, 
         isDeleting,
         touched,
@@ -35,7 +36,6 @@ function FinancialsDetails({
         subject_type,
         financials_data,
     })
-
     const { fields, append, remove } = useFieldArray({
         control,
         name: "files"
@@ -46,7 +46,7 @@ function FinancialsDetails({
             <Fieldset legendTitle="Financials" className="flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
                     <div className="form-group">
-                        <Label>Financial Year</Label>
+                        <Label className="required">Financial Year</Label>
                         <Input
                             type="number"
                             placeholder="e.g. 2024"
@@ -180,6 +180,8 @@ function FinancialsDetails({
 
                 <div className="flex justify-end">
                     <CustomSubmitButton
+                        showFine
+                        onFine={onTouched}
                         state={touched}
                         isPending={isPending}
                     />

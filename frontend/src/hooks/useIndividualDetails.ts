@@ -1,16 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import { cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import useInstanceMutation from "./api/useInstanceMutation";
 import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { Report } from "@/types/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { GENDERS } from "@/constants";
+import useSectionTouched from "./useSectionTouched";
 
 const MaritalStatus = z.enum(["single", "married", "divorced", "widowed"], {message : "Marital Status is required"})
 
@@ -22,10 +23,11 @@ export const individualSchema = z.object({
         const nidRegex = /^\d{2}\d{6,7}[A-Za-z]\d{2}$/
         const passportRegex =/^[A-Za-z]{2}\d{7}$/
         return nidRegex.test(val) || passportRegex.test(val)
-    }, { message: "A valid Zimbabwe national ID or passport number is required" }),    date_of_birth: z.string().min(1, "Date of birth is required"),
+    }, { message: "A valid Zimbabwe national ID or passport number is required" }),
+    date_of_birth: z.string().optional(),
     gender: GENDERS,
     marital_status: MaritalStatus.optional(),
-    nationality: z.string().min(1, "Nationality is required").max(100),
+    nationality: z.string().optional(),
     mobile_number: z.string().min(1, "Mobile number is required").max(50),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
     residential_address: z.string().min(1, "Residential address is required"),
@@ -41,9 +43,9 @@ interface props {
 function useIndividualDetails({individual_details, report_id}:props) {
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", report_id])
-    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, "individual", "individual_details"), [report_id])
     const client = useQueryClient()
-    const [touched, setTouched] = useState(false)
+    const CACHE_KEY = useMemo(()=>genStorageKey(report_id, "individual", "individual_details"), [report_id])
+    const { onTouched, touched }= useSectionTouched(CACHE_KEY)
 
     const {
         control,
@@ -64,10 +66,8 @@ function useIndividualDetails({individual_details, report_id}:props) {
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, CACHE_KEY, onTouched])
 
     const onSubmit = (data: IndividualFormData) => {
         delete data.id;
@@ -87,8 +87,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
             const {id, ...initial_data} = individual_details;
             const changes = handleTrackChangedFields(initial_data, data);
             if(!changes) {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-                setTouched(true)
+                onTouched();
                 return;
             }
             
@@ -103,10 +102,8 @@ function useIndividualDetails({individual_details, report_id}:props) {
                 client.invalidateQueries({
                     queryKey : ["reports"]
                 })
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Information successfully updated")
-            
-                setTouched(true)
+                onTouched()
             },
             onError: (error) => handleAxiosError(error)
         })
@@ -120,6 +117,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
         handleSubmit,
         onSubmit,
         register,
+        onTouched
     }
 }
 

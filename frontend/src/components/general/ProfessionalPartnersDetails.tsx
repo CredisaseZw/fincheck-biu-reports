@@ -13,10 +13,11 @@ function ProfessionalPartnersDetails({
     professionals_data
 }:ProfessionalsProps) {
     const {
-        touched,
         handleSubmit,
         onSubmit,
         register,
+        onTouched,
+        touched,
         isPending
     } = useProfessionalPartners({
         report_id,
@@ -42,8 +43,10 @@ function ProfessionalPartnersDetails({
                     </div>
                 </ColumnsContainer>
                 <CustomSubmitButton
-                        state={touched}
-                        isPending={isPending}
+                    showFine
+                    onFine={onTouched}
+                    state={touched}
+                isPending={isPending}
                     />
             </Fieldset>
         </form>

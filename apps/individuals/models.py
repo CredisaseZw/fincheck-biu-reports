@@ -30,7 +30,8 @@ class Individuals(BaseModel):
     
     full_name = models.CharField(_("Full name"), max_length=255)
     national_id = models.CharField(_("National ID / Passport"), max_length=100, unique=True)
-    date_of_birth = models.DateField(_("Date of birth"),
+    date_of_birth = models.DateField(
+        _("Date of birth"),
         blank = True,
         null = True
     )
@@ -41,7 +42,12 @@ class Individuals(BaseModel):
         default= MaritalStatus.SINGLE,
         choices=MaritalStatus.choices
     )
-    nationality = models.CharField(_("Nationality"), max_length=100)
+    nationality = models.CharField(
+        _("Nationality"), 
+        max_length=100,
+        blank = True,
+        null = True
+    )
     insolvencies_judgements = models.TextField(
         _("Insolvencies, Judgements, Defaults"),
         blank=True,

@@ -20,6 +20,7 @@ function PublicInformationDetails({
         register,
         append,
         remove,
+        onTouched,
         getValues,
         handleSubmit,
         onSubmit,
@@ -112,6 +113,8 @@ function PublicInformationDetails({
                         <Plus size={16} className="mr-2" /> Add Row
                     </Button>
                     <CustomSubmitButton
+                        onFine={onTouched}
+                        showFine
                         state={touched}
                         isPending={isPending}
                     />

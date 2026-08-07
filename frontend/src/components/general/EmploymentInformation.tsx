@@ -19,11 +19,12 @@ function EmploymentInformation({
     subject_type
 }:props) {
     const {
-        touched, 
         onSubmit,
         register,
+        onTouched,
         handleSubmit,
         errors,
+        touched, 
         control,
         isPending
     } = useEmploymentInformation({employment_information, report_id, subject_type})
@@ -94,8 +95,10 @@ function EmploymentInformation({
                     />
                 </div>
                 <CustomSubmitButton
-                        state={touched}
-                        isPending={isPending}
+                    showFine
+                    onFine={onTouched}
+                    state={touched}
+                    isPending={isPending}
                     />
             </Fieldset>
         </form>

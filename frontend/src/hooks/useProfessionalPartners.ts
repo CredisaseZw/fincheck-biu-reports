@@ -2,13 +2,14 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { Company, Individual, ProfessionalsProps, Report } from "@/types/core";
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedFields, genStorageKey, cleanPayload } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import useSectionTouched from "./useSectionTouched";
 
 const schema = z.object({
     id : z.number().optional(),
@@ -39,17 +40,15 @@ function useProfessionalPartners({
         }
     }, [reset, professionals_data])
 
-    const [ touched, setTouched ] = useState(false)
     const { isPending, mutate } = useInstanceMutation();
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "professional_partners_details"), [report_id,subject_type])
+    const {onTouched, touched} = useSectionTouched(CACHE_KEY);
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     const onSubmit = (data : ProfessionalsFormData) =>{
         if(!subject_object_id || !subject_type){
@@ -59,8 +58,7 @@ function useProfessionalPartners({
         
         const changes = handleTrackChangedFields(professionals_data, data);
         if(!changes){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return;
         }
 
@@ -76,9 +74,8 @@ function useProfessionalPartners({
         mutate(PAYLOAD, {
             onSuccess : (data:Company | Individual) => {
                 cache.set(["subject", "professional_partners"], data.professional_partners)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Professional Updated successfully.")
-                setTouched(true)
+                onTouched();
             },
             onError : (error) => handleAxiosError(error)
         })
@@ -86,11 +83,12 @@ function useProfessionalPartners({
     }
 
     return {
-    touched,
         onSubmit,
         register,
+        onTouched,
         handleSubmit,
         errors,
+        touched,
         isPending,
     }
 }

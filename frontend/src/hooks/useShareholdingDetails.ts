@@ -2,12 +2,13 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { Company, CompanyShareholdingProps, Report, Shareholding } from "@/types/core";
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedArray, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import useSectionTouched from "./useSectionTouched";
 
 const schema = z.object({
     id: z.number().optional(),
@@ -70,15 +71,13 @@ function useShareholdingDetails({
 
     const client = useQueryClient()
     const { mutate, isPending } = useInstanceMutation()
-    const [touched, setTouched] = useState(false)
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "shareholding_details"), [report_id,subject_type])
+    const {onTouched, touched} =  useSectionTouched(CACHE_KEY);
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -95,8 +94,7 @@ function useShareholdingDetails({
         const shareholderChanges = handleTrackChangedArray(initShareholders ?? [], currentShareholders);
 
         if (!topLevelChanges && shareholderChanges.length === 0) {
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched()
             return;
         }
 
@@ -112,9 +110,7 @@ function useShareholdingDetails({
 
         mutate(payload, {
             onSuccess: (data_: Shareholding) => {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Shareholders successfully updated.")
-
                 client.setQueryData<Report>(
                     ["report", subject_type, report_id],
                     (old) => {
@@ -129,9 +125,7 @@ function useShareholdingDetails({
                         }
                     }
                 )
-
-                setTouched(true)
-
+                onTouched()
                 reset({
                     id: data_.id,
                     issued_share_capital :  Number(data_.issued_share_capital),
@@ -157,7 +151,7 @@ function useShareholdingDetails({
             mode: "deletion"
         }, {
             onSuccess: () => {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
+                onTouched()
                 toast.success("Shareholder successfully removed.")
                 client.setQueryData<Report>(
                     ["report", subject_type, report_id],
@@ -178,7 +172,6 @@ function useShareholdingDetails({
                         }
                     }
                 )
-                setTouched(true)
             },
             onError: (e) => handleAxiosError(e)
         })
@@ -196,6 +189,7 @@ function useShareholdingDetails({
         register,
         handleSubmit,
         onSubmit,
+        onTouched,
         onDelete
     }
 }

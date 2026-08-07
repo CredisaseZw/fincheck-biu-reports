@@ -16,6 +16,7 @@ function CompanyStructure({
         onSubmit,
         handleSubmit,
         register,
+        onTouched,
         isPending,
         touched,
     } = useCompanyStructure({
@@ -24,7 +25,6 @@ function CompanyStructure({
         structure_data,
         subject_type
     })
-
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -78,6 +78,8 @@ function CompanyStructure({
 
                 </ColumnsContainer>
                 <CustomSubmitButton
+                    showFine
+                    onFine={onTouched}
                     state={touched}
                     isPending={isPending}
                 />

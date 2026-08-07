@@ -17,9 +17,9 @@ import logging
 logger = logging.getLogger(__name__)
 class IndividualInterface(BaseModel):
     fins_number: str
-    national_id: str
-    firstname: str
-    surname: str
+    national_id: Optional[str] = None
+    firstname: Optional[str] = None
+    surname: Optional[str] = None
     dob: Optional[str] = None
     gender: Optional[str] = None
     mobile: Optional[str] = None
@@ -46,22 +46,22 @@ class Summary(BaseModel):
 class Claim(BaseModel):
     claim_number: int
     account_number: Optional[str] = None
-    amount: str
+    amount: Optional[str] = None
     overdue_balance: Optional[str] = None
-    date_of_claim: str
+    date_of_claim: Optional[str]= None
     currency_type: Optional[str] = None
     is_closed: bool
     is_absconder: bool
     company_creditor_fins__registration_name: Optional[str] = None
 
 class CourtRecord(BaseModel):
-    case_number: str
-    court_name: str
-    amount: str
-    currency_type: str
-    judgement_date: str
+    case_number: Optional[str] = None
+    court_name: Optional[str] = None
+    amount: Optional[str] = None
+    currency_type: Optional[str] = None
+    judgement_date: Optional[str] = None
     is_closed: bool
-    plaintf_name: str
+    plaintf_name: Optional[str] = None
 
 class LookupCompanyResponse(BaseModel):
     found: bool
@@ -327,6 +327,8 @@ class EntityLookUp:
 
         claims_data, absconders_data = [], []
         for claim in data.claims:
+            if claim.is_closed:
+                continue
             prepared = self._prepare_claim_data(claim, debtor_content_type, debtor_object_id)
             is_absconder = prepared.pop('_is_absconder')
             (absconders_data if is_absconder else claims_data).append(prepared)

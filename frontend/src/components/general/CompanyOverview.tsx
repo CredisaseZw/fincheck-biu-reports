@@ -27,6 +27,7 @@ export default function CompanyOverview({
         register,
         onSubmit,
         getValues,
+        onTouched,
         touched,
         isPending,
         control,
@@ -89,6 +90,8 @@ export default function CompanyOverview({
                 <Input type="number" {...register("number_of_employees", numericField)} />
             </div>
             <CustomSubmitButton 
+                showFine
+                onFine={onTouched}
                 state = {touched}
                 isPending = {isPending}
             />

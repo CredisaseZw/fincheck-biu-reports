@@ -18,6 +18,7 @@ function ReportDetails({
         errors,
         register,
         handleSubmit,
+        onTouched,
         onSubmit
     } = useReportDetails({    
         subject_object_id,
@@ -49,9 +50,11 @@ function ReportDetails({
                 <p className="text-destructive text-sm">{errors.summary.message}</p>
             }
             <CustomSubmitButton
-                        state={touched}
-                        isPending={isPending}
-                    />
+                state={touched}
+                isPending={isPending}
+                onFine={onTouched}
+                showFine
+            />
         </form>
     </Fieldset>
   )

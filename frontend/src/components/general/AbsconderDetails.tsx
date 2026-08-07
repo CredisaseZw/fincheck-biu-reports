@@ -1,10 +1,8 @@
-import { CURRENCY_OPTIONS, numericField } from "@/constants";
+import { CLEAR_MESSAGE, CURRENCY_OPTIONS, numericField } from "@/constants";
 import Fieldset from "./FieldSet";
 import useAbsconderDetails from "@/hooks/useAbsconderDetails";
 import { Controller } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import RecordDebtorSelector from "./RecordDebtorSelector";
-import SearchEntity, { type SearchEntityRef } from "./SearchEntity";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Trash2, Plus } from "lucide-react";
@@ -21,9 +19,8 @@ function AbsconderDetails({
     const {
         append, 
         remove, 
-        setValue, 
+        onTouched,
         onSubmit,
-        watch, 
         onDelete,
         handleSubmit, 
         register,
@@ -32,7 +29,6 @@ function AbsconderDetails({
         control, 
         errors, 
         fields, 
-        refs,
         touched,
     } = useAbsconderDetails({
         absconders_data,
@@ -44,51 +40,24 @@ function AbsconderDetails({
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Absconder Records" className="flex flex-col gap-4" >
-                {fields.map((field, idx) => {
-                    const setRef = (el: SearchEntityRef | null) => { refs.current[idx] = el }
-                    const entityType = watch(`absconders.${idx}.debtor_type`)
-                    const ds = watch(`absconders.${idx}.default_search`)
-
+                {
+                    fields.length <= 0 &&
+                    <div className="text-center text-muted-foreground">{CLEAR_MESSAGE}</div>
+                }
+                {   
+                    fields.length > 0  &&
+                    fields.map((field, idx) => {
                     return (
                         <div key={field.id} className="rounded-lg border p-4 space-y-3">
-                            <ColumnsContainer numberOfCols={2}>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Debtor</label>
-                                    <div className="flex flex-row gap-1">
-                                        <Controller
-                                            control={control}
-                                            name={`absconders.${idx}.debtor_type`}
-                                            render={({ field }) => (
-                                                <RecordDebtorSelector
-                                                    onChange={(val: string) => {
-                                                        field.onChange(val)
-                                                        refs.current[idx]?.clear()
-                                                    }}
-                                                    defaultValue={field.value}
-                                                />
-                                            )}
-                                        />
-                                        <SearchEntity
-                                            ref={setRef}
-                                            entityType={entityType}
-                                            defaultSearch={ds}
-                                            onSelectItem={(id: number) => setValue(`absconders.${idx}.debtor_object_id`, id)}
-                                        />
-                                    </div>
-                                    {errors.absconders?.[idx]?.debtor_object_id && (
-                                        <p className="text-destructive text-sm">{errors.absconders[idx].debtor_object_id.message}</p>
-                                    )}
-                                </div>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Creditor Name</label>
-                                    <Input
-                                        placeholder="Creditor Name"
-                                        {...register(`absconders.${idx}.creditor_name`)} />
-                                    {errors.absconders?.[idx]?.creditor_name && (
-                                        <p className="text-destructive text-sm">{errors.absconders[idx].creditor_name.message}</p>
-                                    )}
-                                </div>
-                            </ColumnsContainer>
+                            <div className="form-group">
+                                <label className="text-sm font-medium mb-1 inline-block">Creditor Name</label>
+                                <Input
+                                    placeholder="Creditor Name"
+                                    {...register(`absconders.${idx}.creditor_name`)} />
+                                {errors.absconders?.[idx]?.creditor_name && (
+                                    <p className="text-destructive text-sm">{errors.absconders[idx].creditor_name.message}</p>
+                                )}
+                            </div>
                             <ColumnsContainer numberOfCols={3}>
                                 <div className="form-group">
                                     <label className="text-sm font-medium mb-1 inline-block">Currency</label>
@@ -198,13 +167,15 @@ function AbsconderDetails({
                             amount: 0,
                             start_date: undefined,
                             status: "open",
-                            debtor_object_id: 0,
-                            debtor_type: "company",
+                            debtor_object_id: Number(subject_object_id),
+                            debtor_type: subject_type ?? "company",
                         })}
                     >
                         <Plus size={16} className="mr-2" /> Add Row
                     </Button>
                     <CustomSubmitButton
+                        showFine
+                        onFine={onTouched}
                         state={touched}
                         isPending={isPending}
                     />

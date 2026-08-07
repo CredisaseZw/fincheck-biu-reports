@@ -23,6 +23,7 @@ function InsolvencyRecordsDetails({
         append,
         remove,
         getValues,
+        onTouched,
         handleSubmit,
         onSubmit,
         onDelete,
@@ -134,9 +135,11 @@ function InsolvencyRecordsDetails({
                     <Plus size={16} className="mr-2" /> Add Row
                 </Button>
                 <CustomSubmitButton
-                        state={touched}
-                        isPending={isPending}
-                    />
+                    showFine
+                    onFine={onTouched}
+                    state={touched}
+                    isPending={isPending}
+                />
             </div>
         </Fieldset>
     </form>

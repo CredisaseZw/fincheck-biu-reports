@@ -1,14 +1,15 @@
 import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import type { InsolvencyRecordsProps, Report } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState,  useEffect, useMemo } from "react";
+import {  useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {z} from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import useSectionTouched from "./useSectionTouched";
 
 const InsolvencyType = z.enum(["insolvent", "judicial_management"])
 
@@ -47,16 +48,14 @@ function useInsolvencyRecordsDetails({
         }
     })
     const { mutate, isPending } = useInstanceMutation()
-    const [touched, setTouched] = useState(false)
     const cache =  useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "insolvency_records_details"), [report_id,subject_type])
+    const {onTouched, touched} = useSectionTouched(CACHE_KEY);
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched()
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     useEffect(()=>{
         if(insolvency_data){
@@ -78,8 +77,7 @@ function useInsolvencyRecordsDetails({
         }
         const changes = handleTrackChangedArray(insolvency_data, data.insolvency_records,)
         if(changes.length === 0){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return
         }
         const payload: InstanceMutation = {
@@ -95,9 +93,8 @@ function useInsolvencyRecordsDetails({
         mutate(payload, {
             onSuccess : (data) => {
                 cache.set(["subject", "insolvency_records"], data.insolvency_records)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Insolvency records updated successfully")
-                setTouched(true)
+                onTouched();
       },
             onError :(error) => handleAxiosError(error)
         })
@@ -110,10 +107,9 @@ function useInsolvencyRecordsDetails({
         }, {
             onSuccess : () => {
                 cache.removeFromList(["subject", "insolvency_records"], id)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Insolvency record row deleted successfully")
-                setTouched(true)
-      },
+                onTouched();
+            },
             onError : (error) => handleAxiosError(error)
         })
     }
@@ -125,6 +121,7 @@ function useInsolvencyRecordsDetails({
         errors,
         fields,
         isPending,
+        onTouched,
         append,
         onDelete,
         register,

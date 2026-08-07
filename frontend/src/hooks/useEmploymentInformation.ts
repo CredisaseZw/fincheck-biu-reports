@@ -1,13 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { EntityValue, Individual, Report } from "@/types/core";
+import useSectionTouched from "./useSectionTouched";
 
 const EmploymentStatus = z.enum(["employed", "self_employed", "unemployed", "part_time", "retired", "student"])
 const employmentSchema = z.object({
@@ -30,7 +31,7 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "employment_details"), [report_id,subject_type])
-    const [touched, setTouched] = useState(false);
+    const { onTouched, touched } = useSectionTouched(CACHE_KEY);
 
     const {
         reset,
@@ -45,10 +46,8 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
     
     useEffect(()=>{
         if(employment_information){
@@ -73,8 +72,7 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         
         const changes = handleTrackChangedFields(init, data);
         if (!changes) {
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return;
         }
         PAYLOAD.data = { employment_information: changes }
@@ -82,19 +80,19 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         mutate(PAYLOAD, {
             onSuccess : (data: Individual) => {
                 cache.set(["subject", "employment_information"], data.employment_information)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Information successfully updated")
-                setTouched(true)
+                onTouched();
             },
             onError: (error) => handleAxiosError(error)
         })
     }
 
     return {
-    touched, 
         onSubmit,
         register, 
         handleSubmit, 
+        onTouched,
+        touched, 
         errors, 
         control,
         isPending,

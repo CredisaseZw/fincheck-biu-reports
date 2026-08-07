@@ -226,3 +226,4 @@ export const FILE_STYLES = {
       "border-red-300 bg-red-50 text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-400",
   },
 } as const;
+export const CLEAR_MESSAGE = "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"

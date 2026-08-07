@@ -24,6 +24,7 @@ function IndividualDetails({ individual_details, report_id } : props) {
         isPending,
         errors,
         control, 
+        onTouched,
         onSubmit,
         register,
         handleSubmit,
@@ -52,7 +53,7 @@ function IndividualDetails({ individual_details, report_id } : props) {
                     </div>
 
                     <div className="form-group">
-                        <Label className="required">Date of Birth</Label>
+                        <Label>Date of Birth</Label>
                         <Input type="date" {...register("date_of_birth")} />
                         {errors.date_of_birth && <p className="text-destructive text-sm">{errors.date_of_birth.message}</p>}
                     </div>
@@ -86,7 +87,7 @@ function IndividualDetails({ individual_details, report_id } : props) {
                         {errors.gender && <p className="text-destructive text-sm">{errors.gender.message}</p>}
                     </div>
                     <div className="form-group">
-                        <Label className="required">Nationality</Label>
+                        <Label>Nationality</Label>
                         <Input {...register("nationality")} />
                         {errors.nationality && <p className="text-destructive text-sm">{errors.nationality.message}</p>}
                     </div>
@@ -127,13 +128,14 @@ function IndividualDetails({ individual_details, report_id } : props) {
                 </div>
 
                 <CustomSubmitButton
-                        label = {!individual_details ?"Add Individual" : "Update"}
-                        state={touched}
-                        isPending={isPending}
-                    />
+                    onFine={onTouched}
+                    showFine= {Boolean(individual_details)}
+                    label = {!individual_details ?"Add Individual" : "Update"}
+                    state={touched}
+                    isPending={isPending}
+                />
             </Fieldset>
         </form>
     )
 }
-
 export default IndividualDetails

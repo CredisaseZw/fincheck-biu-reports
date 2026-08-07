@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ACCEPTED_TYPES, MAX_SIZE } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState,  useEffect, useMemo } from "react"
+import {  useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { file_api } from "@/axios/api"
 import { useMutation } from "@tanstack/react-query"
 import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils"
-import { getItem, setItem } from "@/lib/storage"
+import { getItem } from "@/lib/storage"
 import { toast } from "sonner"
 import useDetailCacheUpdate from "./useDetailCacheUpdate"
 import type { FinancialsProps, Report } from "@/types/core"
 import useInstanceMutation from "./api/useInstanceMutation";
+import useSectionTouched from "./useSectionTouched";
 
 const fileSchema = z.custom<FileList>()
     .refine(
@@ -73,14 +74,12 @@ function useFinancialsDetails({
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "financials_details"), [report_id,subject_type])
-    const [touched, setTouched] = useState(false);
-    
+    const { onTouched, touched } = useSectionTouched(CACHE_KEY);
+
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     const {mutate: onDelete, isPending: isDeleting} = useInstanceMutation();
     const { mutate: save, isPending } = useMutation({
@@ -190,7 +189,6 @@ function useFinancialsDetails({
         save(formData, {
             onSuccess : ({ data: savedEntry }) => {
                 cache.set(["subject", "financials"], savedEntry)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Financials updated successfully")
                 reset({
                     ...savedEntry,
@@ -205,7 +203,7 @@ function useFinancialsDetails({
                         default_file: f.file
                     })) || [],
                 }) 
-                setTouched(true)
+                onTouched()
             },
             onError: (error) => handleAxiosError(error),
         })
@@ -218,7 +216,7 @@ function useFinancialsDetails({
             onSuccess : () => {
                 cache.removeFromList(["subject", "financials", "files"], id)
                 toast.success("Financial file deleted successfully")
-                setTouched(true)
+                onTouched();
             },
             onError : (error) => handleAxiosError(error)
         })
@@ -230,6 +228,7 @@ function useFinancialsDetails({
         handleSubmit,
         onSubmit,
         watch,
+        onTouched,
         getValues,
         isDeleting,
         errors,

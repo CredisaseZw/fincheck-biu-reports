@@ -16,11 +16,12 @@ function CompanyOperations({
     subject_type
 }:CompanyOperationsProps) {
     const {
-        touched, 
+        onTouched,
         register, 
         handleSubmit, 
         onSubmit,
         getValues,
+        touched, 
         control,
         isPending,
         errors
@@ -174,6 +175,8 @@ function CompanyOperations({
                 </div>
                    
                 <CustomSubmitButton
+                        onFine={onTouched}
+                        showFine = {true}
                         state={touched}
                         isPending={isPending}
                     />

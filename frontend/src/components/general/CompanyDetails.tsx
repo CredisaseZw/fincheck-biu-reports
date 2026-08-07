@@ -26,6 +26,7 @@ function CompanyDetails({
         handleSubmit,
         register,
         onSubmit,
+        onTouched,
         isPending,
         control,
         touched, 
@@ -142,9 +143,12 @@ function CompanyDetails({
                             </div>
                         )}
                     />
+
                     <CustomSubmitButton
-                        label = {!subject_type ?"Add Company" : "Update"}
+                        onFine={onTouched}
                         state={touched}
+                        showFine = {Boolean(subject_type)}
+                        label = {!subject_type ?"Add Company" : "Update"}
                         isPending={isPending}
                     />
                 </Fieldset>

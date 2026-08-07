@@ -23,6 +23,7 @@ function ShareholdingDetails({
         isPending,
         errors,
         fields, 
+        onTouched,
         register, 
         handleSubmit, 
         onSubmit,
@@ -170,6 +171,8 @@ function ShareholdingDetails({
                         <Plus size={16} className="mr-2" /> Add Shareholder
                     </Button>
                     <CustomSubmitButton
+                        showFine 
+                        onFine={onTouched}
                         state={touched}
                         isPending={isPending}
                     />

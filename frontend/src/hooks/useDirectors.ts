@@ -2,13 +2,14 @@ import {useForm, useFieldArray} from "react-hook-form"
 import {zodResolver} from "@hookform/resolvers/zod"
 import {z} from "zod"
 import type { CompanyDirectorsProps, Report } from "@/types/core";
-import { useState,  useEffect, useMemo } from "react";
+import {  useEffect, useMemo } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import { handleAxiosError, handleTrackChangedArray, genStorageKey, cleanPayload } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
 import { GENDERS } from "@/constants";
+import useSectionTouched from "./useSectionTouched";
 
 const Positions = z.enum(["director", "secretary", "chairman","other"])
 const director = z.object({
@@ -60,14 +61,12 @@ function useDirectors({
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "directors_details"), [report_id,subject_type])
     const { mutate, isPending } = useInstanceMutation()
-    const [touched, setTouched] = useState(false);
+    const {onTouched, touched} = useSectionTouched(CACHE_KEY);
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     useEffect(()=>{
         if(directors_data){
@@ -109,8 +108,7 @@ function useDirectors({
 
         const changes = handleTrackChangedArray(directors_data, data.directors)
         if(changes.length === 0){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return
         }
         const payload_data = changes.map((item) => cleanPayload(item));
@@ -123,9 +121,8 @@ function useDirectors({
         mutate(payload,{
             onSuccess : (data) => {
                 cache.set(["subject", "directors"], data.directors)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Directors successfully updated")
-                setTouched(true)
+                onTouched()
             },
             onError: (e) => handleAxiosError(e)
         })
@@ -137,10 +134,9 @@ function useDirectors({
             mode : "deletion"
         }, {
             onSuccess : () => {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 cache.removeFromList(["subject", "directors"], id)
                 toast.success("Directors successfully removed.")
-                setTouched(true)
+                onTouched();
             },
             onError: (e) => handleAxiosError(e)})
     }
@@ -150,6 +146,7 @@ function useDirectors({
         onSubmit,
         append,
         register,
+        onTouched,
         remove,
         onDelete,
         getValues,

@@ -1,14 +1,15 @@
 import type { Report, ReportDetailsProps } from "@/types/core";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
+import useSectionTouched from "./useSectionTouched";
 
 const schema = z.object({
     overall_risk_rating :z.string().min(1, "Overall risk rating is required"),
@@ -33,15 +34,13 @@ function useReportDetails({
     })
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const {mutate, isPending}= useInstanceMutation()
-    const [touched, setTouched] = useState(false)
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "report_details"), [report_id,subject_type])
+    const {onTouched, touched} =useSectionTouched(CACHE_KEY);
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     useEffect(()=>{
         if(report_data){
@@ -52,8 +51,7 @@ function useReportDetails({
     const onSubmit =(data: ReportDetailsFormData) =>{
         const changes = handleTrackChangedFields(report_data, data)
         if(!changes){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return
         }   
     
@@ -64,11 +62,10 @@ function useReportDetails({
         } 
         mutate(p,{
             onSuccess : (data: Report) => {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.info("Report details saved.")
                 if(changes.overall_risk_rating)cache.set(["overall_risk_rating"], data.overall_risk_rating);
                 if(changes.summary)cache.set(["summary"], data.summary);
-                setTouched(true)
+                onTouched();
       },
             onError : (e)=> handleAxiosError(e)
         })
@@ -79,6 +76,7 @@ function useReportDetails({
         isPending,
         errors,
         register,
+        onTouched,
         handleSubmit,
         onSubmit,
     }

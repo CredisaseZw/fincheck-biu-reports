@@ -3,11 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import type { BankerDetailsProps, Company, Individual, Report } from "@/types/core";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
-import { useState,  useEffect, useMemo } from "react";
+import {  useEffect, useMemo } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
+import useSectionTouched from "./useSectionTouched";
 
 const AccountTypes = z.enum(["current", "savings", "loan", "fixed_deposit"])
 const Narrations = z.enum(["A", "B", "C", "D", "E"])
@@ -62,14 +63,12 @@ function useBankersDetails({
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "banker_details"), [report_id,subject_type])
     const { mutate, isPending } = useInstanceMutation()
-    const [touched, setTouched] = useState(false)
+    const { onTouched, touched } = useSectionTouched(CACHE_KEY);
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched") onTouched();
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -91,8 +90,7 @@ function useBankersDetails({
 
         const changes = handleTrackChangedArray(banker_accounts, data.accounts)
         if(changes.length === 0){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return
         }
         const PAYLOAD:InstanceMutation ={
@@ -107,9 +105,8 @@ function useBankersDetails({
         mutate(PAYLOAD, {
             onSuccess : (data: Company | Individual) => {
                 cache.set(["subject", "banker_accounts"], data.banker_accounts)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Banker accounts Updated successfully.")     
-                setTouched(true)
+                onTouched();
             },
             onError : (error) => handleAxiosError(error)
         })
@@ -123,8 +120,8 @@ function useBankersDetails({
             onSuccess : () => {
                 cache.removeFromList(["subject", "banker_accounts"], id)
                 toast.success("Banker row successfully deleted.")
-                setTouched(true)
-      },
+                onTouched();
+            },
             onError :(e)=>handleAxiosError(e)
         })
     }
@@ -137,6 +134,7 @@ function useBankersDetails({
         getValues,
         register,
         handleSubmit,
+        onTouched,
         control,
         isPending,
         errors,

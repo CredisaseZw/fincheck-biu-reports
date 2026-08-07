@@ -26,6 +26,7 @@ function BankerDetails({
         append,
         remove, 
         getValues,
+        onTouched,
         register, 
         handleSubmit,
         onSubmit,
@@ -197,6 +198,8 @@ function BankerDetails({
                         <Plus /> Add Account
                     </Button>
                     <CustomSubmitButton
+                        showFine
+                        onFine={onTouched}
                         state={touched}
                         isPending={isPending}
                     />

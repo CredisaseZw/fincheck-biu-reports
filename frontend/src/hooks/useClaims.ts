@@ -4,14 +4,15 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from  "zod"
 import type { SearchEntityRef } from "@/components/general/SearchEntity";
-import { useState,  useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import type { ClaimsProps } from "@/types/core";
 import { toast } from "sonner";
 import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
+import useSectionTouched from "./useSectionTouched";
 
  
 const claim = z.object({
@@ -63,16 +64,14 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
   }, [reset, claims_data])
 
   const {mutate, isPending} = useInstanceMutation()
-  const [touched, setTouched] = useState(false)
   const cache = useDetailCacheUpdate<Report>(['report', subject_type, report_id])
   const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "claims_details"), [report_id,subject_type])
+  const {onTouched, touched} = useSectionTouched(CACHE_KEY);
 
   useEffect(()=>{
       const state = getItem(CACHE_KEY)
-      if(state === "touched"){
-          setTouched(true)
-      }
-  }, [report_id, subject_type, CACHE_KEY])
+      if(state === "touched") onTouched();
+  }, [report_id, subject_type, CACHE_KEY, onTouched])
 
   const refs = useRef<(SearchEntityRef | null)[]>([])
   const {fields, append, remove} = useFieldArray({
@@ -98,8 +97,7 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
 
     const changes = handleTrackChangedArray(initial_data, current_data)
     if(changes.length === 0){
-      setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-      setTouched(true)
+      onTouched();
       return
     }
 
@@ -115,10 +113,8 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
     mutate(payload, {
       onSuccess : (data) => {
         cache.set(["subject", "claims"], data.claims)
-        setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
         toast.success("Claims updated successfully")
-      
-        setTouched(true)
+        onTouched();
       },
       onError :(error) => handleAxiosError(error)
     })
@@ -132,17 +128,13 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
       onSuccess : () => {
         cache.removeFromList(["subject", "claims"], id)
         toast.success("Claim row deleted successfully")
-      
-        setTouched(true)
+        onTouched();
       },
       onError : (error) => handleAxiosError(error)
     })
   }
 
-  
-
   return {
-    touched,
     getValues,
     setValue,
     watch,
@@ -152,6 +144,8 @@ function useClaims({claims_data, subject_object_id, subject_type, report_id}:Cla
     handleSubmit,
     register,
     onDelete,
+    onTouched,
+    touched,
     refs,
     isPending,
     control,

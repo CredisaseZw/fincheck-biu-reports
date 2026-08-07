@@ -1,8 +1,8 @@
 import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
-import { getItem, setItem } from "@/lib/storage";
+import { getItem } from "@/lib/storage";
 import type { CourtJudgementsProps, Report } from "@/types/core";
 import {zodResolver} from "@hookform/resolvers/zod"
-import { useState,  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod"
@@ -10,6 +10,7 @@ import type { InstanceMutation } from "./api/useInstanceMutation";
 import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { CURRENCY, SETTLEMENT_OPTIONS } from "@/constants";
+import useSectionTouched from "./useSectionTouched";
 
 const schema = z.object({
     id : z.number().optional(),
@@ -60,15 +61,13 @@ function useCourtDetails({
 
     const cache = useDetailCacheUpdate<Report>(['report', subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "court_details"), [report_id,subject_type])
-    const {mutate, isPending} = useInstanceMutation()
-    const [touched, setTouched] = useState(false)
+    const { mutate, isPending } = useInstanceMutation()
+    const { onTouched, touched } = useSectionTouched(CACHE_KEY)
 
     useEffect(()=>{
         const state = getItem(CACHE_KEY)
-        if(state === "touched"){
-            setTouched(true)
-        }
-    }, [report_id, subject_type, CACHE_KEY])
+        if(state === "touched")onTouched()
+    }, [report_id, subject_type, CACHE_KEY, onTouched])
 
 
     const {fields, append, remove} = useFieldArray({
@@ -83,8 +82,7 @@ function useCourtDetails({
         }
         const changes = handleTrackChangedArray(court_judgements_data, data.court_judgements,)
         if(changes.length === 0){
-            setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
-            setTouched(true)
+            onTouched();
             return
         }
         const payload: InstanceMutation = {
@@ -100,9 +98,8 @@ function useCourtDetails({
         mutate(payload, {
             onSuccess : (data) => {
                 cache.set(["subject", "court_judgements"], data.court_judgements)
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 toast.success("Court Judgements updated successfully")
-                setTouched(true)
+                onTouched()
             },
             onError :(error) => handleAxiosError(error)
         })
@@ -114,10 +111,9 @@ function useCourtDetails({
             mode:  "deletion"
         },{
             onSuccess : () => {
-                setItem(CACHE_KEY, "touched", 60 * 60 * 1000 * 24 * 3)
                 cache.removeFromList(["subject", "court_judgements"], id)
                 toast.success("Court Judgement row deleted successfully")
-                setTouched(true)            
+                onTouched()
             },
             onError : (error) => handleAxiosError(error)
         })
@@ -130,6 +126,7 @@ function useCourtDetails({
         control,
         isPending,
         handleSubmit,
+        onTouched,
         append,
         register,
         remove,
