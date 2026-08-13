@@ -83,7 +83,7 @@ function CompanyOperations({
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="local">Local</SelectItem>
-                                        <SelectItem value="local_&_international">Local & International</SelectItem>
+                                        <SelectItem value="local_and_international">Local & International</SelectItem>
                                         <SelectItem value="international">International</SelectItem>
                                     </SelectContent>
                                 </Select>

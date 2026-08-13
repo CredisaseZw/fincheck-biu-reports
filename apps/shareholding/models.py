@@ -17,7 +17,7 @@ class CompanyShareholding(BaseModel):
         null=True,
         blank=True
     )
-    numbers_of_shareholders = models.PositiveIntegerField()
+    numbers_of_shareholders = models.PositiveIntegerField(blank=True, null=True)
     authorized_capital = models.DecimalField(
         _("Authorized Capital"),
         max_digits=20,

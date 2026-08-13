@@ -64,7 +64,11 @@ class Individuals(BaseModel):
         null = True
     )
     is_pep = models.BooleanField(default= False)
-    mobile_number = models.CharField(_("Mobile number"), max_length=50)
+    mobile_number = models.CharField(_("Mobile number"),
+        max_length=50,
+        blank = True,
+        null = True    
+    )
     email = models.EmailField(_("Email"), blank=True, null=True)
     is_deleted = models.BooleanField(_("Is deleted"), default=False)
     refer_type = models.CharField(

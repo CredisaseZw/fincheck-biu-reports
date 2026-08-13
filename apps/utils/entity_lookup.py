@@ -164,7 +164,7 @@ class EntityLookUp:
             **({'creditor_name': claim.company_creditor_fins__registration_name} if claim.company_creditor_fins__registration_name else {}),
             **({'currency': self._handle_currency_type(claim.currency_type.upper())} if claim.currency_type else {}),
             **({'overdue_balance': claim.overdue_balance} if claim.overdue_balance else {}),
-            '_is_absconder': claim.is_absconder,  # routing flag only, stripped before create/compare
+            '_is_absconder': claim.is_absconder,
         }
 
     def _prepare_court_data(self, record: CourtRecord, debtor_content_type, debtor_object_id: int) -> dict:

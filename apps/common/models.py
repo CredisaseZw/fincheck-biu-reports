@@ -72,7 +72,7 @@ class BankerAccounts(BaseModelWithSubject):
     
     bank = models.CharField(max_length=255)
     branch = models.CharField(max_length=255, blank=True)
-    account_name = models.CharField(max_length=255)
+    account_name = models.CharField(max_length=255, blank=True, null = True)
     account_type = models.CharField(
         max_length=20,
         choices=AccountType.choices,

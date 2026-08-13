@@ -87,7 +87,7 @@ function BankerDetails({
                                 </div>
                             </ColumnsContainer>
                             <div className="form-group">
-                                <Label className="required">Account Name</Label>
+                                <Label>Account Name</Label>
                                 <Input {...register(`accounts.${index}.account_name`)} />
                                 {errors.accounts?.[index]?.account_name && (
                                     <p className="text-destructive text-sm">{errors.accounts[index].account_name.message}</p>

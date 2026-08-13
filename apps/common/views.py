@@ -9,6 +9,11 @@ from .models import Financials, TradeReferences, BankerAccounts
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
 from apps.utils.base_viewset import UpdatedByMixin
 from .models import FinancialFiles
+from .entity_schemas import (
+    CompanyReportSchema,
+    IndividualReportSchema
+)
+from rest_framework.decorators import action
 import logging
 logger = logging.getLogger(__name__)
 
@@ -130,3 +135,10 @@ class DeleteTradeReferenceViewSet(GenericViewSet, DestroyModelMixin):
 class DeleteBankerAccounts(GenericViewSet, DestroyModelMixin):
     queryset = BankerAccounts.objects.all()
     permission_classes = [IsStaffUser]
+
+
+class IngestionViewSet(GenericViewSet):
+    @action(detail=False, url_path='ingest', methods=['POST'])
+    def ingest_end_point(self, request, *args, **kwargs):
+        report_type = request.data.get("report_type")
+        payload = request.data.get("payload")

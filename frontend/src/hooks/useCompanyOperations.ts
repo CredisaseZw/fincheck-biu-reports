@@ -21,7 +21,7 @@ const companyOperationsSchema = z.object({
     import_export: z.string().optional(),
     sales_payment_terms: PaymentScope.optional(),
     purchases_payment_terms: PaymentScope.optional(),
-    purchase_supplier_scope : z.enum(["local", "local_&_international", "international"]).optional()    
+    purchase_supplier_scope : z.enum(["local", "local_and_international", "international"]).optional()    
 })
 
 export type CompanyOperationsFormData = z.infer<typeof companyOperationsSchema>

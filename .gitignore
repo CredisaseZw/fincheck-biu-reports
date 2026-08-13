@@ -19,8 +19,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 __pycache__/
+REPORTS
 media/
-
+OCR_TEST_CASES/REPORTS
+OCR_TEST_CASES/env_t
 node_modules
 dist
 dist-ssr

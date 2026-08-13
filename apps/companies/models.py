@@ -301,7 +301,7 @@ class CompanyOperations(BaseModel):
     class SupplierScope(models.TextChoices):
         LOCAL = "local", "Local Suppliers"
         INTERNATIONAL = "international", "International Suppliers"
-        BOTH = "local_&_international", "Local & International Suppliers"
+        BOTH = "local_and_international", "Local And International Suppliers"
 
     company = models.OneToOneField(
         Company,
