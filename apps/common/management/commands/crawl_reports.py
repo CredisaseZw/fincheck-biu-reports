@@ -3,7 +3,7 @@ import os
 import pymupdf4llm
 from django.conf import settings
 from django.core.management import BaseCommand
-from .report_types import ClientFile, ReportType
+from .report_types import ClientFile, ReportType, detect_report_type
 from .llma_logic import EntityDataExtraction, ExtractionError
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,13 @@ class Command(BaseCommand):
             help="Extract and print results without saving to the DB.",
         )
 
+        parser.add_argument(
+            "--type",
+            dest="report_type_filter",
+            choices=["individual", "company", "all"],
+            default="all",
+            help="Only crawl this report type, based on filename (default: all).", )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.clients: list[ClientFile] = []
@@ -34,7 +41,7 @@ class Command(BaseCommand):
     def make_markdown(file):
         return pymupdf4llm.to_markdown(file)
 
-    def crawl_files(self):
+    def crawl_files(self, report_type_filter:str):
         if not os.path.isdir(self.REPORTS_PARENT_FOLDER):
             logger.error("Reports folder does not exist: %s", self.REPORTS_PARENT_FOLDER)
             return
@@ -61,6 +68,12 @@ class Command(BaseCommand):
                         continue
                     for file in os.listdir(client_path):
                         if file.lower().endswith(".pdf"):
+                            _is_individual_name= "individual" in file.lower()
+                            if report_type_filter == "individual" and not _is_individual_name:
+                                continue
+                            if report_type_filter == "company" and _is_individual_name:
+                                continue
+
                             self.clients.append({
                                 "file_name": file,
                                 "path": os.path.join(client_path, file),
@@ -73,18 +86,34 @@ class Command(BaseCommand):
 
         logger.info("Found %d PDF report(s) to process", len(self.clients))
 
-    def process_client_file(self, client_file: ClientFile, *, dry_run: bool) -> bool:
+    def process_client_file(
+            self, 
+            client_file: ClientFile, *,
+            dry_run: bool,
+            report_type_filter:str) -> bool:
         source = client_file["file_name"]
 
         try:
             markdown = self.make_markdown(client_file["path"])
+            report_type = detect_report_type(markdown)
+            if report_type_filter != "all":
+                if report_type_filter == "individual" and report_type != ReportType.INDIVIDUAL:
+                    logger.exception("Failed to convert %s, %s is required", source, report_type_filter)
+                    return False
+                if report_type_filter == "company" and report_type != ReportType.COMPANY:
+                    logger.exception("Failed to convert %s, %s is required", source, report_type_filter)
+                    return False
+                    
         except Exception:
             logger.exception("Failed to convert %s to markdown", source)
             return False
 
         try:
-            parsed, report_type = self.entity_extractor.extract_markdown(
-                markdown, source=source
+            print(report_type)
+            parsed = self.entity_extractor.extract_markdown(
+                markdown, 
+                source=source,
+                report_type=report_type
             )
         except ExtractionError:
             return False
@@ -99,8 +128,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         limit = options.get("limit")
         dry_run = options.get("dry_run", False)
-
-        self.crawl_files()
+        report_type_filter = options.get("report_type_filter", "all")
+        self.crawl_files(report_type_filter)
 
         targets = self.clients[:limit] if limit else self.clients
         if not targets:
@@ -109,10 +138,11 @@ class Command(BaseCommand):
 
         succeeded = 0
         failed = 0
+        print(targets)
 
         for client_file in targets:
             self.stdout.write(f"Processing {client_file['file_name']}...")
-            ok = self.process_client_file(client_file, dry_run=dry_run)
+            ok = self.process_client_file(client_file, dry_run=dry_run, report_type_filter = report_type_filter)
             if ok:
                 succeeded += 1
             else:

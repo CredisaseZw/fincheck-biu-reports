@@ -45,10 +45,12 @@ class EntityDataExtraction:
             self._chains[report_type] = self.prompt | structured_llm
         return self._chains[report_type]
 
-    def extract_markdown(self, markdown: str, *, source: str = "<unknown>"):
-        report_type = detect_report_type(markdown)
+    def extract_markdown(self, 
+            markdown: str, *, 
+            source: str = "<unknown>",
+            report_type: ReportType
+        ):
         chain = self._get_chain(report_type)
-
         try:
             parsed = chain.invoke({"content": markdown})
         except (BadRequestError, APIError) as exc:
@@ -70,4 +72,4 @@ class EntityDataExtraction:
             raise ExtractionError(f"Unexpected error on {source}") from exc
 
         logger.info("Extracted %s as %s", source, report_type.value)
-        return parsed, report_type
+        return parsed
