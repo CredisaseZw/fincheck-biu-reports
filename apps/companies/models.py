@@ -308,12 +308,12 @@ class CompanyOperations(BaseModel):
         on_delete=models.CASCADE,
         related_name="operations"
     )
-    industry = models.CharField(max_length=300, blank=True)
-    target_markets = models.TextField(blank=True)
-    operations_territories = models.TextField(blank=True)
-    property_ownership = models.TextField(blank=True)
-    operational_areas = models.TextField(blank=True)
-    import_export = models.TextField(blank=True, help_text=_("Import / Export details"))
+    industry = models.CharField(max_length=300, blank=True, null=True)
+    target_markets = models.TextField(blank=True,null=True)
+    operations_territories = models.TextField(blank=True,null=True)
+    property_ownership = models.TextField(blank=True,null=True)
+    operational_areas = models.TextField(blank=True,null=True)
+    import_export = models.TextField(blank=True, null=True, help_text=_("Import / Export details"))
     purchases_payment_terms = models.CharField(
         max_length=50,
         choices=PaymentTerms.choices,

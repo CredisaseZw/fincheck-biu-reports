@@ -136,7 +136,7 @@ function useShareholdingDetails({
                         full_name: item.full_name,
                         address: item.address,
                         is_pep: item.is_pep,
-                        number_of_shares: item.number_of_shares,
+                        number_of_shares: Number(item.number_of_shares),
                         percentage_ownership: Number(item.percentage_ownership)
                     }))
                 })

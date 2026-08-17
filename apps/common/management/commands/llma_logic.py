@@ -4,7 +4,7 @@ from groq import BadRequestError, APIError
 from langchain_core.exceptions import OutputParserException
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
-from .report_types import (
+from apps.common.report_types import (
     ReportType,
     SYSTEM_PROMPT,
     detect_report_type,
@@ -19,7 +19,7 @@ class ExtractionError(Exception):
     schema instance, for any reason (Groq error, schema mismatch, etc.)."""
 
 class EntityDataExtraction:
-    def __init__(self, model: str = "openai/gpt-oss-20b"):
+    def __init__(self, model: str = "openai/gpt-oss-120b"):
         self.llm = ChatGroq(
             model=model,
             temperature=0,

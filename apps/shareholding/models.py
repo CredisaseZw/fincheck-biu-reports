@@ -43,8 +43,8 @@ class Shareholder(BaseModel):
     )
     full_name = models.CharField(max_length=100)
     address = models.TextField()
-    number_of_shares = models.PositiveIntegerField()
-    percentage_ownership = models.DecimalField(max_digits=5, decimal_places=2)
+    number_of_shares = models.PositiveIntegerField(blank=True, null=True)
+    percentage_ownership = models.DecimalField(max_digits=5, decimal_places=2, blank = True, null=True)
     is_pep = models.BooleanField(default= False)
     class Meta:
         app_label = "shareholding"

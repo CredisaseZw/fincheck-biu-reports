@@ -227,7 +227,6 @@ class EntityLookUp:
 
         for item in incoming:
             match = existing_by_key.get(key_fn(item))
-
             if match is None:
                 try:
                     model.objects.create(**item)
@@ -371,7 +370,7 @@ class EntityLookUp:
         }
     
     def hit_endpoint(self, type:str, value: str):
-        params = {"national_id": value} if type == "individual" else {"search": value}
+        params = {"national_id": Individuals.normalize_national_id(value)} if type == "individual" else {"search": value}
 
         try:
             response = requests.get(

@@ -167,7 +167,7 @@ export interface CompanyOperations {
   property_ownership: string;
   operational_areas: string;
   import_export: string;
-  purchase_supplier_scope : "local" | "local_&_international" | "international";
+  purchase_supplier_scope : "local" | "local_and_international" | "international";
   sales_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
   purchases_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
 }
@@ -201,8 +201,8 @@ export interface Shareholder {
   id: number;
   full_name: string;
   address: string;
-  number_of_shares: number;
-  percentage_ownership: string;
+  number_of_shares: number | null;
+  percentage_ownership: string | null;
   is_pep : boolean
 }
 
@@ -223,7 +223,7 @@ export interface BankerAccount {
   bank: string;
   branch: string;
   account_name: string;
-  account_type: "current" | "savings" | "loan" | "fixed_deposit";
+  account_type: "current" | "savings" | "loan" | "fixed_deposit" | null;
   account_number: string;
   date_of_acquirement : string,
   bank_code : string

@@ -184,7 +184,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           full_name :item.full_name,
           is_pep : item.is_pep,
           address  :item.address,
-          number_of_shares :item.number_of_shares,
+          number_of_shares : Number(item.number_of_shares),
           percentage_ownership :Number(item.percentage_ownership)
         }))
         : [{
@@ -411,7 +411,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           bank: item.bank,
           branch: item.branch,
           account_name: item.account_name,
-          account_type: item.account_type,
+          account_type: item.account_type ?? "current",
           account_number: item.account_number,
           date_of_acquirement: item.date_of_acquirement,  
           bank_code: item.bank_code,            

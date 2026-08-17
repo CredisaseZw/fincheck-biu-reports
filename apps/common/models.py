@@ -76,6 +76,8 @@ class BankerAccounts(BaseModelWithSubject):
     account_type = models.CharField(
         max_length=20,
         choices=AccountType.choices,
+        blank=True,
+        null = True
     )
     account_number = models.CharField(max_length=250)
     date_of_acquirement = models.DateField(auto_now=True)

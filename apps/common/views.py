@@ -9,10 +9,14 @@ from .models import Financials, TradeReferences, BankerAccounts
 from .serializer import FinancialsSerializer, FinancialsWriteSerializer
 from apps.utils.base_viewset import UpdatedByMixin
 from .models import FinancialFiles
-from .entity_schemas import (
+from pydantic import ValidationError as PydanticValidationError
+from rest_framework.permissions import AllowAny
+from .report_types import (
     CompanyReportSchema,
-    IndividualReportSchema
+    IndividualReportSchema,
+    ReportType
 )
+from .ingest import save_company, save_individual
 from rest_framework.decorators import action
 import logging
 logger = logging.getLogger(__name__)
@@ -138,7 +142,53 @@ class DeleteBankerAccounts(GenericViewSet, DestroyModelMixin):
 
 
 class IngestionViewSet(GenericViewSet):
+    permission_classes = [AllowAny]
+
     @action(detail=False, url_path='ingest', methods=['POST'])
     def ingest_end_point(self, request, *args, **kwargs):
         report_type = request.data.get("report_type")
         payload = request.data.get("payload")
+
+        if not report_type:
+            return Response({
+              "error" : "Report type required."  
+            }, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        if report_type not in (ReportType.INDIVIDUAL.value, ReportType.COMPANY.value):
+            return Response(
+                {"detail": "report_type must be 'individual' or 'company'."},
+                status=STATUS.HTTP_400_BAD_REQUEST,
+            )
+
+        schema_cls = (
+            IndividualReportSchema 
+            if report_type == ReportType.INDIVIDUAL.value
+            else CompanyReportSchema
+        )
+
+        try:
+            parsed = schema_cls.model_validate(payload)
+        except PydanticValidationError as exc:
+            logger.error("Ingest schema validation failed: %s", exc)
+            return Response(
+                {"detail": "Schema validation failed.", "errors": exc.errors()},
+                status=STATUS.HTTP_400_BAD_REQUEST,
+            )
+
+        try:   
+            if report_type == ReportType.INDIVIDUAL.value:
+                instance = save_individual(parsed)
+            else:
+                instance = save_company(parsed)
+        except Exception:
+            logger.exception("Failed to save %s report to DB", report_type)
+            return Response(
+                {"detail": "Failed to save report."},
+                status=STATUS.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+ 
+        return Response(
+            {"id": str(instance.pk), "report_type": report_type},
+            status=STATUS.HTTP_201_CREATED,
+        )
+ 

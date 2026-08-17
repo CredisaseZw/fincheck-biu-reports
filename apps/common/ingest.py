@@ -2,7 +2,6 @@ from decimal import Decimal
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-
 from apps.companies.models import (
     Company,
     CompanyOverview,
@@ -20,8 +19,11 @@ from apps.common.models import (
     TradeReferences,
 )
 from apps.credit_records.models import InsolvencyRecord, PublicInformation
-from .entity_schemas import CompanyReportSchema, IndividualReportSchema
+from .report_types import CompanyReportSchema, IndividualReportSchema
+from apps.utils.entity_lookup import EntityLookUp
+from pprintpp import pprint
 
+entity_lookup = EntityLookUp()
 
 def _dec(value) -> Decimal | None:
     """float/None -> Decimal/None. Goes through str() to avoid binary float
@@ -29,6 +31,7 @@ def _dec(value) -> Decimal | None:
     if value is None:
         return None
     return Decimal(str(value))
+
 
 def _save_common_subject_records(subject, data) -> None:
     content_type = ContentType.objects.get_for_model(subject)
@@ -49,7 +52,7 @@ def _save_common_subject_records(subject, data) -> None:
                 "bank": acct.bank,
                 "branch": acct.branch or "",
                 "account_name": acct.account_name or "",
-                "account_type": acct.account_type,
+                "account_type": acct.account_type or "current",
                 "bank_code": acct.bank_code,
                 "narration": acct.narration or BankerAccounts.Narrations.A,
             },
@@ -113,11 +116,19 @@ def _save_common_subject_records(subject, data) -> None:
 
 
 # Individual
+
 @transaction.atomic
-def save_individual_report(data: IndividualReportSchema) -> Individuals:
-    individual, _ = Individuals.objects.update_or_create(
-        national_id=data.national_id,
-        defaults={
+def save_individual(data: IndividualReportSchema) -> Individuals:
+    national_id = Individuals.normalize_national_id(data.national_id)
+    individual = Individuals.objects.filter(
+        national_id=national_id
+    ).first()
+    if individual: #skip creation we already have something on him
+        return individual
+
+    individual = Individuals.objects.create(
+        **{
+            "national_id": national_id,
             "full_name": data.full_name,
             "date_of_birth": data.date_of_birth,
             "gender": data.gender,
@@ -146,34 +157,54 @@ def save_individual_report(data: IndividualReportSchema) -> Individuals:
             defaults=data.next_of_kin.model_dump(),
         )
 
+    # SAVE CLAIMS, ABS SOMETHING AND COURT RECORDS
+
+    payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
+    if payload:
+        chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
+        entity_lookup.sync_individual_records(individual, chained_data)
     _save_common_subject_records(individual, data)
     return individual
 
-# Company
 
+# Company
 def _get_or_create_director_individual(director) -> Individuals:
-    individual, _ = Individuals.objects.update_or_create(
-        national_id=director.national_id or f"UNKNOWN-{director.full_name}",
+    d_national_id = Individuals.normalize_national_id(director.national_id)
+    individual, created = Individuals.objects.get_or_create(
+        national_id= d_national_id or f"UNKNOWN-{director.full_name}",
         defaults={
+            "national_id": d_national_id,
             "full_name": director.full_name,
             "gender": director.gender,
             "residential_address": director.residential_address,
-            "mobile_number": "",
         },
     )
+    if created:
+        payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
+        if payload:
+            chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
+            entity_lookup.sync_individual_records(individual, chained_data)
+               
     return individual
 
 
 @transaction.atomic
-def save_company_report(data: CompanyReportSchema) -> Company:
-    if Company.objects.filter(
-        Q(registration_number = data.registration_number) |
-        Q(re_registration_number = data.re_registration_number)
-    ).exists(): # the company is already stored and we have current data on the subject
-        return True
+def save_company(data: CompanyReportSchema) -> Company:
+    existing = None
+    if data.registration_number or data.re_registration_number:
+        q = Q()
+        if data.registration_number:
+            q |= Q(registration_number=data.registration_number)
+        if data.re_registration_number:
+            q |= Q(re_registration_number=data.re_registration_number)
+        existing = Company.objects.filter(q).first()
+
+    if existing:  # already stored and we have current data on the subject
+        return existing
 
     company = Company.objects.create(
         **{
+            "registered_name": data.registered_name,
             "trading_name": data.trading_name,
             "registration_number": data.registration_number,
             "re_registration_number": data.re_registration_number,
@@ -233,5 +264,10 @@ def save_company_report(data: CompanyReportSchema) -> Company:
             defaults={"position": director.position},
         )
 
+    value = company.registration_number if company.registration_number else company.re_registration_number
+    payload = entity_lookup.hit_endpoint("company", value)
+    if payload: 
+        chained_data = entity_lookup._prepare_serializer_company_data(payload, company.pk)
+        entity_lookup.sync_company_records(company, chained_data)
     _save_common_subject_records(company, data)
     return company

@@ -1,3 +1,4 @@
+import re
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from apps.utils.base_models import BaseModel
@@ -130,11 +131,15 @@ class Individuals(BaseModel):
         object_id_field="subject_object_id",
     )
 
+    @staticmethod
+    def normalize_national_id(value: str):
+        return re.sub(r"[^A-Za-z0-9]", "", value).strip().upper()
+
     def save(self, *args, **kwargs):
         if self.full_name:
             self.full_name = self.full_name.title()
         if self.national_id:
-            self.national_id = self.national_id.strip().upper()
+            self.national_id = self.normalize_national_id(self.national_id)
         super().save(*args, **kwargs)
     class Meta:
         verbose_name = _("Individual")

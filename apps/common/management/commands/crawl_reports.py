@@ -1,10 +1,13 @@
 import logging
 import os
 import pymupdf4llm
+import requests
 from django.conf import settings
 from django.core.management import BaseCommand
-from .report_types import ClientFile, ReportType, detect_report_type
+from apps.common.report_types import ClientFile, ReportType, detect_report_type
 from .llma_logic import EntityDataExtraction, ExtractionError
+import random
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -41,90 +44,120 @@ class Command(BaseCommand):
     def make_markdown(file):
         return pymupdf4llm.to_markdown(file)
 
+    @staticmethod
+    def _sync_parsed_data(report_type: ReportType, parsed):
+        endpoint = "http://127.0.0.1:8000"  # "https://biu.credi-safe.com/"
+        headers = {"Content-Type": "application/json"}
+        body = {
+            "report_type": report_type.value,
+            "payload": parsed.model_dump(mode="json"),
+        }
+
+        try:
+            response = requests.post(
+                f"{endpoint}/api/ingest/",
+                headers=headers,
+                json=body,
+                timeout=30,
+            )
+            response.raise_for_status()
+        except requests.RequestException:
+            logger.exception("Failed to sync %s to %s", report_type.value, endpoint)
+            raise
+
+        return response.json()
+
+    def crawl_subfolder(self, folder_path: str, report_type_filter: str):
+        entries = os.listdir(folder_path)
+        for entry in entries:
+            full_path = os.path.join(folder_path, entry)
+            if os.path.isdir(full_path):
+                self.crawl_subfolder(full_path, report_type_filter)
+            elif os.path.isfile(full_path) and entry.lower().endswith(".pdf"):
+                is_individual_name = "individual" in folder_path.lower()
+                if report_type_filter == ReportType.INDIVIDUAL and not is_individual_name:
+                    continue
+                if report_type_filter == ReportType.COMPANY and is_individual_name:
+                    continue
+                self.clients.append({
+                    "file_name": entry,
+                    "path": full_path,
+                })
+
     def crawl_files(self, report_type_filter:str):
         if not os.path.isdir(self.REPORTS_PARENT_FOLDER):
             logger.error("Reports folder does not exist: %s", self.REPORTS_PARENT_FOLDER)
             return
 
-        years = sorted(os.listdir(self.REPORTS_PARENT_FOLDER))
-        index = len(years) - 1
-        while index >= 0:  # years, newest first
-            year_path = os.path.join(self.REPORTS_PARENT_FOLDER, years[index])
-            if not os.path.isdir(year_path):
-                index -= 1
-                continue
-
-            months = sorted(os.listdir(year_path))
-            _month_index = len(months) - 1
-            while _month_index >= 0:  # months, newest first
-                month_path = os.path.join(year_path, months[_month_index])
-                if not os.path.isdir(month_path):
-                    _month_index -= 1
-                    continue
-
-                for client in os.listdir(month_path):
-                    client_path = os.path.join(month_path, client)
-                    if not os.path.isdir(client_path):
-                        continue
-                    for file in os.listdir(client_path):
-                        if file.lower().endswith(".pdf"):
-                            _is_individual_name= "individual" in file.lower()
-                            if report_type_filter == "individual" and not _is_individual_name:
-                                continue
-                            if report_type_filter == "company" and _is_individual_name:
-                                continue
-
-                            self.clients.append({
-                                "file_name": file,
-                                "path": os.path.join(client_path, file),
-                                "month": months[_month_index],
-                                "year": years[index],
-                                "client": client,
-                            })
-                _month_index -= 1
-            index -= 1
-
-        logger.info("Found %d PDF report(s) to process", len(self.clients))
+        years = os.listdir(self.REPORTS_PARENT_FOLDER)
+        for year in reversed(years):
+            self.crawl_subfolder(
+                os.path.join(self.REPORTS_PARENT_FOLDER, year), 
+                report_type_filter
+            )
 
     def process_client_file(
-            self, 
+            self,
             client_file: ClientFile, *,
             dry_run: bool,
-            report_type_filter:str) -> bool:
+            report_type_filter: str) -> bool:
         source = client_file["file_name"]
-
+        file_path  = client_file["path"]
         try:
-            markdown = self.make_markdown(client_file["path"])
-            report_type = detect_report_type(markdown)
-            if report_type_filter != "all":
-                if report_type_filter == "individual" and report_type != ReportType.INDIVIDUAL:
-                    logger.exception("Failed to convert %s, %s is required", source, report_type_filter)
-                    return False
-                if report_type_filter == "company" and report_type != ReportType.COMPANY:
-                    logger.exception("Failed to convert %s, %s is required", source, report_type_filter)
-                    return False
-                    
+            if os.path.exists(file_path):
+                markdown = self.make_markdown(file_path)
+                report_type = detect_report_type(markdown)
+                if report_type_filter != "all":
+                    if report_type_filter == "individual" and report_type != ReportType.INDIVIDUAL:
+                        logger.error("Skipping %s, %s is required", source, report_type_filter)
+                        return False
+                    if report_type_filter == "company" and report_type != ReportType.COMPANY:
+                        logger.error("Skipping %s, %s is required", source, report_type_filter)
+                        return False
+            else:         
+                logger.error("Skipping %s, %s does not exits", source, file_path)
+                return False
         except Exception:
             logger.exception("Failed to convert %s to markdown", source)
             return False
 
-        try:
-            print(report_type)
-            parsed = self.entity_extractor.extract_markdown(
-                markdown, 
-                source=source,
-                report_type=report_type
-            )
-        except ExtractionError:
-            return False
-
         if dry_run:
             self.stdout.write(f"[DRY RUN] {source} -> {report_type.value}")
-            self.stdout.write(str(parsed))
+            self.stdout.write(str(len(self.clients)))
             return True
 
-        return True
+        parsed = None
+        for attempt in range(4):
+            try:
+                parsed = self.entity_extractor.extract_markdown(
+                    markdown,
+                    source=source,
+                    report_type=report_type,
+                )
+                break
+            except ExtractionError as exc:
+                is_rate_limited = "429" in str(exc.__cause__)
+                if is_rate_limited and attempt < 3:
+                    wait = (2 ** attempt) + random.uniform(0, 1)
+                    logger.warning("Rate limited on %s, retrying in %.1fs", source, wait)
+                    time.sleep(wait)
+                    continue
+                return False
+        else:
+            return False
 
+        try:
+            response = self._sync_parsed_data(report_type, parsed)
+        except Exception as e:
+            print(f"Some unforeseen error occurred: {e}")
+            return False
+        finally:
+            time.sleep(1)
+
+        if os.path.exists(file_path):
+            os.remove() # in case it some fail we dont wanna waste tokens and all 
+        return True
+    
     def handle(self, *args, **options):
         limit = options.get("limit")
         dry_run = options.get("dry_run", False)
@@ -138,7 +171,6 @@ class Command(BaseCommand):
 
         succeeded = 0
         failed = 0
-        print(targets)
 
         for client_file in targets:
             self.stdout.write(f"Processing {client_file['file_name']}...")

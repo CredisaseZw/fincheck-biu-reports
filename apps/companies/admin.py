@@ -25,14 +25,13 @@ class CompanyAdmin(admin.ModelAdmin):
         "trading_name",
         "registration_number",
         "date_of_registration",
-        "refer_type",
         "email",
         "telephone_number",
         "mobile_number",
         "is_company_verified",
         "is_active",
     )
-    list_filter = ("refer_type", "is_company_verified", "is_active", "site_ownership", "location")
+    list_filter = ("is_company_verified", "is_active", "site_ownership", "location")
     search_fields = (
         "registered_name",
         "trading_name",

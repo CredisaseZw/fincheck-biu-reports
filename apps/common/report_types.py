@@ -4,7 +4,14 @@ from datetime import date
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field
+from typing import TypedDict
 from pydantic import field_validator
+
+# CLIENT FILE DICT
+
+class ClientFile(TypedDict):
+    file_name: str
+    path: str
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -130,23 +137,31 @@ class BankerAccountSchema(BaseModel):
     bank_code: Optional[str] = None
     narration: Optional[BankNarration] = None
 
-
 class ProfessionalPartnersSchema(BaseModel):
     auditors: Optional[str] = None
     lawyers: Optional[str] = None
 
-
+ 
 class FinancialsSchema(BaseModel):
     """Values only. Do NOT reference/attach any file here."""
-
     total_assets: Optional[float] = None
     net_profit: Optional[str] = None
     net_worth: Optional[str] = None
     total_revenue: Optional[str] = None
     asset_ratio: Optional[float] = None
     financial_year: Optional[int] = None
-
-
+ 
+    @field_validator("net_profit", "net_worth", "total_revenue", mode="before")
+    @classmethod
+    def coerce_money_text_to_str(cls, v):
+        # These are typed as text (source reports mix "$71 261.73" style
+        # strings with plain numbers), but the model sometimes returns a
+        # clean figure as a bare int/float instead of a string. Coerce
+        # rather than reject.
+        if isinstance(v, (int, float)):
+            return str(v)
+        return v
+ 
 class TradeReferenceSchema(BaseModel):
     name: str
     contact_info: Optional[str] = None
@@ -156,7 +171,6 @@ class TradeReferenceSchema(BaseModel):
     credit_terms: Optional[str] = None
     payment_trend: Optional[PaymentTrend] = None
 
-
 class InsolvencyRecordSchema(BaseModel):
     """Only include an entry if a real insolvency / judicial management
     record is named. 'CLEAR TO DATE...' / NIL -> do not add an entry."""
@@ -165,7 +179,6 @@ class InsolvencyRecordSchema(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     court_reference: Optional[str] = None
-
 
 class PublicInformationSchema(BaseModel):
     """Only include an entry if a real public record is named.
@@ -337,3 +350,39 @@ class CompanyReportSchema(BaseModel):
 class ReportType(str, Enum):
     INDIVIDUAL = "individual"
     COMPANY = "company"
+
+
+def detect_report_type(markdown: str) -> ReportType:
+    head = markdown[:500].upper()
+    if "INDIVIDUAL REPORT" in head:
+        return ReportType.INDIVIDUAL
+    return ReportType.COMPANY
+
+
+SYSTEM_PROMPT = """\
+You are extracting structured data from a Zimbabwean business/credit \
+information report (Fincheck) that has been converted from PDF to markdown.
+
+Rules:
+- Only extract what is explicitly present. Never invent values.
+- If a section says "CLEAR TO DATE IN OUR FILES...", "NIL", or similar, \
+that section has NO records — return an empty list for it, not a fabricated entry.
+- Ignore any content about claims, absconders, or court judgements — those \
+are not needed.
+- gender is required on every person (individual, director). If not stated \
+directly, infer it from the given first name.
+- Dates should be parsed into ISO format (YYYY-MM-DD).
+- Money fields that are plain numbers can go in the float fields; leave \
+narrative money fields (e.g. "net_profit", "net_worth") as text if they're \
+not a clean number in the source.
+- Fields that hold a single record (employment_information, next_of_kin, \
+shareholding, overview, structure, operations) must be a single JSON object, \
+never wrapped in an array. Only fields explicitly typed as lists (directors, \
+banker_accounts, trade_references, etc.) should be arrays.
+- In the shareholding table, some reports label the shares column \
+"ORDINARY SHARES" but only ever list a percentage (e.g. "50%") rather than \
+an actual share count. Judge by the value, not the header: if the value \
+has a '%' sign, it is a percentage — put it in percentage_ownership and \
+leave number_of_shares empty. Only put a value in number_of_shares if it \
+is a plain count with no '%'.
+"""
