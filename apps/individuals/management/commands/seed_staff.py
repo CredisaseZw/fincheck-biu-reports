@@ -10,8 +10,8 @@ class Command(BaseCommand):
             {   
                 "first_name" : "Admin",
                 "last_name": "Admin",
-                "email": "admin@admin.com",
-                "password": "admin",
+                "email": "admin@fincheck.com",
+                "password": "Finadmin@123",
                 "is_staff": True,
                 "is_superuser": False,
                 "label": "Default admin",
