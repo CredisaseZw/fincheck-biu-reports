@@ -117,6 +117,7 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = "__all__"
+
 class CompanyListSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(read_only=True)
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
@@ -128,6 +129,7 @@ class CompanyListSerializer(serializers.ModelSerializer):
             "registered_name",
             "trading_name",
             "registration_number",
+            're_registration_number',
             "refer_type",
             "email",
             "telephone_number",

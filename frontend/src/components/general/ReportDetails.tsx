@@ -30,7 +30,7 @@ function ReportDetails({
     <Fieldset legendTitle="Report Details">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
             <div className="form-group">
-                <Label>Overall Risk Rating</Label>
+                <Label className="required">Overall Risk Rating</Label>
                 <Input
                     {
                         ...register("overall_risk_rating")

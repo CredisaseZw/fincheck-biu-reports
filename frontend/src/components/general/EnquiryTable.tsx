@@ -30,7 +30,7 @@ function _render_list_company_rows(data: ListCompany[]){
             <TableRow key={idx}>
                 <TableCell>{item.registered_name}</TableCell>
                 <TableCell>{item.trading_name ?? "-"}</TableCell>
-                <TableCell className="text-center">{item.registration_number ?? "-"}</TableCell>
+                <TableCell className="text-center">{item.re_registration_number ?? item.registration_number}</TableCell>
                 <TableCell>{item.email}</TableCell>
                 <TableCell>{item.telephone_number}</TableCell>
                 <TableCell className="flex justify-center">

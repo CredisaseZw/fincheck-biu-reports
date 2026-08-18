@@ -21,7 +21,7 @@ const accountSchema = z.object({
     account_type: AccountTypes,
     account_number: z.string(),
     date_of_acquirement: z.string().date(),
-    bank_code: z.string(),
+    bank_code: z.string().optional(),
     narration: Narrations,
 })
 

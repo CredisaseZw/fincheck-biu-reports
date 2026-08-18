@@ -25,13 +25,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-kr!&d@o4jnm-)c-d$(q9o
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+#GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 _extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
 if _extra_hosts:
     ALLOWED_HOSTS += [h.strip() for h in _extra_hosts.split(',') if h.strip()]
-
 
 # Application definition
 INSTALLED_APPS = [

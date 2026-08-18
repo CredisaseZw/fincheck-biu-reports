@@ -10,6 +10,7 @@ class MiniCompanySerializer(serializers.ModelSerializer):
             "registered_name",
             "trading_name",
             "registration_number",
+            're_registration_number',
             "address_registered",
             "email",  
         ]

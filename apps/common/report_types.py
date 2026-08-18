@@ -21,7 +21,6 @@ class Gender(str, Enum):
     MALE = "male"
     FEMALE = "female"
 
-
 class MaritalStatus(str, Enum):
     SINGLE = "single"
     MARRIED = "married"
@@ -369,6 +368,8 @@ Rules:
 that section has NO records — return an empty list for it, not a fabricated entry.
 - Ignore any content about claims, absconders, or court judgements — those \
 are not needed.
+- If the document doesn't show the registration number, but the re_registration \
+number is present put the re_registration number as the registration number since its the main identifier.
 - gender is required on every person (individual, director). If not stated \
 directly, infer it from the given first name.
 - Dates should be parsed into ISO format (YYYY-MM-DD).

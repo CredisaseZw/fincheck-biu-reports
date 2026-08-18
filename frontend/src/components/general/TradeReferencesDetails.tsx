@@ -7,6 +7,7 @@ import { Controller } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import type { TradeReferencesProps } from '@/types/core';
 import CustomSubmitButton from './CustomSubmitButton';
+import { Label } from '../ui/label';
 
 function TradeReferencesDetails({
   subject_object_id,
@@ -43,37 +44,37 @@ function TradeReferencesDetails({
           <div key={idx} className="rounded-lg border p-4 space-y-3">
             <div className="grid grid-cols-4 gap-3">
               <div className="form-group">
-                <label className="required">Name</label>
+                <Label className="required">Name</Label>
                 <Input placeholder="e.g John" {...register(`trade_references.${idx}.name`)} />
                 {errors.trade_references?.[idx]?.name && (
                   <p className="text-destructive text-sm">{errors.trade_references[idx].name.message}</p>
                 )}
               </div>
               <div className="form-group">
-                <label>Contact Info</label>
+                <Label>Contact Info</Label>
                 <Input placeholder="e.g 078..." {...register(`trade_references.${idx}.contact_info`)} />
               </div>
               <div className="form-group">
-                <label>Reference Source</label>
+                <Label>Reference Source</Label>
                 <Input placeholder="e.g Call" {...register(`trade_references.${idx}.reference_source`)} />
               </div>
               <div className="form-group">
-                <label>Position</label>
+                <Label>Position</Label>
                 <Input placeholder="e.g Manager" {...register(`trade_references.${idx}.position`)} />
               </div>
             </div>
 
             <div className="grid grid-cols-4 gap-3">
               <div className="form-group">
-                <label>Credit Limit</label>
+                <Label>Credit Limit</Label>
                 <Input placeholder="Enter credit limit" {...register(`trade_references.${idx}.credit_limit`)} />
               </div>
               <div className="form-group">
-                <label>Credit Terms</label>
+                <Label>Credit Terms</Label>
                 <Input placeholder="Enter Credit Terms" {...register(`trade_references.${idx}.credit_terms`)} />
               </div>
               <div className="form-group">
-                <label>Payment Trend</label>
+                <Label>Payment Trend</Label>
                 <Controller
                   control={control}
                   name={`trade_references.${idx}.payment_trend`}
@@ -95,7 +96,7 @@ function TradeReferencesDetails({
                 )}
               </div>
               <div className="form-group">
-                <label className="required">Reference Date</label>
+                <Label className="required">Reference Date</Label>
                 <Input type="date" {...register(`trade_references.${idx}.referenced_date`)} />
                 {errors.trade_references?.[idx]?.referenced_date && (
                   <p className="text-destructive text-sm">{errors.trade_references[idx].referenced_date.message}</p>

@@ -76,11 +76,11 @@ function LiveReports() {
                         reports.map((item)=>{
                             const client_bottom_level = "national_id" in  item.client
                             ? item.client.email ?? "-"
-                            : item.client.registration_number ?? item.client.trading_name ??"-"
+                            : item.client.re_registration_number ?? item.client.registration_number ?? item.client.trading_name ??"-"
 
                             const subject_bottom_level = "national_id" in  item.subject
                             ? item.subject.email ?? "-"
-                            : item.subject.registration_number ?? item.subject.trading_name ?? "-"
+                            : item.subject.re_registration_number ?? item.subject.registration_number ?? item.subject.trading_name ?? "-"
                             
                             const pillVariant = (item.is_stale && item.status === "in_progress") ? "danger" : REPORT_STATUS_PILL_VARIANTS[item.status]
 

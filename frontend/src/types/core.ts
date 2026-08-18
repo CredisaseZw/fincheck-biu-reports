@@ -50,6 +50,7 @@ export interface ListCompany extends Timestamps {
   id: number;
   company_name: string;
   registered_name: string;
+  re_registration_number : string | null;
   trading_name: string | null;
   registration_number: string | null;
   refer_type: string;
@@ -74,6 +75,7 @@ export interface MiniCompany {
   id: number;
   type: "company";
   registered_name: string;
+  re_registration_number:  string | null
   trading_name: string | null;
   address_registered: string;
   registration_number : string | null;

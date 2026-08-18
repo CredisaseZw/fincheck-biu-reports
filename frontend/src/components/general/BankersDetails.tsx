@@ -95,7 +95,7 @@ function BankerDetails({
                             </div>
 
                             <div className="form-group">
-                                <Label className="required">Bank Code</Label>
+                                <Label>Bank Code</Label>
                                 <Input {...register(`accounts.${index}.bank_code`)} />
                                 {errors.accounts?.[index]?.bank_code && (
                                     <p className="text-destructive text-sm">{errors.accounts[index].bank_code.message}</p>
