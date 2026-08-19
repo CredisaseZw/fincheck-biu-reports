@@ -3,8 +3,8 @@ import logging
 from groq import BadRequestError, APIError
 from langchain_core.exceptions import OutputParserException
 from langchain_core.prompts import ChatPromptTemplate
-#from langchain_together import ChatTogether
-from langchain_groq import ChatGroq
+from langchain_together import ChatTogether
+#from langchain_groq import ChatGroq
 from apps.common.report_types import (
     ReportType,
     SYSTEM_PROMPT,
@@ -21,16 +21,16 @@ class ExtractionError(Exception):
 
 class EntityDataExtraction:
     def __init__(self, model: str = "openai/gpt-oss-120b"):
-        # self.llm = ChatTogether(
-        #     model=model,
-        #     temperature=0,
-        #     api_key=settings.TOGETHER_API_KEY,
-        # )
-        self.llm = ChatGroq(
+        self.llm = ChatTogether(
             model=model,
             temperature=0,
-            api_key=settings.GROQ_API_KEY,
+            api_key=settings.TOGETHER_API_KEY,
         )
+        # self.llm = ChatGroq(
+        #     model=model,
+        #     temperature=0,
+        #     api_key=settings.GROQ_API_KEY,
+        # )
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", SYSTEM_PROMPT),
             ("human", "{content}"),
