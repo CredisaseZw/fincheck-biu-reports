@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _sync_parsed_data(report_type: ReportType, parsed):
-        endpoint = "https://biu.credi-safe.com/" #"http://127.0.0.1:8000"   
+        endpoint = "https://biu.credi-safe.com" #"http://127.0.0.1:8000"   
         headers = {"Content-Type": "application/json"}
         body = {
             "report_type": report_type.value,
@@ -74,10 +74,10 @@ class Command(BaseCommand):
             if os.path.isdir(full_path):
                 self.crawl_subfolder(full_path, report_type_filter)
             elif os.path.isfile(full_path) and entry.lower().endswith(".pdf"):
-                is_individual_name = "individual" in folder_path.lower()
-                if report_type_filter == ReportType.INDIVIDUAL and not is_individual_name:
+                is_individual_name = "individual" in full_path.lower()
+                if report_type_filter == ReportType.INDIVIDUAL.value and not is_individual_name:
                     continue
-                if report_type_filter == ReportType.COMPANY and is_individual_name:
+                if report_type_filter == ReportType.COMPANY.value and is_individual_name:
                     continue
                 self.clients.append({
                     "file_name": entry,
@@ -155,7 +155,7 @@ class Command(BaseCommand):
             time.sleep(1)
 
         if os.path.exists(file_path):
-            os.remove() # in case it some fail we dont wanna waste tokens and all 
+            os.remove(file_path) # in case it some fail we dont wanna waste tokens and all 
         return True
     
     def handle(self, *args, **options):
