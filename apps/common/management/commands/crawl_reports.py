@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _sync_parsed_data(report_type: ReportType, parsed):
-        endpoint = "http://127.0.0.1:8000"  # "https://biu.credi-safe.com/"
+        endpoint = "https://biu.credi-safe.com/" #"http://127.0.0.1:8000"   
         headers = {"Content-Type": "application/json"}
         body = {
             "report_type": report_type.value,

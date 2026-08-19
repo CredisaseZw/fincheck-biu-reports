@@ -62,6 +62,7 @@ function AdminDashboard() {
                     <label className="text-xl font-bold text-primary dark:text-white">Enquire {toCap(currentSubject)}</label>
                     <div className="flex flex-col md:flex-row gap-2">
                         <Select
+                            key = {currentSubject}
                             value={currentSubject}
                             onValueChange={setCurrentSubject}
                         >

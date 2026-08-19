@@ -25,7 +25,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-kr!&d@o4jnm-)c-d$(q9o
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-#GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+USE_TEST_DB = os.environ.get('USE_TEST_DB', 'False') == 'True'
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
@@ -143,7 +145,7 @@ TESTING_DB = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATABASES = {
-    'default': TESTING_DB if DEBUG else LIVE_DB
+    'default': TESTING_DB if USE_TEST_DB else LIVE_DB
 }
 
 # Password validation
