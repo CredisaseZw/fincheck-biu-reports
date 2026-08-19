@@ -175,7 +175,7 @@ class Command(BaseCommand):
         succeeded = 0
         failed = 0
 
-        for index, client_file in enumarate(targets):
+        for index, client_file in enumerate(targets):
             self.stdout.write(f"[{index + 1} / {len(targets)}] Processing {client_file['file_name']}...")
             ok = self.process_client_file(client_file, dry_run=dry_run, report_type_filter = report_type_filter)
             if ok:
