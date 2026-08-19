@@ -79,7 +79,7 @@ class BankerAccounts(BaseModelWithSubject):
         blank=True,
         null = True
     )
-    account_number = models.CharField(max_length=250)
+    account_number = models.CharField(max_length=250, blank=True, null=True)
     date_of_acquirement = models.DateField(auto_now=True)
     bank_code = models.CharField(
         max_length=50,

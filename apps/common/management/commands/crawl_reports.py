@@ -61,9 +61,12 @@ class Command(BaseCommand):
                 timeout=30,
             )
             response.raise_for_status()
-        except requests.RequestException:
+        except requests.RequestException as e:
             logger.exception("Failed to sync %s to %s", report_type.value, endpoint)
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error("Response body: %s", e.response.text)
             raise
+
 
         return response.json()
 

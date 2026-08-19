@@ -180,10 +180,23 @@ class IngestionViewSet(GenericViewSet):
                 instance = save_individual(parsed)
             else:
                 instance = save_company(parsed)
-        except Exception:
-            logger.exception("Failed to save %s report to DB", report_type)
+        except Exception as exc:
+            # Surface the real cause so the crawler log shows what actually broke
+            identifier = (
+                getattr(parsed, "national_id", None)
+                or getattr(parsed, "registered_name", None)
+                or "unknown"
+            )
+            logger.exception(
+                "Failed to save %s report to DB — identifier=%s, error=%s: %s",
+                report_type, identifier, type(exc).__name__, exc,
+            )
             return Response(
-                {"detail": "Failed to save report."},
+                {
+                    "detail": "Failed to save report.",
+                    "error": f"{type(exc).__name__}: {exc}",
+                    "identifier": str(identifier),
+                },
                 status=STATUS.HTTP_500_INTERNAL_SERVER_ERROR,
             )
  

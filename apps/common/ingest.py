@@ -1,7 +1,8 @@
+import logging
 from decimal import Decimal
 from django.db.models import Q
+from django.db import IntegrityError, transaction
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 from apps.companies.models import (
     Company,
     CompanyOverview,
@@ -23,6 +24,7 @@ from .report_types import CompanyReportSchema, IndividualReportSchema
 from apps.utils.entity_lookup import EntityLookUp
 from pprintpp import pprint
 
+logger = logging.getLogger(__name__)
 entity_lookup = EntityLookUp()
 
 def _dec(value) -> Decimal | None:
@@ -160,15 +162,26 @@ def save_individual(data: IndividualReportSchema) -> Individuals:
     # SAVE CLAIMS, ABS SOMETHING AND COURT RECORDS
 
     payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
-    if payload:
-        chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
-        entity_lookup.sync_individual_records(individual, chained_data)
+    try:
+        if payload:
+            chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
+            entity_lookup.sync_individual_records(individual, chained_data)
+    except Exception:
+        logger.exception(
+            "Entity lookup failed for individual '%s' (pk=%s) — "
+            "Individual was saved but credit records were not synced",
+            individual.full_name, individual.pk,
+        )
+        
     _save_common_subject_records(individual, data)
     return individual
 
 
 # Company
-def _get_or_create_director_individual(director) -> Individuals:
+def _get_or_create_director_individual(director):
+    if not director.national_id:
+        return None
+    
     d_national_id = Individuals.normalize_national_id(director.national_id)
     individual, created = Individuals.objects.get_or_create(
         national_id= d_national_id or f"UNKNOWN-{director.full_name}",
@@ -180,10 +193,17 @@ def _get_or_create_director_individual(director) -> Individuals:
         },
     )
     if created:
-        payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
-        if payload:
-            chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
-            entity_lookup.sync_individual_records(individual, chained_data)
+        try:
+            payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
+            if payload:
+                chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
+                entity_lookup.sync_individual_records(individual, chained_data)
+        except Exception:
+            logger.exception(
+                "Entity lookup failed for individual '%s' (pk=%s) — "
+                "Individual was saved but credit records were not synced",
+                individual.full_name, individual.pk,
+            )
                
     return individual
 
@@ -199,26 +219,43 @@ def save_company(data: CompanyReportSchema) -> Company:
             q |= Q(re_registration_number=data.re_registration_number)
         existing = Company.objects.filter(q).first()
 
+    if not existing and data.registered_name:
+        existing = Company.objects.filter(
+            Q(registered_name=data.registered_name)
+            | (Q(trading_name=data.trading_name) if data.trading_name else Q())
+        ).first()
+
     if existing:  # already stored and we have current data on the subject
         return existing
 
-    company = Company.objects.create(
-        **{
-            "registered_name": data.registered_name,
-            "trading_name": data.trading_name,
-            "registration_number": data.registration_number,
-            "re_registration_number": data.re_registration_number,
-            "date_of_incorporation": data.date_of_incorporation,
-            "date_of_registration": data.date_of_registration,
-            "location": data.location,
-            "site_ownership": data.site_ownership,
-            "address_registered": data.address_registered,
-            "email": data.email,
-            "telephone_number": data.telephone_number,
-            "mobile_number": data.mobile_number,
-            "website": data.website,
-        }
-    )
+    try:
+        company = Company.objects.create(
+            **{
+                "registered_name": data.registered_name,
+                "trading_name": data.trading_name,
+                "registration_number": data.registration_number,
+                "re_registration_number": data.re_registration_number,
+                "date_of_incorporation": data.date_of_incorporation,
+                "date_of_registration": data.date_of_registration,
+                "location": data.location,
+                "site_ownership": data.site_ownership,
+                "address_registered": data.address_registered,
+                "email": data.email,
+                "telephone_number": data.telephone_number,
+                "mobile_number": data.mobile_number,
+                "website": data.website,
+            }
+        )
+    except IntegrityError:
+        logger.warning(
+            "IntegrityError creating company '%s' (trading: '%s') — "
+            "falling back to lookup by name",
+            data.registered_name, data.trading_name,
+        )
+        existing = Company.objects.filter(registered_name=data.registered_name).first()
+        if existing:
+            return existing
+        raise 
 
     if data.overview:
         CompanyOverview.objects.update_or_create(
@@ -258,16 +295,27 @@ def save_company(data: CompanyReportSchema) -> Company:
 
     for director in data.directors:
         individual = _get_or_create_director_individual(director)
-        CompanyDirector.objects.update_or_create(
-            company=company,
-            individual=individual,
-            defaults={"position": director.position},
+        if individual:
+            CompanyDirector.objects.update_or_create(
+                company=company,
+                individual=individual,
+                defaults={"position": director.position},
+            )
+
+    # Entity lookup — wrapped so a fincheck API failure doesn't tank the save
+    try:
+        value = company.registration_number if company.registration_number else company.re_registration_number
+        if value:
+            payload = entity_lookup.hit_endpoint("company", value)
+            if payload: 
+                chained_data = entity_lookup._prepare_serializer_company_data(payload, company.pk)
+                entity_lookup.sync_company_records(company, chained_data)
+    except Exception:
+        logger.exception(
+            "Entity lookup failed for company '%s' (pk=%s) — "
+            "company was saved but credit records were not synced",
+            data.registered_name, company.pk,
         )
 
-    value = company.registration_number if company.registration_number else company.re_registration_number
-    payload = entity_lookup.hit_endpoint("company", value)
-    if payload: 
-        chained_data = entity_lookup._prepare_serializer_company_data(payload, company.pk)
-        entity_lookup.sync_company_records(company, chained_data)
     _save_common_subject_records(company, data)
     return company

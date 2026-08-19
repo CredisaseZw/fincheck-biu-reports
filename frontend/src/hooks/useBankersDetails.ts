@@ -19,7 +19,7 @@ const accountSchema = z.object({
     branch: z.string().optional(),
     account_name: z.string().optional(),
     account_type: AccountTypes,
-    account_number: z.string(),
+    account_number: z.string().optional(),
     date_of_acquirement: z.string().date(),
     bank_code: z.string().optional(),
     narration: Narrations,

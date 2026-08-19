@@ -103,9 +103,8 @@ function BankerDetails({
                             </div>
 
                             <div className="form-group">
-                                <Label className="required">Account Number</Label>
+                                <Label>Account Number</Label>
                                 <Textarea {...register(`accounts.${index}.account_number`)} />   
-                                
                                 {errors.accounts?.[index]?.account_number && (
                                     <p className="text-destructive text-sm">{errors.accounts[index].account_number.message}</p>
                                 )}

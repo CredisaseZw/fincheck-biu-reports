@@ -103,7 +103,7 @@ class Company(BaseModel):
     )
 
     #contact details
-    email = models.EmailField(
+    email = models.TextField(
         max_length=255,
         blank=True,
         null=True,

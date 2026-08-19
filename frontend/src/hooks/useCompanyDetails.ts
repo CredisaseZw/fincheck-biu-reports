@@ -21,7 +21,7 @@ const companySchema = z.object({
     trading_name: z.string().max(255),
     address_registered: z.string().min(1, "Registered address is required"),
     address_operations: z.string().optional(),
-    email: z.string().email("Invalid email").optional().or(z.literal("")),
+    email: z.string().optional(),
     telephone_number: z.string().optional(),
     mobile_number: z.string().optional(),
     website: z.string()
