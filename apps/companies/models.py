@@ -197,6 +197,8 @@ class Company(BaseModel):
     is_deleted = models.BooleanField(default=False)  
 
     def save(self, *args, **kwargs):
+        if self.registered_name:
+            self.registered_name = self.registered_name.upper()
         if self.registration_number:
             self.registration_number = self.registration_number.upper()
         super().save(*args, **kwargs)

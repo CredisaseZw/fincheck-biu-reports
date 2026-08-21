@@ -127,7 +127,7 @@ class Command(BaseCommand):
 
         if dry_run:
             self.stdout.write(f"[DRY RUN] {source} -> {report_type.value}")
-            self.stdout.write(str(len(self.clients)))
+            self.stdout.write(markdown)
             return True
 
         parsed = None
