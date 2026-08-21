@@ -33,7 +33,7 @@ class CompanyShareholding(BaseModel):
         verbose_name_plural = "Company Shareholdings"
 
     def __str__(self):
-        return f"{self.company} | Shares: {self.numbers_of_shares} | Shareholders: {self.numbers_of_shareholders}"
+        return f"{self.company}"
 
 class Shareholder(BaseModel):
     shareholding = models.ForeignKey(
