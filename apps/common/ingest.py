@@ -221,8 +221,8 @@ def save_company(data: CompanyReportSchema) -> Company:
 
     if not existing and data.registered_name:
         existing = Company.objects.filter(
-            Q(registered_name=data.registered_name)
-            | (Q(trading_name=data.trading_name) if data.trading_name else Q())
+            Q(registered_name=data.registered_name.upper())
+            | (Q(trading_name=data.trading_name.upper()) if data.trading_name else Q())
         ).first()
 
     if existing:  # already stored and we have current data on the subject
