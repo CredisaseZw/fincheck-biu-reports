@@ -22,7 +22,7 @@ class ExtractionError(Exception):
     schema instance, for any reason (LLMA error, schema mismatch, etc.)."""
 
 class EntityDataExtraction:
-    def __init__(self, model: str = "openai/gpt-oss-120b", max_tokens: int = 30384):
+    def __init__(self, model: str = "openai/gpt-oss-120b", max_tokens: int = 40384):
         self.max_tokens = max_tokens
         self.llm = ChatTogether(
             model=model,
@@ -64,7 +64,7 @@ class EntityDataExtraction:
         markdown: str, *,
         source: str = "<unknown>",
         report_type: ReportType,
-        retry_max_tokens: int = 25384,
+        retry_max_tokens: int = 60384,
     ):
         chain = self._get_chain(report_type)
         try:

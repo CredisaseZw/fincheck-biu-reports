@@ -23,7 +23,7 @@ function ClientDashboard() {
     
     return (
     <div className="flex flex-col gap-4">
-        <div className="card flex flex-col gap-4">
+        <div className="card flex flex-col gap-4 min-w-0 overflow-hidden">
             <div className="flex flex-row gap-3">
                 <Tabs 
                     value={currentSubject}

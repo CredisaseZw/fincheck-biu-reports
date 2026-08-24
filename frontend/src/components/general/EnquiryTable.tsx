@@ -3,45 +3,63 @@ import type { EntityValue, ListCompany, ListIndividual, PaginationData } from "@
 import BaseTable from "./BaseTable";
 import ViewEntityDialog from "@/dialogues/ViewEntityDialog";
 import { TableCell, TableRow } from "../ui/table";
+import { returnStringedList } from "@/lib/utils";
 
 function _render_list_individual_rows(data: ListIndividual[]){
     return (
-        data.map((item, idx) => (
+        data.map((item, idx) => {
+            const emails = returnStringedList(item.email ?? "-");
+            
+            return(
             <TableRow key={idx}>   
                 <TableCell>{item.full_name}</TableCell>
                 <TableCell>{item.national_id}</TableCell>
                 <TableCell className="text-center">{item.gender ?? "-"}</TableCell>
                 <TableCell className="text-center">{item.mobile_number ?? "-"}</TableCell>
-                <TableCell>{item.email ?? "-"}</TableCell>
+                <TableCell>
+                    <ul>
+                        {emails.map((email, index) => (
+                        <li key={index}>{email}</li>
+                        ))}
+                    </ul>
+                </TableCell>
                 <TableCell className="flex justify-center">
-                    <ViewEntityDialog
-                        entity_type={"individual"}
-                        id={item.id}
-                    />
+                <ViewEntityDialog
+                    entity_type={"individual"}
+                    id={item.id}
+                />
                 </TableCell>
             </TableRow>
-        ))
+        )})
     )    
 }
 
-function _render_list_company_rows(data: ListCompany[]){
+function _render_list_company_rows(data: ListCompany[]) {
+  return data.map((item, idx) => {
+    const emails = returnStringedList(item.email ?? "-");
+
     return (
-        data.map((item, idx)=> (
-            <TableRow key={idx}>
-                <TableCell>{item.registered_name}</TableCell>
-                <TableCell>{item.trading_name ?? "-"}</TableCell>
-                <TableCell className="text-center">{item.re_registration_number ?? item.registration_number}</TableCell>
-                <TableCell>{item.email}</TableCell>
-                <TableCell>{item.telephone_number}</TableCell>
-                <TableCell className="flex justify-center">
-                   <ViewEntityDialog
-                        entity_type={"company"}
-                        id = {item.id}
-                   />
-                </TableCell>
-            </TableRow>
-        ))
-    )
+      <TableRow key={item.id ?? idx}>
+        <TableCell className="max-w-50 wrap-break-word">{item.registered_name}</TableCell>
+        <TableCell className="max-w-50 wrap-break-word">{item.trading_name ?? "-"}</TableCell>
+        <TableCell className="text-center whitespace-nowrap">{item.re_registration_number ?? item.registration_number}</TableCell>
+        <TableCell className="break-all">
+          <ul>
+            {emails.map((email, index) => (
+              <li key={index}>{email}</li>
+            ))}
+          </ul>
+        </TableCell>
+        <TableCell className="whitespace-nowrap">{item.telephone_number}</TableCell>
+        <TableCell className="text-center whitespace-nowrap">
+          <ViewEntityDialog
+            entity_type="company"
+            id={item.id}
+          />
+        </TableCell>
+      </TableRow>
+    );
+  });
 }
 
 interface props {

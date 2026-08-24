@@ -56,7 +56,7 @@ function AdminDashboard() {
             </ColumnsContainer>
             : <></>
         }
-        <div className="card p-5 flex flex-col gap-8">
+        <div className="card p-5 flex flex-col gap-8 min-w-0 overflow-hidden">
             <form className="flex flex-col md:flex-row gap-3" onSubmit={handleSearchSubmit}>
                 <div className="form-group w-full">
                     <label className="text-xl font-bold text-primary dark:text-white">Enquire {toCap(currentSubject)}</label>

@@ -5,6 +5,7 @@ import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge"
 import CryptoJS from "crypto-js";
+import { boolean } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -316,3 +317,10 @@ export const combineInsolvencies = (individual: Individual) => {
   if (claims) parts.push(claims);
   return parts.join("\n").trim();
 };
+
+export const returnStringedList = (value: string) =>{
+  return value
+  .split(/[,;/\s]+/)
+  .map(i => i.trim())
+  .filter(boolean)
+} 

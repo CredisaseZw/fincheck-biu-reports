@@ -40,11 +40,11 @@ function ArchivedReportsTable({
         {
             results.map((item)=>{
             const client_bottom_level = "national_id" in  item.client
-            ? item.client.email ?? "-"
+            ? item.client.national_id ?? "-"
             : item.client.re_registration_number ?? item.client.registration_number ?? item.client.trading_name ??"-"
 
             const subject_bottom_level = "national_id" in item.subject
-            ? item.subject.email ?? "-"
+            ? item.subject.national_id ?? "-"
             : item.subject.re_registration_number ?? item.subject.registration_number ?? item.subject.trading_name ?? "-"
                 
             return (

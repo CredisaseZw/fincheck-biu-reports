@@ -57,8 +57,4 @@ class IndividualSearchFilter(django_filters.FilterSet):
             if instance:
                 return queryset.filter(pk=instance.pk)
             
-        if instance:
-            return queryset.filter(pk=instance.pk)
-
-
         return queryset.none()

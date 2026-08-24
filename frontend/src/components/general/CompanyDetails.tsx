@@ -83,7 +83,7 @@ function CompanyDetails({
                     <ColumnsContainer numberOfCols={3}>
                         <div className="form-group">
                             <Label>Email</Label>
-                            <Input type="email" {...register("email")} />
+                            <Input {...register("email")} />
                             {errors.email && (
                                 <p className="text-destructive text-sm">{errors.email.message}</p>
                             )}

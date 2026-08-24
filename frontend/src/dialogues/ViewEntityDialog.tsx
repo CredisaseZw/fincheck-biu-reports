@@ -8,6 +8,7 @@ import useGetSingleEntity from "@/hooks/api/useGetSingleEntity";
 import { API_END_POINT } from "@/axios/api";
 import { useAuth } from "@/contexts/AuthContext";
 import useCreateEnquiry, { type CreateEnquiryProps } from "@/hooks/api/useCreateEnquiry";
+import { cn, returnStringedList } from "@/lib/utils";
 
 function _val(val: string | number | null | undefined, fallback = "—"): string {
   if (val === null || val === undefined || String(val).trim() === "") return fallback;
@@ -96,15 +97,28 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
-function GridRow({ label, value, extra }: { label: string; value: string; extra?: React.ReactNode }) {
+function GridRow({ label, value, extra }: { label: string; value: string | string[]; extra?: React.ReactNode }) {
   if (!label) return null;
-  const valStr = String(value).trim();
-  if (!valStr || valStr === "-" || valStr === "—") return null;
+
+  if (!Array.isArray(value)){
+    const valStr = String(value).trim();
+    if (!valStr || valStr === "-" || valStr === "—") return null;
+  }
   return (
     <div className="flex border-b border-gray-100 last:border-b-0">
       <div className="w-[35%] py-3 px-5 font-semibold text-gray-500 text-[8pt] uppercase tracking-wide">{label}</div>
-      <div className="w-[65%] py-3 px-5 text-[9pt] text-gray-900 font-semibold uppercase">
-        {value}
+      <div className={cn("w-[65%] py-3 px-5 text-[9pt] text-gray-900 font-semibold", label.toLowerCase() !== "email" && "uppercase")}>
+        {
+          Array.isArray(value)
+          ? <ul>
+            {
+              value.map((item, idx) => (
+                <li key = {idx}>{item}</li>
+              ))
+            }
+          </ul>
+          : value
+        }
         {extra}
       </div>
     </div>
@@ -150,7 +164,7 @@ function CompanyContactSection({ data }: { data: Company }) {
     <SectionCard title="Contact Details">
       <GridRow label="Telephone" value={_val(data.telephone_number)} />
       <GridRow label="Mobile" value={_val(data.mobile_number)} />
-      <GridRow label="Email" value={_val(data.email)} />
+      <GridRow label="Email" value={returnStringedList(_val(data.email)) }/>
       <GridRow label="Website" value={_val(data.website)} />
       <GridRow label="Address (Registered)" value={_upper(data.address_registered)} extra={data.is_address_registered_verified !== undefined ? _badge(!!data.is_address_registered_verified) : undefined} />
       <GridRow label="Address (Operations)" value={_upper(data.address_operations)} />
@@ -196,7 +210,7 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
                 return (
                   <div key={lbl} className="flex gap-2 items-baseline">
                     <span className="text-[7pt] font-bold uppercase tracking-wide text-gray-500 min-w-25 shrink-0">{lbl}</span>
-                    <span className="text-[8.5pt] font-semibold text-gray-900 uppercase">{val}</span>
+                    <span className={cn("text-[8.5pt] font-semibold text-gray-900", lbl.toLowerCase() !== "email" && "uppercase")}>{val}</span>
                   </div>
                 );
               })}
@@ -278,7 +292,7 @@ function IndividualContactSection({ data }: { data: Individual }) {
   return (
     <SectionCard title="Contact Details">
       <GridRow label="Mobile Number" value={_val(data.mobile_number)} />
-      <GridRow label="Email" value={_val(data.email)} />
+      <GridRow label="Email" value={returnStringedList(_val(data.email))} />
       <GridRow label="Residential Address" value={_upper(data.residential_address)} />
     </SectionCard>
   );

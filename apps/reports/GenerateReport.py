@@ -2,11 +2,11 @@ from __future__ import annotations
 import base64
 import html
 import io
+import re
 import os
 import secrets
 from datetime import date, datetime
 from typing import Optional
-
 import weasyprint
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -17,15 +17,11 @@ from urllib.parse import urlparse
 def _media_root() -> str:
     return str(getattr(settings, "MEDIA_ROOT", ""))
 
-
 def _media_url() -> str:
     return getattr(settings, "MEDIA_URL", "/media/")
 
-
 def _default_logo_path() -> str:
     return os.path.join(settings.BASE_DIR, "apps", "reports", "static", "logo.png")
-
-
 class FincheckReportPDF:
     LOGO_PATH: Optional[str] = None
     PRIMARY = "#051C2C"
@@ -119,16 +115,22 @@ class FincheckReportPDF:
 
     @staticmethod
     def _format_multiline(val_str: str, upper: bool = False) -> str:
-        if '\n' in val_str:
-            lines = [line.strip() for line in val_str.split('\n') if line.strip()]
+        parts = [p.strip() for p in re.split(r'[,;/\n]+', val_str) if p.strip()]
+        if len(parts) > 1:
             if upper:
-                lines = [line.upper() for line in lines]
-            escaped_lines = [html.escape(line) for line in lines]
-            return '<ul style="margin-left: 15px; margin-top: 4px; margin-bottom: 4px; padding-left: 10px;">' + "".join(f"<li>{line}</li>" for line in escaped_lines) + '</ul>'
+                parts = [p.upper() for p in parts]
+            escaped = [html.escape(p) for p in parts]
+            return '<ul style="margin-left: 15px; margin-top: 4px; margin-bottom: 4px; padding-left: 10px;">' + "".join(f"<li>{line}</li>" for line in escaped) + '</ul>'
         if upper:
             val_str = val_str.upper()
         return html.escape(val_str)
 
+    @staticmethod
+    def _m(val, default: str = "—") -> str:
+        if val is None or str(val).strip() == "":
+            return default
+        return val.upper()
+           
     @staticmethod
     def _u(val, default: str = "—") -> str:
         if val is None or str(val).strip() == "":
@@ -238,9 +240,9 @@ class FincheckReportPDF:
 
     @staticmethod
     def _data_table(headers: list, rows_html: str, empty: str = "NOTHING TO SHOW") -> str:
-        if not rows_html or not rows_html.strip():
-            return ""
         ths = "".join(f"<th>{h}</th>" for h in headers)
+        if not rows_html or not rows_html.strip():
+            rows_html = f'<tr><td colspan="{len(headers)}" class="ta-c empty" style="color: #64748B;">{empty}</td></tr>'
         return f"""
         <table class="data-table">
           <thead><tr>{ths}</tr></thead>
@@ -657,18 +659,18 @@ body {{
 
     def _subject_name(self) -> str:
         if self._subject_type == "company":
-            return self._u(self._subject.get("registered_name") or self._subject.get("company_name", ""))
-        return self._u(self._subject.get("full_name", ""))
+            return self._m(self._subject.get("registered_name") or self._subject.get("company_name", ""))
+        return self._m(self._subject.get("full_name", ""))
 
     def _client_name(self) -> str:
-        return self._u(
+        return self._m(
             self._client.get("registered_name")
             or self._client.get("full_name")
             or self._client.get("company_name", "")
         )
 
     def _username(self)-> str:
-        return self._u(
+        return self._m(
             self._report.username
         )
 
@@ -681,7 +683,7 @@ body {{
             ref = self._e(self._snapshot.get("enquiry_reference"))
             created = self._date(self._snapshot.get("created_at"))
             fin = self._snapshot.get("finalized_at")
-        dlbl = "FINALISED ON" if fin else "REPORT GENERATED ON"
+        dlbl = "DATE PRINTED" if fin else "REPORT GENERATED ON"
         dval = self._date(fin) if fin else created
         wm = '<div class="watermark">DRAFT</div>' if self._status == "draft" else ""
         subject_name = self._subject_name()
@@ -789,10 +791,10 @@ body {{
             "Address (Registered)": " " + self._badge(bool(s.get("is_address_registered_verified"))) if s.get("is_address_registered_verified") is not None else "",
         }
         rows = [
-            ("Registered Name", self._u(s.get("registered_name"))),
-            ("Trading Name", self._u(s.get("trading_name"))),
-            ("Re-Registration Number", self._u(s.get("re_registration_number"))),
-            ("Registration Number", self._u(s.get("registration_number"))),
+            ("Registered Name", self._m(s.get("registered_name"))),
+            ("Trading Name", self._m(s.get("trading_name"))),
+            ("Re-Registration Number", self._m(s.get("re_registration_number"))),
+            ("Registration Number", self._m(s.get("registration_number"))),
             ("Registration Date", self._date((s.get("date_of_registration")))),
             ("Date of Incorporation", self._date((s.get("date_of_incorporation")))),
         ]
@@ -801,8 +803,8 @@ body {{
     def _render_company_contact(self) -> str:
         s = self._subject
         rows = [
-            ("Address (Registered)", self._u(s.get("address_registered")), True),
-            ("Address (Operations)", self._u(s.get("address_operations")), True),
+            ("Address (Registered)", self._m(s.get("address_registered")), True),
+            ("Address (Operations)", self._m(s.get("address_operations")), True),
             ("Telephone", self._e(s.get("telephone_number"))),
             ("Mobile", self._e(s.get("mobile_number"))),
             ("Email", self._e(s.get("email"))),
@@ -848,8 +850,8 @@ body {{
                 ("Gender", self._label(gender)),
                 ("Date of Birth", self._date(dob)),
                 ("PEP", "YES" if is_pep else "NO"),
-                ("Address (Latest)", self._u(address_latest)),
-                ("Address (Previous)", self._u(address_prev)),
+                ("Address (Latest)", self._m(address_latest)),
+                ("Address (Previous)", self._m(address_prev)),
                 ("Email", self._e(email)),
                 ("Mobile", self._e(mobile)),
             ]
@@ -888,7 +890,7 @@ body {{
         rows_html = "".join(f"""
         <tr>
           <td>{self._u(s.get("full_name"))}</td>
-          <td>{self._u(s.get("address"))}</td>
+          <td>{self._m(s.get("address"))}</td>
           <td class="ta-r">{self._e(s.get("number_of_shares"))}</td>
           <td class="ta-r">{self._e(s.get("percentage_ownership"))}%</td>
           <td class="ta-r">{"YES" if s.get("is_pep") else "NO"}</td>
@@ -944,7 +946,7 @@ body {{
         rows = [
             ("Mobile Number", self._e(s.get("mobile_number"))),
             ("Email", self._e(s.get("email"))),
-            ("Residential Address", self._u(s.get("residential_address"))),
+            ("Residential Address", self._m(s.get("residential_address"))),
             ("", "—"),
         ]
         return self._card("Contact Details", self._grid_table(rows))
@@ -976,7 +978,6 @@ body {{
             recs = self._subject.get("claims") or []
             rows = "".join(f"""<tr>
               <td>{self._u(c.get("creditor_name"))}</td>
-              <td>{self._u((c.get("debtor") or {}).get("name"))}</td>
               <td>{self._e(c.get("account_number"))}</td>
               <td>{self._e(c.get("currency"))}</td>
               <td class="ta-r">{self._money(c.get("amount"))}</td>
@@ -985,15 +986,14 @@ body {{
               <td class="ta-c">{self._status_badge(c.get("status", "open"))}</td>
             </tr>""" for c in recs) if recs else ""
             return self._data_table(
-                ["Creditor", "Debtor", "A/C No.", "Currency", "Amount", "Overdue", "Claim Date", "Status"],
-                rows, "No claims recorded")
+                ["Creditor", "A/C No.", "Currency", "Amount", "Overdue", "Claim Date", "Status"],
+                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
 
         def absconders_html() -> str:
             recs = self._subject.get("absconders") or []
             rows = "".join(f"""<tr>
               <td>{self._u(a.get("creditor_name"))}</td>
-              <td>{self._u((a.get("debtor") or {}).get("name"))}</td>
-              <td>{self._e(a.get("account_number"))}</td>
+              <td>{self._m(a.get("account_number"))}</td>
               <td>{self._e(a.get("currency"))}</td>
               <td class="ta-r">{self._money(a.get("amount"))}</td>
               <td class="ta-r">{self._money(a.get("overdue_balance"))}</td>
@@ -1001,14 +1001,14 @@ body {{
               <td class="ta-c">{self._status_badge(a.get("status", "open"))}</td>
             </tr>""" for a in recs) if recs else ""
             return self._data_table(
-                ["Creditor", "Debtor", "A/C No.", "Currency", "Amount", "Overdue", "Start Date", "Status"],
-                rows, "No absconder records")
+                ["Creditor", "A/C No.", "Currency", "Amount", "Overdue", "Start Date", "Status"],
+                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
 
         def court_html() -> str:
             recs = self._subject.get("court_judgements") or []
             rows = "".join(f"""<tr>
               <td>{self._u(c.get("court_name"))}</td>
-              <td>{self._e(c.get("case_number"))}</td>
+              <td>{self._m(c.get("case_number"))}</td>
               <td>{self._u(c.get("plaintf_name"))}</td>
               <td>{self._e(c.get("currency"))}</td>
               <td class="ta-r">{self._money(c.get("amount"))}</td>
@@ -1017,7 +1017,7 @@ body {{
             </tr>""" for c in recs) if recs else ""
             return self._data_table(
                 ["Court", "Case No.", "Plaintiff", "Currency", "Amount", "Judgement Date", "Status"],
-                rows, "No court judgements recorded")
+                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
 
         def insolvency_html() -> str:
             recs = self._subject.get("insolvency_records") or []
@@ -1029,7 +1029,7 @@ body {{
             </tr>""" for i in recs) if recs else ""
             return self._data_table(
                 ["Type", "Court Reference", "Start Date", "End Date"],
-                rows, "No insolvency records")
+                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
 
         def public_html() -> str:
             recs = self._subject.get("public_information") or []
@@ -1040,7 +1040,7 @@ body {{
             </tr>""" for p in recs) if recs else ""
             return self._data_table(
                 ["Record Date", "Summary", "Link"],
-                rows, "No public information recorded")
+                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
 
         parts = []
         c_html = claims_html()
@@ -1113,7 +1113,7 @@ body {{
         cards = ""
         for b in banks:
             bank_rows = [
-                ("Account Name", self._u(b.get("account_name"))),
+                ("Account Name", self._m(b.get("account_name"))),
                 ("Type", self._label(b.get("account_type", ""))),
                 ("Code", self._e(b.get("bank_code"))),
                 ("Narration", self._e(b.get("narration"))),
