@@ -26,7 +26,7 @@ function Login() {
           </div>
           <div className="flex flex-col gap-5">
             <div className="form-group">
-              <Label className="required">Email</Label>
+              <Label className="required" highlighted = {false}>Email</Label>
               <Input
                 {...register("email")}
                 placeholder="johndean@example.com"
@@ -34,7 +34,7 @@ function Login() {
               {errors.email && <p className="text-red-600 text-xs font-light text-left">{errors.email.message}</p>}
             </div>
             <div className="form-group">
-              <Label className = "required">Password</Label>
+              <Label className = "required" highlighted = {false}>Password</Label>
               <Input
                 {...register("password")}
                 type="password" 

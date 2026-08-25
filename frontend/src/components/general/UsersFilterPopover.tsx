@@ -37,7 +37,7 @@ export function UsersFilterPopover() {
       <PopoverContent className="w-72 space-y-4 rounded-lg" align="end">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>User type</Label>
+            <Label highlighted = {false}>User type</Label>
             <Controller
               name="user_type"
               control={control}
@@ -58,7 +58,7 @@ export function UsersFilterPopover() {
           {
             watch("user_type") === "external" &&
             <div className="space-y-2">
-              <Label>Client type</Label>
+              <Label highlighted = {false}>Client type</Label>
               <Controller
                 name="client_type"
                 control={control}
@@ -79,7 +79,7 @@ export function UsersFilterPopover() {
           }
 
           <div className="space-y-2">
-            <Label>Status</Label>
+            <Label highlighted = {false}>Status</Label>
             <Controller
               name="is_active"
               control={control}
@@ -99,7 +99,7 @@ export function UsersFilterPopover() {
           </div>
           <ColumnsContainer>
             <div className="space-y-2">
-              <Label>Created after</Label>
+              <Label highlighted = {false}>Created after</Label>
               <Controller
                 name="created_at_after"
                 control={control}
@@ -110,7 +110,7 @@ export function UsersFilterPopover() {
             </div>
 
             <div className="space-y-2">
-              <Label>Created before</Label>
+              <Label highlighted = {false}>Created before</Label>
               <Controller
                 name="created_at_before"
                 control={control}

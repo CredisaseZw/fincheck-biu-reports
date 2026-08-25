@@ -11,11 +11,11 @@ interface props{
 
 function Fieldset({legendTitle, children, className, legendTitleVariant = "default", marginClass}: props) {
   const s = legendTitleVariant === "default"
-  ? "px-4 font-semibold"
+  ? "px-4 font-black"
   : "px-2 text-sm"
   return (
     <fieldset className={cn("border flex flex-col gap-3 relative w-full rounded-md  p-5", className, marginClass)} >
-        <legend className={cn("text-secondary","text-[1rem]",  s)}> {legendTitle}  </legend>
+        <legend className={cn("text-secondary","text-[1rem] uppercase",  s)}> {legendTitle}  </legend>
         {children}
     </fieldset>
   )

@@ -36,7 +36,7 @@ function FilterOptionsDialogue({showFinalized}:props) {
                 {
                     !showFinalized &&
                     <div className="flex flex-col gap-1">
-                        <Label>Status</Label>
+                        <Label highlighted = {false}>Status</Label>
                         <Controller
                             key={getValues(`status`)}
                             control={control}
@@ -61,14 +61,14 @@ function FilterOptionsDialogue({showFinalized}:props) {
                 }
                 <ColumnsContainer numberOfCols={showFinalized ? 2 : 1}>
                     <div className="flex flex-col gap-1">
-                        <Label>Date from</Label>
+                        <Label highlighted = {false}>Date from</Label>
                         <Input
                             {...register("date_from")}
                             type="date"
                         />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <Label>Date to</Label>
+                        <Label highlighted = {false}>Date to</Label>
                         <Input
                             {...register("date_to")}
                             type="date"
@@ -79,14 +79,14 @@ function FilterOptionsDialogue({showFinalized}:props) {
                     showFinalized &&
                 <>               
                     <div className="flex flex-col gap-1">
-                        <Label>Finalized from</Label>
+                        <Label highlighted = {false}>Finalized from</Label>
                         <Input
                             {...register("finalized_from")}
                             type="date"
                         />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <Label>Finalized To</Label>
+                        <Label highlighted = {false}>Finalized To</Label>
                         <Input
                             type="date"
                             {...register("finalized_to")}

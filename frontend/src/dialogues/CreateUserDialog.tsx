@@ -121,7 +121,7 @@ function CreateUserDialog({ editingUser, externalOpen, onExternalOpenChange }: C
                   {/* External: client search (create mode only) */}
                   {userType === "external" && !isEditMode && (
                     <div className="form-group">
-                        <Label className="required">Client Name</Label>
+                        <Label className="required" highlighted = {false}>Client Name</Label>
                         <div className="flex flex-row gap-3">
                             <Controller
                                 control={control}
@@ -182,13 +182,13 @@ function CreateUserDialog({ editingUser, externalOpen, onExternalOpenChange }: C
                         userType === "internal" &&  
                         <ColumnsContainer numberOfCols={2} gapClass="gap-4">
                             <div className="form-group">
-                                <Label className="required">First Name</Label>
+                                <Label className="required" highlighted = {false}>First Name</Label>
                                 <Input {...register("first_name")} />
                                 {errors.first_name && <p className="text-destructive text-sm">{errors.first_name.message}</p>}
                             </div>
 
                             <div className="form-group">
-                                <Label className="required">Last Name</Label>
+                                <Label className="required" highlighted = {false}>Last Name</Label>
                                 <Input {...register("last_name")} />
                                 {errors.last_name && <p className="text-destructive text-sm">{errors.last_name.message}</p>}
                             </div>
@@ -196,13 +196,13 @@ function CreateUserDialog({ editingUser, externalOpen, onExternalOpenChange }: C
                     }
 
                     <div className="form-group">
-                        <Label className="required">Email</Label>
+                        <Label className="required" highlighted = {false}>Email</Label>
                         <Input type="email" {...register("email")} />
                         {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
                     </div>
 
                   <div className="form-group">
-                      <Label className={isEditMode ? "" : "required"}>
+                      <Label highlighted= {false} className={isEditMode ? "" : "required"}>
                           {isEditMode ? "New Password (leave blank to keep current)" : "Password"}
                       </Label>
                       <Input type="password" {...register("password")} placeholder={isEditMode ? "••••••••" : ""} />

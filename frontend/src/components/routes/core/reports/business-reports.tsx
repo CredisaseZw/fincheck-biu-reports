@@ -42,7 +42,7 @@ function BusinessReports() {
             <ColumnsContainer numberOfCols={2}>
                 <ColumnsContainer>
                     <div className="form-group">
-                        <Label>Month End Date</Label>
+                        <Label highlighted = {false}>Month End Date</Label>
                         <Input
                             type="number"
                             min={"1"}
@@ -52,7 +52,7 @@ function BusinessReports() {
                         />
                     </div>
                     <div className="form-group">
-                        <Label>Current year</Label>
+                        <Label highlighted = {false}>Current year</Label>
                         <Select
                             value={currentYear}
                             onValueChange={(e) => setCurrentYear(e)}
@@ -73,7 +73,7 @@ function BusinessReports() {
 
                 <div className="flex justify-start lg:justify-end">
                     <div className="form-group w-full">
-                        <Label>Search Reports</Label>
+                        <Label highlighted = {false}>Search Reports</Label>
                         <div className="flex flex-col sm:flex-row gap-3 w-full">
                             <Select
                                 onValueChange={(e) => setSearchCategory(e)}
