@@ -93,15 +93,41 @@ function BankerDetails({
                                     <p className="text-destructive text-sm">{errors.accounts[index].account_name.message}</p>
                                 )}
                             </div>
-
-                            <div className="form-group">
-                                <Label>Bank Code</Label>
-                                <Input {...register(`accounts.${index}.bank_code`)} />
-                                {errors.accounts?.[index]?.bank_code && (
-                                    <p className="text-destructive text-sm">{errors.accounts[index].bank_code.message}</p>
-                                )}
-                            </div>
-
+                            <ColumnsContainer>
+                                <div className="form-group">
+                                    <Label>Bank Code</Label>
+                                    <Input {...register(`accounts.${index}.bank_code`)} />
+                                    {errors.accounts?.[index]?.bank_code && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].bank_code.message}</p>
+                                    )}
+                                </div>
+                                <div className="form-group">
+                                    <Label className="required">Narration</Label>
+                                    <Controller
+                                        key={getValues(`accounts.${index}.narration`)}
+                                        control={control}
+                                        name={`accounts.${index}.narration`}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select narration" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {NARRATIONS.map((n) => (
+                                                        <SelectItem key={n.value} value={n.value}>
+                                                            {n.value} – {n.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                    {errors.accounts?.[index]?.narration && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].narration.message}</p>
+                                    )}
+                                </div>
+                            </ColumnsContainer>
+                          
                             <div className="form-group">
                                 <Label>Account Number</Label>
                                 <Textarea {...register(`accounts.${index}.account_number`)} />   
@@ -110,7 +136,7 @@ function BankerDetails({
                                 )}
                             </div>
 
-                            <ColumnsContainer numberOfCols={3} gapClass="gap-4">
+                            <ColumnsContainer gapClass="gap-4">
                                 <div className="form-group">
                                     <Label className="required">Date of Acquirement</Label>
                                     <Input
@@ -144,31 +170,6 @@ function BankerDetails({
                                     />
                                     {errors.accounts?.[index]?.account_type && (
                                         <p className="text-destructive text-sm">{errors.accounts[index].account_type.message}</p>
-                                    )}
-                                </div>
-                                <div className="form-group">
-                                    <Label className="required">Narration</Label>
-                                    <Controller
-                                        key={getValues(`accounts.${index}.narration`)}
-                                        control={control}
-                                        name={`accounts.${index}.narration`}
-                                        render={({ field }) => (
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select narration" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {NARRATIONS.map((n) => (
-                                                        <SelectItem key={n.value} value={n.value}>
-                                                            {n.value} – {n.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                    {errors.accounts?.[index]?.narration && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].narration.message}</p>
                                     )}
                                 </div>
                             </ColumnsContainer>

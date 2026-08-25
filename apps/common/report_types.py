@@ -179,15 +179,6 @@ class InsolvencyRecordSchema(BaseModel):
     end_date: Optional[date] = None
     court_reference: Optional[str] = None
 
-class PublicInformationSchema(BaseModel):
-    """Only include an entry if a real public record is named.
-    'CLEAR TO DATE...' / NIL -> do not add an entry."""
-
-    record_date: Optional[date] = None
-    summary: Optional[str] = None
-    link: Optional[str] = None
-
-
 # ---------------------------------------------------------------------------
 # Individual entity
 # ---------------------------------------------------------------------------
@@ -241,7 +232,6 @@ class IndividualReportSchema(BaseModel):
     trade_references: list[TradeReferenceSchema] = Field(default_factory=list)
 
     insolvency_records: list[InsolvencyRecordSchema] = Field(default_factory=list)
-    public_information: list[PublicInformationSchema] = Field(default_factory=list)
 
     @field_validator(
         "employment_information", "former_employment_information", "next_of_kin",
@@ -344,7 +334,6 @@ class CompanyReportSchema(BaseModel):
     trade_references: list[TradeReferenceSchema] = Field(default_factory=list)
 
     insolvency_records: list[InsolvencyRecordSchema] = Field(default_factory=list)
-    public_information: list[PublicInformationSchema] = Field(default_factory=list)
 
 class ReportType(str, Enum):
     INDIVIDUAL = "individual"
@@ -366,7 +355,7 @@ Rules:
 - Only extract what is explicitly present. Never invent values.
 - If a section says "CLEAR TO DATE IN OUR FILES...", "NIL", or similar, \
 that section has NO records — return an empty list for it, not a fabricated entry.
-- Ignore any content about claims, absconders, or court judgements — those \
+- Ignore any content about public records (information), claims, absconders, or court judgements — those \
 are not needed.
 - If the document doesn't show the registration number, but the re_registration \
 number is present put the re_registration number as the registration number since its the main identifier.
