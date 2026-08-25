@@ -68,10 +68,9 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
         const i = item as ListCompany;
         return {
             id: i.id,
-            value: i.company_name,
+            value: i.registered_name ?? i.trading_name,
             uniqueID: i.registration_number ?? i.re_registration_number,
             email: i.email
-
         }
     }
 

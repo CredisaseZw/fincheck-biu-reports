@@ -18,7 +18,7 @@ const companySchema = z.object({
     registered_name: z.string().min(1, "Registered name is required").max(50, "Company Name too long."),
     registration_number: z.string().optional(),
     re_registration_number: z.string().optional(),
-    trading_name: z.string().max(255),
+    trading_name: z.string().max(255).optional(),
     address_registered: z.string().min(1, "Registered address is required"),
     address_operations: z.string().optional(),
     email: z.string().optional(),

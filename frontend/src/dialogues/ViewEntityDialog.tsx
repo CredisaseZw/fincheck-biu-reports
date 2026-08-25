@@ -224,6 +224,13 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
 
 function ShareholdingSection({ data }: { data: Shareholding }) {
   const shareholders = data?.shareholders || [];
+
+  // Check if there's any totals data worth showing
+  const hasTotals = [data.authorized_capital, data.issued_share_capital, data.numbers_of_shareholders]
+    .some(v => v !== null && v !== undefined && String(v).trim() !== "" && String(v).trim() !== "—");
+
+  if (!hasTotals && shareholders.length === 0) return null;
+
   return (
     <SectionCard title="Shareholding">
       <GridRow label="Authorised Capital" value={_val(data.authorized_capital)} />

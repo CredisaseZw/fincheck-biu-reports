@@ -318,12 +318,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         end_date :item.end_date,
         court_reference:item.court_reference
       }))
-      : [{
-        insolvency_type : "insolvent",
-        start_date :"",
-        end_date :"",
-        court_reference:""
-      }]
+      : []
     )
 
     setPublicInformation(
@@ -334,11 +329,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         link: item.link ?? "",
         record_date : item.record_date
       }))
-      : [{
-        summary: "",
-        link: "",
-        record_date: ""
-      }]
+      : []
     )
 
     setFinancials(
@@ -398,10 +389,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         credit_terms : item.credit_terms ?? undefined,
         payment_trend : item.payment_trend ?? undefined
       }))
-      : [{
-        referenced_date : "",
-        name : "",
-      }]
+      : []
     )
 
     setBankerDetails(

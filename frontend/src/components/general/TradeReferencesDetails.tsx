@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import type { TradeReferencesProps } from '@/types/core';
 import CustomSubmitButton from './CustomSubmitButton';
 import { Label } from '../ui/label';
+import { CLEAR_MESSAGE } from '@/constants';
 
 function TradeReferencesDetails({
   subject_object_id,
@@ -40,7 +41,13 @@ function TradeReferencesDetails({
     return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Fieldset legendTitle="Trade References">
-       {fields.map((_, idx) => (
+        { 
+          fields.length <= 0 &&
+          <div className="text-center text-muted-foreground">{CLEAR_MESSAGE}</div>      
+        }
+       { 
+        fields.length >=1 &&
+        fields.map((_, idx) => (
           <div key={idx} className="rounded-lg border p-4 space-y-3">
             <div className="grid grid-cols-4 gap-3">
               <div className="form-group">

@@ -18,7 +18,6 @@ from apps.utils.helpers import validate_serializer
 from apps.directors.serializers import CompanyDirectorsSerializer
 from apps.individuals.models import Individuals
 from apps.individuals.serializers import IndividualDirectorSerializer
-from apps.directors.tasks import sync_director_to_individual_task
 from rest_framework.decorators import action
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
@@ -123,6 +122,8 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                 }, status=STATUS.HTTP_400_BAD_REQUEST)
 
             individual_id = d.get("id")
+            national_id = d.get("national_id")
+
             director_serializer = IndividualDirectorSerializer(data=d)
             error = validate_serializer(serializer=director_serializer)
             if error:
@@ -130,12 +131,15 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                 return error
 
             i_data = director_serializer.validated_data
-            i_data.pop("id", None) 
+            i_data.pop("id", None)
+
             individual = None
             if individual_id:
-                individual = Individuals.objects.filter(
-                    pk=individual_id,
-                ).first()
+                individual = Individuals.objects.filter(pk=individual_id).first()
+
+            if individual is None and national_id:
+                individual = Individuals.objects.filter(national_id=national_id).first()
+
             if individual is None:
                 individual = Individuals.objects.create(**i_data)
             else:
@@ -143,6 +147,7 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                 individual.refresh_from_db()
 
             validated_data.append((individual, position))
+
         with transaction.atomic():
             for individual, position in validated_data:
                 CompanyDirector.objects.update_or_create(
@@ -211,6 +216,7 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                         shareholding=shareholding,
                         **validated_data,
                     )
+
 
         read_serializer = ShareholdingsSerializers(shareholding)
         return Response(read_serializer.data, status=STATUS.HTTP_200_OK)

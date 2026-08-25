@@ -805,10 +805,10 @@ body {{
         rows = [
             ("Address (Registered)", self._m(s.get("address_registered")), True),
             ("Address (Operations)", self._m(s.get("address_operations")), True),
-            ("Telephone", self._e(s.get("telephone_number"))),
-            ("Mobile", self._e(s.get("mobile_number"))),
-            ("Email", self._e(s.get("email"))),
-            ("Website", self._e(s.get("website"))),
+            ("Telephone", self._e(s.get("telephone_number")), True),
+            ("Mobile", self._e(s.get("mobile_number")), True),
+            ("Email", self._e(s.get("email")), True),
+            ("Website", self._m(s.get("website")), True),
         ]
         return self._card("Contact Details", self._grid_table(rows))
 
@@ -887,17 +887,22 @@ body {{
             ("Shareholders", self._e(sh.get("numbers_of_shareholders"))),
         ])
 
-        rows_html = "".join(f"""
-        <tr>
-          <td>{self._u(s.get("full_name"))}</td>
-          <td>{self._m(s.get("address"))}</td>
-          <td class="ta-r">{self._e(s.get("number_of_shares"))}</td>
-          <td class="ta-r">{self._e(s.get("percentage_ownership"))}%</td>
-          <td class="ta-r">{"YES" if s.get("is_pep") else "NO"}</td>
-        </tr>""" for s in shs) if shs else ""
+        tbl = ""
+        if shs:
+            rows_html = "".join(f"""
+            <tr>
+              <td>{self._u(s.get("full_name"))}</td>
+              <td>{self._m(s.get("address"))}</td>
+              <td class="ta-r">{self._e(s.get("number_of_shares"))}</td>
+              <td class="ta-r">{self._e(s.get("percentage_ownership"))}%</td>
+              <td class="ta-r">{"YES" if s.get("is_pep") else "NO"}</td>
+            </tr>""" for s in shs)
+            tbl = self._data_table(["Name", "Address", "No. of Shares", "% Ownership", "PEP"], rows_html)
 
-        tbl = self._data_table(["Name", "Address", "No. of Shares", "% Ownership", "PEP"], rows_html, "No shareholders on record")
-        return self._card("Shareholding", totals + tbl)
+        body = totals + tbl
+        if not body or not body.strip():
+            return ""
+        return self._card("Shareholding", body)
 
     def _render_structure(self) -> str:
         st = self._subject.get("structure") or {}
@@ -976,6 +981,8 @@ body {{
     def _render_credit_records(self) -> str:
         def claims_html() -> str:
             recs = self._subject.get("claims") or []
+            if not recs:
+                return ""
             rows = "".join(f"""<tr>
               <td>{self._u(c.get("creditor_name"))}</td>
               <td>{self._e(c.get("account_number"))}</td>
@@ -984,13 +991,15 @@ body {{
               <td class="ta-r">{self._money(c.get("overdue_balance"))}</td>
               <td class="nowrap">{self._date(c.get("claim_date"))}</td>
               <td class="ta-c">{self._status_badge(c.get("status", "open"))}</td>
-            </tr>""" for c in recs) if recs else ""
+            </tr>""" for c in recs)
             return self._data_table(
                 ["Creditor", "A/C No.", "Currency", "Amount", "Overdue", "Claim Date", "Status"],
-                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
+                rows)
 
         def absconders_html() -> str:
             recs = self._subject.get("absconders") or []
+            if not recs:
+                return ""
             rows = "".join(f"""<tr>
               <td>{self._u(a.get("creditor_name"))}</td>
               <td>{self._m(a.get("account_number"))}</td>
@@ -999,13 +1008,15 @@ body {{
               <td class="ta-r">{self._money(a.get("overdue_balance"))}</td>
               <td class="nowrap">{self._date(a.get("start_date"))}</td>
               <td class="ta-c">{self._status_badge(a.get("status", "open"))}</td>
-            </tr>""" for a in recs) if recs else ""
+            </tr>""" for a in recs)
             return self._data_table(
                 ["Creditor", "A/C No.", "Currency", "Amount", "Overdue", "Start Date", "Status"],
-                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
+                rows)
 
         def court_html() -> str:
             recs = self._subject.get("court_judgements") or []
+            if not recs:
+                return ""
             rows = "".join(f"""<tr>
               <td>{self._u(c.get("court_name"))}</td>
               <td>{self._m(c.get("case_number"))}</td>
@@ -1014,33 +1025,37 @@ body {{
               <td class="ta-r">{self._money(c.get("amount"))}</td>
               <td class="nowrap">{self._date(c.get("judgement_date"))}</td>
               <td class="ta-c">{self._status_badge(c.get("status", "open"))}</td>
-            </tr>""" for c in recs) if recs else ""
+            </tr>""" for c in recs)
             return self._data_table(
                 ["Court", "Case No.", "Plaintiff", "Currency", "Amount", "Judgement Date", "Status"],
-                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
+                rows)
 
         def insolvency_html() -> str:
             recs = self._subject.get("insolvency_records") or []
+            if not recs:
+                return ""
             rows = "".join(f"""<tr>
               <td>{self._label(i.get("insolvency_type", ""))}</td>
               <td>{self._e(i.get("court_reference"))}</td>
               <td class="nowrap">{self._date(i.get("start_date"))}</td>
               <td class="nowrap">{self._date(i.get("end_date"))}</td>
-            </tr>""" for i in recs) if recs else ""
+            </tr>""" for i in recs)
             return self._data_table(
                 ["Type", "Court Reference", "Start Date", "End Date"],
-                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
+                rows)
 
         def public_html() -> str:
             recs = self._subject.get("public_information") or []
+            if not recs:
+                return ""
             rows = "".join(f"""<tr>
               <td class="nowrap">{self._date(p.get("record_date"))}</td>
               <td>{self._u(p.get("summary"))}</td>
               <td style="font-size:8pt;text-transform:none">{self._e(p.get("link"))}</td>
-            </tr>""" for p in recs) if recs else ""
+            </tr>""" for p in recs)
             return self._data_table(
                 ["Record Date", "Summary", "Link"],
-                rows, "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS")
+                rows)
 
         parts = []
         c_html = claims_html()
@@ -1058,6 +1073,8 @@ body {{
 
     def _render_trade_references(self) -> str:
         refs = self._subject.get("trade_references") or []
+        if not refs:
+            return ""
         rows = "".join(f"""<tr>
           <td class="nowrap">{self._date(r.get("referenced_date"))}</td>
           <td>{self._u(r.get("name"))}</td>
@@ -1067,10 +1084,10 @@ body {{
           <td class="ta-r">{self._e(r.get("credit_limit"))}</td>
           <td class="ta-r">{self._e(r.get("credit_terms"))}</td>
           <td>{self._label(r.get("payment_trend", "") or r.get("payment_trend_display", ""))}</td>
-        </tr>""" for r in refs) if refs else ""
+        </tr>""" for r in refs)
         body = self._data_table(
             ["Ref. Date", "Name", "Contact", "Source", "Position", "Credit Limit", "Credit Terms", "Pay Trend"],
-            rows, "No trade references recorded")
+            rows)
         return self._card("Trade References", body)
 
     def _render_financials(self) -> str:
@@ -1108,7 +1125,7 @@ body {{
     def _render_bankers(self) -> str:
         banks = self._subject.get("banker_accounts") or []
         if not banks:
-            return self._card("Bankers", '<div class="empty">No banking records</div>')
+            return ""
 
         cards = ""
         for b in banks:
@@ -1163,7 +1180,7 @@ body {{
     def _render_footer() -> str:
         return """
         <div class="footer">
-          <p>This report is confidential and intended solely for the individual or entity to whom it is addressed. Information on this report is valid at the time of enquiry only.</p>
+          <p>This report is confidential and intended solely for the individual or company to whom it is addressed. Information on this report is valid at the time of enquiry only.</p>
           <p>Terms and Conditions apply.</p>
           <p>© FINCHECK. All rights reserved.</p>
         </div>"""

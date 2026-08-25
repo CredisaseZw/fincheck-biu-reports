@@ -52,7 +52,7 @@ function CompanyDetails({
                         </div>
 
                         <div className="form-group">
-                            <Label className="required">Trading Name</Label>
+                            <Label>Trading Name</Label>
                             <Input {...register("trading_name")} />
                             {errors.trading_name && (
                                 <p className="text-destructive text-sm">{errors.trading_name.message}</p>

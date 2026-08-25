@@ -90,6 +90,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
         ]
 
 class IndividualDirectorSerializer(serializers.ModelSerializer):
+    national_id = serializers.CharField(required=True)
     class Meta:
         model = Individuals
         fields = [
