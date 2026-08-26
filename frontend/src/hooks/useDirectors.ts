@@ -21,12 +21,13 @@ const director = z.object({
     residential_address : z.string(),
     is_pep : z.boolean(),
     address_prev : z.string().optional(),
-    national_id : z.string().refine((val) => {
-        if (!val) return true
-        const nidRegex = /^\d{2}\d{6,7}[A-Za-z]\d{2}$/
-        const passportRegex =/^[A-Za-z]{2}\d{7}$/
-        return nidRegex.test(val) || passportRegex.test(val)
-    }, { message: "A valid Zimbabwe national ID or passport number is required" }),
+    // national_id : z.string().refine((val) => {
+    //     if (!val) return true
+    //     const nidRegex = /^\d{2}\d{6,7}[A-Za-z]\d{2}$/
+    //     const passportRegex =/^[A-Za-z]{2}\d{7}$/
+    //     return nidRegex.test(val) || passportRegex.test(val)
+    // }, { message: "A valid Zimbabwe national ID or passport number is required" }),
+    national_id: z.string().optional(),
     email : z.string().optional(),
     mobile_number :z.string().optional(),
     insolvencies_judgements : z.string().optional()

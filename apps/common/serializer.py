@@ -15,6 +15,8 @@ class RegistrationAccountsSerializer(UpdatedBySerializerMixin, serializers.Model
         exclude = ["subject_content_type", "subject_object_id"]
 
 class BankerAccountsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
+    narration_display = serializers.CharField(source="get_narration_display", read_only=True)
+    
     class Meta:
         model = BankerAccounts
         exclude = ["subject_content_type", "subject_object_id"]

@@ -173,7 +173,7 @@ function useAddReportDialogue(list_report?: ListReport) {
       setShareholding({
         id :  company.shareholdings?.id ?? undefined,
         issued_share_capital : company.shareholdings?.issued_share_capital ? Number(company.shareholdings.issued_share_capital) : undefined,
-        numbers_of_shareholders : company.shareholdings?.numbers_of_shareholders ?? 0,
+        numbers_of_shareholders : company.shareholdings?.numbers_of_shareholders,
         authorized_capital: company.shareholdings?.authorized_capital ? Number(company.shareholdings?.authorized_capital) : undefined,
        
         shareholders: 
@@ -184,17 +184,14 @@ function useAddReportDialogue(list_report?: ListReport) {
           full_name :item.full_name,
           is_pep : item.is_pep,
           address  :item.address,
-          number_of_shares : Number(item.number_of_shares),
-          percentage_ownership :Number(item.percentage_ownership)
+          number_of_shares : item.number_of_shares ?? undefined,
+          percentage_ownership : item.percentage_ownership != null
+            ? Number(item.percentage_ownership)
+            : undefined
         }))
-        : [{
-            full_name : "",
-            address : "",
-            is_pep : false,
-            number_of_shares: 0,   
-          percentage_ownership: 0,    
-        }]
+        : []
       })
+      
       setDirectors(
         company.directors&&
         company.directors.length > 0
@@ -412,7 +409,7 @@ function useAddReportDialogue(list_report?: ListReport) {
             account_number: "",
             date_of_acquirement: "",  
             bank_code: "",            
-            narration: "C",
+            narration: "none",
         }]
     )
 

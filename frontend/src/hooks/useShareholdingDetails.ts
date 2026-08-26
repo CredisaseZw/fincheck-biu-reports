@@ -13,7 +13,7 @@ import useSectionTouched from "./useSectionTouched";
 const schema = z.object({
     id: z.number().optional(),
     issued_share_capital: z.number().optional(),
-    numbers_of_shareholders: z.number("Enter a valid number of shareholders").positive("Positive numbers required"),
+    numbers_of_shareholders: z.number("Enter a valid number of shareholders").positive("Positive numbers required").optional(),
     authorized_capital: z.number().optional(),
     shareholders: z.array(
         z.object({
@@ -21,11 +21,12 @@ const schema = z.object({
             full_name: z.string(),
             address: z.string(),
             is_pep: z.boolean(),
-            number_of_shares: z.number("Enter a valid number of shares").positive("Positive numbers required"),
+            number_of_shares: z.number("Enter a valid number of shares").positive("Positive numbers required").optional(),
             percentage_ownership: z.number("Enter a valid percentage")
                 .min(0, "Min value is 0")
                 .max(100, "Max value is 100")
                 .positive("Positive numbers required")
+                .optional()
         })
     )
 })

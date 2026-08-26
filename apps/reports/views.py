@@ -176,8 +176,9 @@ class ReportViewSet(BaseAuthJSONViewSet):
         with transaction.atomic():
             if not bypass_check and subject_unique_id:
                 client = Company.objects.filter(
-                    id = subject_id,
-                    registration_number = subject_unique_id.strip()
+                    Q (registration_number = subject_unique_id.strip()) |
+                    Q(re_registration_number = subject_unique_id.strip()),
+                    id = subject_id                    
                 ).first() if subject_type == "company" else Individuals.objects.filter(
                     id = subject_id,
                     national_id = subject_unique_id.strip().replace("-", "").replace(" ", "").upper()

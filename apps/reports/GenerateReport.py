@@ -144,6 +144,13 @@ class FincheckReportPDF:
         return FincheckReportPDF._format_multiline(str(val).strip(), upper=False)
 
     @staticmethod
+    def _low(val, default: str = "—") -> str:
+        """Format value as lowercase — use for emails and websites."""
+        if val is None or str(val).strip() == "":
+            return default
+        return f'<span style="text-transform:none">{html.escape(str(val).strip().lower())}</span>'
+
+    @staticmethod
     def _date(val) -> str:
         if not val:
             return "—"
@@ -499,7 +506,7 @@ body {{
   width: 32%;
   font-size: 9pt;
   color: {c.TEXT};
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
 }}
 
@@ -523,7 +530,7 @@ body {{
   font-size: 8pt;
   vertical-align: middle;
   color: {c.TEXT};
-  font-weight: 500;
+  font-weight: 400;
   text-transform: uppercase;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -596,7 +603,7 @@ body {{
 }}
 .dir-v {{
   font-size: 8.5pt;
-  font-weight: 600;
+  font-weight: 500;
   color: {c.TEXT};
   text-transform: uppercase;
   overflow-wrap: break-word;
@@ -807,8 +814,8 @@ body {{
             ("Address (Operations)", self._m(s.get("address_operations")), True),
             ("Telephone", self._e(s.get("telephone_number")), True),
             ("Mobile", self._e(s.get("mobile_number")), True),
-            ("Email", self._e(s.get("email")), True),
-            ("Website", self._m(s.get("website")), True),
+            ("Email", self._low(s.get("email")), True),
+            ("Website", self._low(s.get("website")), True),
         ]
         return self._card("Contact Details", self._grid_table(rows))
 
@@ -852,7 +859,7 @@ body {{
                 ("PEP", "YES" if is_pep else "NO"),
                 ("Address (Latest)", self._m(address_latest)),
                 ("Address (Previous)", self._m(address_prev)),
-                ("Email", self._e(email)),
+                ("Email", self._low(email)),
                 ("Mobile", self._e(mobile)),
             ]
             
@@ -875,7 +882,8 @@ body {{
               <div class="dir-v" style="margin-top: 10px; display: block; border-top: 1px dashed #E2E8F0; padding-top: 10px;">{solvencies}</div>
             </div>"""
 
-        return self._card("Directors", f'<div class="dir-grid">{cards}</div>')
+        grid_cols = "1fr" if len(dirs) == 1 else "1fr 1fr"
+        return self._card("Directors", f'<div class="dir-grid" style="grid-template-columns: {grid_cols}">{cards}</div>')
 
     def _render_shareholding(self) -> str:
         sh = self._subject.get("shareholdings") or {}
@@ -950,7 +958,7 @@ body {{
         s = self._subject
         rows = [
             ("Mobile Number", self._e(s.get("mobile_number"))),
-            ("Email", self._e(s.get("email"))),
+            ("Email", self._low(s.get("email"))),
             ("Residential Address", self._m(s.get("residential_address"))),
             ("", "—"),
         ]
@@ -1129,11 +1137,14 @@ body {{
 
         cards = ""
         for b in banks:
+            narration_raw = b.get("narration_display")
+            narration = None if narration_raw and str(narration_raw).strip().lower() == "none" else narration_raw
+            
             bank_rows = [
                 ("Account Name", self._m(b.get("account_name"))),
                 ("Type", self._label(b.get("account_type", ""))),
                 ("Code", self._e(b.get("bank_code"))),
-                ("Narration", self._e(b.get("narration"))),
+                ("Narration", self._e(narration)),
                 ("Date Acquired", self._date(b.get("date_of_acquirement"))),
                 ("Account No.", self._e(b.get("account_number"))),
             ]

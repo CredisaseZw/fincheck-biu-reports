@@ -62,6 +62,7 @@ class BankerAccounts(BaseModelWithSubject):
         C = "C", "Satisfactory Credit Worthiness (Moderate Risk)"
         D = "D", "No Credit Worthy"
         E = "E", "Rating Suspended"
+        NONE = "none", "None"
     class Currency(models.TextChoices):
         USD = "USD", "US Dollar"
         ZIG = "ZiG", "Zimbabwe Gold"
@@ -87,9 +88,11 @@ class BankerAccounts(BaseModelWithSubject):
         null=True
     )
     narration = models.CharField(
-        max_length=2,
+        max_length=10,
         choices=Narrations.choices,
-        default=Narrations.A
+        default=Narrations.NONE,
+        null=True,
+        blank=True,
     )
 
     class Meta:

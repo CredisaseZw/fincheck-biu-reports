@@ -21,6 +21,7 @@ function FilterOptionsDialogue({showFinalized}:props) {
         getValues,
         control,
     } = useFilterOptionsDialogue()
+    
     return (
     <Popover>
         <PopoverTrigger>

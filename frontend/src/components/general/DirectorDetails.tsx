@@ -62,12 +62,6 @@ const DirectorRow = ({
                     }
                 } catch (error) { 
                     console.log(error)
-                    // setValue(`directors.${index}.full_name`, "", { shouldValidate: true });
-                    // setValue(`directors.${index}.gender`, "male", { shouldValidate: true });
-                    // setValue(`directors.${index}.dob`, { shouldValidate: true });
-                    // setValue(`directors.${index}.mobile_number`, "", { shouldValidate: true });
-                    // setValue(`directors.${index}.email`, "", { shouldValidate: true });
-                    // setValue(`directors.${index}.residential_address`, "", { shouldValidate: true });
                 } finally {
                     setIsChecking(false);
                 }

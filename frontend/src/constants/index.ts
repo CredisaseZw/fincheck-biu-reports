@@ -207,6 +207,8 @@ export const NARRATIONS = [
     { value: "C", label: "Satisfactory Credit Worthiness (Moderate Risk)" },
     { value: "D", label: "No Credit Worthy" },
     { value: "E", label: "Rating Suspended" },
+    { value: "none", label: "None" },
+
 ]
 
 export const FILE_STYLES = {

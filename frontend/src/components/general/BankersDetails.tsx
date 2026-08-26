@@ -192,7 +192,7 @@ function BankerDetails({
                             account_number: "",
                             date_of_acquirement: "",
                             bank_code: "",
-                            narration: "C",
+                            narration: "none",
                         })}
                     >
                         <Plus /> Add Account

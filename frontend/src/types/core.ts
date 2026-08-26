@@ -229,7 +229,7 @@ export interface BankerAccount {
   account_number: string;
   date_of_acquirement : string,
   bank_code : string
-  narration : "A" | "B" | "C" | "D" | "E"
+  narration : "A" | "B" | "C" | "D" | "E" | "none"
 }
 
 export interface ProfessionalPartner {

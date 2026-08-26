@@ -11,7 +11,7 @@ import { getItem } from "@/lib/storage";
 import useSectionTouched from "./useSectionTouched";
 
 const AccountTypes = z.enum(["current", "savings", "loan", "fixed_deposit"])
-const Narrations = z.enum(["A", "B", "C", "D", "E"])
+const Narrations = z.enum(["A", "B", "C", "D", "E", "none"])
 
 const accountSchema = z.object({
     id: z.number().optional(),
@@ -46,9 +46,7 @@ function useBankersDetails({
     } = useForm<BankerDetailsFormData>({
         resolver: zodResolver(schema),
         defaultValues: {
-            accounts: [
-                
-            ],
+            accounts: [],
         },
     })
 

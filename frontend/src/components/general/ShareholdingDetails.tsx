@@ -39,7 +39,7 @@ function ShareholdingDetails({
         })
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
             <Fieldset legendTitle="Shareholding Details" className="flex flex-col gap-4">
                 <ColumnsContainer numberOfCols={3}>
                     <div className="form-group">
@@ -57,13 +57,12 @@ function ShareholdingDetails({
                         )}
                     </div> 
                     <div className="form-group">
-                        <Label className="required">Number of Shareholders</Label>
+                        <Label>Number of Shareholders</Label>
                         <Input type="number" {...register("numbers_of_shareholders", numericField)} />
                         {errors.numbers_of_shareholders && (
                             <p className="text-destructive text-sm">{errors.numbers_of_shareholders.message}</p>
                         )}
-                    </div>
-                
+                    </div>                
                 </ColumnsContainer>
                 <div>
 
@@ -112,7 +111,7 @@ function ShareholdingDetails({
                         </ColumnsContainer>
                         <ColumnsContainer>
                             <div className="form-group">
-                                <Label className="required">Number of Shares</Label>
+                                <Label>Number of Shares</Label>
                                 <Input
                                     type="number"
                                     {...register(`shareholders.${index}.number_of_shares`, numericField)}
@@ -123,7 +122,7 @@ function ShareholdingDetails({
                             </div>
                             <div className="flex flex-row gap-3">
                                 <div className="form-group flex-1">
-                                    <Label className="required">Percentage Ownership</Label>
+                                    <Label>Percentage Ownership</Label>
                                     <Input
                                         type="number"
                                         step="0.01"
@@ -155,28 +154,28 @@ function ShareholdingDetails({
                 : <span className="text-muted-foreground text-center">No Shareholders added. Press "Add Shareholder"</span>
             }
 
-                <div className="flex justify-between">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="self-start"
-                        onClick={() => append({
-                            full_name: "",
-                            address: "",
-                            is_pep: false,
-                            number_of_shares: 0,
-                            percentage_ownership: 0,
-                        })}
-                    >
-                        <Plus size={16} className="mr-2" /> Add Shareholder
-                    </Button>
-                    <CustomSubmitButton
-                        showFine 
-                        onFine={onTouched}
-                        state={touched}
-                        isPending={isPending}
-                    />
-                </div>
+            <div className="flex justify-between">
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="self-start"
+                    onClick={() => append({
+                        full_name: "",
+                        address: "",
+                        is_pep: false,
+                        number_of_shares: 0,
+                        percentage_ownership: 0,
+                    })}
+                >
+                    <Plus size={16} className="mr-2" /> Add Shareholder
+                </Button>
+                <CustomSubmitButton
+                    showFine 
+                    onFine={onTouched}
+                    state={touched}
+                    isPending={isPending}
+                />
+            </div>
 
             </Fieldset>
         </form>
