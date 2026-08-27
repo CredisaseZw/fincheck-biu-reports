@@ -40,15 +40,20 @@ class Command(BaseCommand):
         self.clients: list[ClientFile] = []
         self.entity_extractor = EntityDataExtraction()
 
-    @staticmethod
-    def make_markdown(file):
+    def _remove_file(self,file: str):
+        if os.path.exists(file):
+            os.remove(file)
+
+    def make_markdown(self,file):
         try:
             markdown = pymupdf4llm.to_markdown(file)
+            if len(markdown) <= 0:
+                self._remove_file(file)
+                return None     
             return markdown
         except Exception as e:
             print(f"Error making markdown: {e}")
-            if os.path.exists(file):
-                os.remove(file)
+            self._remove_file(file)
             return None
 
     @staticmethod
@@ -168,8 +173,7 @@ class Command(BaseCommand):
         finally:
             time.sleep(1)
 
-        if os.path.exists(file_path):
-            os.remove(file_path) # in case it some fail we dont wanna waste tokens and all 
+        self._remove_file(file_path)
         return True
     
     def handle(self, *args, **options):
