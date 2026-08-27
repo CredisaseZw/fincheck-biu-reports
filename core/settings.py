@@ -339,5 +339,10 @@ LOGGING = {
             "level": LOG_LEVEL,
             "propagate": True,
         },
+        "django.request": {
+            "handlers": ["console", "error_file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
     },
 }
