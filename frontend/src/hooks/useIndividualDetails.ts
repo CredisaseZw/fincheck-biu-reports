@@ -18,12 +18,7 @@ const MaritalStatus = z.enum(["single", "married", "divorced", "widowed"], {mess
 export const individualSchema = z.object({
     id: z.number().optional(),
     full_name: z.string().min(1, "Full name is required").max(255),
-    national_id : z.string().refine((val) => {
-        if (!val) return true
-        const nidRegex = /^\d{2}\d{6,7}[A-Za-z]\d{2}$/
-        const passportRegex =/^[A-Za-z]{2}\d{7}$/
-        return nidRegex.test(val) || passportRegex.test(val)
-    }, { message: "A valid Zimbabwe national ID or passport number is required" }),
+    national_id : z.string().min(1, "A valid Zimbabwe national ID or passport number is required"),
     date_of_birth: z.string().optional(),
     gender: GENDERS,
     marital_status: MaritalStatus.optional(),

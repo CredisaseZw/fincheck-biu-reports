@@ -16,6 +16,7 @@ import type { ShareholdingsFormData } from "@/hooks/useShareholdingDetails";
 import type { DirectorFormData } from "@/hooks/useDirectors"
 import type { ReportDetailsFormData } from "@/hooks/useReportDetails";
 import type { CompanyOverviewFormData } from "@/hooks/useCompanyOverview";
+import type { ReportExtrasFormData } from "@/hooks/useReportExtras";
 export interface RouteItem  {
     name: string;
     link: string;
@@ -117,6 +118,7 @@ export interface ListReport extends Timestamps{
   status : "draft" | "finalized" | "in_progress" | "suspended"
   overall_risk_rating : number | null,
   username : string | null,
+  contact_person: string | null,
   report_pdf : string | null,
 }
 
@@ -214,6 +216,8 @@ export interface RegistrationAccount {
   vat_number: string | null;
   nssa_number: string | null;
   praz_number: string | null;
+  tax_clearance_expiration_date: string | null;
+  is_tax_clearance_expiration_date : boolean
   is_tin_verified: boolean;
   is_vat_verified: boolean;
   is_nssa_verified: boolean;
@@ -396,6 +400,8 @@ export interface Report extends Timestamps {
   subject_type: EntityValue
   overall_risk_rating : string | null,
   summary : string | null
+  contact_person:string | null
+  last_report :string | null
   suspension_reason : string | null,
   is_stale : boolean
   status : "draft" | "finalized"
@@ -416,7 +422,8 @@ export interface DefaultHeaderProps{
   subject_default_search : string,
   subject_unique_id:string,
   enquiry_reference : string,
-  created_at : string
+  last_report: string | null,
+  created_at : string,
 }
 
 export interface MonthlySummary {
@@ -490,4 +497,8 @@ export interface ReportDetailsProps extends ReportEntityProps{
 
 export interface CompanyOverviewProps extends ReportEntityProps{
   company_overview : CompanyOverviewFormData | undefined
+}
+
+export interface ReportExtrasProps extends ReportEntityProps{
+  report_extras: ReportExtrasFormData| undefined
 }

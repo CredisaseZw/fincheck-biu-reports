@@ -20,8 +20,7 @@ class ReportSearchFilter(BaseFilterBackend):
             Q(registered_name__icontains=search) |
             Q(registration_number__icontains=search) |
             Q(re_registration_number__icontains=search) | 
-            Q(trading_name__icontains=search) |
-            Q(email__icontains=search)
+            Q(trading_name__icontains=search)
         ).values_list("id", flat=True)
 
         individual_ids = Individuals.objects.filter(
@@ -32,6 +31,7 @@ class ReportSearchFilter(BaseFilterBackend):
         return queryset.filter(
             Q(username__icontains=search) |
             Q(enquiry_reference__icontains=search) |
+            Q(contact_person__icontains=search) |
             Q(subject_content_type=company_ct, subject_object_id__in=company_ids) |
             Q(subject_content_type=individual_ct, subject_object_id__in=individual_ids) |
             Q(client_content_type=company_ct, client_object_id__in=company_ids) |

@@ -36,7 +36,6 @@ class CompanyAdmin(admin.ModelAdmin):
         "registered_name",
         "trading_name",
         "registration_number",
-        "email",
         "telephone_number",
         "mobile_number",
     )

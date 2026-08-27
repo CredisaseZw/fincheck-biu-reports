@@ -270,7 +270,10 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
                             }}
                             onFocus={open}
                             onKeyDown={handleKeyDown}
-                            placeholder={entityType === "company" ? "ABC Inc" : "John Doe"}
+                            placeholder={entityType === "company" 
+                                ? "Registration Number, Registration Name, Trading Name" 
+                                : "National ID, Passport Number, Full name"
+                            }
                             className="pl-9 pr-14"
                             aria-haspopup="listbox"
                             aria-expanded={isOpen}

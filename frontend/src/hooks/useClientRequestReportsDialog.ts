@@ -12,7 +12,7 @@ import { handleAxiosError } from "@/lib/utils";
 const row = z.object({
     subject_type : DEBTOR_TYPE,
     subject_object_id : z.number("A valid subject object id is required").positive("A valid subject object id is required"),
-    unique_id :z.string().optional()
+    contact_person: z.string().optional()
 })
 const schema = z.object({
     requestor:z.string().min(1, "Requestor name is required"),

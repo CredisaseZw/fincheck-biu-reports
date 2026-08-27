@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import useGetArchivedReports from "./api/useGetArchivedReports";
 import type { ListReport, PaginationData } from "@/types/core";
 import useURLParamsFilter from "./useURLParamsFilter";
+import { useAuth } from "@/contexts/AuthContext";
 
 const MIN_DAY = 1;
 const MAX_DAY = 31;
@@ -24,6 +25,7 @@ function useBusinessReport() {
     const [paginationData, setPaginationData] = useState<PaginationData | undefined>()
     const [searchedData, setSearchedData] = useState<ListReport[]>([])
     const { updateFilters, getUrlParams, resetFilters } = useURLParamsFilter()
+    const {user} =useAuth();
 
     const monthEndDateValid = useMemo(
         () => isValidMonthEndDate(monthEndDate),
@@ -89,6 +91,7 @@ function useBusinessReport() {
     }
 
     return {
+        user,
         isError,
         loading: isLoading || _searchedLoading,
         monthEndDate,

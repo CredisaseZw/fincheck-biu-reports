@@ -11,6 +11,7 @@ import { cn, handleAxiosError } from "@/lib/utils";
 import { api } from "@/axios/api";
 import ArchivedReportsTable from "./ArchivedReportsTable";
 import type { ListReport } from "@/types/core";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CollapsableTableProps {
   label: string;
@@ -31,7 +32,7 @@ export default function CollapsableTable({
   defaultOpen = false,
 }: CollapsableTableProps) {
     const [open, setOpen] = useState(defaultOpen);
-
+    const {user} = useAuth()
     const { data, isLoading, isFetching, error, isError } = useQuery({
         queryKey: ["reports", "by-month", { year, month, monthEndDate }],
         queryFn:async () =>{
@@ -79,6 +80,7 @@ export default function CollapsableTable({
       </CollapsibleTrigger>
       <CollapsibleContent className="p-5">
         <ArchivedReportsTable
+            allowDeletion = {Boolean(user?.i_s)}
             isEmpty = {reports.length === 0}
             isError = {isError}
             isLoading = {loading}

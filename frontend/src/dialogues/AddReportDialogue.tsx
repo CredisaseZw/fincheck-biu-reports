@@ -38,7 +38,7 @@ import ReportDetails from "@/components/general/ReportDetails";
 import FinalizedReportDialog from "./FinalizedReportDialogue";
 import CompanyOverview from "@/components/general/CompanyOverview";
 import SuspendReportDialog from "./SuspendReportDialog";
-import { SubjectMismatchAlert } from "./SubjectMismatchAlert";
+import ReportExtras from "@/components/general/ReportExtras";
 
 interface props {
     report_item?: ListReport
@@ -73,16 +73,17 @@ function AddReportDialogue({ report_item }: props) {
         accounts,
         subjectType,
         companyInformation,
-        subjectUniqueID,
         financials,
         headerEditMode,
         isLocked,
         shareholding,
-        openMisMatchDialog,
-        setOpenMisMatchDialog,
+        contactPerson, 
+        reportExtras,
+        createdAt,
+        setCreatedAt,
+        setContactPerson,
         onSelectEntity,
         onClear,
-        setSubjectUniqueID,
         setUsername,
         onEdit,
         generateReport,
@@ -103,11 +104,6 @@ function AddReportDialogue({ report_item }: props) {
 
     return (
         <div className="relative">
-            <SubjectMismatchAlert
-                open = {openMisMatchDialog}
-                onOpenChange={setOpenMisMatchDialog}
-                onContinue={()=>generateReport(true)}
-            />
             <Dialog 
                 open={open} 
                 onOpenChange={handleOpenChange}>
@@ -136,9 +132,11 @@ function AddReportDialogue({ report_item }: props) {
                                 clientType={clientType}
                                 subjectType={subjectType}
                                 default_header={defaultHeader}
-                                SubjectUniqueID={subjectUniqueID}
+                                contactPerson = {contactPerson}
+                                createdAt = {createdAt}
+                                setCreatedAt ={setCreatedAt}
+                                setContactPerson = {setContactPerson}
                                 onUpdateEntityTypes={onUpdateEntityTypes}
-                                setSubjectUniqueID={setSubjectUniqueID}
                                 onSelectEntity={onSelectEntity}
                                 onSetEntityId={onSetEntityId}
                                 setUsername = {setUsername}
@@ -152,50 +150,60 @@ function AddReportDialogue({ report_item }: props) {
                         {showSkeleton
                             ? <FormSkeleton />
                             : report ? 
-                                subjectType === "company"
-                                ? <>
-                                    <CompanyDetails
-                                        subject_type= {subject_type}
-                                        company_overview = {companyInformation}
-                                        report_id={report.id}
-                                    />
-                                    <CompanyOverview
-                                        subject_type={subject_type}
-                                        subject_object_id={subject_object_id}
-                                        report_id={report.id}
-                                        company_overview={companyOverview}
-                                    />
-                                    <CompanyStructure 
-                                        structure_data = {companyStructure}
-                                        report_id={report.id}
-                                        subject_object_id = {subject_object_id}
-                                        subject_type = {subject_type}
-                                    />
-                                    <CompanyOperations 
-                                        operations_data = {companyOperations}
-                                        report_id={report.id}
-                                        subject_object_id = {subject_object_id}
-                                        subject_type = {subject_type}
-                                    />
-                                </>
-                                : subjectType === "individual"
+                                <>
+                                <ReportExtras
+                                    report_extras = {reportExtras}
+                                    report_id  = {report.id}
+                                    subject_type = {subject_type}
+                                />
+                                {    
+                                    subjectType === "company"
                                     ? <>
-                                        <IndividualDetails 
-                                            report_id={report.id}
-                                            individual_details={individualDetails}
-                                        />
-                                        <EmploymentInformation 
-                                            employment_information = {employmentInformation}
-                                            report_id={report.id}
+                                        <CompanyDetails
                                             subject_type= {subject_type}
-                                        />
-                                        <NextOfKin 
-                                            subject_type={subject_type}
-                                            next_of_kin={nextOfKin}
+                                            company_overview = {companyInformation}
                                             report_id={report.id}
+                                        />
+                                        <CompanyOverview
+                                            subject_type={subject_type}
+                                            subject_object_id={subject_object_id}
+                                            report_id={report.id}
+                                            company_overview={companyOverview}
+                                        />
+                                        <CompanyStructure 
+                                            structure_data = {companyStructure}
+                                            report_id={report.id}
+                                            subject_object_id = {subject_object_id}
+                                            subject_type = {subject_type}
+                                        />
+                                        <CompanyOperations 
+                                            operations_data = {companyOperations}
+                                            report_id={report.id}
+                                            subject_object_id = {subject_object_id}
+                                            subject_type = {subject_type}
                                         />
                                     </>
-                                    : null
+                                    : subjectType === "individual"
+                                        ? <>
+                                            <IndividualDetails 
+                                                report_id={report.id}
+                                                individual_details={individualDetails}
+                                            />
+                                            <EmploymentInformation 
+                                                employment_information = {employmentInformation}
+                                                report_id={report.id}
+                                                subject_type= {subject_type}
+                                            />
+                                            <NextOfKin 
+                                                subject_type={subject_type}
+                                                next_of_kin={nextOfKin}
+                                                report_id={report.id}
+                                            />
+                                        </>
+                                        : null
+                                    }
+                                </>
+
                                 : null
                                 }
 

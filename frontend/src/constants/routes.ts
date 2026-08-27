@@ -36,4 +36,5 @@ export const USERS_LINKS: RouteItem[] = [
   }
 ]
 
+
 export const ROUTES = [...CORE_ROUTES, ...USERS_LINKS]

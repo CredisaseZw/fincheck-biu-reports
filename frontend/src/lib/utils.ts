@@ -52,6 +52,13 @@ export function getFormattedDate(dateStr: string){
   return `${day}-${month.toLocaleUpperCase()}-${year}`;
 }
 
+export function toDatetimeLocal(isoString: string | null): string {
+  if (!isoString) return "";
+  const d = new Date(isoString);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export const toCap = (value: string): string => {
   const normalized = value.replaceAll(/_/g, " ");
   if (!normalized) return normalized;

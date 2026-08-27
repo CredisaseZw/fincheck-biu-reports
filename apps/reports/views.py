@@ -18,6 +18,7 @@ from django.utils import timezone
 from datetime import date, timedelta
 from django.db.models import Q, Count
 from collections import Counter
+from rest_framework.mixins import DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.reports.GenerateReport import FincheckReportPDF
@@ -40,6 +41,7 @@ from apps.utils.helpers import (
 
 logger = logging.getLogger(__name__)
 r = redis.from_url(settings.REDIS_CACHE_LOCATION)
+
 class ReportViewSet(BaseAuthJSONViewSet):
     filter_backends = [ReportSearchFilter, DjangoFilterBackend]
     filterset_class = ReportsFilter
@@ -93,6 +95,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
             for index, r in enumerate(rows):
                 subject_id = r.get("subject_object_id")
                 subject_type = r.get("subject_type")
+                contact_person = r.get("contact_person", "")
 
                 if subject_type not in content_type_cache:
                     content_type_cache[subject_type] = get_content_type_id(subject_id, subject_type)
@@ -116,8 +119,9 @@ class ReportViewSet(BaseAuthJSONViewSet):
                         subject_content_type_id=subject_content_type_id,
                         client_content_type_id=client_type_id,
                         client_object_id=client_id,
-                        status=Report.StatusChoices.DRAFT,
+                        status=Report.StatusChoices.IN_PROGRESS,
                         username=requestor,
+                        contact_person = contact_person,
                         updated_by=user,
                         enquiry_reference=f"{prefix}{next_seq + index:04d}",
                     )
@@ -138,12 +142,14 @@ class ReportViewSet(BaseAuthJSONViewSet):
             }, status=STATUS.HTTP_403_FORBIDDEN)
         
         username = request.data.get("username", "")
-        bypass_check = request.data.get("bypass_check", False)     
+        contact_person = request.data.get("contact_person", "")
+        created_at = request.data.get("created_at", timezone.now())
         subject_id = request.data.get("subject_object_id")
         client_id = request.data.get("client_object_id")
         subject_type = request.data.get("subject_type")
         client_type = request.data.get("client_type")
         subject_unique_id = request.data.get("subject_unique_id", None)
+        
 
         subject_content_type_id = get_content_type_id(subject_id, subject_type)
         client_content_type_id = get_content_type_id(client_id, client_type)
@@ -174,31 +180,16 @@ class ReportViewSet(BaseAuthJSONViewSet):
             )
         
         with transaction.atomic():
-            if not bypass_check and subject_unique_id:
-                client = Company.objects.filter(
-                    Q (registration_number = subject_unique_id.strip()) |
-                    Q(re_registration_number = subject_unique_id.strip()),
-                    id = subject_id                    
-                ).first() if subject_type == "company" else Individuals.objects.filter(
-                    id = subject_id,
-                    national_id = subject_unique_id.strip().replace("-", "").replace(" ", "").upper()
-                ).first()
-
-                if not client:
-                    return Response({
-                        "error":  "Given Subject ID does not match with the subjects",
-                    }, 
-                        status=STATUS.HTTP_409_CONFLICT
-                    )
-
             status = Report.StatusChoices.IN_PROGRESS if self.request.user.is_staff else Report.StatusChoices.DRAFT
             report = Report.objects.create(
                 subject_object_id=subject_id,
                 subject_content_type_id=subject_content_type_id,
                 client_object_id=client_id,
                 username = username,
+                contact_person = contact_person,
                 client_content_type_id=client_content_type_id,
                 status = status,
+                created_at = created_at,
                 updated_by = user   
             )
 
@@ -214,13 +205,6 @@ class ReportViewSet(BaseAuthJSONViewSet):
         return Response({
             "error": "Access error."
         }, status=STATUS.HTTP_403_FORBIDDEN)
-    
-    def destroy(self, request, *args, **kwargs):
-        report:Report = self.get_object()
-        if report.status == report.StatusChoices.FINALIZED:
-            return Response({"error" : "Report already finalized."}, status=STATUS.HTTP_400_BAD_REQUEST)
-
-        return super().destroy(request, *args, **kwargs) 
 
     def partial_update(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -341,7 +325,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
             status=STATUS.HTTP_409_CONFLICT,
         )
 
-class ArchivedReportsViewSet(BaseListDataViewSet):
+class ArchivedReportsViewSet(BaseListDataViewSet, DestroyModelMixin):
     filter_backends = [BusinessReportsSearchFilter, DjangoFilterBackend]
     serializer_class = ListReportSerializer
 

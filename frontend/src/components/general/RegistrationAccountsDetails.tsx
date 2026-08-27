@@ -67,6 +67,35 @@ function RegistrationAccountsDetails({
                         </div>
                     ))}
                 </ColumnsContainer>
+                <div>
+                    <div className="form-group">
+                        <Label>Tax Clearance</Label>
+                        <span className="text-muted-foreground text-sm">Expiration Date</span>
+                        <div className="flex flex-row items-center gap-2">
+                            <Input
+                                className="flex-1"
+                                type={"date"}
+                                {...register("tax_clearance_expiration_date")}
+                            />
+                            <Controller
+                                control={control}
+                                name={"is_tax_clearance_expiration_date"}
+                                render={({ field }) => (
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <Checkbox
+                                            key={`is_tax_clearance_expiration_date_${field.value}`}
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                        <Label className="cursor-pointer" onClick={() => field.onChange(!field.value)}>
+                                            Verified
+                                        </Label>
+                                    </div>
+                                )}
+                            />
+                        </div>
+                    </div>
+                </div>
                 <CustomSubmitButton
                     showFine
                     onFine={onTouched}

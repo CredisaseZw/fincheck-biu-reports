@@ -2,30 +2,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import ColumnsContainer from './ColumnsContainer';
 import type { DefaultHeaderProps, EntityMode, EntityValue, onSelectEntityProps } from '@/types/core';
 import SearchEntity, { type SearchEntityRef } from './SearchEntity';
-import { getCurrentDateFormatted, getFormattedDate } from '@/lib/utils';
 import { useRef, type Dispatch, type SetStateAction } from 'react';
 import { Input } from '../ui/input';
 interface props{
     clientType : EntityValue,
     subjectType : EntityValue    
     username : string,
+    contactPerson: string
     default_header : DefaultHeaderProps | undefined,
-    SubjectUniqueID : string | undefined | null
+    createdAt: string
     onSelectEntity : (entity : EntityMode, props:onSelectEntityProps) => void
-    setSubjectUniqueID: (value: SetStateAction<string | undefined | null>) => void
     onUpdateEntityTypes : (entity :EntityMode, value: EntityValue)=> void
     onSetEntityId : (entity : EntityMode, value: number | null) => void
     setUsername:Dispatch<SetStateAction<string>>
+    setContactPerson: Dispatch<SetStateAction<string>>
+    setCreatedAt: Dispatch<SetStateAction<string>>
 }
 
 function ReportHeaderForm({ 
     default_header, 
     clientType,
     subjectType,
-    SubjectUniqueID,
     username,
+    contactPerson,
+    createdAt,
+    setCreatedAt,
+    setContactPerson,
     onSelectEntity,
-    setSubjectUniqueID,
     setUsername,
     onSetEntityId,
     onUpdateEntityTypes
@@ -35,10 +38,10 @@ function ReportHeaderForm({
 
     return (
     <div className="w-full">
-        <div className="border-b pb-5 flex flex-col gap-6">
+        <div className="pb-5 flex flex-col gap-6">
             <ColumnsContainer gapClass="gap-5">
                 <div className="flex flex-col">
-                    <h1 className="font-bold text-lg text-gray-800 dark:text-gray-200">Client Name</h1>
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Client Name</h1>
                     <div className="flex flex-row gap-3">
                         <Select 
                             value={clientType}
@@ -68,7 +71,7 @@ function ReportHeaderForm({
                     </div>
                 </div>
                 <div className="flex flex-col">
-                    <h1 className="font-bold text-lg text-gray-800 dark:text-gray-200">Subjects Name</h1>
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Subjects Name</h1>
                     <div className="flex flex-row gap-3">
                         <Select
                             value={subjectType}
@@ -96,39 +99,35 @@ function ReportHeaderForm({
                         />
                     </div>
                 </div>
+            </ColumnsContainer>
+            <ColumnsContainer numberOfCols={3}>
                 <div className="form-group">
-                    <h1 className="font-bold text-lg text-gray-800 dark:text-gray-200">Subject's {subjectType === "company" ? "Company Reg No" : "National ID"}</h1>
-                    <Input
-                        value={SubjectUniqueID ?? ""}
-                        onChange={(e)=> setSubjectUniqueID(e.target.value)}
-                        placeholder = {subjectType === "company" ? "e.g 123/56" : "e.g 632178595M21"}
-                    />
-                </div>
-                <div className="form-group">
-                    <h1 className="font-bold text-lg text-gray-800 dark:text-gray-200">Requestor Name</h1>
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Requestor Name</h1>
                     <Input
                         value={username}
                         onChange={(e)=> setUsername(e.target.value)}
                         placeholder = "e.g John Doe"
                     />
                 </div>
+                <div className="form-group">
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Contact Person</h1>
+                    <Input
+                        value={contactPerson}
+                        onChange={(e)=> setContactPerson(e.target.value)}
+                        placeholder = "e.g John Doe"
+                    />
+                </div>
+                <div className="form-group">
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Report Creation date</h1>
+                    <Input
+                        type = {"datetime-local"}
+                        value={createdAt}
+                        onChange={(e)=> setCreatedAt(e.target.value)}
+                    />
+                </div>
             </ColumnsContainer>
         </div>
-        <div className="pt-5 flex flex-row justify-between">
-            <div className="flex flex-col gap-1.5">
-                <h6 className="font-semibold text-md text-gray-800 dark:text-gray-200">Enquiry Reference</h6>
-                <span className="text-gray-700 dark:text-gray-100"> 
-                    { default_header?.enquiry_reference ?? "-" }
-                </span>
-            </div>
-            <div className="flex flex-col gap-1.5 text-end">
-              <h6 className="font-semibold text-md text-gray-800 dark:text-gray-200">Report Date</h6>
-                <span className="text-gray-700 dark:text-gray-100">{
-                default_header?.created_at
-                ? getFormattedDate(default_header.created_at)
-                : getCurrentDateFormatted()}</span>
-            </div>
-        </div>
+
         
     </div>
   )

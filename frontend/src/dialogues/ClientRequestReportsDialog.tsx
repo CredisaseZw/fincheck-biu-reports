@@ -93,7 +93,6 @@ function ClientRequestReportsDialog() {
                                                     entityMode="subject"
                                                     onSelectEntity={( _:EntityMode, v: onSelectEntityProps)=>{
                                                         setValue(`rows.${idx}.subject_object_id`, v.id)
-                                                        if(v.uniqueID) setValue(`rows.${idx}.unique_id`, v.uniqueID);
                                                     }}
                                                 />
                                             </div>
@@ -108,7 +107,7 @@ function ClientRequestReportsDialog() {
                                     </TableCell>
                                     <TableCell>
                                         <Input
-                                            { ...register(`rows.${idx}.unique_id`) }
+                                            { ...register(`rows.${idx}.contact_person`) }
                                         />
                                     </TableCell>
                                     <TableCell className="flex justify-center items-center">

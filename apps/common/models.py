@@ -30,6 +30,8 @@ class RegistrationAccounts(BaseModelWithSubject):
         null = True,
         help_text=_("Account praz number")   
     )
+    tax_clearance_expiration_date = models.DateField(blank=True, null = True)
+    is_tax_clearance_expiration_date = models.BooleanField(default=False)
     is_praz_verified = models.BooleanField(default=False)
     is_nssa_verified = models.BooleanField(default=False)
     is_vat_verified = models.BooleanField(default=False)

@@ -16,6 +16,7 @@ function BusinessReports() {
         currentYear,
         loading,
         data,
+        user,
         isError,
         searchCategory,
         searchValue,
@@ -167,7 +168,9 @@ function BusinessReports() {
                 isError = {_searchedIsError}
                 paginationData={paginationData}
                 results={searchedData}
+                allowDeletion = {Boolean(user?.i_s)}
             />
+
          </div>   
         }
 

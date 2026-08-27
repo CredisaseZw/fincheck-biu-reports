@@ -41,7 +41,7 @@ function useLogin() {
                     navigate(params.next)
                     return;
                 }
-                navigate("/dashboard")
+                navigate("/active-reports")
             },
             onError :(error) => handleAxiosError(error),
         })   

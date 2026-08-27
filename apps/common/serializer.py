@@ -49,6 +49,8 @@ class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):
             "vat_number",
             "nssa_number",
             "praz_number",
+            'tax_clearance_expiration_date',
+            'is_tax_clearance_expiration_date',
             "is_praz_verified",
             "is_nssa_verified",
             "is_vat_verified",

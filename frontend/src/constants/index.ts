@@ -8,6 +8,7 @@ export const LiveReportHeaders:Header[] = [
     { name : "Client" },
     { name : "Subject" },
     { name : "Requestor", textAlign: "left"},
+    { name : "Contact Person", textAlign: "left"},
     { name : "Report Status"},
     { name : "Action", textAlign : "center" },
 ]
@@ -16,6 +17,7 @@ export const LiveClientReportHeaders:Header[] = [
     { name : "Request Date", textAlign : "center" },
     { name : "Subject" },
     { name : "Requestor", textAlign: "left"},
+    { name : "Contact Person", textAlign: "left"},
     { name : "Report Status"},
     { name : "Action", textAlign : "center" },   
 ]
@@ -56,7 +58,7 @@ export const IndividualListHeaders:Header[] = [
 export const ReportRequestHeaders: Header[] = [
     { name : "Report No", textAlign:"center" },
     { name : "Company / Individual", textAlign:"center" },
-    { name : "Company No / National Id / Passport", textAlign:"center" },
+    { name : "Contact Person", textAlign:"center" },
     { name : "Remove", textAlign :"center"}
 
 ]

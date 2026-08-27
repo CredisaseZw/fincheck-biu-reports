@@ -8,8 +8,10 @@ import { OptionButton } from "./OptionButton";
 import OptionsWrapper from "./OptionsWrapper";
 import { ClientReportHeaders, ReportHeaders } from "@/constants";
 import { useAuth } from "@/contexts/AuthContext";
+import DeleteReportAlert from "@/dialogues/DeleteReportDialogue";
 
 interface props {
+    allowDeletion : boolean
     isLoading : boolean
     isError : boolean
     isEmpty: boolean
@@ -18,11 +20,12 @@ interface props {
 }
 
 function ArchivedReportsTable({
-    isLoading,
     isError,
     isEmpty,
+    results,
+    isLoading,
     paginationData,
-    results
+    allowDeletion = false
 }:props) {
     const {user} = useAuth()
     return (
@@ -86,7 +89,14 @@ function ArchivedReportsTable({
                                 Icon={ExternalLink}
                                 label="View Report"
                             /> 
-                            }
+                        }
+                        {
+                            allowDeletion &&
+                            <DeleteReportAlert
+                                isArchived
+                                id = {item.id}
+                            />
+                        }
                     </OptionsWrapper>
                 </TableCell>
             </TableRow>

@@ -4,8 +4,7 @@ import useGetSingleReport from "./api/useGetSingleReport";
 import { useEffect, useState} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
-import { isAxiosError } from "axios";
-import { getEntityID, getEntityName, handleAxiosError } from "@/lib/utils";
+import { getEntityID, getEntityName, handleAxiosError, toDatetimeLocal } from "@/lib/utils";
 import type { Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report } from "@/types/core";
 import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
@@ -27,22 +26,24 @@ import type { ShareholdingsFormData } from "./useShareholdingDetails";
 import type { DirectorFormData } from "./useDirectors";
 import type { ReportDetailsFormData } from "./useReportDetails";
 import type { CompanyOverviewFormData } from "./useCompanyOverview";
+import type { ReportExtrasFormData } from "./useReportExtras";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const { mutate } = useCreateReport();
   const { setReportLoading } = useReport()
   const [open, setOpen] = useState(false);  
-  const [openMisMatchDialog, setOpenMisMatchDialog] = useState(false)
-  const [subjectUniqueID, setSubjectUniqueID] = useState<string | undefined | null>(undefined)
   const [clientObjectId, setClientObjectId] = useState<number | null>(null);
   const [subjectObjectId, setSubjectObjectId] = useState<number | null>(null);
   const [clientType, setClientType] = useState<EntityValue>("company")
   const [subjectType, setSubjectType] = useState<EntityValue>("company")
   const [username, setUsername] = useState<string>("");
+  const [contactPerson, setContactPerson] = useState<string>("")
+  const [createdAt, setCreatedAt] = useState<string>(toDatetimeLocal(new Date().toISOString()))
   const [report, setReport] =useState<Report | undefined>(undefined)
   const [headerEditMode, setHeaderEditMode ] = useState<boolean>()
   const [defaultHeader, setDefaultHeader] = useState<DefaultHeaderProps | undefined>(undefined);
   const [companyInformation, setCompanyInformation] = useState<CompanyFormData | undefined>(undefined);
+  const [reportExtras, setReportExtras] = useState<ReportExtrasFormData | undefined>(undefined);
   const [individualDetails, setIndividualDetails] = useState<IndividualFormData | undefined>(undefined)
   const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
   const [nextOfKin, setNextOfKin] = useState<NextOfKinFormData | undefined>(undefined);
@@ -85,13 +86,12 @@ function useAddReportDialogue(list_report?: ListReport) {
     setSubjectType(value);
   }
 
-  const onSelectEntity = (entity : EntityMode, { id, uniqueID }: onSelectEntityProps ) => {
+  const onSelectEntity = (entity : EntityMode, { id }: onSelectEntityProps ) => {
     if (entity === "client"){
       setClientObjectId(id)
       return;
     }
     setSubjectObjectId(id)
-    setSubjectUniqueID(uniqueID)
   }
 
   const onSetEntityId = (entity : EntityMode, value: number | null) => {
@@ -125,10 +125,16 @@ function useAddReportDialogue(list_report?: ListReport) {
       subject_default_search : getEntityName(report.subject),
       subject_unique_id : getEntityID(report.subject),
       client_unique_id : getEntityID(report.client),
+      last_report : report.last_report,
       enquiry_reference : report.enquiry_reference,
       created_at : report.created_at
     })
 
+    setReportExtras({
+      contact_person : report.contact_person ?? "",
+      created_at: toDatetimeLocal(report.created_at ?? new Date().toISOString()),
+    })
+    
     if(report.subject_type === "company"){
       const company = report.subject as Company
       setCompanyInformation({
@@ -366,6 +372,8 @@ function useAddReportDialogue(list_report?: ListReport) {
         is_praz_verified : report.subject.registration_accounts.is_praz_verified,
         is_tin_verified : report.subject.registration_accounts.is_tin_verified,
         is_vat_verified : report.subject.registration_accounts.is_vat_verified,
+        tax_clearance_expiration_date : report.subject.registration_accounts.tax_clearance_expiration_date ?? "",
+        is_tax_clearance_expiration_date : report.subject.registration_accounts.is_tax_clearance_expiration_date,
         nssa_number : report.subject.registration_accounts.nssa_number ?? undefined,
         praz_number : report.subject.registration_accounts.praz_number ?? undefined,
         tin_number :report.subject.registration_accounts.tin_number ?? undefined,
@@ -426,15 +434,15 @@ function useAddReportDialogue(list_report?: ListReport) {
 
   }, [report])
 
-  const generateReport = (byPassCheck = false)=>{
+  const generateReport = ()=>{
     if(list_report) return
     if(!clientObjectId || !subjectObjectId) return;
     setReportLoading(true);
 
     const payload = {
       ...(username && { username : username,}),
-      ...(subjectUniqueID && {subject_unique_id: subjectUniqueID}),
-      ...(byPassCheck && {bypass_check : true}),
+      ...(contactPerson && {contact_person : contactPerson}),
+      ...(createdAt && {created_at: new Date(createdAt).toISOString()}),
       client_object_id : clientObjectId,
       client_type :  clientType,
       subject_object_id : subjectObjectId,
@@ -449,23 +457,20 @@ function useAddReportDialogue(list_report?: ListReport) {
           queryKey : ["reports"]
         })
       },
-      onError : (error) => {
-        if(isAxiosError(error)){
-          if(error.status === 409) setOpenMisMatchDialog(true)
-        }
-        handleAxiosError(error)
-      },
+      onError : (error) => handleAxiosError(error),
       onSettled :()=> setReportLoading(false)
     })
   }
 
   const onClear = () => {
     setUsername("");
+    setContactPerson("");
+    setCreatedAt(toDatetimeLocal(new Date().toISOString()))
     setReport(undefined); 
+    setReportExtras(undefined)
     setDefaultHeader(undefined)
     setClientObjectId(null)
     setSubjectObjectId(null)
-    setSubjectUniqueID(undefined)
     setHeaderEditMode(!list_report);
     setCompanyOverview(undefined);
     setIndividualDetails(undefined);
@@ -498,7 +503,6 @@ function useAddReportDialogue(list_report?: ListReport) {
     companyOverview,
     username,
     directors,
-    subjectUniqueID,
     isLocked,
     tradeReferences,
     individualDetails,
@@ -518,13 +522,15 @@ function useAddReportDialogue(list_report?: ListReport) {
     publicInformation,
     bankerDetails,
     financials,
-    openMisMatchDialog,
     accounts,
     companyOperations,
     companyInformation,
+    contactPerson, 
+    reportExtras,
+    createdAt,
+    setCreatedAt,
+    setContactPerson,
     onClear,
-    setSubjectUniqueID,
-    setOpenMisMatchDialog,
     setUsername,
     onEdit,
     setOpen,

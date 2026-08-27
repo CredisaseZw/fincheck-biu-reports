@@ -39,6 +39,14 @@ export function AppSidebar() {
             : user.client.registered_name
         : user?.full_name
     }, [user])
+
+    const ROUTES = useMemo(()=>{
+        return CORE_ROUTES.map((route)=>{
+            if(user?.i_s) return route
+            if(!user?.i_s && route.name !== "Dashboard")return route 
+        })
+    }, [user])
+
     return (
     <Sidebar>
         <SidebarHeader className="px-4 pt-5 pb-3">
@@ -60,8 +68,8 @@ export function AppSidebar() {
                 <SidebarGroupLabel>BUSINESS REPORTS</SidebarGroupLabel>
                 <SidebarGroupContent>
                     <SidebarMenu>
-
-                        {CORE_ROUTES.map((link) => {
+                        {ROUTES.map((link) => {
+                            if(!link) return <></>
                             return <CustomSidebarMenuItem link={link} key={link.link}/>;
                         })}
 

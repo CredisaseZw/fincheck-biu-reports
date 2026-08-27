@@ -12,6 +12,8 @@ import { cn, returnStringedList } from "@/lib/utils";
 
 function _val(val: string | number | null | undefined, fallback = "—"): string {
   if (val === null || val === undefined || String(val).trim() === "") return fallback;
+  const strVal = String(val).trim();
+  if (strVal === "0.00" || strVal === "0" || strVal === "0.0") return fallback;
   return String(val);
 }
 
@@ -26,6 +28,8 @@ function _label(raw: string | null | undefined): string {
 
 function _date(val: string | null | undefined): string {
   if (!val) return "—";
+  const strVal = String(val).trim();
+  if (strVal === "0.00" || strVal === "0" || strVal === "0.0") return "—";
   try {
     const d = new Date(val);
     if (isNaN(d.getTime())) return String(val).toUpperCase();
@@ -37,9 +41,13 @@ function _date(val: string | null | undefined): string {
 
 function _money(amount: string | number | null | undefined, currency = ""): string {
   if (amount === null || amount === undefined) return "—";
+  const strVal = String(amount).trim();
+  if (strVal === "0.00" || strVal === "0" || strVal === "0.0") return "—";
   try {
+    const parsed = parseFloat(String(amount));
+    if (parsed === 0) return "—";
     const prefix = currency ? `${currency} ` : "";
-    return `${prefix}${parseFloat(String(amount)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${prefix}${parsed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   } catch {
     return String(amount);
   }
@@ -549,6 +557,7 @@ function RegistrationsSection({ data }: { data: RegistrationAccount }) {
       <GridRow label="VAT Number" value={_val(data.vat_number)} extra={data.is_vat_verified !== undefined ? _badge(!!data.is_vat_verified) : undefined} />
       <GridRow label="NSSA Number" value={_val(data.nssa_number)} extra={data.is_nssa_verified !== undefined ? _badge(!!data.is_nssa_verified) : undefined} />
       <GridRow label="PRAZ Number" value={_val(data.praz_number)} extra={data.is_praz_verified !== undefined ? _badge(!!data.is_praz_verified) : undefined} />
+      <GridRow label="Tax Clearance Expiration Date" value={_date(data.tax_clearance_expiration_date)} extra={data.is_tax_clearance_expiration_date !== undefined ? _badge(!!data.is_tax_clearance_expiration_date) : undefined} />
     </SectionCard>
   );
 }

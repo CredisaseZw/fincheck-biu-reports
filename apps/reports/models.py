@@ -9,6 +9,7 @@ from django.db.models import UniqueConstraint
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
+from django.core.serializers.json import DjangoJSONEncoder
 
 def report_pdf_path(instance, filename):
     from django.conf import settings
@@ -35,6 +36,10 @@ class Report(BaseModelWithSubject):
         "client_content_type", 
         "client_object_id"
     )
+    contact_person = models.TextField(
+        blank=True,
+        null=True
+    )
     username = models.CharField(
         max_length=25,
         blank=True,
@@ -60,7 +65,10 @@ class Report(BaseModelWithSubject):
     )    
     snapshot = models.JSONField(
         _("Data ScreenShot"),
-        default=dict
+        default=dict,
+        null= True,
+        blank = True,
+        encoder=DjangoJSONEncoder,
     )
     finalized_at = models.DateTimeField(
         null=True,
@@ -74,12 +82,27 @@ class Report(BaseModelWithSubject):
     )
     enquiry_reference = models.CharField(max_length=20, unique=True, editable=False)
     is_deleted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now,blank=True, null=True) #bypass auto_now for editing
 
     @property
     def is_stale(self):
         if self.status not in [self.StatusChoices.DRAFT, self.StatusChoices.IN_PROGRESS]:
             return False
         return timezone.now() - self.created_at > timedelta(days=3)
+
+    @property
+    def last_report(self):
+        last = (
+            Report.objects.filter(
+                subject_content_type_id=self.subject_content_type_id,
+                subject_object_id=self.subject_object_id,
+                status=self.StatusChoices.FINALIZED,
+            )
+            .exclude(pk=self.pk)
+            .order_by("-created_at")
+            .first()
+        )
+        return last.created_at if last else None
 
     def save(self, *args, **kwargs):
         if not self.enquiry_reference:
@@ -99,6 +122,11 @@ class Report(BaseModelWithSubject):
         else:
             super().save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        if self.report_pdf:
+            self.report_pdf.delete(save=False)
+        return super().delete(*args, **kwargs)
+    
     class Meta:
         app_label = "reports"
         db_table = "reports"

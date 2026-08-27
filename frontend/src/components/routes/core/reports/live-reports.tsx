@@ -106,6 +106,7 @@ function LiveReports() {
                                     </div>
                                 </TableCell>
                                 <TableCell>{(!item.username || item.username.trim() === "") ? '-' : item.username}</TableCell>
+                                <TableCell className="max-w-50 wrap-break-word">{(!item.contact_person || item.contact_person.trim() === "") ? '-' : item.contact_person}</TableCell>
                                 <TableCell className="text-center">
                                     <StatusPill variant={pillVariant as any}>
                                         {toCap(item.status)}

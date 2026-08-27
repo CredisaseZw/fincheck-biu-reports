@@ -18,11 +18,13 @@ import { toast } from "sonner";
 
 interface props {
     id: number
+    isArchived?: boolean
     disabled?: boolean
 }
 
 function DeleteReportAlert({
   id,
+  isArchived = false,
   disabled
 }: props) {
     const [open, setOpen] = useState(false)
@@ -30,11 +32,13 @@ function DeleteReportAlert({
     const {mutate, isPending} = useInstanceMutation()
 
     const onDelete =()=>{
-        mutate({url : `/api/reports/${id}/`, mode: "deletion"}, {
+        mutate({url :!isArchived 
+            ?`/api/reports/${id}/`
+            : `/api/archived-reports/${id}/`
+            ,mode: "deletion"}, {
             onSuccess : ()=>{
-                queryClient.invalidateQueries({
-                    queryKey : ["reports"]
-                })
+                if(isArchived){ queryClient.invalidateQueries({ queryKey : ["archived-reports"] }) }
+                queryClient.invalidateQueries({ queryKey : ["reports"] })
                 toast.success("Report deleted successfully")
                 setOpen(false)
             },

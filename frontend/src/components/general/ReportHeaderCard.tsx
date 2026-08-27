@@ -1,6 +1,7 @@
 import type { DefaultHeaderProps } from "@/types/core";
 import LoadingIndicator from "./LoadingIndicator";
 import { getCurrentDateFormatted, getFormattedDate } from "@/lib/utils";
+import ColumnsContainer from "./ColumnsContainer";
 
 interface ReportHeaderCardProps {
     default_header : DefaultHeaderProps | undefined,
@@ -50,8 +51,7 @@ export default function ReportHeaderCard({
                 </div>
 
                 <div className="my-5 h-px bg-primary-foreground/20 dark:bg-light/20" />
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <ColumnsContainer numberOfCols={default_header?.last_report ? 3 : 2}>
                     <div>
                         <p className="text-sm font-medium opacity-80">
                             Enquiry Reference
@@ -64,8 +64,24 @@ export default function ReportHeaderCard({
                             ) : <LoadingIndicator variant="button"/>
                         }
                     </div>
-
-                    <div>
+                    {
+                        default_header?.last_report &&
+                        <div className="flex items-center justify-center">
+                            <div className="w-fit">
+                                <p className="text-sm font-medium opacity-80">
+                                    Last Report Date
+                                </p>
+                                <p className="mt-1 text-2xl font-bold">
+                                    {   default_header?.last_report
+                                        ? getFormattedDate(default_header.last_report)
+                                        : ""
+                                    }
+                                </p>
+                            </div>
+                            
+                        </div>
+                    }
+                    <div className={default_header?.last_report ? "flex flex-col items-end" : ""}>
                         <p className="text-sm font-medium opacity-80">
                             Request Date
                         </p>
@@ -76,7 +92,7 @@ export default function ReportHeaderCard({
                             }
                         </p>
                     </div>
-                </div>
+                </ColumnsContainer>
             </div>
         </div>
     );

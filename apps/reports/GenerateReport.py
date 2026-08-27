@@ -127,19 +127,19 @@ class FincheckReportPDF:
 
     @staticmethod
     def _m(val, default: str = "—") -> str:
-        if val is None or str(val).strip() == "":
+        if val is None or str(val).strip() in ("", "0.00"):
             return default
         return val.upper()
            
     @staticmethod
     def _u(val, default: str = "—") -> str:
-        if val is None or str(val).strip() == "":
+        if val is None or str(val).strip() in ("", "0.00"):
             return default
         return FincheckReportPDF._format_multiline(str(val).strip(), upper=True)
 
     @staticmethod
     def _e(val, default: str = "—") -> str:
-        if val is None or str(val).strip() == "":
+        if val is None or str(val).strip() in ("", "0.00"):
             return default
         return FincheckReportPDF._format_multiline(str(val).strip(), upper=False)
 
@@ -163,11 +163,14 @@ class FincheckReportPDF:
 
     @staticmethod
     def _money(amount, currency: str = "") -> str:
-        if amount is None:
+        if amount is None or str(amount).strip() in ("0.00", "0", "0.0"):
             return "—"
         try:
+            val_float = float(amount)
+            if val_float == 0.0:
+                return "—"
             prefix = f"{html.escape(str(currency))} " if currency else ""
-            return f"{prefix}{float(amount):,.2f}"
+            return f"{prefix}{val_float:,.2f}"
         except (ValueError, TypeError):
             return html.escape(str(amount))
 
@@ -1121,12 +1124,14 @@ body {{
             "VAT Number": " " + self._badge(bool(reg.get("is_vat_verified"))) if reg.get("is_vat_verified") is not None else "",
             "NSSA Number": " " + self._badge(bool(reg.get("is_nssa_verified"))) if reg.get("is_nssa_verified") is not None else "",
             "PRAZ Number": " " + self._badge(bool(reg.get("is_praz_verified"))) if reg.get("is_praz_verified") is not None else "",
+            "Tax Clearance Expiration Date": " " + self._badge(bool(reg.get("is_tax_clearance_expiration_date"))) if reg.get("is_tax_clearance_expiration_date") is not None else "",
         }
         rows = [
             ("TIN Number", self._e(reg.get("tin_number"))),
             ("VAT Number", self._e(reg.get("vat_number"))),
             ("NSSA Number", self._e(reg.get("nssa_number"))),
             ("PRAZ Number", self._e(reg.get("praz_number"))),
+            ("Tax Clearance Expiration Date", self._date(reg.get("tax_clearance_expiration_date"))),
         ]
         return self._card("Registrations", self._grid_table(rows, verified))
 
