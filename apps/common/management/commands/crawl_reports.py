@@ -45,7 +45,8 @@ class Command(BaseCommand):
         try:
             markdown = pymupdf4llm.to_markdown(file)
             return markdown
-        except Exception:
+        except Exception as e:
+            print(f"Error making markdown: {e}")
             if os.path.exists(file):
                 os.remove(file)
             return None
