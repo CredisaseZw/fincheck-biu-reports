@@ -1,7 +1,6 @@
 import logging
 import os
 import pymupdf4llm
-from pymupdf.pymupdf import EmptyFileError
 import requests
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -46,7 +45,7 @@ class Command(BaseCommand):
         try:
             markdown = pymupdf4llm.to_markdown(file)
             return markdown
-        except EmptyFileError:
+        except Exception:
             if os.path.exists(file):
                 os.remove(file)
             return None
