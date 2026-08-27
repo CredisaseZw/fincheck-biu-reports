@@ -19,7 +19,7 @@ from apps.common.models import (
     Financials,
     TradeReferences,
 )
-from apps.credit_records.models import InsolvencyRecord, PublicInformation
+from apps.credit_records.models import InsolvencyRecord
 from .report_types import CompanyReportSchema, IndividualReportSchema
 from apps.utils.entity_lookup import EntityLookUp
 from pprintpp import pprint
@@ -107,15 +107,6 @@ def _save_common_subject_records(subject, data) -> None:
             start_date=rec.start_date,
             defaults={"end_date": rec.end_date, "court_reference": rec.court_reference},
         )
-
-    for info in data.public_information:
-        PublicInformation.objects.get_or_create(
-            subject_content_type=content_type,
-            subject_object_id=subject.pk,
-            summary=info.summary,
-            defaults={"record_date": info.record_date, "link": info.link},
-        )
-
 
 # Individual
 
