@@ -1,6 +1,7 @@
 import logging
 import os
 import pymupdf4llm
+from pymupdf.pymupdf import EmptyFileError
 import requests
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -42,7 +43,13 @@ class Command(BaseCommand):
 
     @staticmethod
     def make_markdown(file):
-        return pymupdf4llm.to_markdown(file)
+        try:
+            markdown = pymupdf4llm.to_markdown(file)
+            return markdown
+        except EmptyFileError:
+            if os.path.exists(file):
+                os.remove(file)
+            return None
 
     @staticmethod
     def _sync_parsed_data(report_type: ReportType, parsed):
@@ -110,6 +117,9 @@ class Command(BaseCommand):
         try:
             if os.path.exists(file_path):
                 markdown = self.make_markdown(file_path)
+                if not markdown:
+                    return False
+                
                 report_type = detect_report_type(markdown)
                 if report_type_filter != "all":
                     if report_type_filter == "individual" and report_type != ReportType.INDIVIDUAL:
@@ -126,7 +136,7 @@ class Command(BaseCommand):
             return False
 
         if dry_run:
-            self.stdout.write(f"[DRY RUN] {source} -> {report_type.value}")
+            self.stdout.write(f"[DRY RUN] {source} -> {report_type.value} -> [{len(markdown)}]")
             self.stdout.write(markdown)
             return True
 
