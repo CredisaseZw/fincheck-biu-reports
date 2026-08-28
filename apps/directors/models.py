@@ -41,4 +41,5 @@ class CompanyDirector(BaseModel):
         verbose_name_plural = "Company Directors"
 
     def __str__(self):
-        return f"{self.individual.full_name} | ({self.company})"
+        name = self.individual.full_name if self.individual else "Unknown"
+        return f"{name} | ({self.company})"
