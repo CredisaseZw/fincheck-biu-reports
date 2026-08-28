@@ -88,7 +88,7 @@ function LiveReports() {
                             <TableRow key={item.id}>
                                 <TableCell className="text-center">{item.enquiry_reference}</TableCell>
                                 <TableCell className="text-center">
-                                    {getFormattedDate(item.created_at)}
+                                    {getFormattedDate(item.report_date ?? item.created_at)}
                                 </TableCell>
                                 {
                                     user?.i_s &&

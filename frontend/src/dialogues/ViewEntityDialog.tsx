@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import type { EntityValue, Company, Individual, Claim, Absconder, CourtJudgement, InsolvencyRecord, PublicInformation, TradeReference, BankerAccount, Financial, RegistrationAccount, ProfessionalPartner, CompanyDirector, Shareholding, CompanyOverview, CompanyStructure, CompanyOperations, EmploymentInformation, NextOfKin } from "@/types/core";
+import type { EntityValue, Company, Individual, Claim, Absconder, CourtJudgement, InsolvencyRecord, PublicInformation, TradeReference, BankerAccount, Financial, RegistrationAccount, ProfessionalPartner, CompanyDirector, Shareholding, CompanyOverview, CompanyStructure, CompanyOperations, EmploymentInformation, NextOfKin, EntityInformationProps } from "@/types/core";
 import { Eye, Printer, Loader2, Paperclip, EyeOff } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { useEffect, useRef, useState } from "react"
@@ -9,6 +9,7 @@ import { API_END_POINT } from "@/axios/api";
 import { useAuth } from "@/contexts/AuthContext";
 import useCreateEnquiry, { type CreateEnquiryProps } from "@/hooks/api/useCreateEnquiry";
 import { cn, returnStringedList } from "@/lib/utils";
+import { OptionButton } from "@/components/general/OptionButton";
 
 function _val(val: string | number | null | undefined, fallback = "—"): string {
   if (val === null || val === undefined || String(val).trim() === "") return fallback;
@@ -210,7 +211,7 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
                 ["Address (Latest)", _upper(d.individual_detail.residential_address)],
                 ["Address (Previous)", _upper(d.individual_detail.address_prev)],
                 ["Email", _val(d.individual_detail.email)],
-                ["Mobile", _val(d.individual_detail.mobile_phone_number)],
+                ["Mobile", _val(d.individual_detail?.mobile_number)],
                 ["Insolvencies", d.individual_detail.insolvencies_judgements ? _upper(d.individual_detail.insolvencies_judgements) : "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"],
               ].map(([lbl, val]) => {
                 const v = String(val).trim();
@@ -636,11 +637,8 @@ function EntityContent({ entity_type, data }: { entity_type: EntityValue; data: 
   );
 }
 
-interface props {
-  entity_type : EntityValue,
-  id: number
-}
-function ViewEntityDialog({entity_type, id}:props) {
+
+function ViewEntityDialog({entity_type, id}:EntityInformationProps) {
   const [openControl, setOpenControl] = useState(false);
   const {
     data, 
@@ -673,11 +671,7 @@ function ViewEntityDialog({entity_type, id}:props) {
       onOpenChange={setOpenControl}
     >
       <DialogTrigger> 
-        <div
-          className="rounded-full self-center cursor-pointer flex dark:bg-[#1A2330] bg-gray-100 border p-2"
-        >
-          <Eye size={15}/>
-        </div>
+      <OptionButton Icon={Eye} label="View More"/>
       </DialogTrigger>
       <DialogContent className="md:max-w-250 sm:max-h-[90vh] overflow-y-auto light bg-white text-gray-900">
         <div ref = {printRef}>

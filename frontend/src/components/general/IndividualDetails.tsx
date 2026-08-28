@@ -129,7 +129,7 @@ function IndividualDetails({ individual_details, report_id } : props) {
 
                 <CustomSubmitButton
                     onFine={onTouched}
-                    showFine= {Boolean(individual_details)}
+                    showFine= {Boolean(individual_details && report_id)}
                     label = {!individual_details ?"Add Individual" : "Update"}
                     state={touched}
                     isPending={isPending}

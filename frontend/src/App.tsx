@@ -10,6 +10,7 @@ import { Toaster } from "./components/ui/sonner"
 import ReportProvider from "./contexts/ReportMutationContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import PrivateRoute from "./components/layouts/PrivateRoute";
+import NotFound from "./components/routes/NotFound";
 import { useEffect } from "react";
 import { clearAll, getItem, setItem } from "./lib/storage";
 
@@ -54,7 +55,7 @@ function App() {
                   </Route>
                 </Route>
                 
-                <Route path="*" element={<Navigate to={"/"} replace />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>  
             <Toaster

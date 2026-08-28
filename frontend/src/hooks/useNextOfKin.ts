@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { EntityValue, Individual, Report } from "@/types/core";
 import useSectionTouched from "./useSectionTouched";
+import { useQueryClient } from "@tanstack/react-query";
 
 const nextOfKinSchema = z.object({
     individual_id : z.number().optional(),
@@ -44,8 +45,10 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "next_of_kin_details"), [report_id,subject_type])
     const {onTouched, touched} =useSectionTouched(CACHE_KEY);
     const {mutate, isPending} = useInstanceMutation()
-
+    const client = useQueryClient()
+    
     useEffect(()=>{
+        
         const state = getItem(CACHE_KEY)
         if(state === "touched") onTouched();
     }, [report_id, subject_type, CACHE_KEY, onTouched])
@@ -74,9 +77,10 @@ function useNextOfKin({next_of_kin, report_id, subject_type}:props) {
     
         mutate(PAYLOAD, {
             onSuccess : (data:Individual) => {
+                client.invalidateQueries({ queryKey: ["individual" ]})
                 cache.set(["subject", "next_of_kin"], data.next_of_kin)
                 toast.success("Information successfully updated")
-                onTouched()
+                if(report_id) onTouched();
             },
             onError: (error) => handleAxiosError(error)
         })

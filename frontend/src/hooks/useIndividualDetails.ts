@@ -12,6 +12,7 @@ import type { Report } from "@/types/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { GENDERS } from "@/constants";
 import useSectionTouched from "./useSectionTouched";
+import { useReport } from "@/contexts/ReportMutationContext";
 
 const MaritalStatus = z.enum(["single", "married", "divorced", "widowed"], {message : "Marital Status is required"})
 
@@ -41,6 +42,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
     const client = useQueryClient()
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, "individual", "individual_details"), [report_id])
     const { onTouched, touched }= useSectionTouched(CACHE_KEY)
+    const { setOpenCompanyFields } = useReport();
 
     const {
         control,
@@ -60,6 +62,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
     }, [individual_details, reset])
 
     useEffect(()=>{
+        
         const state = getItem(CACHE_KEY)
         if(state === "touched") onTouched();
     }, [report_id, CACHE_KEY, onTouched])
@@ -94,11 +97,13 @@ function useIndividualDetails({individual_details, report_id}:props) {
         mutate(PAYLOAD, {
             onSuccess : (data) => {
                 cache.set(["subject"], data)
-                client.invalidateQueries({
-                    queryKey : ["reports"]
-                })
+                client.invalidateQueries({ queryKey : ["reports"] })
+                client.invalidateQueries({ queryKey: ["individual" ]})
+                client.invalidateQueries({ queryKey : ["entity-lists", "individual"] })
                 toast.success("Information successfully updated")
-                onTouched()
+                if(report_id) onTouched();
+                if(!report_id) {setOpenCompanyFields(false)}
+
             },
             onError: (error) => handleAxiosError(error)
         })

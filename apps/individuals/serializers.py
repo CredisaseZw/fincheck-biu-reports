@@ -263,7 +263,7 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
             content_type = ContentType.objects.get_for_model(instance)
             if employment_information_data:
                 employment_information_data.pop("id", None)
-                employment_information_data['update_by'] = updated_by
+                employment_information_data['updated_by'] = updated_by
                 EmploymentInformation.objects.update_or_create(
                     individual=instance,
                     defaults=employment_information_data
@@ -271,7 +271,7 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
 
             if next_of_kin_data:
                 next_of_kin_data.pop("id", None)
-                next_of_kin_data['update_by'] = updated_by
+                next_of_kin_data['updated_by'] = updated_by
                 NextOfKin.objects.update_or_create(
                     individual=instance,
                     defaults=next_of_kin_data

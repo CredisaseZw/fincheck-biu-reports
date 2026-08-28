@@ -93,7 +93,39 @@ function BankerDetails({
                                     <p className="text-destructive text-sm">{errors.accounts[index].account_name.message}</p>
                                 )}
                             </div>
-                            <ColumnsContainer>
+                            <div className="form-group">
+                                <Label>Account Number</Label>
+                                <Textarea {...register(`accounts.${index}.account_number`)} />   
+                                {errors.accounts?.[index]?.account_number && (
+                                    <p className="text-destructive text-sm">{errors.accounts[index].account_number.message}</p>
+                                )}
+                            </div>    
+                            <div className="form-group">
+                                <Label className="required">Account Type</Label>
+                                <Controller
+                                    key={getValues(`accounts.${index}.account_type`)}
+                                    control={control}
+                                    name={`accounts.${index}.account_type`}
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {ACCOUNT_TYPES.map((t) => (
+                                                    <SelectItem key={t.value} value={t.value}>
+                                                        {t.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                {errors.accounts?.[index]?.account_type && (
+                                    <p className="text-destructive text-sm">{errors.accounts[index].account_type.message}</p>
+                                )}
+                            </div>
+                            <ColumnsContainer numberOfCols={3}>
                                 <div className="form-group">
                                     <Label>Bank Code</Label>
                                     <Input {...register(`accounts.${index}.bank_code`)} />
@@ -126,50 +158,14 @@ function BankerDetails({
                                         <p className="text-destructive text-sm">{errors.accounts[index].narration.message}</p>
                                     )}
                                 </div>
-                            </ColumnsContainer>
-                          
-                            <div className="form-group">
-                                <Label>Account Number</Label>
-                                <Textarea {...register(`accounts.${index}.account_number`)} />   
-                                {errors.accounts?.[index]?.account_number && (
-                                    <p className="text-destructive text-sm">{errors.accounts[index].account_number.message}</p>
-                                )}
-                            </div>
-
-                            <ColumnsContainer gapClass="gap-4">
                                 <div className="form-group">
-                                    <Label className="required">Date of Acquirement</Label>
+                                    <Label>Date of Acquirement</Label>
                                     <Input
                                         type="date"
                                         {...register(`accounts.${index}.date_of_acquirement`)}
                                     />
                                     {errors.accounts?.[index]?.date_of_acquirement && (
                                         <p className="text-destructive text-sm">{errors.accounts[index].date_of_acquirement.message}</p>
-                                    )}
-                                </div>
-                                <div className="form-group">
-                                    <Label className="required">Account Type</Label>
-                                    <Controller
-                                        key={getValues(`accounts.${index}.account_type`)}
-                                        control={control}
-                                        name={`accounts.${index}.account_type`}
-                                        render={({ field }) => (
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select type" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {ACCOUNT_TYPES.map((t) => (
-                                                        <SelectItem key={t.value} value={t.value}>
-                                                            {t.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                    {errors.accounts?.[index]?.account_type && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].account_type.message}</p>
                                     )}
                                 </div>
                             </ColumnsContainer>

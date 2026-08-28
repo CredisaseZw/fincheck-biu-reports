@@ -78,7 +78,7 @@ function CompanyStructure({
 
                 </ColumnsContainer>
                 <CustomSubmitButton
-                    showFine
+                    showFine = {Boolean(report_id)}
                     onFine={onTouched}
                     state={touched}
                     isPending={isPending}

@@ -84,6 +84,59 @@ function DashboardCardSkeleton() {
   );
 }
 
+export function GeneralFormSkeletons(){
+  return (
+    <div className="w-full rounded-lg">
+      <Skeleton className="h-5 w-40 mb-6" />
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <div>
+          <Skeleton className="h-4 w-24 mb-2" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+        <div>
+          <Skeleton className="h-4 w-32 mb-2" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+      </div>
+      <div className="mb-6">
+        <Skeleton className="h-4 w-16 mb-2" />
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <div>
+          <Skeleton className="h-4 w-16 mb-2" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+        <div>
+          <Skeleton className="h-4 w-20 mb-2" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <div>
+          <Skeleton className="h-4 w-32 mb-2" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+        <div>
+          <Skeleton className="h-4 w-28 mb-2" />
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <Skeleton className="h-4 w-36 mb-2" />
+        <Skeleton className="h-24 w-full rounded-md" />
+      </div>
+
+      <div className="flex justify-end">
+        <Skeleton className="h-9 w-24 rounded-md" />
+      </div>
+    </div>
+  );
+}
+
 export function DashboardStatsSkeleton (){
   return (
     <ColumnsContainer numberOfCols={3}>

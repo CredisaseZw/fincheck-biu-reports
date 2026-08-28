@@ -10,6 +10,7 @@ import useInstanceMutation from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { useEffect, useMemo } from "react";
 import useSectionTouched from "./useSectionTouched";
+import { useQueryClient } from "@tanstack/react-query";
 
 const companyStructureSchema = z.object({
     holding_company: z.string().optional(),
@@ -36,12 +37,14 @@ function useCompanyStructure({
         resolver: zodResolver(companyStructureSchema),
         defaultValues: structure_data
     })
+    const client = useQueryClient()
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "structure_details"), [report_id,subject_type])
     const { onTouched, touched } = useSectionTouched(CACHE_KEY);
     
     useEffect(()=>{
+        
         const state = getItem(CACHE_KEY)
         if(state === "touched") onTouched();
     }, [report_id, subject_type, CACHE_KEY, onTouched])
@@ -67,9 +70,10 @@ function useCompanyStructure({
         }
         mutate(PAYLOAD, {
             onSuccess : (data:Company) => {
+                client.invalidateQueries({ queryKey: ["company" ]})
                 cache.set(["subject","structure"], data.structure)
                 toast.success("Company structure updated successfully.")
-                onTouched()
+                if(report_id) onTouched();
             },
             onError : (error) => handleAxiosError(error)
         })

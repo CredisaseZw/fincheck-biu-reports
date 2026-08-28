@@ -127,26 +127,26 @@ class FincheckReportPDF:
 
     @staticmethod
     def _m(val, default: str = "—") -> str:
-        if val is None or str(val).strip() in ("", "0.00"):
+        if val is None or str(val).strip() in ("", "0.00") or str(val).strip().upper() in ("N/A", "NAN", "NONE"):
             return default
         return val.upper()
            
     @staticmethod
     def _u(val, default: str = "—") -> str:
-        if val is None or str(val).strip() in ("", "0.00"):
+        if val is None or str(val).strip() in ("", "0.00") or str(val).strip().upper() in ("N/A", "NAN", "NONE"):
             return default
         return FincheckReportPDF._format_multiline(str(val).strip(), upper=True)
 
     @staticmethod
     def _e(val, default: str = "—") -> str:
-        if val is None or str(val).strip() in ("", "0.00"):
+        if val is None or str(val).strip() in ("", "0.00") or str(val).strip().upper() in ("N/A", "NAN", "NONE"):
             return default
         return FincheckReportPDF._format_multiline(str(val).strip(), upper=False)
 
     @staticmethod
     def _low(val, default: str = "—") -> str:
         """Format value as lowercase — use for emails and websites."""
-        if val is None or str(val).strip() == "":
+        if val is None or str(val).strip() == "" or str(val).strip().upper() in ("N/A", "NAN", "NONE"):
             return default
         return f'<span style="text-transform:none">{html.escape(str(val).strip().lower())}</span>'
 
@@ -163,7 +163,7 @@ class FincheckReportPDF:
 
     @staticmethod
     def _money(amount, currency: str = "") -> str:
-        if amount is None or str(amount).strip() in ("0.00", "0", "0.0"):
+        if amount is None or str(amount).strip() in ("0.00", "0", "0.0") or str(amount).strip().upper() in ("N/A", "NAN", "NONE"):
             return "—"
         try:
             val_float = float(amount)
@@ -212,7 +212,7 @@ class FincheckReportPDF:
             val = r[1]
             if val is not None:
                 val_str = str(val).strip()
-                if val_str and val_str not in ("-", "—"):
+                if val_str and val_str not in ("-", "—") and val_str.upper() not in ("N/A", "NAN", "NONE"):
                     is_full = r[2] if len(r) > 2 else False
                     valid_rows.append((r[0], r[1], is_full))
         
@@ -687,11 +687,11 @@ body {{
     def _render_header(self) -> str:
         if self._report is not None:
             ref = self._e(self._report.enquiry_reference)
-            created = self._date(self._report.created_at)
+            created = self._date( self._report.report_date if self._report.report_date else self._report.created_at)
             fin = self._report.finalized_at
         else:
             ref = self._e(self._snapshot.get("enquiry_reference"))
-            created = self._date(self._snapshot.get("created_at"))
+            created = self._date(self._snapshot.get("report_date") if self._snapshot.get("report_date", None) else self._snapshot.get("created_at"))
             fin = self._snapshot.get("finalized_at")
         dlbl = "DATE PRINTED" if fin else "REPORT GENERATED ON"
         dval = self._date(fin) if fin else created
@@ -853,7 +853,7 @@ body {{
             address_latest = ind.get("residential_address") or ind.get("address_latest") or d.get("address_latest")
             address_prev = ind.get("address_prev") or d.get("address_prev")
             email = ind.get("email") or d.get("email")
-            mobile = ind.get("mobile_number") or ind.get("mobile_phone_number") or d.get("mobile_phone_number")
+            mobile = ind.get("mobile_number")
 
             dir_rows = [
                 ("National ID", self._e(national_id)),

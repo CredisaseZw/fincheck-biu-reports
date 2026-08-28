@@ -10,12 +10,13 @@ import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import { useQueryClient } from "@tanstack/react-query";
 import { getItem } from "@/lib/storage";
 import useSectionTouched from "./useSectionTouched";
+import { useReport } from "@/contexts/ReportMutationContext";
 
 const companySchema = z.object({
     id : z.number().optional(),
     date_of_registration: z.string().optional(),    
     date_of_incorporation: z.string().optional(),
-    registered_name: z.string().min(1, "Registered name is required").max(50, "Company Name too long."),
+    registered_name: z.string().min(1, "Registered name is required").max(200, "Company Name too long."),
     registration_number: z.string().optional(),
     re_registration_number: z.string().optional(),
     trading_name: z.string().max(255).optional(),
@@ -47,6 +48,10 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "company_details"), [report_id,subject_type])
     const { onTouched, touched } = useSectionTouched(CACHE_KEY)
     const {
+        setOpenCompanyFields
+    } = useReport();
+
+    const {
         reset,
         getValues,
         register,
@@ -65,6 +70,7 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
     }, [company_overview, reset]);
 
     useEffect(()=>{
+        
         const state = getItem(CACHE_KEY)
         if(state === "touched") onTouched();
     }, [report_id, subject_type, CACHE_KEY, onTouched])
@@ -98,13 +104,14 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
         
         mutate(PAYLOAD,{
             onSuccess : (data: Company) => {
-                client.invalidateQueries({
-                    queryKey : ["reports"]
-                })
+                client.invalidateQueries({ queryKey : ["reports"]})
+                client.invalidateQueries({ queryKey : ["company"] })
+                client.invalidateQueries({ queryKey : ["entity-lists", "company"] })
                 cache.set(["subject"], data)
                 toast.info(message)
-                onTouched()
-
+                if(report_id && subject_type){ onTouched() }
+                if(!report_id && !subject_type) {setOpenCompanyFields(false)}
+                
             },
             onError:(error)=>handleAxiosError(error)
         } )

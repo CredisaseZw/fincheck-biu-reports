@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { EntityValue, Individual, Report } from "@/types/core";
 import useSectionTouched from "./useSectionTouched";
+import { useQueryClient } from "@tanstack/react-query";
 
 const EmploymentStatus = z.enum(["employed", "self_employed", "unemployed", "part_time", "retired", "student"])
 const employmentSchema = z.object({
@@ -32,7 +33,8 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "employment_details"), [report_id,subject_type])
     const { onTouched, touched } = useSectionTouched(CACHE_KEY);
-
+    const client = useQueryClient();
+    
     const {
         reset,
         register,
@@ -80,8 +82,9 @@ function useEmploymentInformation({employment_information, report_id, subject_ty
         mutate(PAYLOAD, {
             onSuccess : (data: Individual) => {
                 cache.set(["subject", "employment_information"], data.employment_information)
+                client.invalidateQueries({ queryKey: ["individual" ]})
                 toast.success("Information successfully updated")
-                onTouched();
+                if(report_id) onTouched();
             },
             onError: (error) => handleAxiosError(error)
         })

@@ -42,6 +42,7 @@ class TradeReferencesSerializer(UpdatedBySerializerMixin, serializers.ModelSeria
 
 # WRITE SERIALIZERS
 class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):
+    tax_clearance_expiration_date = serializers.DateField(required=False, allow_null=True)
     class Meta:
         model = RegistrationAccounts
         fields = [
@@ -56,6 +57,12 @@ class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):
             "is_vat_verified",
             "is_tin_verified",
         ]
+
+    def to_internal_value(self, data):
+        data = data.copy()
+        if data.get('tax_clearance_expiration_date') == '':
+            data['tax_clearance_expiration_date'] = None
+        return super().to_internal_value(data)
 
 
 class BankerAccountsWriteSerializer(serializers.ModelSerializer):

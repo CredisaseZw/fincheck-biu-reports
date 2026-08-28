@@ -8,6 +8,8 @@ import DashboardCard from "./DashboardCard";
 import { DashboardStatsSkeleton } from "./Skeletons";
 import EnquiryTable from "./EnquiryTable";
 import EnquirySearchBox from "./EnquirySearchBox";
+import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
+import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
 
 function AdminDashboard() {
     const {   
@@ -56,9 +58,9 @@ function AdminDashboard() {
             </ColumnsContainer>
             : <></>
         }
-        <div className="card p-5 flex flex-col gap-8 min-w-0 overflow-hidden">
-            <form className="flex flex-col md:flex-row gap-3" onSubmit={handleSearchSubmit}>
-                <div className="form-group w-full">
+        <div className="card p-5 flex flex-col gap-5 min-w-0 overflow-hidden">
+            <form className="flex flex-col gap-3 md:flex-row  md:justify-between" onSubmit={handleSearchSubmit}>
+                <div className="form-group w-full md:w-fit">
                     <label className="text-xl font-bold text-primary dark:text-white">Enquire {toCap(currentSubject)}</label>
                     <div className="flex flex-col md:flex-row gap-2">
                         <Select
@@ -83,7 +85,11 @@ function AdminDashboard() {
                         />
                     </div>
                 </div>
-            </form>
+                <div className="self-center flex flex-row gap-3">
+                    <CreateCompanyDialogue trigger/>
+                    <CreateIndividualDialogue trigger/>    
+                </div>
+                </form>
             {
                 isData &&
                 <EnquiryTable
@@ -101,3 +107,4 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard
+

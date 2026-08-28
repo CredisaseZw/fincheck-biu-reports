@@ -176,7 +176,7 @@ function CompanyOperations({
                    
                 <CustomSubmitButton
                         onFine={onTouched}
-                        showFine = {true}
+                        showFine = {Boolean(report_id)}
                         state={touched}
                         isPending={isPending}
                     />

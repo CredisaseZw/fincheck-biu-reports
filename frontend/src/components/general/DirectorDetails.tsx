@@ -96,7 +96,7 @@ const DirectorRow = ({
                     <Label className="required">National ID / Passport ID</Label>
                     <Input 
                         {...register(`directors.${index}.national_id`)} 
-                        placeholder="69235489C67 or ZN1234567" 
+                        placeholder="e.g 69235489C67 or ZN1234567" 
                     />
                     {errors.directors?.[index]?.national_id && (
                         <p className="text-destructive text-sm">{errors.directors[index].national_id.message}</p>

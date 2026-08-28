@@ -58,6 +58,8 @@ class BankerAccounts(BaseModelWithSubject):
         SAVINGS = "savings", "Savings"
         LOAN = "loan", "Loan"
         FIXED_DEPOSIT = "fixed_deposit", "Fixed Deposit"
+        NONE = "none", "None"
+
     class Narrations(models.TextChoices):
         A = "A", "Very Good Credit Worthiness (Lowest Risk)"
         B = "B", "Good Credit Worthiness (Low Risk)"
@@ -83,7 +85,7 @@ class BankerAccounts(BaseModelWithSubject):
         null = True
     )
     account_number = models.CharField(max_length=250, blank=True, null=True)
-    date_of_acquirement = models.DateField(auto_now=True)
+    date_of_acquirement = models.DateField(blank=True, null =True)
     bank_code = models.CharField(
         max_length=50,
         blank=True,

@@ -10,7 +10,7 @@ import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/
 import { getItem } from "@/lib/storage";
 import useSectionTouched from "./useSectionTouched";
 
-const AccountTypes = z.enum(["current", "savings", "loan", "fixed_deposit"])
+const AccountTypes = z.enum(["current", "savings", "loan", "fixed_deposit", "none"])
 const Narrations = z.enum(["A", "B", "C", "D", "E", "none"])
 
 const accountSchema = z.object({
@@ -20,7 +20,7 @@ const accountSchema = z.object({
     account_name: z.string().optional(),
     account_type: AccountTypes,
     account_number: z.string().optional(),
-    date_of_acquirement: z.string().date(),
+    date_of_acquirement: z.string().date().optional(),
     bank_code: z.string().optional(),
     narration: Narrations,
 })

@@ -8,7 +8,8 @@ interface props {
 }
 function useGetSingleEntity({entity_type, id, enabled}:props) {
     const {
-        data, 
+        data,
+        isError, 
         isLoading,
         error
     } = useQuery({
@@ -26,6 +27,7 @@ function useGetSingleEntity({entity_type, id, enabled}:props) {
     })
     return {
         data, 
+        isError, 
         isLoading,
         error
     }

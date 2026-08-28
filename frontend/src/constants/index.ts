@@ -201,6 +201,8 @@ export const ACCOUNT_TYPES = [
     { value: "savings", label: "Savings" },
     { value: "loan", label: "Loan" },
     { value: "fixed_deposit", label: "Fixed Deposit" },
+    { value: "none", label: "None" },
+
 ]
 
 export const NARRATIONS = [

@@ -24,6 +24,7 @@ class ReportSerializer(serializers.ModelSerializer):
             'suspension_reason',
             'overall_risk_rating',
             'summary',
+            'report_date',
             'created_at',
             'updated_at',
             'finalized_at',
@@ -58,6 +59,7 @@ class ListReportSerializer(serializers.ModelSerializer):
             'suspension_reason',
             'report_pdf',
             'overall_risk_rating',
+            'report_date',
             'created_at',
             'updated_at'
         ]

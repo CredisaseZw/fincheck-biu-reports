@@ -132,7 +132,7 @@ function useAddReportDialogue(list_report?: ListReport) {
 
     setReportExtras({
       contact_person : report.contact_person ?? "",
-      created_at: toDatetimeLocal(report.created_at ?? new Date().toISOString()),
+      report_date: toDatetimeLocal(report.report_date ?? report.created_at ?? new Date().toISOString()),
     })
     
     if(report.subject_type === "company"){
@@ -212,7 +212,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           address_prev : item.individual_detail.address_prev ?? "",
           national_id : item.individual_detail.national_id ?? "",
           email : item.individual_detail.email ?? "",
-          mobile_number : item.individual_detail.mobile_phone_number ?? "",
+          mobile_number : item.individual_detail.mobile_number ?? "",
           insolvencies_judgements : item.individual_detail.insolvencies_judgements ?? ""
         }))
         : [{
@@ -442,7 +442,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     const payload = {
       ...(username && { username : username,}),
       ...(contactPerson && {contact_person : contactPerson}),
-      ...(createdAt && {created_at: new Date(createdAt).toISOString()}),
+      ...(createdAt && {report_date: new Date(createdAt).toISOString()}),
       client_object_id : clientObjectId,
       client_type :  clientType,
       subject_object_id : subjectObjectId,

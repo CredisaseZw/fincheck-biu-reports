@@ -120,6 +120,7 @@ export interface ListReport extends Timestamps{
   username : string | null,
   contact_person: string | null,
   report_pdf : string | null,
+  report_date:string |null
 }
 
 export interface User {
@@ -188,7 +189,7 @@ export interface  CompanyDirector extends Timestamps {
     residential_address: string;
     address_prev: string | null;
     email: string | null;
-    mobile_phone_number: string | null;
+    mobile_number: string | null;
     is_pep : boolean
   } 
 }
@@ -404,6 +405,7 @@ export interface Report extends Timestamps {
   last_report :string | null
   suspension_reason : string | null,
   is_stale : boolean
+  report_date : string | null
   status : "draft" | "finalized"
   references: TradeReference[];
 }
@@ -448,7 +450,10 @@ interface ReportEntityProps {
   subject_type?: EntityValue | null
   report_id : number | undefined
 }
-
+export interface EntityInformationProps{
+  entity_type : EntityValue,
+  id: number
+} 
 export interface AbsconderProps extends ReportEntityProps{
   absconders_data: AbsconderFormData[]
 }

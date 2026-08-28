@@ -9,6 +9,8 @@ from django.db.models import UniqueConstraint
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import OrderBy, F
+from django.db.models.functions import Coalesce
 from django.core.serializers.json import DjangoJSONEncoder
 
 def report_pdf_path(instance, filename):
@@ -82,7 +84,7 @@ class Report(BaseModelWithSubject):
     )
     enquiry_reference = models.CharField(max_length=20, unique=True, editable=False)
     is_deleted = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now,blank=True, null=True) #bypass auto_now for editing
+    report_date = models.DateTimeField(blank=True, null=True)
 
     @property
     def is_stale(self):
@@ -132,7 +134,9 @@ class Report(BaseModelWithSubject):
         db_table = "reports"
         verbose_name = _("Enquiry Report")
         verbose_name_plural = _("Enquiry Reports")
-        ordering = ["-created_at"]
+        ordering = [
+            OrderBy(Coalesce('report_date', 'created_at'), descending=True)
+        ]
         constraints = [
             UniqueConstraint(
                 fields= ["enquiry_reference"],

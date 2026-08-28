@@ -48,7 +48,7 @@ function NextOfKin({next_of_kin, report_id, subject_type}: props) {
 
                 </ColumnsContainer>
                 <CustomSubmitButton
-                    showFine
+                    showFine = {Boolean(report_id)}
                     onFine={onTouched}
                     isPending = {isPending}
                     state = {touched}

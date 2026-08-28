@@ -54,6 +54,9 @@ function EmploymentInformation({
                                 </Select>
                             )}
                         />
+                        {errors.employment_status && (
+                            <p className="text-destructive text-sm">{errors.employment_status.message}</p>
+                        )}
                     </div>
                     <div className="form-group">
                         <Label>Employer</Label>
@@ -95,7 +98,7 @@ function EmploymentInformation({
                     />
                 </div>
                 <CustomSubmitButton
-                    showFine
+                    showFine = {Boolean(report_id)}
                     onFine={onTouched}
                     state={touched}
                     isPending={isPending}

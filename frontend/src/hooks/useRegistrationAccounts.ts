@@ -16,7 +16,7 @@ const schema = z.object({
     vat_number : z.string().optional(),
     nssa_number : z.string().optional(),
     praz_number : z.string().optional(),
-    tax_clearance_expiration_date : z.string().date().optional(),
+    tax_clearance_expiration_date : z.string().optional(),
     is_tax_clearance_expiration_date : z.boolean().optional(),
     is_praz_verified : z.boolean().optional(),
     is_nssa_verified : z.boolean().optional(),

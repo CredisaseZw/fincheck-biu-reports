@@ -9,6 +9,7 @@ import { z } from "zod"
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import useSectionTouched from "./useSectionTouched";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PaymentScope =  z.enum(["cash_only", "cash_and_credit", "credit_only",])
 
@@ -42,12 +43,14 @@ function useCompanyOperations({
         resolver: zodResolver(companyOperationsSchema),
         defaultValues: operations_data
     })
+    const client = useQueryClient()
     const {mutate, isPending} = useInstanceMutation()
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "operations_details"), [report_id,subject_type])
     const { onTouched, touched }= useSectionTouched(CACHE_KEY)
 
     useEffect(()=>{
+        
         const state = getItem(CACHE_KEY)
         if(state === "touched") onTouched();
     }, [report_id, subject_type, CACHE_KEY, onTouched])
@@ -74,9 +77,10 @@ function useCompanyOperations({
         }
         mutate(PAYLOAD, {
             onSuccess : (data: Company) => {
+                client.invalidateQueries({ queryKey: ["company" ]})
                 cache.set(["subject", "operations"], data.operations)
                 toast.success("Company Operations updated successfully.")
-                onTouched();
+                if(report_id) onTouched();
       },
             onError : (error) => handleAxiosError(error)
         })

@@ -43,11 +43,11 @@ function ReportExtras({
                         <Label>Report Creation Date</Label>
                         <Input
                             type={"datetime-local"}
-                            {...register("created_at")}
+                            {...register("report_date")}
                         />
                         {
-                            errors.created_at &&
-                            <p className="text-destructive text-sm">{errors.created_at.message}</p>
+                            errors.report_date &&
+                            <p className="text-destructive text-sm">{errors.report_date.message}</p>
                         }
                     </div> */}
                 </ColumnsContainer>

@@ -147,7 +147,7 @@ function CompanyDetails({
                     <CustomSubmitButton
                         onFine={onTouched}
                         state={touched}
-                        showFine = {Boolean(subject_type)}
+                        showFine = {Boolean(subject_type && report_id)}
                         label = {!subject_type ?"Add Company" : "Update"}
                         isPending={isPending}
                     />

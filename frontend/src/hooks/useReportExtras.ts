@@ -11,7 +11,7 @@ import useInstanceMutation from './api/useInstanceMutation';
 
 const schema = z.object({
     contact_person :z.string().optional(),
-    created_at : z.string().nullable().optional()
+    report_date : z.string().nullable().optional()
 })
 
 export type ReportExtrasFormData = z.infer<typeof schema>;
@@ -58,7 +58,7 @@ export default function useReportExtras({
         }, {
             onSuccess : (report: Report) =>{
                 if(changes.contact_person){ cache.set(["contact_person"], report.contact_person) }
-                if (changes.created_at){ cache.set(["created_at"], report.created_at) }
+                if (changes.report_date){ cache.set(["report_date"], report.report_date) }
                 onTouched();
             },
             onError: (error) => handleAxiosError(error)
