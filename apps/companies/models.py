@@ -37,7 +37,7 @@ class Company(BaseModel):
 
     registered_name = models.CharField(
         max_length=200,
-        help_text=_(""),
+        help_text=_("Company unique registered name"),
         unique=True
     )
     trading_name = models.CharField(
