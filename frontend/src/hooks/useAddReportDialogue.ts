@@ -199,22 +199,28 @@ function useAddReportDialogue(list_report?: ListReport) {
       })
       
       setDirectors(
-        company.directors&&
+        company.directors &&
         company.directors.length > 0
-        ? company.directors.map(item=>({
-          id : item.id,
-          full_name : item.individual_detail.full_name,
-          gender : item.individual_detail.gender ?? "",
-          dob : item.individual_detail.dob ?? "",
-          position : item.position,
-          is_pep : item.individual_detail.is_pep,
-          residential_address :  item.individual_detail.residential_address ?? "",
-          address_prev : item.individual_detail.address_prev ?? "",
-          national_id : item.individual_detail.national_id ?? "",
-          email : item.individual_detail.email ?? "",
-          mobile_number : item.individual_detail.mobile_number ?? "",
-          insolvencies_judgements : item.individual_detail.insolvencies_judgements ?? ""
-        }))
+        ? company.directors.map(item => {
+          const individualDetail = item?.individual_detail ?? undefined
+
+          return {
+            id: item?.id,
+            full_name: individualDetail?.full_name ?? "",
+            gender: individualDetail?.gender && individualDetail.gender.length >= 2
+              ? individualDetail.gender
+              : "unknown",
+            dob: individualDetail?.dob ?? "",
+            position: item?.position,
+            is_pep: individualDetail?.is_pep ?? false,
+            residential_address: individualDetail?.residential_address ?? "",
+            address_prev: individualDetail?.address_prev ?? "",
+            national_id: individualDetail?.national_id ?? "",
+            email: individualDetail?.email ?? "",
+            mobile_number: individualDetail?.mobile_number ?? "",
+            insolvencies_judgements: individualDetail?.insolvencies_judgements ?? ""
+          }
+        })
         : []
       )
       

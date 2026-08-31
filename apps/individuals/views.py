@@ -6,6 +6,7 @@ from .serializers import (
     ClientIndividualSerializer,
     IndividualUpdateSerializer,
 )
+from django.db.models import ProtectedError
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.utils.filters import IndividualSearchFilter
 from apps.users.models import User
@@ -65,13 +66,21 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
         return super().create(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        user:User = request.user
+        user: User = request.user
         if not user.is_staff:
             return Response({
-                "error" : "Access error."
+                "error": "Access error."
             }, status=STATUS.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
 
+        instance = self.get_object()
+        try:
+            instance.delete()
+        except ProtectedError as e:
+            return Response({
+                "error": str(e)
+            }, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        return Response(status=STATUS.HTTP_204_NO_CONTENT)
     def partial_update(self, request, *args, **kwargs):
         user:User = request.user
         if not user.is_staff:
@@ -99,15 +108,15 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
             )
 
         individual = None
-        search_value = national_id.strip().upper()
-        instance = entity.entity_look_up(type="individual", value=search_value)
-        if instance:
-            individual = instance
-        
+        search_value = Individuals.normalize_national_id(national_id)
+        individual = Individuals.objects.filter(
+            national_id=search_value
+        ).first()
+
         if not individual:
-            individual = Individuals.objects.filter(
-                national_id=search_value
-            ).first()
+            instance = entity.entity_look_up(type="individual", value=search_value)
+            if instance:
+                individual = instance
         
         if not individual:
             return Response(

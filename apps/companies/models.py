@@ -1,6 +1,7 @@
 from django.db import models
 from django.db import transaction
 from apps.reports.models import Report
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import UniqueConstraint
 from django.contrib.contenttypes.fields import GenericRelation
 from apps.utils.base_models import BaseModel
@@ -194,6 +195,21 @@ class Company(BaseModel):
     is_company_verified = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)  
+
+    def delete(self, *args, **kwargs):
+        ct = ContentType.objects.get_for_model(Company)
+        has_reports = Report.objects.filter(
+            models.Q(subject_content_type = ct, subject_object_id = self.pk) | 
+            models.Q(client_content_type = ct, client_object_id = self.pk) 
+        ).exists()
+
+        if has_reports:
+            raise models.ProtectedError(
+                f"Cannot delete {self.registered_name} - referenced by one or more reports.",
+                self
+            )
+        return super().delete(*args, **kwargs)
+        
 
     def save(self, *args, **kwargs):
         if self.registered_name:

@@ -3,6 +3,8 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 from apps.utils.base_models import BaseModel
 from django.db.models import UniqueConstraint
+from apps.reports.models import Report
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
 from apps.common.models import (
     ProfessionalPartners,
@@ -136,6 +138,20 @@ class Individuals(BaseModel):
         content_type_field="subject_content_type",
         object_id_field="subject_object_id",
     )
+
+    def delete(self, *args, **kwargs):
+        ct = ContentType.objects.get_for_model(Individuals)
+        has_reports = Report.objects.filter(
+            models.Q(subject_content_type = ct, subject_object_id = self.pk) | 
+            models.Q(client_content_type = ct, client_object_id = self.pk) 
+        ).exists()
+
+        if has_reports:
+            raise models.ProtectedError(
+                f"Cannot delete {self.full_name} referenced by one or more reports.",
+                self
+            )
+        return super().delete(*args, **kwargs)
 
     @staticmethod
     def normalize_national_id(value: str):

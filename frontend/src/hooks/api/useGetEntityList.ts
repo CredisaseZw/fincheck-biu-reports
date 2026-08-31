@@ -28,6 +28,7 @@ function useGetEntityList() {
         })
         return response.data;
       },
+      staleTime: 2 * 60 * 1_000,
       enabled: Boolean(entity_value === "company" || entity_value === "individual") && Boolean(params.search)
     })
     return {

@@ -6,6 +6,7 @@ import { TableCell, TableRow } from "../ui/table";
 import { returnStringedList } from "@/lib/utils";
 import OptionsWrapper from "./OptionsWrapper";
 import EditEntity from "@/dialogues/EditEntity";
+import DeleteEntityDialog from "@/dialogues/DeleteEntityDialog";
 
 function _render_list_individual_rows(data: ListIndividual[]){
     return (
@@ -33,6 +34,10 @@ function _render_list_individual_rows(data: ListIndividual[]){
                     />
                     <EditEntity
                       entity_type="individual"
+                      id={item.id}
+                    />
+                    <DeleteEntityDialog 
+                      entity_type= {"individual"}
                       id={item.id}
                     />
                   </OptionsWrapper>
@@ -67,6 +72,10 @@ function _render_list_company_rows(data: ListCompany[]) {
             />
             <EditEntity
               entity_type="company"
+              id={item.id}
+            />
+            <DeleteEntityDialog 
+              entity_type= {"company"}
               id={item.id}
             />
           </OptionsWrapper>

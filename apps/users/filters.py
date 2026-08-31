@@ -5,6 +5,7 @@ from apps.companies.models import Company
 from apps.individuals.models import Individuals
 import django_filters
 from .models import User
+
 class UsersSearchFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         search = request.query_params.get("search", "").strip()

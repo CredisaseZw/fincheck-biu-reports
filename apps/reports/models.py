@@ -1,7 +1,7 @@
-import secrets
 
+import secrets
 from django.db import models
-from apps.utils.base_models import BaseModelWithSubject
+from apps.utils.base_models import BaseModelWithSubject, BaseModel
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
@@ -21,23 +21,29 @@ def report_pdf_path(instance, filename):
     return f"{ 'l' if not settings.DEBUG else 't' }/reports/{now.strftime('%Y')}/{now.strftime('%b')}/{ref}_{token}.pdf"
 
 # Create your models here.
-class Report(BaseModelWithSubject):
+class Report(BaseModel):
     class StatusChoices(models.TextChoices):
         DRAFT = "draft", "Draft"
         IN_PROGRESS = "in_progress", "In Progress"
         SUSPENDED = "suspended", "Suspended"
         FINALIZED = "finalized", "Finalized"
 
+    subject_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.PROTECT,
+        related_name="report_subject"
+    )
+    subject_object_id = models.PositiveIntegerField()
+    subject = GenericForeignKey("subject_content_type", "subject_object_id")
+
     client_content_type = models.ForeignKey(
         ContentType,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="report_clients"
     )
     client_object_id = models.PositiveIntegerField()
-    client = GenericForeignKey(
-        "client_content_type", 
-        "client_object_id"
-    )
+    client = GenericForeignKey( "client_content_type",  "client_object_id")
+    
     contact_person = models.TextField(
         blank=True,
         null=True

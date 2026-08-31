@@ -28,6 +28,10 @@ class IndividualsAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("created_at", "updated_at")
     inlines = (EmploymentInformationInline, NextOfKinInline)
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
 @admin.register(EmploymentInformation)
 class EmploymentInformationAdmin(admin.ModelAdmin):
     list_display = (

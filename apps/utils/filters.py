@@ -23,14 +23,11 @@ class CompanySearchFilter(django_filters.FilterSet):
             Q(registration_number__icontains=value)
         )
 
-        if db_matches.exists():
-            return db_matches
-
         instance = entity.entity_look_up(type="company", value=value)
         if instance:
-            return queryset.filter(pk=instance.pk)
+            db_matches = db_matches | queryset.filter(pk=instance.pk)
 
-        return queryset.none()
+        return db_matches.distinct()
     
 class IndividualSearchFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method="filter_search")
@@ -51,10 +48,11 @@ class IndividualSearchFilter(django_filters.FilterSet):
         if db_matches.exists():
             return db_matches
 
+        instance = None
         zim_id_pattern = r"^\d{2}-?\d{6}[A-Z]\d{2,3}$"
         if bool(re.match(zim_id_pattern, Individuals.normalize_national_id(value))):
             instance = entity.entity_look_up(type="individual", value=value)
-            if instance:
-                return queryset.filter(pk=instance.pk)
-            
-        return queryset.none()
+
+        if instance:
+            db_matches = db_matches | queryset.filter(pk=instance.pk)
+        return db_matches.distinct()

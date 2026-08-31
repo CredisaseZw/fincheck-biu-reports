@@ -9,6 +9,7 @@ from .serializers import (
     ClientCompanySerializer,
     CompanyUpdateSerializer,
 )
+from django.db.models import ProtectedError
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status as STATUS
@@ -78,13 +79,22 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
         return super().create(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        user:User = request.user
+        user: User = request.user
         if not user.is_staff:
             return Response({
-                "error" : "Access error."
+                "error": "Access error."
             }, status=STATUS.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
 
+        instance = self.get_object()
+        try:
+            instance.delete()
+        except ProtectedError as e:
+            return Response({
+                "error": str(e)
+            }, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        return Response(status=STATUS.HTTP_204_NO_CONTENT)
+                
     def partial_update(self, request, *args, **kwargs):
         user:User = request.user
         if not user.is_staff:
@@ -143,9 +153,10 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
             if individual is None:
                 individual = Individuals.objects.create(**i_data)
             else:
-                Individuals.objects.filter(pk=individual.pk).update(**i_data)
-                individual.refresh_from_db()
+                for attr, value in i_data.items():
+                    setattr(individual, attr, value)
 
+                individual.save()
             validated_data.append((individual, position))
 
         with transaction.atomic():

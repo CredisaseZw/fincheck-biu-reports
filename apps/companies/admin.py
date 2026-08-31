@@ -42,6 +42,10 @@ class CompanyAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
     inlines = (CompanyOverviewInline, CompanyStructureInline, CompanyOperationsInline)
 
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
+
 @admin.register(CompanyOverview)
 class CompanyOverviewAdmin(admin.ModelAdmin):
     list_display = (

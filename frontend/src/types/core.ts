@@ -181,7 +181,7 @@ export interface  CompanyDirector extends Timestamps {
   position: "director" | "secretary" | "other";
   id: number,
   individual:number,
-  individual_detail : {
+  individual_detail? : {
     id: number;
     full_name: string;
     gender: "male" | "female";
@@ -193,7 +193,7 @@ export interface  CompanyDirector extends Timestamps {
     email: string | null;
     mobile_number: string | null;
     is_pep : boolean
-  } 
+  } | null
 }
 
 export interface Shareholding extends Timestamps {

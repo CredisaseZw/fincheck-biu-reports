@@ -222,6 +222,9 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
         model = Individuals
         fields = "__all__"
 
+    def validate_national_id(self, value):
+        return Individuals.normalize_national_id(value)
+    
     def _update_generic_relations(self, individual, data_list, model,content_type, updated_by = None):
         for item in data_list:
             item_id = item.pop("id", None)
