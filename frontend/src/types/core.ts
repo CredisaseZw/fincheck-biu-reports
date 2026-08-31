@@ -179,6 +179,8 @@ export interface CompanyOperations {
 
 export interface  CompanyDirector extends Timestamps {
   position: "director" | "secretary" | "other";
+  id: number,
+  individual:number,
   individual_detail : {
     id: number;
     full_name: string;
