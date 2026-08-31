@@ -95,7 +95,6 @@ function useCompanyDetails({company_overview, report_id, subject_type}:props) {
                 onTouched()
                 return
             }
-            
             message = "Information successfully updated."
             PAYLOAD.url = `/api/companies/${id}/`
             PAYLOAD.mode = "update"

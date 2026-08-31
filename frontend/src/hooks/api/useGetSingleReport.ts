@@ -19,7 +19,7 @@ function useGetSingleReport({
             return response.data;
         },
         enabled : Boolean(enabled),
-        staleTime: 30 * 1000,
+        staleTime: 10 * 60 * 1000,
     })
     return {
         data,
