@@ -732,8 +732,6 @@ body {{
             comment = self._snapshot.get("summary") or ""
         claims = self._subject.get("claims", [])
         absconders = self._subject.get("absconders", [])
-        court = self._subject.get("court_judgements", [])
-        insolvency = self._subject.get("insolvency_records", [])
         directors = self._subject.get("directors", [])
       
         reg_years = "—"
