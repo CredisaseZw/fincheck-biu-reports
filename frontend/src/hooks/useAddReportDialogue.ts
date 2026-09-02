@@ -207,7 +207,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           const individualDetail = item?.individual_detail ?? undefined
 
           return {
-            id: item?.id,
+            id: individualDetail?.id ?? undefined,
             full_name: individualDetail?.full_name ?? "",
             gender: individualDetail?.gender && individualDetail.gender.length >= 2
               ? individualDetail.gender
