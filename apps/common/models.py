@@ -61,11 +61,11 @@ class BankerAccounts(BaseModelWithSubject):
         NONE = "none", "None"
 
     class Narrations(models.TextChoices):
-        A = "A", "Very Good Credit Worthiness (Lowest Risk)"
-        B = "B", "Good Credit Worthiness (Low Risk)"
-        C = "C", "Satisfactory Credit Worthiness (Moderate Risk)"
-        D = "D", "No Credit Worthy"
-        E = "E", "Rating Suspended"
+        A = "A", "A - Very Good Credit Worthiness (Lowest Risk)"
+        B = "B", "B - Good Credit Worthiness (Low Risk)"
+        C = "C", "C - Satisfactory Credit Worthiness (Moderate Risk)"
+        D = "D", "D - No Credit Worthy"
+        E = "E", "E - Rating Suspended"
         NONE = "none", "None"
     class Currency(models.TextChoices):
         USD = "USD", "US Dollar"
@@ -75,8 +75,8 @@ class BankerAccounts(BaseModelWithSubject):
         CHF = "CHF", "Swiss Franc"
         ZAR = "ZAR", "South African Rand"
     
-    bank = models.CharField(max_length=255)
-    branch = models.CharField(max_length=255, blank=True)
+    bank = models.CharField(max_length=255, blank=True, null=True)
+    branch = models.CharField(max_length=255, blank=True, null=True)
     account_name = models.CharField(max_length=255, blank=True, null = True)
     account_type = models.CharField(
         max_length=20,
@@ -86,17 +86,18 @@ class BankerAccounts(BaseModelWithSubject):
     )
     account_number = models.CharField(max_length=250, blank=True, null=True)
     date_of_acquirement = models.DateField(blank=True, null =True)
-    bank_code = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True
-    )
-    narration = models.CharField(
+    bank_code_narration = models.CharField(
         max_length=10,
         choices=Narrations.choices,
         default=Narrations.NONE,
         null=True,
         blank=True,
+    )
+    currency = models.CharField(
+        max_length=10,
+        choices=Currency.choices,
+        blank=True,
+        null=True
     )
 
     class Meta:

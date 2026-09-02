@@ -407,8 +407,8 @@ function useAddReportDialogue(list_report?: ListReport) {
           account_type: item.account_type ?? "current",
           account_number: item.account_number,
           date_of_acquirement: item.date_of_acquirement,  
-          bank_code: item.bank_code,            
-          narration: item.narration,
+          bank_code_narration: item.bank_code_narration,
+          currency: item.currency ?? undefined,
       }))
       : [{
             bank: "",
@@ -416,8 +416,8 @@ function useAddReportDialogue(list_report?: ListReport) {
             account_type: "current",
             account_number: "",
             date_of_acquirement: "",  
-            bank_code: "",            
-            narration: "none",
+            bank_code_narration: "none",
+            currency: "",
         }]
     )
 

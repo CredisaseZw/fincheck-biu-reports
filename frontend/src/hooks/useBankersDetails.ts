@@ -15,14 +15,14 @@ const Narrations = z.enum(["A", "B", "C", "D", "E", "none"])
 
 const accountSchema = z.object({
     id: z.number().optional(),
-    bank: z.string(),
+    bank: z.string().optional(),
     branch: z.string().optional(),
     account_name: z.string().optional(),
-    account_type: AccountTypes,
+    account_type: AccountTypes.optional(),
     account_number: z.string().optional(),
     date_of_acquirement: z.string().date().optional(),
-    bank_code: z.string().optional(),
-    narration: Narrations,
+    bank_code_narration: Narrations.optional(),
+    currency: z.string().optional(),
 })
 
 const schema = z.object({ accounts: z.array(accountSchema) })

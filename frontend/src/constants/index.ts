@@ -216,6 +216,15 @@ export const NARRATIONS = [
 
 ]
 
+export const CURRENCIES = [
+    { value: "USD", label: "US Dollar" },
+    { value: "ZiG", label: "Zimbabwe Gold" },
+    { value: "AUD", label: "Australian Dollar" },
+    { value: "CAD", label: "Canadian Dollar" },
+    { value: "CHF", label: "Swiss Franc" },
+    { value: "ZAR", label: "South African Rand" },
+]
+
 export const FILE_STYLES = {
   pdf: {
     icon: FileText,

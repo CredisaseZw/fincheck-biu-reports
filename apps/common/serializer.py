@@ -15,7 +15,7 @@ class RegistrationAccountsSerializer(UpdatedBySerializerMixin, serializers.Model
         exclude = ["subject_content_type", "subject_object_id"]
 
 class BankerAccountsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
-    narration_display = serializers.CharField(source="get_narration_display", read_only=True)
+    bank_code_narration_display = serializers.CharField(source="get_bank_code_narration_display", read_only=True)
     
     class Meta:
         model = BankerAccounts
@@ -78,8 +78,8 @@ class BankerAccountsWriteSerializer(serializers.ModelSerializer):
             "account_type",
             "account_number",
             "date_of_acquirement",
-            "bank_code",
-            "narration",
+            "bank_code_narration",
+            "currency",
         ]
 
 

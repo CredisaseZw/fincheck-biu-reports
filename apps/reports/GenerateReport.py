@@ -735,10 +735,7 @@ body {{
         court = self._subject.get("court_judgements", [])
         insolvency = self._subject.get("insolvency_records", [])
         directors = self._subject.get("directors", [])
-        banks = self._subject.get("banker_accounts", [])
-
-        codes = ", ".join(b["bank_code"] for b in banks if b.get("bank_code")) or "—"
-
+      
         reg_years = "—"
         if self._subject_type == "company":
             rd = self._subject.get("date_of_incorporation")
@@ -762,13 +759,8 @@ body {{
         <table class="summary-metrics">
           <tr>
             {metric_cell("Credit Defaults", str(len(claims) + len(absconders)))}
-            {metric_cell("Insolvencies", str(len(insolvency)))}
-            {metric_cell("Bank Code(s)", html.escape(codes.upper()), "font-size:8.5pt")}
-          </tr>
-          <tr>
-            {metric_cell("Directors", str(len(directors)))}
-            {metric_cell("Court Judgements", str(len(court)))}
             {metric_cell("Years Incorporated", reg_years)}
+            {metric_cell("Directors", str(len(directors)))}
           </tr>
         </table>"""
 
@@ -1149,16 +1141,15 @@ body {{
 
         cards = ""
         for b in banks:
-            narration_raw = b.get("narration_display")
+            narration_raw = b.get("bank_code_narration_display")
             narration = None if narration_raw and str(narration_raw).strip().lower() == "none" else narration_raw
             
             bank_rows = [
                 ("Account Name", self._m(b.get("account_name"))),
                 ("Type", self._label(b.get("account_type", ""))),
-                ("Code", self._e(b.get("bank_code"))),
                 ("Narration", self._e(narration)),
                 ("Bank report date acquired", self._date(b.get("date_of_acquirement"))),
-                ("Account No.", self._e(b.get("account_number"))),
+                ("Account No.", self._e(f"{b.get('account_number', '')}({b.get('currency')})" if b.get("currency") else b.get("account_number"))),
             ]
             
             rows_html = ""

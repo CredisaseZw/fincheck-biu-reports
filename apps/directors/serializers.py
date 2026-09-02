@@ -16,7 +16,7 @@ class CompanyDirectorsSerializer(serializers.ModelSerializer):
         fields = ["directors"]
 
     def get_directors(self, instance):
-        directors = instance.directors.order_by("created_at")
+        directors = instance.directors.order_by("-created_at")
         return DirectorSerializer(directors, many=True).data
 
 

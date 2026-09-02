@@ -11,9 +11,8 @@ import { Trash2, Plus } from "lucide-react"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import CustomSubmitButton from "./CustomSubmitButton";
-import { ACCOUNT_TYPES, NARRATIONS } from "@/constants";
+import { ACCOUNT_TYPES, NARRATIONS, CURRENCIES } from "@/constants";
 import type { BankerDetailsProps } from "@/types/core";
-import { Textarea } from "../ui/textarea";
 
 function BankerDetails({
     subject_object_id,
@@ -71,7 +70,7 @@ function BankerDetails({
 
                             <ColumnsContainer numberOfCols={2} gapClass="gap-4">
                                 <div className="form-group">
-                                    <Label className="required">Bank</Label>
+                                    <Label>Bank</Label>
                                     <Input {...register(`accounts.${index}.bank`)} />
                                     {errors.accounts?.[index]?.bank && (
                                         <p className="text-destructive text-sm">{errors.accounts[index].bank.message}</p>
@@ -93,52 +92,72 @@ function BankerDetails({
                                     <p className="text-destructive text-sm">{errors.accounts[index].account_name.message}</p>
                                 )}
                             </div>
-                            <div className="form-group">
-                                <Label>Account Number</Label>
-                                <Textarea {...register(`accounts.${index}.account_number`)} />   
-                                {errors.accounts?.[index]?.account_number && (
-                                    <p className="text-destructive text-sm">{errors.accounts[index].account_number.message}</p>
-                                )}
-                            </div>    
-                            <div className="form-group">
-                                <Label className="required">Account Type</Label>
-                                <Controller
-                                    key={getValues(`accounts.${index}.account_type`)}
-                                    control={control}
-                                    name={`accounts.${index}.account_type`}
-                                    render={({ field }) => (
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {ACCOUNT_TYPES.map((t) => (
-                                                    <SelectItem key={t.value} value={t.value}>
-                                                        {t.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                                {errors.accounts?.[index]?.account_type && (
-                                    <p className="text-destructive text-sm">{errors.accounts[index].account_type.message}</p>
-                                )}
-                            </div>
-                            <ColumnsContainer numberOfCols={3}>
+                            <ColumnsContainer numberOfCols={2} gapClass="gap-4">
                                 <div className="form-group">
-                                    <Label>Bank Code</Label>
-                                    <Input {...register(`accounts.${index}.bank_code`)} />
-                                    {errors.accounts?.[index]?.bank_code && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].bank_code.message}</p>
+                                    <Label>Account Number</Label>
+                                    <Input {...register(`accounts.${index}.account_number`)} />   
+                                    {errors.accounts?.[index]?.account_number && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].account_number.message}</p>
                                     )}
                                 </div>
                                 <div className="form-group">
-                                    <Label className="required">Narration</Label>
+                                    <Label>Currency</Label>
                                     <Controller
-                                        key={getValues(`accounts.${index}.narration`)}
+                                        key={getValues(`accounts.${index}.currency`)}
                                         control={control}
-                                        name={`accounts.${index}.narration`}
+                                        name={`accounts.${index}.currency`}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select currency" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {CURRENCIES.map((c) => (
+                                                        <SelectItem key={c.value} value={c.value}>
+                                                            {c.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                    {errors.accounts?.[index]?.currency && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].currency.message}</p>
+                                    )}
+                                </div>
+                            </ColumnsContainer>
+                            <ColumnsContainer numberOfCols={3}>
+                                <div className="form-group">
+                                    <Label>Account Type</Label>
+                                    <Controller
+                                        key={getValues(`accounts.${index}.account_type`)}
+                                        control={control}
+                                        name={`accounts.${index}.account_type`}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {ACCOUNT_TYPES.map((t) => (
+                                                        <SelectItem key={t.value} value={t.value}>
+                                                            {t.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                    {errors.accounts?.[index]?.account_type && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].account_type.message}</p>
+                                    )}
+                                </div>
+                                <div className="form-group">
+                                    <Label>Bank Code Narration</Label>
+                                    <Controller
+                                        key={getValues(`accounts.${index}.bank_code_narration`)}
+                                        control={control}
+                                        name={`accounts.${index}.bank_code_narration`}
                                         render={({ field }) => (
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <SelectTrigger className="w-full">
@@ -154,8 +173,8 @@ function BankerDetails({
                                             </Select>
                                         )}
                                     />
-                                    {errors.accounts?.[index]?.narration && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].narration.message}</p>
+                                    {errors.accounts?.[index]?.bank_code_narration && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].bank_code_narration.message}</p>
                                     )}
                                 </div>
                                 <div className="form-group">
@@ -187,8 +206,7 @@ function BankerDetails({
                             account_type: "current",
                             account_number: "",
                             date_of_acquirement: "",
-                            bank_code: "",
-                            narration: "none",
+                            bank_code_narration: "none",
                         })}
                     >
                         <Plus /> Add Account

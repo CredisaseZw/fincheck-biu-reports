@@ -567,16 +567,15 @@ function BankersSection({ accounts }: { accounts: BankerAccount[] }) {
   if (!accounts || accounts.length === 0) return null;
   return (
     <SectionCard title="Bankers">
-      <DataTable headers={["Bank", "Branch", "Account Name", "Type", "Account No.", "Code","Narration", "bank report date acquired"]}>
+      <DataTable headers={["Bank", "Branch", "Account Name", "Type", "Account No.", "Narration", "bank report date acquired"]}>
         {accounts.map((b) => (
           <tr key={b.id} className="border-b border-gray-100 even:bg-gray-50">
             <td className="py-2.5 px-4">{_upper(b.bank)}</td>
             <td className="py-2.5 px-4">{_upper(b.branch)}</td>
             <td className="py-2.5 px-4">{_upper(b.account_name)}</td>
             <td className="py-2.5 px-4">{_label(b.account_type)}</td>
-            <td className="py-2.5 px-4">{_val(b.account_number)}</td>
-            <td className="py-2.5 px-4 text-center">{_val(b.bank_code)}</td>
-            <td className="py-2.5 px-4 text-center">{_val(b.narration)}</td>
+            <td className="py-2.5 px-4">{b.account_number ? `${b.account_number}${b.currency ? ` (${b.currency})` : ''}` : '—'}</td>
+            <td className="py-2.5 px-4 text-center">{_val(b.bank_code_narration)}</td>
             <td className="py-2.5 px-4 whitespace-nowrap">{_date(b.date_of_acquirement)}</td>
           </tr>
         ))}

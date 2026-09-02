@@ -231,14 +231,14 @@ export interface RegistrationAccount {
 
 export interface BankerAccount {
   id: number;
-  bank: string;
-  branch: string;
-  account_name: string;
-  account_type: "current" | "savings" | "loan" | "fixed_deposit" | null;
-  account_number: string;
-  date_of_acquirement : string,
-  bank_code : string
-  narration : "A" | "B" | "C" | "D" | "E" | "none"
+  bank?: string;
+  branch?: string;
+  account_name?: string;
+  account_type?: "current" | "savings" | "loan" | "fixed_deposit" | "none" | null;
+  account_number?: string;
+  date_of_acquirement?: string;
+  bank_code_narration?: "A" | "B" | "C" | "D" | "E" | "none";
+  currency?: string | null;
 }
 
 export interface ProfessionalPartner {

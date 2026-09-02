@@ -51,12 +51,12 @@ def _save_common_subject_records(subject, data) -> None:
             subject_object_id=subject.pk,
             account_number=acct.account_number,
             defaults={
-                "bank": acct.bank,
+                "bank": acct.bank or "",
                 "branch": acct.branch or "",
                 "account_name": acct.account_name or "",
                 "account_type": acct.account_type or "current",
-                "bank_code": acct.bank_code,
-                "narration": acct.narration or BankerAccounts.Narrations.A,
+                "bank_code_narration": acct.bank_code_narration or BankerAccounts.Narrations.A,
+                "currency": acct.currency,
             },
         )
 

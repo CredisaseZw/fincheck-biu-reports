@@ -133,8 +133,7 @@ class BankerAccountSchema(BaseModel):
     currency: Optional[Currency] = Field(
         None, description="Currency the account is denominated in, if stated."
     )
-    bank_code: Optional[str] = None
-    narration: Optional[BankNarration] = None
+    bank_code_narration: Optional[BankNarration] = None
 
 class ProfessionalPartnersSchema(BaseModel):
     auditors: Optional[str] = None
