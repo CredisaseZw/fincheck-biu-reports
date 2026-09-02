@@ -70,6 +70,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
     def request_report(self, request, *args, **kwargs):
         user: User = request.user
         requestor = request.data.get("requestor", "")
+        username_mobile = request.data.get("username_mobile", "")
         rows = request.data.get("rows", [])
 
         if not rows:
@@ -125,6 +126,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
                         client_object_id=client_id,
                         status=Report.StatusChoices.IN_PROGRESS,
                         username=requestor,
+                        username_mobile=username_mobile,
                         report_date = timezone.now(),
                         contact_person = contact_person,
                         updated_by=user,
@@ -152,7 +154,8 @@ class ReportViewSet(BaseAuthJSONViewSet):
         subject_id = request.data.get("subject_object_id")
         client_id = request.data.get("client_object_id")
         subject_type = request.data.get("subject_type")
-        client_type = request.data.get("client_type")        
+        client_type = request.data.get("client_type")    
+        username_mobile = request.data.get("username_mobile", "")    
 
         subject_content_type_id = get_content_type_id(subject_id, subject_type)
         client_content_type_id = get_content_type_id(client_id, client_type)
@@ -189,6 +192,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
                 subject_content_type_id=subject_content_type_id,
                 client_object_id=client_id,
                 username = username,
+                username_mobile = username_mobile,
                 contact_person = contact_person,
                 client_content_type_id=client_content_type_id,
                 status = status,
@@ -334,17 +338,17 @@ class ArchivedReportsViewSet(BaseListDataViewSet, DestroyModelMixin):
 
     def get_queryset(self):
         user: User = self.request.user
-        base = Report.objects.annotate(
-            sort_date=Coalesce('report_date', 'created_at')
-        ).filter(status=Report.StatusChoices.FINALIZED)
+        base = Report.objects.filter(
+            status=Report.StatusChoices.FINALIZED
+        )
 
         if user.is_staff or user.is_superuser:
-            return base.order_by('-sort_date')
+            return base.order_by('-finalized_at')
 
         return base.filter(
             client_object_id=user.client_object_id,
             client_content_type=user.client_content_type,
-        ).order_by('-sort_date')
+        ).order_by('-finalized_at')
     
     def cutoff_day(self, request):
         return int(request.query_params.get("month_end_date", 25))
@@ -361,12 +365,12 @@ class ArchivedReportsViewSet(BaseListDataViewSet, DestroyModelMixin):
         range_end = date(year, 12, 31) + timedelta(days=31)
 
         instance = self.filter_queryset(self.get_queryset()).filter(
-            sort_date__date__gte=range_start,
-            sort_date__date__lte=range_end,
+            finalized_at__date__gte=range_start,
+            finalized_at__date__lte=range_end,
         )
 
         counter = Counter()
-        for dt in instance.values_list("sort_date", flat=True):
+        for dt in instance.values_list("finalized_at", flat=True):
             b_year, b_month = bucket_for_date(dt, cutoff)
             if b_year == year:
                 counter[(b_year, b_month)] += 1
@@ -390,7 +394,7 @@ class ArchivedReportsViewSet(BaseListDataViewSet, DestroyModelMixin):
 
         start, end = bucket_date_range(year, month, cutoff)
         instance = self.filter_queryset(self.get_queryset()).filter(
-            sort_date__date__gte=start, sort_date__date__lte=end
+            finalized_at__date__gte=start, finalized_at__date__lte=end
         )
 
         # page = self.paginate_queryset(instance)
@@ -399,14 +403,13 @@ class ArchivedReportsViewSet(BaseListDataViewSet, DestroyModelMixin):
 
         serializer = self.get_serializer(instance, many = True)
         return Response(serializer.data, status=STATUS.HTTP_200_OK)
-
 class DashboardStats(ViewSet):
     permission_classes = [IsAuthenticated]
-    
-    def period_stats(self,since):
-        user:User = self.request.user
+
+    def period_stats(self, since):
+        user: User = self.request.user
         base_qs = Report.objects.annotate(
-            sort_date=Coalesce('report_date', 'created_at')
+            sort_date=Coalesce('finalized_at', 'created_at')
         )
 
         qs = base_qs.filter(sort_date__gte=since) if user.is_staff else base_qs.filter(
@@ -416,13 +419,13 @@ class DashboardStats(ViewSet):
         )
 
         qs = qs.order_by('-sort_date')
-        
+
         agg = qs.aggregate(
             active=Count("id", filter=~Q(status=Report.StatusChoices.FINALIZED)),
             finalized=Count("id", filter=Q(status=Report.StatusChoices.FINALIZED)),
         )
         return agg
-    
+
     def list(self, request, *args, **kwargs):
         now = timezone.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -436,6 +439,8 @@ class DashboardStats(ViewSet):
         }
 
         return Response(data)
+
+
 class ClientMonthlyStats(ViewSet):
     permission_classes = [IsAuthenticated]
 
@@ -443,7 +448,7 @@ class ClientMonthlyStats(ViewSet):
         user: User = request.user
         year = timezone.now().year
 
-        base_qs = Report.objects.annotate(sort_date=Coalesce('report_date', 'created_at'))
+        base_qs = Report.objects.annotate(sort_date=Coalesce('finalized_at', 'created_at'))
         qs = base_qs.filter(sort_date__year=year) if user.is_staff else base_qs.filter(
             client_object_id=user.client_object_id,
             client_content_type=user.client_content_type,

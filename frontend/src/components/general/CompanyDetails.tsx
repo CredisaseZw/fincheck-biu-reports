@@ -72,7 +72,7 @@ function CompanyDetails({
                     </ColumnsContainer>
                     <ColumnsContainer>
                         <div className="form-group">
-                            <Label>Date of Registration</Label>
+                            <Label>Date of Re-registration</Label>
                             <Input type="date" {...register("date_of_registration")} />
                         </div>
                         <div className="form-group">

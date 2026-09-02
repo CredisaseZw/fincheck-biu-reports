@@ -187,7 +187,7 @@ class EntityLookUp:
             **({'mobile_number': individual.mobile} if individual.mobile else {}),
             **({'residential_address': individual.address} if individual.address else {}),
             'full_name': f"{individual.firstname} {individual.surname}",
-            'national_id': individual.national_id,
+            'national_id': Individuals.normalize_national_id(individual.national_id) if individual.national_id else None,
         }
 
     def _prepare_company_data(self, company: CompanyInterface) -> dict:

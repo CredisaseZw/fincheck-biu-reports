@@ -181,7 +181,6 @@ class IngestionViewSet(GenericViewSet):
             else:
                 instance = save_company(parsed)
         except Exception as exc:
-            # Surface the real cause so the crawler log shows what actually broke
             identifier = (
                 getattr(parsed, "national_id", None)
                 or getattr(parsed, "registered_name", None)

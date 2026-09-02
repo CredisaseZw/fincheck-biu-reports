@@ -11,6 +11,8 @@ interface props{
     contactPerson: string
     default_header : DefaultHeaderProps | undefined,
     createdAt: string
+    usernameMobile: string
+    setUsernameMobile: Dispatch<SetStateAction<string>>
     onSelectEntity : (entity : EntityMode, props:onSelectEntityProps) => void
     onUpdateEntityTypes : (entity :EntityMode, value: EntityValue)=> void
     onSetEntityId : (entity : EntityMode, value: number | null) => void
@@ -26,6 +28,8 @@ function ReportHeaderForm({
     username,
     contactPerson,
     createdAt,
+    usernameMobile,
+    setUsernameMobile,
     setCreatedAt,
     setContactPerson,
     onSelectEntity,
@@ -117,15 +121,23 @@ function ReportHeaderForm({
                         placeholder = "e.g John Doe"
                     />
                 </div>
-                <div className="form-group">
-                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Report Creation date</h1>
+               <div className="form-group">
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Requestor Mobile</h1>
                     <Input
-                        type = {"datetime-local"}
-                        value={createdAt}
-                        onChange={(e)=> setCreatedAt(e.target.value)}
+                        value={usernameMobile}
+                        onChange={(e)=> setUsernameMobile(e.target.value)}
+                        placeholder = "e.g +234 801 234 5678"
                     />
                 </div>
             </ColumnsContainer>
+             <div className="form-group">
+                <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Report Creation date</h1>
+                <Input
+                    type = {"datetime-local"}
+                    value={createdAt}
+                    onChange={(e)=> setCreatedAt(e.target.value)}
+                />
+            </div>
         </div>
 
         

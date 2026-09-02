@@ -37,6 +37,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [clientType, setClientType] = useState<EntityValue>("company")
   const [subjectType, setSubjectType] = useState<EntityValue>("company")
   const [username, setUsername] = useState<string>("");
+  const [usernameMobile, setUsernameMobile] = useState<string>("");
   const [contactPerson, setContactPerson] = useState<string>("")
   const [createdAt, setCreatedAt] = useState<string>(toDatetimeLocal(new Date().toISOString()))
   const [report, setReport] =useState<Report | undefined>(undefined)
@@ -131,8 +132,9 @@ function useAddReportDialogue(list_report?: ListReport) {
     })
 
     setReportExtras({
+      username_mobile : report.username_mobile ?? "",
+      username :  report.username ?? "",
       contact_person : report.contact_person ?? "",
-      report_date: toDatetimeLocal(report.report_date ?? report.created_at ?? new Date().toISOString()),
     })
     
     if(report.subject_type === "company"){
@@ -439,6 +441,7 @@ function useAddReportDialogue(list_report?: ListReport) {
 
     const payload = {
       ...(username && { username : username,}),
+      ...(usernameMobile && { username_mobile : usernameMobile }),
       ...(contactPerson && {contact_person : contactPerson}),
       ...(createdAt && {report_date: new Date(createdAt).toISOString()}),
       client_object_id : clientObjectId,
@@ -463,6 +466,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   const onClear = () => {
     setUsername("");
     setContactPerson("");
+    setUsernameMobile("");
     setCreatedAt(toDatetimeLocal(new Date().toISOString()))
     setReport(undefined); 
     setReportExtras(undefined)
@@ -526,6 +530,8 @@ function useAddReportDialogue(list_report?: ListReport) {
     contactPerson, 
     reportExtras,
     createdAt,
+    usernameMobile,
+    setUsernameMobile,
     setCreatedAt,
     setContactPerson,
     onClear,

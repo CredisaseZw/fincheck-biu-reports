@@ -132,7 +132,7 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                 }, status=STATUS.HTTP_400_BAD_REQUEST)
 
             individual_id = d.get("id")
-            national_id = d.get("national_id")
+            national_id = Individuals.normalize_national_id(d.get("national_id", "")) if d.get("national_id") else None
 
             director_serializer = IndividualDirectorSerializer(data=d)
             error = validate_serializer(serializer=director_serializer)

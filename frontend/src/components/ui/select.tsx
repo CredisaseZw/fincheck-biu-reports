@@ -49,7 +49,7 @@ function SelectTrigger({
       >
          {children}
          <SelectPrimitive.Icon asChild>
-            <ChevronDownIcon className="size-4 text-gray-800 dark:text-white" />
+            <ChevronDownIcon className="size-4 text-green-700 dark:text-green-400" />
          </SelectPrimitive.Icon>
       </SelectPrimitive.Trigger>
    );
@@ -157,7 +157,7 @@ function SelectScrollUpButton({
       {...props}
     >
       <ChevronUpIcon
-        className="text-gray-800 dark:text-white"
+        className="text-green-700 dark:text-green-400"
       />
     </SelectPrimitive.ScrollUpButton>
   )

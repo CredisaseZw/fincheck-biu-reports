@@ -191,7 +191,7 @@ class Company(BaseModel):
         object_id_field="subject_object_id"
     )
 
-    is_address_registered_verified = models.BooleanField(default=True)
+    is_address_registered_verified = models.BooleanField(default=False)
     is_company_verified = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)  

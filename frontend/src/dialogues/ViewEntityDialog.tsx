@@ -162,7 +162,7 @@ function CompanyDetailsSection({ data }: { data: Company }) {
       <GridRow label="Trading Name" value={_upper(data.trading_name)} />
       <GridRow label="Re-Registration Number" value={_upper(data.re_registration_number)} />
       <GridRow label="Registration Number" value={_upper(data.registration_number)} />
-      <GridRow label="Date Registered" value={_date(data.date_of_registration)} />
+      <GridRow label="Date Re-registered" value={_date(data.date_of_registration)} />
       <GridRow label="Date of incorporation" value={_upper(data.date_of_incorporation)} />
     </SectionCard>
   );
@@ -197,22 +197,22 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
     <SectionCard title="Directors">
       <div className="grid grid-cols-1 md:grid-cols-2">
         {directors.map((d) => (
-          <div key={d.individual_detail.id} className="p-4 border-b border-r border-gray-200 last:border-b-0">
+          <div key={d.id} className="p-4 border-b border-r border-gray-200 last:border-b-0">
             <div className="text-[10pt] font-extrabold text-[#051C2C] mb-2 pb-2 border-b border-blue-50">
-              {_upper(d.individual_detail.full_name)}
+              {_upper(d?.individual_detail?.full_name)}
               <span className="font-medium text-[8.5pt] text-[#1E5474] ml-2">— {_label(d.position)}</span>
             </div>
             <div className="space-y-1">
               {[
-                ["National ID", _val(d.individual_detail.national_id)],
-                ["Gender", _label(d.individual_detail.gender)],
-                ["Date of Birth", _date(d.individual_detail.dob)],
-                ["PEP", d.individual_detail.is_pep ? "YES" : "NO"],
-                ["Address (Latest)", _upper(d.individual_detail.residential_address)],
-                ["Address (Previous)", _upper(d.individual_detail.address_prev)],
-                ["Email", _val(d.individual_detail.email)],
+                ["National ID", _val(d.individual_detail?.national_id)],
+                ["Gender", _label(d.individual_detail?.gender)],
+                ["Date of Birth", _date(d.individual_detail?.dob)],
+                ["PEP", d.individual_detail?.is_pep ? "YES" : "NO"],
+                ["Address (Latest)", _upper(d.individual_detail?.residential_address)],
+                ["Address (Previous)", _upper(d.individual_detail?.address_prev)],
+                ["Email", _val(d.individual_detail?.email)],
                 ["Mobile", _val(d.individual_detail?.mobile_number)],
-                ["Insolvencies", d.individual_detail.insolvencies_judgements ? _upper(d.individual_detail.insolvencies_judgements) : "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"],
+                ["Insolvencies", d.individual_detail?.insolvencies_judgements ? _upper(d.individual_detail?.insolvencies_judgements) : "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"],
               ].map(([lbl, val]) => {
                 const v = String(val).trim();
                 if (!v || v === "—") return null;
@@ -567,7 +567,7 @@ function BankersSection({ accounts }: { accounts: BankerAccount[] }) {
   if (!accounts || accounts.length === 0) return null;
   return (
     <SectionCard title="Bankers">
-      <DataTable headers={["Bank", "Branch", "Account Name", "Type", "Account No.", "Code","Narration", "Date Acquired"]}>
+      <DataTable headers={["Bank", "Branch", "Account Name", "Type", "Account No.", "Code","Narration", "bank report date acquired"]}>
         {accounts.map((b) => (
           <tr key={b.id} className="border-b border-gray-100 even:bg-gray-50">
             <td className="py-2.5 px-4">{_upper(b.bank)}</td>

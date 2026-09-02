@@ -5,7 +5,7 @@ import type { CompanyDirectorsProps, Report } from "@/types/core";
 import {  useEffect, useMemo } from "react";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import useInstanceMutation, { type InstanceMutation } from "./api/useInstanceMutation";
-import { handleAxiosError, handleTrackChangedArray, genStorageKey, cleanPayload } from "@/lib/utils";
+import { handleAxiosError, handleTrackChangedArray, genStorageKey } from "@/lib/utils";
 import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
 import { GENDERS } from "@/constants";
@@ -106,11 +106,10 @@ function useDirectors({
             onTouched();
             return
         }
-        const payload_data = changes.map((item) => cleanPayload(item));
         const payload:InstanceMutation = {
             url : `/api/companies/${subject_object_id}/directors/`,
             mode : "create",
-            data :{ directors : payload_data }
+            data :{ directors : changes }
         }
 
         mutate(payload,{

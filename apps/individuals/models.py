@@ -78,7 +78,7 @@ class Individuals(BaseModel):
         blank = True,
         null = True    
     )
-    email = models.EmailField(_("Email"), blank=True, null=True)
+    email = models.CharField(_("Email"), blank=True, null=True, max_length=100)
     is_deleted = models.BooleanField(_("Is deleted"), default=False)
     refer_type = models.CharField(
         max_length=10,

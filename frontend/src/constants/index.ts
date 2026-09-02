@@ -23,7 +23,8 @@ export const LiveClientReportHeaders:Header[] = [
 ]
 export const ReportHeaders:Header[] = [
     { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
-    { name : "Report Date", textAlign : "center", value : "created_at" },
+    { name : "Report Date", textAlign : "center", value : "finalized_at" },
+    { name : "Request Date", textAlign : "center", value : "created_at" },
     { name : "Client", value : "client"},
     { name : "Subject", value : "subject"},
     { name : "Requestor", textAlign: "left", value:"username"},

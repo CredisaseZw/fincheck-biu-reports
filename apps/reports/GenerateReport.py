@@ -684,6 +684,14 @@ body {{
             self._report.username
         )
 
+    def _requestor_mobile(self)->str:
+        mobile = self._report.username_mobile
+        if mobile:
+            if mobile.strip().upper() in ["", "N/A", "NAN", "NONE"]:
+                return ""
+            return f" - {self._m( self._report.username_mobile)}"
+        return ""
+    
     def _render_header(self) -> str:
         if self._report is not None:
             ref = self._e(self._report.enquiry_reference)
@@ -710,8 +718,7 @@ body {{
               <div class="header-col-right">
                 <div class="header-ref">ENQUIRY REF: <b>{ref}</b></div>
                 <div class="header-client">CLIENT: <b>{self._client_name()}</b></div>
-                <div class="header-client">REQUESTOR: <b>{self._username()}</b></div>
-              
+                <div class="header-client">REQUESTOR: <b>{self._username()}{self._requestor_mobile()}</b></div>
               </div>
             </div>
           </div>
@@ -805,7 +812,7 @@ body {{
             ("Trading Name", self._m(s.get("trading_name"))),
             ("Re-Registration Number", self._m(s.get("re_registration_number"))),
             ("Registration Number", self._m(s.get("registration_number"))),
-            ("Registration Date", self._date((s.get("date_of_registration")))),
+            ("Re-registration Date", self._date((s.get("date_of_registration")))),
             ("Date of Incorporation", self._date((s.get("date_of_incorporation")))),
         ]
         return self._card("Company Details", self._grid_table(rows, verified))
@@ -1150,7 +1157,7 @@ body {{
                 ("Type", self._label(b.get("account_type", ""))),
                 ("Code", self._e(b.get("bank_code"))),
                 ("Narration", self._e(narration)),
-                ("Date Acquired", self._date(b.get("date_of_acquirement"))),
+                ("Bank report date acquired", self._date(b.get("date_of_acquirement"))),
                 ("Account No.", self._e(b.get("account_number"))),
             ]
             

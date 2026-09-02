@@ -118,9 +118,11 @@ export interface ListReport extends Timestamps{
   status : "draft" | "finalized" | "in_progress" | "suspended"
   overall_risk_rating : number | null,
   username : string | null,
+  username_mobile: string | null,
   contact_person: string | null,
   report_pdf : string | null,
-  report_date:string |null
+  report_date:string |null,
+  finalized_at : string | null
 }
 
 export interface User {
@@ -403,6 +405,8 @@ export interface Report extends Timestamps {
   subject_type: EntityValue
   overall_risk_rating : string | null,
   summary : string | null
+  username: string | null
+  username_mobile : string | null
   contact_person:string | null
   last_report :string | null
   suspension_reason : string | null,

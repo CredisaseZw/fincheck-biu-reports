@@ -27,7 +27,7 @@ function ReportExtras({
     return (
         <Fieldset legendTitle="Report Extras">
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
-                <ColumnsContainer numberOfCols={1}>
+                <ColumnsContainer numberOfCols={3}>
                     <div className="form-group">    
                         <Label>Contact Person</Label>
                         <Input
@@ -39,17 +39,20 @@ function ReportExtras({
                             <p className="text-destructive text-sm">{errors.contact_person.message}</p>
                         }
                     </div>
-                    {/* <div className="form-group">    
-                        <Label>Report Creation Date</Label>
+                    <div className="form-group">
+                        <Label>Name of requestor</Label>
                         <Input
-                            type={"datetime-local"}
-                            {...register("report_date")}
+                            placeholder="e.g John Doers"
+                            {...register("username")}
                         />
-                        {
-                            errors.report_date &&
-                            <p className="text-destructive text-sm">{errors.report_date.message}</p>
-                        }
-                    </div> */}
+                    </div>
+                    <div className="form-group">
+                        <Label>Requestor Mobile</Label>
+                        <Input
+                            placeholder="e.g +234 801 234 5678"
+                            {...register("username_mobile")}
+                        />
+                    </div>
                 </ColumnsContainer>
                 <CustomSubmitButton
                     onFine={onTouched}

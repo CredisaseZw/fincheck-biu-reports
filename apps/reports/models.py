@@ -49,7 +49,12 @@ class Report(BaseModel):
         null=True
     )
     username = models.CharField(
-        max_length=25,
+        max_length=50,
+        blank=True,
+        null=True
+    )
+    username_mobile = models.CharField(
+        max_length=15,
         blank=True,
         null=True
     )

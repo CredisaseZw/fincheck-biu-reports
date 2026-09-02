@@ -196,7 +196,6 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
                                 setOpenIndividualFields(true)
                             }}
                             size="sm"
-                            variant="outline"
                         >
                             Add {entityType}
                         </Button>

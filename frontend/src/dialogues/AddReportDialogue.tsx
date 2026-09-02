@@ -80,6 +80,8 @@ function AddReportDialogue({ report_item }: props) {
         contactPerson, 
         reportExtras,
         createdAt,
+        usernameMobile,
+        setUsernameMobile,
         setCreatedAt,
         setContactPerson,
         onSelectEntity,
@@ -134,6 +136,8 @@ function AddReportDialogue({ report_item }: props) {
                                 default_header={defaultHeader}
                                 contactPerson = {contactPerson}
                                 createdAt = {createdAt}
+                                usernameMobile = {usernameMobile}
+                                setUsernameMobile = {setUsernameMobile}
                                 setCreatedAt ={setCreatedAt}
                                 setContactPerson = {setContactPerson}
                                 onUpdateEntityTypes={onUpdateEntityTypes}

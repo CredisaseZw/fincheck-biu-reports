@@ -53,6 +53,7 @@ function ArchivedReportsTable({
             return (
             <TableRow key={item.id}>
                 <TableCell className="text-center">{item.enquiry_reference}</TableCell>
+                <TableCell className="text-center">{getFormattedDate(item.finalized_at ?? item.created_at)}</TableCell>
                 <TableCell className="text-center">
                     {getFormattedDate(item.report_date ?? item.created_at)}
                 </TableCell>

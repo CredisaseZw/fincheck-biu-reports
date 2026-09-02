@@ -10,8 +10,9 @@ import useSectionTouched from './useSectionTouched';
 import useInstanceMutation from './api/useInstanceMutation';
 
 const schema = z.object({
+    username : z.string().optional(),
     contact_person :z.string().optional(),
-    report_date : z.string().nullable().optional()
+    username_mobile : z.string().optional(),
 })
 
 export type ReportExtrasFormData = z.infer<typeof schema>;
@@ -32,7 +33,7 @@ export default function useReportExtras({
     const { mutate, isPending } = useInstanceMutation();
     const cache = useDetailCacheUpdate<Report>(['report', subject_type, report_id])
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "report_extras"), [report_id, subject_type])
-    const {onTouched, touched} = useSectionTouched(CACHE_KEY);
+    const {onTouched, touched} = useSectionTouched(CACHE_KEY)
     
     useEffect(() => {
         if (report_extras) {
@@ -53,12 +54,13 @@ export default function useReportExtras({
         }
         mutate({
             url : `/api/reports/${report_id}/`,
-            data,
+            data: changes,
             mode:  "update"
         }, {
             onSuccess : (report: Report) =>{
-                if(changes.contact_person){ cache.set(["contact_person"], report.contact_person) }
-                if (changes.report_date){ cache.set(["report_date"], report.report_date) }
+                if (changes.username_mobile){ cache.set(["username_mobile"], report.username_mobile)}
+                if (changes.username){ cache.set(["username"], report.username)}
+                if (changes.contact_person){ cache.set(["contact_person"], report.contact_person) }
                 onTouched();
             },
             onError: (error) => handleAxiosError(error)

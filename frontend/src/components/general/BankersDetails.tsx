@@ -159,7 +159,7 @@ function BankerDetails({
                                     )}
                                 </div>
                                 <div className="form-group">
-                                    <Label>Date of Acquirement</Label>
+                                    <Label>Bank report date acquired</Label>
                                     <Input
                                         type="date"
                                         {...register(`accounts.${index}.date_of_acquirement`)}
