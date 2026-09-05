@@ -205,7 +205,7 @@ function BankerDetails({
                             account_name: "",
                             account_type: "current",
                             account_number: "",
-                            date_of_acquirement: "",
+                            date_of_acquirement: undefined,
                             bank_code_narration: "none",
                         })}
                     >

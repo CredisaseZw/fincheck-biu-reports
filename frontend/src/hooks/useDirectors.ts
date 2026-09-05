@@ -17,7 +17,7 @@ const director = z.object({
     full_name : z.string().min(1,"A valid name is required"),
     position: Positions,
     gender : GENDERS,
-    dob : z.string().optional(),
+    date_of_birth : z.string().optional(),
     residential_address : z.string(),
     is_pep : z.boolean(),
     address_prev : z.string().optional(),
@@ -77,30 +77,6 @@ function useDirectors({
     })
 
     const onSubmit = (data : DirectorsFormData) => {
-        const nationalIds = new Set<string>();
-        const emails = new Set<string>();
-
-        for (const dir of data.directors) {
-            const nid = dir.national_id?.trim().toLowerCase();
-            const email = dir.email?.trim().toLowerCase();
-
-            if (nid) {
-                if (nationalIds.has(nid)) {
-                    toast.error(`Duplicate National ID/Passport detected: ${dir.national_id}`);
-                    return;
-                }
-                nationalIds.add(nid);
-            }
-
-            if (email) {
-                if (emails.has(email)) {
-                    toast.error(`Duplicate Email detected: ${dir.email}`);
-                    return;
-                }
-                emails.add(email);
-            }
-        }
-
         const changes = handleTrackChangedArray(directors_data, data.directors)
         if(changes.length === 0){
             onTouched();

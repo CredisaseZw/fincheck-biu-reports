@@ -50,7 +50,7 @@ const DirectorRow = ({
                         if (ind.id) setValue(`directors.${index}.id`, ind.id)
                         if (ind.full_name) setValue(`directors.${index}.full_name`, ind.full_name, { shouldValidate: true });
                         if (ind.gender) setValue(`directors.${index}.gender`, ind.gender.toLocaleLowerCase(), { shouldValidate: true });
-                        if (ind.date_of_birth) setValue(`directors.${index}.dob`, ind.date_of_birth, { shouldValidate: true });
+                        if (ind.date_of_birth) setValue(`directors.${index}.date_of_birth`, ind.date_of_birth, { shouldValidate: true });
                         if (ind.mobile_number) setValue(`directors.${index}.mobile_number`, ind.mobile_number, { shouldValidate: true });
                         if (ind.email) setValue(`directors.${index}.email`, ind.email, { shouldValidate: true });
                         if (ind.residential_address) setValue(`directors.${index}.residential_address`, ind.residential_address, { shouldValidate: true });
@@ -174,9 +174,9 @@ const DirectorRow = ({
             <ColumnsContainer numberOfCols={2}>
                 <div className="form-group">
                     <Label>Date of Birth</Label>
-                    <Input type="date" {...register(`directors.${index}.dob`)} disabled={isChecking} />
-                    {errors.directors?.[index]?.dob && (
-                        <p className="text-destructive text-sm">{errors.directors[index].dob.message}</p>
+                    <Input type="date" {...register(`directors.${index}.date_of_birth`)} disabled={isChecking} />
+                    {errors.directors?.[index]?.date_of_birth && (
+                        <p className="text-destructive text-sm">{errors.directors[index].date_of_birth.message}</p>
                     )}
                 </div>
                 <div className="flex flex-row gap-3">
@@ -294,7 +294,7 @@ function DirectorDetails({
                             is_pep : false,
                             position: "director",
                             gender: "male",
-                            dob: "",
+                            date_of_birth: undefined,
                             national_id : "",
                             residential_address: "",
                             address_prev: "",

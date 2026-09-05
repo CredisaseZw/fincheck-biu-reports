@@ -121,12 +121,21 @@ function IndividualDetails({ individual_details, report_id } : props) {
                     </div>
 
                 </ColumnsContainer>
-                <div className="form-group">
-                    <Label className="required">Residential Address</Label>
-                    <Textarea {...register("residential_address")} />
-                    {errors.residential_address && <p className="text-destructive text-sm">{errors.residential_address.message}</p>}
-                </div>
+                <ColumnsContainer>
+                    <div className="form-group">
+                        <Label className="required">Residential Address</Label>
+                        <Textarea {...register("residential_address")} />
+                        {errors.residential_address && <p className="text-destructive text-sm">{errors.residential_address.message}</p>}
+                    </div>
+                    <div className="form-group">
+                        <Label >Previous Address</Label>
+                        <Textarea {...register("address_prev")} />
+                        {errors.address_prev && <p className="text-destructive text-sm">{errors.address_prev.message}</p>}
+                        
+                    </div>
 
+                </ColumnsContainer>
+                
                 <CustomSubmitButton
                     onFine={onTouched}
                     showFine= {Boolean(individual_details && report_id)}

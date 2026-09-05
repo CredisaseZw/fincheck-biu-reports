@@ -7,7 +7,7 @@ from .models import (
     FinancialFiles,
     TradeReferences,
 )
-from apps.utils.base_serialisers import UpdatedBySerializerMixin
+from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 # READ SERIALIZERS
 class RegistrationAccountsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
@@ -68,6 +68,8 @@ class RegistrationAccountsWriteSerializer(serializers.ModelSerializer):
 class BankerAccountsWriteSerializer(serializers.ModelSerializer):
     account_type = serializers.ChoiceField(choices=BankerAccounts.AccountType.choices)
     id = serializers.IntegerField(required=False)
+    date_of_acquirement = NullableDateField(required=False, allow_null=True)
+
     class Meta:
         model = BankerAccounts
         fields = [

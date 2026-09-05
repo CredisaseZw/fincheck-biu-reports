@@ -27,6 +27,7 @@ export const individualSchema = z.object({
     mobile_number: z.string().min(1, "Mobile number is required").max(50),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
     residential_address: z.string().min(1, "Residential address is required"),
+    address_prev: z.string().optional(),
 })
 
 export type IndividualFormData = z.infer<typeof individualSchema>

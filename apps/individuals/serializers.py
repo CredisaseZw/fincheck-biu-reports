@@ -26,7 +26,7 @@ from apps.credit_records.serializers import (
     InsolvencyRecordSerializer,
     PublicInformationSerializer,
 )
-from apps.utils.base_serialisers import UpdatedBySerializerMixin
+from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.utils.entity_lookup import EntityLookUp
 entity = EntityLookUp()
 class EmploymentInformationSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
@@ -91,6 +91,8 @@ class IndividualListSerializer(serializers.ModelSerializer):
 
 class IndividualDirectorSerializer(serializers.ModelSerializer):
     national_id = serializers.CharField(required=True)
+    date_of_birth = NullableDateField(required=False, allow_null=True)
+
     class Meta:
         model = Individuals
         fields = [
@@ -104,11 +106,12 @@ class IndividualDirectorSerializer(serializers.ModelSerializer):
             "email",
             "address_prev",
             "insolvencies_judgements",
-            "is_pep",
+            "is_pep"
         ]
 
 # Write Serializers 
 class IndividualCreateSerializer(serializers.ModelSerializer):
+    date_of_birth = NullableDateField(required=False, allow_null=True)
     next_of_kin = NextOfKinSerializer(required=False)
     employment_information = EmploymentInformationSerializer(required=False)
     marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
@@ -196,6 +199,7 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
     
 class IndividualUpdateSerializer(serializers.ModelSerializer):
     next_of_kin = NextOfKinSerializer(required=False)
+    date_of_birth = NullableDateField(required=False, allow_null=True)
     employment_information = EmploymentInformationSerializer(required=False)
     marital_status = serializers.ChoiceField(choices=Individuals.MaritalStatus.choices)
     banker_accounts = BankerAccountsWriteSerializer(many = True, write_only = True, required=False)

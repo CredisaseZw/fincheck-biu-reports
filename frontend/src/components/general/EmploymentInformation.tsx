@@ -90,12 +90,9 @@ function EmploymentInformation({
                 <div className="form-group">
                     <Label>Monthly Income</Label>
                     <Input
-                        type="number"
-                        step="0.01"
-                        {...register("monthly_income", {
-                            setValueAs: (v: string) => v === "" ? undefined : Number(v),
-                        })}
+                        {...register("monthly_income")}
                     />
+                    {}
                 </div>
                 <CustomSubmitButton
                     showFine = {Boolean(report_id)}

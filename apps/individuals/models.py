@@ -187,7 +187,7 @@ class EmploymentInformation(BaseModel):
     position = models.CharField(_("Position"), max_length=255, blank=True, null=True)
     employment_status = models.CharField(_("Employment Status"), max_length=100, blank=True, null=True)
     years_employed = models.PositiveIntegerField(_("Years Employed"), null=True, blank=True)
-    monthly_income = models.DecimalField(_("Monthly Income"), max_digits=12, decimal_places=2, blank=True, null=True)
+    monthly_income = models.CharField(_("Monthly Income"), max_length=255, null=True, blank=True)
     previous_employer = models.CharField(
         _("Previous Employer"),
         max_length=255,

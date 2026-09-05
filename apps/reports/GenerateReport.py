@@ -794,8 +794,8 @@ body {{
     def _render_company_details(self) -> str:
         s = self._subject
         verified = {
-            "Registered Name": " " + self._badge(bool(s.get("is_company_verified"))) if s.get("is_company_verified") is not None else "",
-            "Address (Registered)": " " + self._badge(bool(s.get("is_address_registered_verified"))) if s.get("is_address_registered_verified") is not None else "",
+            "Registered Name": " " + self._badge(True) if s.get("is_company_verified") else "",
+            "Address (Registered)": " " + self._badge(True) if s.get("is_address_registered_verified") else "",
         }
         rows = [
             ("Registered Name", self._m(s.get("registered_name"))),
@@ -989,6 +989,7 @@ body {{
     def _render_credit_records(self) -> str:
         def claims_html() -> str:
             recs = self._subject.get("claims") or []
+            recs = [c for c in recs if str(c.get("status", "")).upper() != "SETTLED"]
             if not recs:
                 return ""
             rows = "".join(f"""<tr>
@@ -1006,6 +1007,7 @@ body {{
 
         def absconders_html() -> str:
             recs = self._subject.get("absconders") or []
+            recs = [c for c in recs if str(c.get("status", "")).upper() != "SETTLED"]
             if not recs:
                 return ""
             rows = "".join(f"""<tr>
@@ -1023,6 +1025,7 @@ body {{
 
         def court_html() -> str:
             recs = self._subject.get("court_judgements") or []
+            recs = [c for c in recs if str(c.get("status", "")).upper() != "SETTLED"]
             if not recs:
                 return ""
             rows = "".join(f"""<tr>
@@ -1117,11 +1120,11 @@ body {{
     def _render_registrations(self) -> str:
         reg = self._subject.get("registration_accounts") or {}
         verified = {
-            "TIN Number": " " + self._badge(bool(reg.get("is_tin_verified"))) if reg.get("is_tin_verified") is not None else "",
-            "VAT Number": " " + self._badge(bool(reg.get("is_vat_verified"))) if reg.get("is_vat_verified") is not None else "",
-            "NSSA Number": " " + self._badge(bool(reg.get("is_nssa_verified"))) if reg.get("is_nssa_verified") is not None else "",
-            "PRAZ Number": " " + self._badge(bool(reg.get("is_praz_verified"))) if reg.get("is_praz_verified") is not None else "",
-            "Tax Clearance Expiration Date": " " + self._badge(bool(reg.get("is_tax_clearance_expiration_date"))) if reg.get("is_tax_clearance_expiration_date") is not None else "",
+            "TIN Number": " " + self._badge(True) if reg.get("is_tin_verified") else "",
+            "VAT Number": " " + self._badge(True) if reg.get("is_vat_verified") else "",
+            "NSSA Number": " " + self._badge(True) if reg.get("is_nssa_verified") else "",
+            "PRAZ Number": " " + self._badge(True) if reg.get("is_praz_verified") else "",
+            "Tax Clearance Expiration Date": " " + self._badge(True) if reg.get("is_tax_clearance_expiration_date") else "",
         }
         rows = [
             ("TIN Number", self._e(reg.get("tin_number"))),

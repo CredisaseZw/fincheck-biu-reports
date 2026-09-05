@@ -43,8 +43,8 @@ const useEditEntity = ({entity_type, id}:EntityInformationProps) => {
                 registered_name: company?.registered_name ?? "",
                 re_registration_number: company?.re_registration_number ?? "",
                 trading_name: company?.trading_name ?? "",
-                date_of_incorporation: company?.date_of_incorporation ?? "",
-                date_of_registration: company?.date_of_registration ?? "",
+                date_of_incorporation: company?.date_of_incorporation ?? undefined,
+                date_of_registration: company?.date_of_registration ?? undefined,
                 address_registered: company?.address_registered ?? "", 
                 address_operations: company?.address_operations ?? "", 
                 email: company?.email ?? "",
@@ -82,7 +82,7 @@ const useEditEntity = ({entity_type, id}:EntityInformationProps) => {
                 id: individual.id,
                 full_name: individual.full_name ?? "",
                 national_id: individual.national_id ?? "",
-                date_of_birth: individual.date_of_birth ?? "",
+                date_of_birth: individual.date_of_birth ?? undefined,
                 gender: individual.gender.length < 2 ? "unknown" : individual.gender,
                 marital_status: individual.marital_status ?? undefined,
                 nationality: individual.nationality ?? "",
@@ -97,7 +97,7 @@ const useEditEntity = ({entity_type, id}:EntityInformationProps) => {
                 position: individual.employment_information?.position ?? "",
                 employment_status: individual.employment_information?.employment_status ?? undefined,
                 years_employed: individual.employment_information?.years_employed ?? undefined,
-                monthly_income: Number(individual.employment_information?.monthly_income ?? 0),
+                monthly_income: individual.employment_information?.monthly_income ?? "",
                 previous_employer: individual.employment_information?.previous_employer ?? "",
             })
             

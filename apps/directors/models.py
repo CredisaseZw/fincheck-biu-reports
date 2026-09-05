@@ -39,6 +39,7 @@ class CompanyDirector(BaseModel):
         db_table = 'company_directors'
         verbose_name = "Company Director"
         verbose_name_plural = "Company Directors"
+        unique_together = ("company", "individual", "position")
 
     def __str__(self):
         name = self.individual.full_name if self.individual else "Unknown"

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from apps.utils.mini_serializers import MiniIndividualDebtorSerializers, MiniCompanyDebtorSerializers
 from .models import Claims, Absconders, CourtJudgement, InsolvencyRecord, PublicInformation
 from apps.individuals.models import Individuals
+from apps.utils.base_serialisers import NullableDateField
 
 def _get_debtor_data(debtor):
     if not debtor:
@@ -88,6 +89,7 @@ class PublicInformationSerializer(serializers.ModelSerializer):
 # WRITE SERIALIZERS
 
 class ClaimsWriteSerializer(serializers.ModelSerializer):
+    claim_date = NullableDateField(required=False, allow_null=True)
     class Meta:
         model = Claims
         fields = [
@@ -104,6 +106,7 @@ class ClaimsWriteSerializer(serializers.ModelSerializer):
             "status",
         ]
 class AbscondersWriteSerializer(serializers.ModelSerializer):
+    start_date = NullableDateField(required=False, allow_null=True)
     class Meta:
         model = Absconders
         fields = [
@@ -122,6 +125,8 @@ class AbscondersWriteSerializer(serializers.ModelSerializer):
 
 
 class CourtJudgementWriteSerializer(serializers.ModelSerializer):
+    judgement_date = NullableDateField(required=False, allow_null=True)
+
     class Meta:
         model = CourtJudgement
         fields = [
@@ -138,6 +143,9 @@ class CourtJudgementWriteSerializer(serializers.ModelSerializer):
 
 
 class InsolvencyRecordWriteSerializer(serializers.ModelSerializer):
+    start_date = NullableDateField(required=False, allow_null=True)
+    end_date = NullableDateField(required=False, allow_null=True)
+
     class Meta:
         model = InsolvencyRecord
         fields = [
@@ -149,6 +157,7 @@ class InsolvencyRecordWriteSerializer(serializers.ModelSerializer):
             "court_reference"
         ]
 class PublicInformationWriteSerializer(serializers.ModelSerializer):
+    record_date = NullableDateField(required=False, allow_null=True)
     class Meta:
         model = PublicInformation
         fields = [

@@ -189,7 +189,7 @@ export interface  CompanyDirector extends Timestamps {
     gender: "male" | "female";
     national_id: string;
     insolvencies_judgements: string | null;
-    dob: string;
+    date_of_birth: string | null;
     residential_address: string;
     address_prev: string | null;
     email: string | null;
@@ -394,6 +394,7 @@ export interface Individual extends CommonFields {
   refer_type: string;
   employment_information: EmploymentInformation | null;
   next_of_kin: NextOfKin | null;
+  address_prev:  string | null
 }
 
 export interface Report extends Timestamps {

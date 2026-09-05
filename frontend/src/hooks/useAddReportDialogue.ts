@@ -145,8 +145,8 @@ function useAddReportDialogue(list_report?: ListReport) {
         registered_name: company?.registered_name ?? "",
         re_registration_number: company?.re_registration_number ?? "",
         trading_name: company?.trading_name ?? "",
-        date_of_incorporation: company?.date_of_incorporation ?? "",
-        date_of_registration: company?.date_of_registration ?? "",
+        date_of_incorporation: company?.date_of_incorporation ?? undefined,
+        date_of_registration: company?.date_of_registration ?? undefined,
         address_registered: company?.address_registered ?? "", 
         address_operations: company?.address_operations ?? "", 
         email: company?.email ?? "",
@@ -212,15 +212,15 @@ function useAddReportDialogue(list_report?: ListReport) {
             gender: individualDetail?.gender && individualDetail.gender.length >= 2
               ? individualDetail.gender
               : "unknown",
-            dob: individualDetail?.dob ?? "",
+            date_of_birth: individualDetail?.date_of_birth ?? undefined,
             position: item?.position,
             is_pep: individualDetail?.is_pep ?? false,
             residential_address: individualDetail?.residential_address ?? "",
-            address_prev: individualDetail?.address_prev ?? "",
-            national_id: individualDetail?.national_id ?? "",
-            email: individualDetail?.email ?? "",
-            mobile_number: individualDetail?.mobile_number ?? "",
-            insolvencies_judgements: individualDetail?.insolvencies_judgements ?? ""
+            address_prev: individualDetail?.address_prev ?? undefined,
+            national_id: individualDetail?.national_id ?? undefined,
+            email: individualDetail?.email ?? undefined,
+            mobile_number: individualDetail?.mobile_number ?? undefined,
+            insolvencies_judgements: individualDetail?.insolvencies_judgements ?? undefined
           }
         })
         : []
@@ -231,15 +231,16 @@ function useAddReportDialogue(list_report?: ListReport) {
       const individual = report.subject as Individual
       setIndividualDetails({
         id: individual.id,
-        full_name: individual.full_name ?? "",
-        national_id: individual.national_id ?? "",
-        date_of_birth: individual.date_of_birth ?? "",
+        full_name: individual.full_name ?? undefined,
+        national_id: individual.national_id ?? undefined,
+        date_of_birth: individual.date_of_birth ?? undefined,
         gender: individual.gender.length < 2 ? "unknown" : individual.gender,
         marital_status: individual.marital_status ?? undefined,
-        nationality: individual.nationality ?? "",
-        residential_address: individual.residential_address ??"",
-        mobile_number: individual.mobile_number ?? "",
-        email: individual.email ?? "",
+        nationality: individual.nationality ?? undefined,
+        residential_address: individual.residential_address ?? "",
+        mobile_number: individual.mobile_number ?? undefined,
+        email: individual.email ?? undefined,
+        address_prev: individual.address_prev ?? undefined
       })
       
       setEmploymentInformation({
@@ -248,7 +249,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         position: individual.employment_information?.position ?? "",
         employment_status: individual.employment_information?.employment_status ?? undefined,
         years_employed: individual.employment_information?.years_employed ?? undefined,
-        monthly_income: Number(individual.employment_information?.monthly_income ?? 0),
+        monthly_income: individual.employment_information?.monthly_income ?? "",
         previous_employer: individual.employment_information?.previous_employer ?? "",
       })
       
@@ -372,7 +373,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         is_praz_verified : report.subject.registration_accounts.is_praz_verified,
         is_tin_verified : report.subject.registration_accounts.is_tin_verified,
         is_vat_verified : report.subject.registration_accounts.is_vat_verified,
-        tax_clearance_expiration_date : report.subject.registration_accounts.tax_clearance_expiration_date ?? "",
+        tax_clearance_expiration_date : report.subject.registration_accounts.tax_clearance_expiration_date ?? undefined,
         is_tax_clearance_expiration_date : report.subject.registration_accounts.is_tax_clearance_expiration_date,
         nssa_number : report.subject.registration_accounts.nssa_number ?? undefined,
         praz_number : report.subject.registration_accounts.praz_number ?? undefined,
@@ -406,7 +407,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           account_name: item.account_name,
           account_type: item.account_type ?? "current",
           account_number: item.account_number,
-          date_of_acquirement: item.date_of_acquirement,  
+          date_of_acquirement: item.date_of_acquirement ?? undefined,  
           bank_code_narration: item.bank_code_narration,
           currency: item.currency ?? undefined,
       }))
@@ -415,7 +416,7 @@ function useAddReportDialogue(list_report?: ListReport) {
             account_name: "",
             account_type: "current",
             account_number: "",
-            date_of_acquirement: "",  
+            date_of_acquirement: undefined,
             bank_code_narration: "none",
             currency: "",
         }]

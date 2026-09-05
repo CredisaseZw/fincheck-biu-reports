@@ -40,7 +40,7 @@ from apps.credit_records.serializers import (
 
 from django.contrib.contenttypes.models import ContentType
 from apps.directors.serializers import DirectorSerializer
-from apps.utils.base_serialisers import UpdatedBySerializerMixin
+from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.shareholding.serializers import ShareholdingsSerializers
 from apps.utils.entity_lookup import EntityLookUp
 entity =  EntityLookUp()
@@ -141,6 +141,8 @@ class CompanyListSerializer(serializers.ModelSerializer):
 
 #WRITE OPERATIONS
 class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
+    date_of_incorporation = NullableDateField(required=False, allow_null=True)
+    date_of_registration = NullableDateField(required=False, allow_null=True)
     claims = ClaimsSerializer(read_only=True, many=True, required=False)
     absconders = AbscondersSerializer(read_only=True, many=True, required=False)
     court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)
@@ -236,6 +238,8 @@ class CompanyCreateSerializer(serializers.ModelSerializer):    #NOT REQUIRED
         return company
 
 class CompanyUpdateSerializer(serializers.ModelSerializer):
+    date_of_incorporation = NullableDateField(required=False, allow_null=True)
+    date_of_registration = NullableDateField(required=False, allow_null=True)
     claims = ClaimsSerializer(read_only=True, many=True, required=False)
     absconders = AbscondersSerializer(read_only=True, many=True, required=False)
     court_judgements = CourtJudgementSerializer(read_only=True, many=True, required=False)

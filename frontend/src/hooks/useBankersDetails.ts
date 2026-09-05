@@ -20,7 +20,7 @@ const accountSchema = z.object({
     account_name: z.string().optional(),
     account_type: AccountTypes.optional(),
     account_number: z.string().optional(),
-    date_of_acquirement: z.string().date().optional(),
+    date_of_acquirement: z.string().optional(),
     bank_code_narration: Narrations.optional(),
     currency: z.string().optional(),
 })

@@ -24,7 +24,7 @@ class ShareholdingsSerializers(UpdatedBySerializerMixin,serializers.ModelSeriali
         ]
 
     def get_shareholders(self, obj):
-        qs = obj.shareholders.order_by("created_at")
+        qs = obj.shareholders.order_by("-created_at")
         return ShareholderSerializer(qs, many=True).data
 class CompanyShareholdingsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     company = MiniCompanySerializer(read_only = True, source = "shareholdings")

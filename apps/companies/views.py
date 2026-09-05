@@ -164,7 +164,8 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                 CompanyDirector.objects.update_or_create(
                     company=company,
                     individual=individual,
-                    defaults={"position": position},
+                    position=position,
+                    defaults={},
                 )
 
         company.refresh_from_db()

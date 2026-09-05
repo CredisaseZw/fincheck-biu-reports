@@ -6,7 +6,7 @@ function useSectionTouched(key: string) {
     
     const onTouched = () =>{
         setTouched(true)
-        setItem(key, "touched", 60 * 60 * 1000 * 24 * 3)
+        setItem(key, "touched", 60 * 60 * 1000 * 24 * 10)
     }
 
     return {

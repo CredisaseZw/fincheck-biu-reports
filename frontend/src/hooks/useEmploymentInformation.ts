@@ -18,7 +18,7 @@ const employmentSchema = z.object({
     position: z.string().max(255).optional(),
     employment_status: EmploymentStatus.optional(),
     years_employed: z.number().int().positive().optional(),
-    monthly_income: z.number().optional(),
+    monthly_income: z.string().optional(),
     previous_employer: z.string().max(255).optional(),
 })
 
