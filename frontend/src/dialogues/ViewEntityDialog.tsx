@@ -206,7 +206,7 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
               {[
                 ["National ID", _val(d.individual_detail?.national_id)],
                 ["Gender", _label(d.individual_detail?.gender)],
-                ["Date of Birth", _date(d.individual_detail?.dob)],
+                ["Date of Birth", _date(d.individual_detail?.date_of_birth)],
                 ["PEP", d.individual_detail?.is_pep ? "YES" : "NO"],
                 ["Address (Latest)", _upper(d.individual_detail?.residential_address)],
                 ["Address (Previous)", _upper(d.individual_detail?.address_prev)],
@@ -482,10 +482,10 @@ function FinancialsSection({ data }: { data: Financial }) {
   return (
     <SectionCard title="Financials">
       <GridRow label="Financial Year" value={_val(data?.financial_year)} />
-      <GridRow label="Total Assets" value={_money(data?.total_assets)} />
-      <GridRow label="Total Revenue" value={_money(data?.total_revenue)} />
-      <GridRow label="Net Profit" value={_money(data?.net_profit)} />
-      <GridRow label="Net Worth" value={_money(data?.net_worth)} />
+      <GridRow label="Total Assets" value={_val(data?.total_assets)} />
+      <GridRow label="Total Revenue" value={_val(data?.total_revenue)} />
+      <GridRow label="Net Profit" value={_val(data?.net_profit)} />
+      <GridRow label="Net Worth" value={_val(data?.net_worth)} />
       <GridRow label="Asset Ratio" value={_val(data?.asset_ratio)} />
       
       {files.map((fileData) => {
