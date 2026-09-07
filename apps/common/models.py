@@ -128,10 +128,9 @@ class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON
 
 
 class Financials(BaseModelWithSubject):    
-    total_assets = models.DecimalField(
+    total_assets = models.CharField(
         _("Total Assets"),
-        max_digits=20,
-        decimal_places=2,
+        max_length=200,
         null=True,
         blank=True
     )
@@ -153,12 +152,11 @@ class Financials(BaseModelWithSubject):
         null=True,
         blank=True
     )
-    asset_ratio = models.DecimalField(
+    asset_ratio = models.CharField(
         _("Asset Ratio"),
-        max_digits=20,
-        decimal_places=2,
+        max_length=200,
         null=True,
-        blank=True   
+        blank=True
     )
 
     financial_year = models.PositiveIntegerField(

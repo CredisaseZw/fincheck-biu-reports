@@ -340,12 +340,12 @@ function useAddReportDialogue(list_report?: ListReport) {
       report.subject.financials
       ? {
         id: report.subject.financials.id,
-        total_assets: report.subject.financials.total_assets ? Number(report.subject.financials.total_assets) : undefined,
+        total_assets: report.subject.financials.total_assets ?? undefined,
         net_profit: report.subject.financials.net_profit ?? "",
         net_worth: report.subject.financials.net_worth ?? "",
         total_revenue: report.subject.financials.total_revenue ?? "",
         financial_year: report.subject.financials.financial_year,
-        asset_ratio : report.subject.financials.asset_ratio ? Number(report.subject.financials.asset_ratio) : undefined, 
+        asset_ratio : report.subject.financials.asset_ratio ?? undefined, 
         files : report.subject.financials.files.map((item)=>({
           id : item.id,
           default_file : item.file ?? "",

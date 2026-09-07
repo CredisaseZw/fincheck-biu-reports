@@ -1106,12 +1106,13 @@ body {{
         has_file = bool(fin.get("files"))
         rows = [
             ("Financial Year", self._e(fin.get("financial_year"))),
-            ("Total Assets", self._money(fin.get("total_assets"))),
-            ("Total Revenue", self._money(fin.get("total_revenue"))),
-            ("Net Profit", self._money(fin.get("net_profit"))),
-            ("Net Worth", self._money(fin.get("net_worth"))),
-            ("Paid-up Capital", self._money(fin.get("paid_up_capital"))),
-            ("Authorised Capital", self._money(fin.get("authorized_capital"))),
+            ("Total Assets", self._m(fin.get("total_assets"))),
+            ("Total Revenue", self._m(fin.get("total_revenue"))),
+            ("Net Profit", self._m(fin.get("net_profit"))),
+            ("Net Worth", self._m(fin.get("net_worth"))),
+            ("Asset Ratio", self._m(fin.get("asset_ratio"))),
+            ("Paid-up Capital", self._m(fin.get("paid_up_capital"))),
+            ("Authorised Capital", self._m(fin.get("authorized_capital"))),
             ("", ""),
         ]
         note = '<div class="fin-note">FINANCIAL STATEMENTS ATTACHED ON FOLLOWING PAGE(S)</div>' if has_file else ""

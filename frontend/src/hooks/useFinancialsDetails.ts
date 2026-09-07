@@ -34,11 +34,11 @@ const fileRowSchema = z.object({
 
 const financialsSchema = z.object({
     id: z.number().optional(),
-    total_assets: z.number().optional(),
+    total_assets: z.string().optional(),
     net_profit: z.string().optional(),
     net_worth: z.string().optional(),
     total_revenue: z.string().optional(),
-    asset_ratio : z.number().optional(),
+    asset_ratio : z.string().optional(),
     financial_year: z.number().int().positive().min(2000).max(new Date().getFullYear()),
     files: z.array(fileRowSchema).optional()
 })
@@ -118,7 +118,7 @@ function useFinancialsDetails({
         numericKeys.forEach((key) => {
             if (key in entry) {
                 const val = entry[key]
-                if (val !== undefined && val !== null && !isNaN(val as any)) {
+                if (val !== undefined && val !== null) {
                     formData.append(key, String(val))
                 } else if (entry.id) {
                     formData.append(key, "")

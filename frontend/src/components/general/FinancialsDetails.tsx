@@ -82,9 +82,7 @@ function FinancialsDetails({
                         <div className="form-group">
                             <Label>Total Assets</Label>
                             <Input
-                                type="number"
-                                step="0.01"
-                                {...register("total_assets", numericField)}
+                                {...register("total_assets")}
                             />
                             {errors.total_assets && (
                                 <p className="text-destructive text-sm">
@@ -108,9 +106,7 @@ function FinancialsDetails({
                         <div className="form-group">
                             <Label>Asset Ratio</Label>
                             <Input
-                                type="number"
-                                step="0.01"
-                                {...register("asset_ratio", numericField)}
+                                {...register("asset_ratio")}
                             />
                             {errors.asset_ratio && (
                                 <p className="text-destructive text-sm">
