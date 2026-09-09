@@ -1,11 +1,11 @@
 import useLockManagement from "./useLockManagement";
 import useCreateReport from "./api/useCreateReport";
 import useGetSingleReport from "./api/useGetSingleReport";
-import { useEffect, useState} from "react";
+import { useCallback, useEffect, useState} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
 import { getEntityID, getEntityName, handleAxiosError, toDatetimeLocal } from "@/lib/utils";
-import type { Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report } from "@/types/core";
+import type { CommonFields, Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report } from "@/types/core";
 import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
@@ -27,6 +27,8 @@ import type { DirectorFormData } from "./useDirectors";
 import type { ReportDetailsFormData } from "./useReportDetails";
 import type { CompanyOverviewFormData } from "./useCompanyOverview";
 import type { ReportExtrasFormData } from "./useReportExtras";
+import { api } from "@/axios/api";
+import useDetailCacheUpdate from "./useDetailCacheUpdate";
 
 function useAddReportDialogue(list_report?: ListReport) {
   const { mutate } = useCreateReport();
@@ -64,6 +66,8 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [shareholding, setShareholding] = useState<ShareholdingsFormData | undefined>();
   const [directors, setDirectors] = useState<DirectorFormData[]>([])
   const [reportDetails, setReportDetails] = useState<ReportDetailsFormData | undefined>(undefined);
+  const [isRefreshingCredits, setIsRefreshingCredits] = useState(false);
+  const cache = useDetailCacheUpdate<Report>(["report", list_report?.subject_type, list_report?.id])
 
   const {data, isLoading, error } = useGetSingleReport({
     id : list_report?.id,
@@ -78,6 +82,28 @@ function useAddReportDialogue(list_report?: ListReport) {
   
   const onEdit = () => setHeaderEditMode(true)
   const queryClient =  useQueryClient()
+
+  const refreshCreditRecords = useCallback(async()=>{
+    if(!report) {
+      return;
+    }
+    setIsRefreshingCredits(true);
+    try{
+      const response = await api.post<CommonFields>("/api/refresh-credits/", {
+        "entity_type": report.subject_type,
+        "entity_identifier": report.subject.id
+      }) 
+      if(response.data){
+        const data = response.data;
+        cache.set(["subject", "claims"], data.claims);
+        cache.set(["subject", "absconders"], data.absconders);
+        cache.set(["subject", "court_judgements"], data.court_judgements);
+        cache.set(["subject", "insolvency_records"], data.insolvency_records);
+        cache.set(["subject", "public_information"], data.public_information);
+      }
+    } catch (error) {handleAxiosError(error)}
+    finally{setIsRefreshingCredits(false)}
+  }, [report, cache])
 
   const onUpdateEntityTypes = ( entity :EntityMode, value: EntityValue)=>{
     if (entity === "client") {
@@ -531,7 +557,9 @@ function useAddReportDialogue(list_report?: ListReport) {
     contactPerson, 
     reportExtras,
     createdAt,
+    isRefreshingCredits,
     usernameMobile,
+    refreshCreditRecords,
     setUsernameMobile,
     setCreatedAt,
     setContactPerson,

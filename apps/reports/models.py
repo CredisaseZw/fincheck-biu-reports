@@ -112,7 +112,7 @@ class Report(BaseModel):
                 status=self.StatusChoices.FINALIZED,
             )
             .exclude(pk=self.pk)
-            .order_by("-created_at")
+            .order_by("-finalized_at")
             .first()
         )
         return last.created_at if last else None

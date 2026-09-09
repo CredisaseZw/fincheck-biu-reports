@@ -9,6 +9,7 @@ class Claims(BaseFinancialRecord):
         SETTLED = "settled", "Settled"
         DISPUTED = "disputed", "Disputed"
         WRITTEN_OFF = "written_off", "Written Off"
+        INDETERMINANT = "indeterminant", "Indeterminant"
 
     claim_date = models.DateField()
     status = models.CharField(
@@ -31,6 +32,7 @@ class Absconders(BaseFinancialRecord):
         SETTLED = "settled", "Settled"
         DISPUTED = "disputed", "Disputed"
         WRITTEN_OFF = "written_off", "Written Off"
+        INDETERMINANT = "indeterminant", "Indeterminant"
 
     start_date = models.DateField(
         blank = True,
@@ -56,6 +58,7 @@ class CourtJudgement(BaseModelWithSubject):
         SETTLED = "settled", "Settled"
         DISPUTED = "disputed", "Disputed"
         WRITTEN_OFF = "written_off", "Written Off"
+        INDETERMINANT = "indeterminant", "Indeterminant"
 
     class Currency(models.TextChoices):
         USD = "USD", "US Dollar"

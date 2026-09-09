@@ -130,6 +130,7 @@ function AbsconderDetails({
                                                     <SelectItem value="open">Open</SelectItem>
                                                     <SelectItem value="settled">Settled</SelectItem>
                                                     <SelectItem value="disputed">Disputed</SelectItem>
+                                                    <SelectItem value="indeterminant">Indeterminant</SelectItem>
                                                     <SelectItem value="written_off">Written Off</SelectItem>
                                                 </SelectContent>
                                             </Select>

@@ -181,7 +181,7 @@ export const GENDER_OPTIONS = GENDERS.options
 
 export const DEBTOR_TYPE = z.enum(["company", "individual"])
 
-export const SETTLEMENT_OPTIONS = z.enum(["open", "settled", "disputed", "written_off"])
+export const SETTLEMENT_OPTIONS = z.enum(["open", "settled", "disputed", "written_off", "indeterminant"])
 
 export const CURRENCY = z.enum(["USD", "ZiG", "AUD", "CAD", "CHF", "ZAR"])
 export const CURRENCY_OPTIONS = CURRENCY.options

@@ -14,7 +14,7 @@ import {
     DialogContent,
     DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus } from "lucide-react";
+import { Plus, RotateCw } from "lucide-react";
 import BankerDetails from "@/components/general/BankersDetails";
 import ProfessionalPartnersDetails from "@/components/general/ProfessionalPartnersDetails";
 import RegistrationAccountsDetails from "@/components/general/RegistrationAccountsDetails";
@@ -81,6 +81,8 @@ function AddReportDialogue({ report_item }: props) {
         reportExtras,
         createdAt,
         usernameMobile,
+        isRefreshingCredits, 
+        refreshCreditRecords,
         setUsernameMobile,
         setCreatedAt,
         setContactPerson,
@@ -270,6 +272,19 @@ function AddReportDialogue({ report_item }: props) {
                                         subject_object_id={subject_object_id}
                                         subject_type={subject_type}
                                     />
+                                    <div className="flex flex-row justify-end">
+                                        <Button
+                                            onClick={refreshCreditRecords}
+                                            disabled = {isRefreshingCredits}
+                                        >
+                                            {
+                                                isRefreshingCredits 
+                                                ? <LoadingIndicator variant="button"/>
+                                                : <RotateCw/>
+                                            }
+                                            Refresh Credit Records
+                                        </Button>
+                                    </div>
                                 </Fieldset>
 
                                 <TradeReferencesDetails 
