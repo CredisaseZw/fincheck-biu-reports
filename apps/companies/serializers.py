@@ -103,7 +103,7 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
         payload = entity.hit_endpoint("company", instance.registration_number)
         if payload:
             chained_data = entity._prepare_serializer_company_data(payload, instance.pk)
-            entity.sync_company_records(instance, chained_data)
+            entity.sync_entity_records(instance, chained_data)
 
         instance.refresh_from_db()
         data =  super().to_representation(instance)

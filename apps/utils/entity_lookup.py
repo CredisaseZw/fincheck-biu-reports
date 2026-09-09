@@ -2,17 +2,12 @@ from django.db.models import Model
 from django.db import IntegrityError
 from apps.individuals.models import Individuals
 from apps.companies.models import Company
-from django.db import transaction
 from apps.credit_records.models import Claims, Absconders, CourtJudgement
 from typing import List, Optional
 from pydantic import BaseModel
 from django.contrib.contenttypes.models import ContentType
 import requests
-from apps.credit_records.serializers import (
-    AbscondersSerializer,
-    ClaimsSerializer,
-    CourtJudgementSerializer
-)
+
 import logging
 logger = logging.getLogger(__name__)
 class IndividualInterface(BaseModel):
@@ -219,57 +214,21 @@ class EntityLookUp:
                 changed[field] = incoming[field]
         return changed
 
-    def _sync_records(self, model, existing_serialized: list, incoming: list, key_fn, watch_fields: list):
-        if not incoming:
-            return
-
-        existing_by_key = {key_fn(e): e for e in existing_serialized}
-
+    def _sync_records(self, model, existing_queryset, incoming: list):
+        existing_queryset.delete()
         for item in incoming:
-            match = existing_by_key.get(key_fn(item))
-            if match is None:
-                try:
-                    model.objects.create(**item)
-                except Exception:
-                    logger.exception("Failed to create %s", model.__name__)
-                continue
-
-            changed = self._changed_fields(match, item, watch_fields)
-            if not changed:
-                continue
-
             try:
-                with transaction.atomic():
-                    obj = model.objects.select_for_update().get(pk=match['id'])
-                    for field, value in changed.items():
-                        setattr(obj, field, value)
-                    obj.save(update_fields=list(changed.keys()))
+                model.objects.create(**item)
             except Exception:
-                logger.exception("Failed to update %s #%s", model.__name__, match.get('id'))
+                logger.exception("Failed to create %s", model.__name__)
 
-    def sync_individual_records(self, instance, chained_data: Optional[dict]):
+    def sync_entity_records(self, instance, chained_data: Optional[dict]):
         if not chained_data:
             return
-
-        existing_claims = ClaimsSerializer(instance.claims.all(), many=True).data
-        existing_absconders = AbscondersSerializer(instance.absconders.all(), many=True).data
-        existing_courts = CourtJudgementSerializer(instance.court_judgements.all(), many=True).data
-
-        self._sync_records(Claims, existing_claims, chained_data['claims'], self._claim_key, watch_fields=['status', 'overdue_balance'])
-        self._sync_records(Absconders, existing_absconders, chained_data['absconders'], self._claim_key, watch_fields=['status'])
-        self._sync_records(CourtJudgement, existing_courts, chained_data['court_records'], self._court_key, watch_fields=['status'])
-
-    def sync_company_records(self, instance, chained_data: Optional[dict]):
-        if not chained_data:
-            return
-
-        existing_claims = ClaimsSerializer(instance.claims.all(), many=True).data
-        existing_absconders = AbscondersSerializer(instance.absconders.all(), many=True).data
-        existing_courts = CourtJudgementSerializer(instance.court_judgements.all(), many=True).data
-
-        self._sync_records(Claims, existing_claims, chained_data['claims'], self._claim_key, watch_fields=['status', 'overdue_balance'])
-        self._sync_records(Absconders, existing_absconders, chained_data['absconders'], self._claim_key, watch_fields=['status'])
-        self._sync_records(CourtJudgement, existing_courts, chained_data['court_records'], self._court_key, watch_fields=['status'])
+        
+        self._sync_records(Claims, instance.claims.all(), chained_data['claims'])
+        self._sync_records(Absconders, instance.absconders.all(), chained_data['absconders'])
+        self._sync_records(CourtJudgement, instance.court_judgements.all(), chained_data['court_records'])
 
     def save_company_data(self, response):
         data = LookupCompanyResponse.model_validate(response)
@@ -326,6 +285,7 @@ class EntityLookUp:
         for claim in data.claims:
             if claim.is_closed:
                 continue
+
             prepared = self._prepare_claim_data(claim, debtor_content_type, debtor_object_id)
             is_absconder = prepared.pop('_is_absconder')
             (absconders_data if is_absconder else claims_data).append(prepared)
@@ -354,6 +314,9 @@ class EntityLookUp:
 
         claims_data, absconders_data = [], []
         for claim in data.claims:
+            if claim.is_closed:
+                continue
+
             prepared = self._prepare_claim_data(claim, debtor_content_type, debtor_object_id)
             is_absconder = prepared.pop('_is_absconder')
             (absconders_data if is_absconder else claims_data).append(prepared)

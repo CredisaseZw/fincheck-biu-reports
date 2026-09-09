@@ -7,17 +7,19 @@ import {
     Select, SelectContent, SelectItem,
     SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Trash2, Plus } from "lucide-react"
+import { Trash2, Plus, RotateCw } from "lucide-react"
 import ColumnsContainer from "./ColumnsContainer"
 import Fieldset from "./FieldSet"
 import { Textarea } from "../ui/textarea";
-import type { CompanyDirectorsProps } from "@/types/core";
+import type { CompanyDirectorsProps, Individual } from "@/types/core";
 import CustomSubmitButton from "./CustomSubmitButton";
 import { Checkbox } from "../ui/checkbox";
 import { useState, useEffect } from "react";
-import { combineInsolvencies, toCap } from "@/lib/utils";
+import { handleAxiosError, normalize_national_id, toCap } from "@/lib/utils";
 import { api } from "@/axios/api";
-import { GENDER_OPTIONS } from "@/constants";
+import { CLEAR_MESSAGE, GENDER_OPTIONS } from "@/constants";
+import { toast } from "sonner";
+import LoadingIndicator from "./LoadingIndicator";
 
 const DirectorRow = ({ 
     index, 
@@ -32,7 +34,10 @@ const DirectorRow = ({
     setValue 
 }: any) => {
     const [isChecking, setIsChecking] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const nationalId = watch(`directors.${index}.national_id`);
+    const id = watch(`directors.${index}.id`)
+
 
     useEffect(() => {
         if (!nationalId) return;
@@ -44,7 +49,7 @@ const DirectorRow = ({
             const checkData = async () => {
                 try {
                     setIsChecking(true);
-                    const res = await api.get(`/api/individuals/lookup/?national_id=${nationalId}`);
+                    const res = await api.get(`/api/individuals/lookup/?national_id=${normalize_national_id(nationalId)}`);
                     if (res.data) {
                         const ind = res.data;
                         if (ind.id) setValue(`directors.${index}.id`, ind.id)
@@ -54,11 +59,7 @@ const DirectorRow = ({
                         if (ind.mobile_number) setValue(`directors.${index}.mobile_number`, ind.mobile_number, { shouldValidate: true });
                         if (ind.email) setValue(`directors.${index}.email`, ind.email, { shouldValidate: true });
                         if (ind.residential_address) setValue(`directors.${index}.residential_address`, ind.residential_address, { shouldValidate: true });
-                        
-                        const insolvencies = combineInsolvencies(ind);
-                        if (insolvencies) {
-                            setValue(`directors.${index}.insolvencies_judgements`, insolvencies, { shouldValidate: true });
-                        }
+                        if (ind.insolvencies_judgements)  setValue(`directors.${index}.insolvencies_judgements`, ind.insolvencies_judgements, { shouldValidate: true });
                     }
                 } catch (error) { 
                     console.log(error)
@@ -69,6 +70,29 @@ const DirectorRow = ({
             checkData();
         }
     }, [nationalId, index, setValue, field.national_id]);
+
+    const refreshJudgements = async() => {
+        if(!id){
+            toast.error("Invalid user",{description :"User not yet saved in the BizSafe system."})
+            return;
+        }
+
+        try{
+            setIsRefreshing(true)
+            const response  = await api.post<Individual>("/api/refresh-credits/", {
+                "entity_type": "individual",
+                "entity_identifier": id
+            });
+            if (response.data){
+                if (response.data.insolvencies_judgements){
+                    setValue(`directors.${index}.insolvencies_judgements`, response.data.insolvencies_judgements, { shouldValidate: true })
+                }else {
+                    setValue(`directors.${index}.insolvencies_judgements`, undefined)
+                }
+            }   
+        }catch (error){handleAxiosError(error)}
+        finally{setIsRefreshing(false)}
+    }
 
     return (
         <div key={field.id} className="flex flex-col gap-3 border rounded-md p-4">
@@ -223,11 +247,37 @@ const DirectorRow = ({
                 </div>
             </ColumnsContainer>
             <div className="form-group">
-                <Label>Insolvencies, Judgements, Defaults</Label>
-                <Textarea {...register(`directors.${index}.insolvencies_judgements`)} disabled={isChecking} />
-                    {errors.directors?.[index]?.insolvencies_judgements && (
-                        <p className="text-destructive text-sm">{errors.directors[index].insolvencies_judgements.message}</p>
-                    )}
+                <div className="card relative">
+                    <Label className="mb-2.5">Insolvencies, Judgements, Defaults</Label>
+                    <Button
+                        onClick={refreshJudgements}
+                        size={"icon-sm"}
+                        type="button"
+                        aria-label="Refresh insolvency records"
+                        disabled = {isRefreshing}
+                        className="absolute top-2.5 right-2.5 text-xs px-2 py-1 rounded-full cursor-pointer hover:bg-white/10"
+                    >
+                        {
+                            isRefreshing 
+                            ? <LoadingIndicator variant="button"/>
+                            : <RotateCw/>
+                        }
+                    </Button>
+                    {(() => {
+                        const value = getValues(`directors.${index}.insolvencies_judgements`);
+                        if (!value) return <p className="text-xs">{CLEAR_MESSAGE}</p>;
+                        if (value.includes("\n")) {
+                        return (
+                            <ul>
+                                {value.split("\n").filter(Boolean).map((line: string, i: number) => (
+                                    <li key={i} className="text-sm">{line}</li>
+                                ))}
+                            </ul>
+                        );
+                        }
+                        return <p>{value}</p>;
+                    })()}
+                </div>
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import { FILE_STYLES } from "@/constants";
-import type { Absconder, Address, Claim, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
+import type { Address, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
@@ -274,60 +274,13 @@ export function encrypt(value: unknown, secret: string): string{
     return encryption
 }
 
-export const summarizeClaims = (claims?: any[]) => {
-  if (!claims || claims.length === 0) return "";
-  return claims.map(c => {
-    let summary = `Claim on ${c.claim_date || 'unknown date'}`;
-    if (c.creditor_name) summary += ` by creditor ${c.creditor_name}`;
-    if (c.amount) summary += ` for ${c.currency || 'USD'} ${c.amount}`;
-    if (c.overdue_balance) summary += ` (Overdue: ${c.currency || 'USD'} ${c.overdue_balance})`;
-    summary += ` with status ${c.status || 'open'}.`;
-    return summary;
-  }).join("\n");
-};
-
-export const summarizeAbsconders = (absconders?: any[]) => {
-  if (!absconders || absconders.length === 0) return "";
-  return absconders.map(a => {
-    let summary = `Absconder record from ${a.start_date || 'unknown date'}`;
-    if (a.creditor_name) summary += ` by creditor ${a.creditor_name}`;
-    if (a.amount) summary += ` for ${a.currency || 'USD'} ${a.amount}`;
-    if (a.overdue_balance) summary += ` (Overdue: ${a.currency || 'USD'} ${a.overdue_balance})`;
-    summary += ` with status ${a.status || 'open'}.`;
-    return summary;
-  }).join("\n");
-};
-
-export const summarizeCourtJudgements = (judgements?: any[]) => {
-  if (!judgements || judgements.length === 0) return "";
-  return judgements.map(j => {
-    let summary = `Court judgement from ${j.court_name || 'unknown court'} on ${j.judgement_date || 'unknown date'}`;
-    if (j.amount) summary += ` for ${j.currency || 'USD'} ${j.amount}`;
-    if (j.plaintf_name) summary += ` by plaintiff ${j.plaintf_name}`;
-    summary += ` with status ${j.status || 'open'}.`;
-    return summary;
-  }).join("\n");
-};
-
-export const summarizePublicInfo = (publicInfo?: any[]) => {
-  if (!publicInfo || publicInfo.length === 0) return "";
-  return publicInfo.map(p => `Public info on ${p.record_date || 'unknown date'}: ${p.summary || ''}.`).join("\n");
-};
-
-export const combineInsolvencies = (individual: Individual) => {
-  const parts = [];
-  const claims = summarizeClaims(individual.claims?.map((c: Claim) => c.status === "open" && c));
-  const absconders = summarizeAbsconders(individual.absconders?.map((a: Absconder) => a.status==="open" && a));
-  if (individual.court_judgements?.length) parts.push(summarizeCourtJudgements(individual.court_judgements));
-  if (individual.public_information?.length) parts.push(summarizePublicInfo(individual.public_information));
-  if (absconders) parts.push(absconders);
-  if (claims) parts.push(claims);
-  return parts.join("\n").trim();
-};
-
 export const returnStringedList = (value: string) =>{
   return value
   .split(/[,;/\s]+/)
   .map(i => i.trim())
   .filter(boolean)
 } 
+
+export function normalize_national_id(value: string):string {
+  return value.replace(/[^A-Za-z0-9]/g, "").trim().toUpperCase();
+}

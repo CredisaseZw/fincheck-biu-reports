@@ -16,6 +16,10 @@ from .report_types import (
     IndividualReportSchema,
     ReportType
 )
+from apps.individuals.models import Individuals
+from apps.companies.models import Company
+from apps.individuals.serializers import IndividualSerializer
+from apps.companies.serializers import CompanySerializer
 from .ingest import save_company, save_individual
 from rest_framework.decorators import action
 import logging
@@ -140,6 +144,43 @@ class DeleteBankerAccounts(GenericViewSet, DestroyModelMixin):
     queryset = BankerAccounts.objects.all()
     permission_classes = [IsStaffUser]
 
+class RefreshCreditRecords(GenericViewSet):
+    permission_classes = [IsStaffUser]
+    key_map = {
+        "individual": {
+            "model": Individuals,
+            "serializer": IndividualSerializer,
+        },
+        "company": {
+            "model": Company,
+            "serializer": CompanySerializer,
+        },
+    }
+
+    @action(detail=False, methods=['POST'], url_path="refresh-credits")
+    def refresh_credits(self, request, *args, **kwargs):
+        entity_type = request.data.get("entity_type")
+        entity_identifier = request.data.get("entity_identifier")
+
+        if not entity_type or entity_type not in self.key_map:
+            return Response({
+                "error": "A valid entity type is required."
+            }, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        if not entity_identifier:
+            return Response({
+                "error": "Identifier is empty"
+            }, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        config = self.key_map[entity_type]
+        instance = config["model"].objects.filter(pk=entity_identifier).first()
+        if not instance:
+            return Response({
+                "error": "Instance not found"
+            }, status=STATUS.HTTP_400_BAD_REQUEST)
+
+        serializer = config["serializer"]
+        return Response(serializer(instance=instance).data, status=STATUS.HTTP_200_OK)
 
 class IngestionViewSet(GenericViewSet):
     permission_classes = [AllowAny]

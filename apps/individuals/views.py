@@ -123,6 +123,8 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
                 {"error": "Individual not found."},
                 status=STATUS.HTTP_404_NOT_FOUND
             )
-            
+        
+        individual.refresh_from_db()
         serializer = IndividualSerializer(individual)
         return Response(serializer.data, status=STATUS.HTTP_200_OK)
+        #43038095m43 shona 

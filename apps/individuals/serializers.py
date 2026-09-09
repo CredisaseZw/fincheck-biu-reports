@@ -26,6 +26,7 @@ from apps.credit_records.serializers import (
     InsolvencyRecordSerializer,
     PublicInformationSerializer,
 )
+from apps.utils.enitity_helpers import sync_insolvencies_summary
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.utils.entity_lookup import EntityLookUp
 entity = EntityLookUp()
@@ -63,7 +64,9 @@ class IndividualSerializer(serializers.ModelSerializer):
         payload = entity.hit_endpoint("individual", instance.national_id)
         if payload:
             chained_data = entity._prepare_serializer_individual_data(payload, instance.pk)
-            entity.sync_individual_records(instance, chained_data)
+            entity.sync_entity_records(instance, chained_data)
+        
+        sync_insolvencies_summary(instance)
 
         instance.refresh_from_db()
         data = super().to_representation(instance)
@@ -88,11 +91,19 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "marital_status", "mobile_number", "email",
             "nationality", "refer_type", "created_at",
         ]
-
 class IndividualDirectorSerializer(serializers.ModelSerializer):
     national_id = serializers.CharField(required=True)
     date_of_birth = NullableDateField(required=False, allow_null=True)
 
+    def to_representation(self, instance):
+        payload = entity.hit_endpoint("individual", instance.national_id)
+        if payload:
+            chained_data = entity._prepare_serializer_individual_data(payload, instance.pk)
+            entity.sync_entity_records(instance, chained_data)
+
+        sync_insolvencies_summary(instance)
+        instance.refresh_from_db()
+        return super().to_representation(instance)
     class Meta:
         model = Individuals
         fields = [

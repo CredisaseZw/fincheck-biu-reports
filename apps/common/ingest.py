@@ -156,7 +156,7 @@ def save_individual(data: IndividualReportSchema) -> Individuals:
     try:
         if payload:
             chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
-            entity_lookup.sync_individual_records(individual, chained_data)
+            entity_lookup.sync_entity_records(individual, chained_data)
     except Exception:
         logger.exception(
             "Entity lookup failed for individual '%s' (pk=%s) — "
@@ -188,16 +188,14 @@ def _get_or_create_director_individual(director):
             payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
             if payload:
                 chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
-                entity_lookup.sync_individual_records(individual, chained_data)
+                entity_lookup.sync_entity_records(individual, chained_data)
         except Exception:
             logger.exception(
                 "Entity lookup failed for individual '%s' (pk=%s) — "
                 "Individual was saved but credit records were not synced",
                 individual.full_name, individual.pk,
-            )
-               
+            )               
     return individual
-
 
 @transaction.atomic
 def save_company(data: CompanyReportSchema) -> Company:
@@ -300,7 +298,7 @@ def save_company(data: CompanyReportSchema) -> Company:
             payload = entity_lookup.hit_endpoint("company", value)
             if payload: 
                 chained_data = entity_lookup._prepare_serializer_company_data(payload, company.pk)
-                entity_lookup.sync_company_records(company, chained_data)
+                entity_lookup.sync_entity_records(company, chained_data)
     except Exception:
         logger.exception(
             "Entity lookup failed for company '%s' (pk=%s) — "

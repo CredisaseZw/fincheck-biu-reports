@@ -87,4 +87,3 @@ def bucket_date_range(year, month, cutoff_day):
     end_day = min(cutoff_day, monthrange(year, month)[1])
     end = date(year, month, end_day)
     return start, end
-

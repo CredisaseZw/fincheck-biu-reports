@@ -4,7 +4,8 @@ from .views import (
     DeleteTradeReferenceViewSet, 
     DeleteBankerAccounts, 
     DeleteFinancialFile,
-    IngestionViewSet
+    IngestionViewSet,
+    RefreshCreditRecords
 )
 
 router = SimpleRouter()
@@ -13,5 +14,6 @@ router.register(r"financial-files", DeleteFinancialFile, basename="financial-fil
 router.register(r"trade_references", DeleteTradeReferenceViewSet, basename="trade_references")
 router.register(r"bankers_accounts", DeleteBankerAccounts, basename="bankers_accounts")
 router.register(r'', IngestionViewSet, basename='ingest')
+router.register(r'', RefreshCreditRecords, basename='refresh')
 
 urlpatterns = router.urls
