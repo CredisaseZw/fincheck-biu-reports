@@ -431,7 +431,7 @@ function useAddReportDialogue(list_report?: ListReport) {
           bank: item.bank,
           branch: item.branch,
           account_name: item.account_name,
-          account_type: item.account_type ?? "current",
+          account_type: item.account_type ?? "none",
           account_number: item.account_number,
           date_of_acquirement: item.date_of_acquirement ?? undefined,  
           bank_code_narration: item.bank_code_narration,
@@ -440,7 +440,7 @@ function useAddReportDialogue(list_report?: ListReport) {
       : [{
             bank: "",
             account_name: "",
-            account_type: "current",
+            account_type: "none",
             account_number: "",
             date_of_acquirement: undefined,
             bank_code_narration: "none",
