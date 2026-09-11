@@ -1,7 +1,7 @@
 import re
 from apps.companies.models import Company
 from django.db.models import Q
-
+from apps.individuals.models import Individuals
 
 def clean_registration_names():
     qs = Company.objects.filter(
@@ -44,3 +44,32 @@ def clean_registration_names():
             print(f"  id={pk} | {name!r} | {err}")
 
     return {"total": total, "passed": passed, "failed": failed}
+
+
+def clean_commas():
+    c_qs = Company.objects.all()
+    i_qs = Individuals.objects.all()
+
+    for company in c_qs:
+        changed = False
+        if company.email and "," in company.email:
+            company.email = company.email.replace(",", ";")
+            changed = True
+        if company.telephone_number and "," in company.telephone_number:
+            company.telephone_number = company.telephone_number.replace(",", ";")
+            changed = True
+
+        if changed:
+            company.save()
+
+    for individual in i_qs:
+        changed = False
+        if individual.email and "," in individual.email:
+            individual.email = individual.email.replace(",", ";")
+            changed = True
+        if individual.mobile_number and "," in individual.mobile_number:
+            individual.mobile_number = individual.mobile_number.replace(",", ";")
+            changed = True
+
+        if changed:
+            individual.save()

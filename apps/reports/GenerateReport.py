@@ -115,7 +115,7 @@ class FincheckReportPDF:
 
     @staticmethod
     def _format_multiline(val_str: str, upper: bool = False) -> str:
-        parts = [p.strip() for p in re.split(r'[,;/\n]+', val_str) if p.strip()]
+        parts = [p.strip() for p in re.split(r'[;/\n]+', val_str) if p.strip()]
         if len(parts) > 1:
             if upper:
                 parts = [p.upper() for p in parts]
