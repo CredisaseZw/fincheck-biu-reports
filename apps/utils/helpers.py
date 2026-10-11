@@ -8,7 +8,9 @@ from apps.individuals.serializers import IndividualSerializer
 from apps.companies.serializers import CompanySerializer
 from apps.utils.mini_serializers import MiniCompanySerializer, MiniIndividualSerializer
 from calendar import monthrange
-from datetime import date
+from datetime import date, timedelta
+from django.utils import timezone
+from django.conf import settings
 
 def clean_error(error):
     if isinstance(error, serializers.ValidationError):
@@ -87,3 +89,11 @@ def bucket_date_range(year, month, cutoff_day):
     end_day = min(cutoff_day, monthrange(year, month)[1])
     end = date(year, month, end_day)
     return start, end
+
+def get_cycle_start(now):
+    local = timezone.localtime(now)
+    start = local.replace(day=settings.CYCLE_START_DATE, hour=0, minute=0, second=0, microsecond=0)
+    if local.day < settings.CYCLE_START_DATE:
+        last_of_prev = start.replace(day=1) - timedelta(days=1)
+        start = last_of_prev.replace(day=settings.CYCLE_START_DATE)
+    return start

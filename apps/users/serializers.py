@@ -3,6 +3,18 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from apps.utils.helpers import _content_ob_serializer
 
+
+class WriteUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'email',
+            'is_staff',
+            'is_active'
+        ]
+
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     i_a = serializers.SerializerMethodField()

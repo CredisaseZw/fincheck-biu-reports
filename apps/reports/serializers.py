@@ -6,13 +6,35 @@ from .models import Report
 from apps.utils.helpers import _content_ob_serializer
 # READ SERIALIZERS
 
-class ReportSerializer(serializers.ModelSerializer):
-    is_stale = serializers.BooleanField(read_only=True)
-
+class UpdateReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = [
             'id',
+            'username',
+            'username_mobile',
+            'status',
+            'is_stale',
+            'last_report',
+            'contact_person',
+            'analyst',
+            'suspension_reason',
+            'overall_risk_rating',
+            'summary',
+            'report_narration',
+            'report_date',
+            'report_pdf',
+        ]
+        
+class ReportSerializer(serializers.ModelSerializer):
+    analyst_name = serializers.SerializerMethodField()
+    is_stale = serializers.BooleanField(read_only=True)
+    class Meta:
+        model = Report
+        fields = [
+            'id',
+            'analyst',
+            'analyst_name',
             'enquiry_reference',
             'client',
             'subject',
@@ -25,13 +47,18 @@ class ReportSerializer(serializers.ModelSerializer):
             'suspension_reason',
             'overall_risk_rating',
             'summary',
+            'report_narration',
             'report_date',
             'created_at',
             'updated_at',
             'finalized_at',
             'report_pdf',
         ]
-
+    def get_analyst_name(self, instance):
+        if instance.analyst:
+            return instance.analyst.get_full_name()
+        return None
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
@@ -44,14 +71,18 @@ class ReportSerializer(serializers.ModelSerializer):
         data['subject_type'] = 'individual' if subject_data and 'national_id' in subject_data else 'company'
 
         return data
+    
 class ListReportSerializer(serializers.ModelSerializer):
     is_stale = serializers.BooleanField(read_only=True)
+    analyst_name = serializers.SerializerMethodField()
     class Meta:
         model = Report
         fields = [
             'id',
+            'report_narration',
             'enquiry_reference',
             'client',
+            'analyst_name',
             'contact_person',
             'username',
             'username_mobile',
@@ -66,6 +97,10 @@ class ListReportSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
+    def get_analyst_name(self, instance):
+        if instance.analyst:
+            return instance.analyst.get_full_name()
+        return None
     
     def to_representation(self, instance):
         data = super().to_representation(instance)

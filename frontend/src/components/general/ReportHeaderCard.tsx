@@ -1,6 +1,6 @@
 import type { DefaultHeaderProps } from "@/types/core";
 import LoadingIndicator from "./LoadingIndicator";
-import { getCurrentDateFormatted, getFormattedDate } from "@/lib/utils";
+import { getFormattedDate } from "@/lib/utils";
 import ColumnsContainer from "./ColumnsContainer";
 
 interface ReportHeaderCardProps {
@@ -11,6 +11,8 @@ interface ReportHeaderCardProps {
 export default function ReportHeaderCard({
     default_header,
 }: ReportHeaderCardProps) {
+    const reportDate = default_header?.report_date ?? default_header?.report_date ?? undefined
+
     return (
         <div className="relative w-full rounded-xl border border-border bg-primary text-primary-foreground shadow-sm overflow-hidden dark:bg-gray-900 dark:text-gray-200">
             <div className="p-6 md:p-7">
@@ -86,9 +88,9 @@ export default function ReportHeaderCard({
                             Request Date
                         </p>
                         <p className="mt-1 text-2xl font-bold">
-                            {   default_header?.created_at
-                                ? getFormattedDate(default_header.created_at)
-                                : getCurrentDateFormatted()
+                            {   reportDate 
+                                ? getFormattedDate(reportDate)
+                                : "-"
                             }
                         </p>
                     </div>

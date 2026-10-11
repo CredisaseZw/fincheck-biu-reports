@@ -5,6 +5,7 @@ import ColumnsContainer from "./ColumnsContainer";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import CustomSubmitButton from "./CustomSubmitButton";
+import { Textarea } from "../ui/textarea";
 
 function ReportExtras({
     report_extras, 
@@ -26,7 +27,7 @@ function ReportExtras({
     })
     return (
         <Fieldset legendTitle="Report Extras">
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <ColumnsContainer numberOfCols={3}>
                     <div className="form-group">    
                         <Label>Contact Person</Label>
@@ -54,6 +55,10 @@ function ReportExtras({
                         />
                     </div>
                 </ColumnsContainer>
+                <div className="form-group">
+                    <Label>Report Narration</Label>
+                    <Textarea placeholder="Enter where you left off" {...register("report_narration")}/>
+                </div>
                 <CustomSubmitButton
                     onFine={onTouched}
                     state = {touched}

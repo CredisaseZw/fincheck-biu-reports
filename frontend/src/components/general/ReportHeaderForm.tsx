@@ -4,6 +4,7 @@ import type { DefaultHeaderProps, EntityMode, EntityValue, onSelectEntityProps }
 import SearchEntity, { type SearchEntityRef } from './SearchEntity';
 import { useRef, type Dispatch, type SetStateAction } from 'react';
 import { Input } from '../ui/input';
+import SearchAnalyst from './SearchAnalyst';
 interface props{
     clientType : EntityValue,
     subjectType : EntityValue    
@@ -12,6 +13,7 @@ interface props{
     default_header : DefaultHeaderProps | undefined,
     createdAt: string
     usernameMobile: string
+    onSelectAnalyst : (id: number | null) => void 
     setUsernameMobile: Dispatch<SetStateAction<string>>
     onSelectEntity : (entity : EntityMode, props:onSelectEntityProps) => void
     onUpdateEntityTypes : (entity :EntityMode, value: EntityValue)=> void
@@ -29,6 +31,7 @@ function ReportHeaderForm({
     contactPerson,
     createdAt,
     usernameMobile,
+    onSelectAnalyst,
     setUsernameMobile,
     setCreatedAt,
     setContactPerson,
@@ -113,14 +116,6 @@ function ReportHeaderForm({
                         placeholder = "e.g John Doe"
                     />
                 </div>
-                <div className="form-group">
-                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Contact Person</h1>
-                    <Input
-                        value={contactPerson}
-                        onChange={(e)=> setContactPerson(e.target.value)}
-                        placeholder = "e.g John Doe"
-                    />
-                </div>
                <div className="form-group">
                     <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Requestor Mobile</h1>
                     <Input
@@ -129,15 +124,32 @@ function ReportHeaderForm({
                         placeholder = "e.g +234 801 234 5678"
                     />
                 </div>
+                <div className="form-group">
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Contact Person</h1>
+                    <Input
+                        value={contactPerson}
+                        onChange={(e)=> setContactPerson(e.target.value)}
+                        placeholder = "e.g John Doe"
+                    />
+                </div>
             </ColumnsContainer>
-             <div className="form-group">
-                <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Report Creation date</h1>
-                <Input
-                    type = {"datetime-local"}
-                    value={createdAt}
-                    onChange={(e)=> setCreatedAt(e.target.value)}
-                />
-            </div>
+            <ColumnsContainer>
+                <div className="form-group">
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Analyst Name</h1>
+                    <SearchAnalyst
+                        onSelectAnalyst={onSelectAnalyst}
+                    />
+                </div>
+                <div className="form-group">
+                    <h1 className="font-semibold text-base text-gray-800 dark:text-gray-200">Report Creation date</h1>
+                    <Input
+                        type = {"datetime-local"}
+                        value={createdAt}
+                        onChange={(e)=> setCreatedAt(e.target.value)}
+                    />
+                </div>
+            </ColumnsContainer>
+
         </div>
 
         

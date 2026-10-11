@@ -1,3 +1,4 @@
+import BizsafeReportsList from "@/components/routes/core/bizsafe/bizsafe-reports-list";
 import BusinessReports from "@/components/routes/core/reports/business-reports";
 import Dashboard from "@/components/routes/core/reports/dashboard";
 import InternalUsers from "@/components/routes/core/reports/internal-users";
@@ -26,6 +27,21 @@ export const CORE_ROUTES: RouteItem[] = [
   }
 ]
 
+export const BIZ_SAFE_ROUTES: RouteItem[] = [
+  {
+    name: 'Bizsafe Reports',
+    icon: FileText,
+    children: [
+      {
+        name: 'Reports List',
+        link: '/bizsafe-reports-list',
+        icon: FileText,
+        component: BizsafeReportsList,
+      }
+    ]
+  }
+]
+
 export const USERS_LINKS: RouteItem[] = [
   {
     name: 'Internal Users',
@@ -37,4 +53,4 @@ export const USERS_LINKS: RouteItem[] = [
 ]
 
 
-export const ROUTES = [...CORE_ROUTES, ...USERS_LINKS]
+export const ROUTES = [...CORE_ROUTES, ...USERS_LINKS, ...BIZ_SAFE_ROUTES]

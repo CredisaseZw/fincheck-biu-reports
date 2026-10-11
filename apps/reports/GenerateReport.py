@@ -795,7 +795,6 @@ body {{
         s = self._subject
         verified = {
             "Registered Name": " " + self._badge(True) if s.get("is_company_verified") else "",
-            "Address (Registered)": " " + self._badge(True) if s.get("is_address_registered_verified") else "",
         }
         rows = [
             ("Registered Name", self._m(s.get("registered_name"))),
@@ -809,6 +808,9 @@ body {{
 
     def _render_company_contact(self) -> str:
         s = self._subject
+        verified = {
+            "Address (Registered)": " " + self._badge(True) if s.get("is_address_registered_verified") else "",
+        }
         rows = [
             ("Address (Registered)", self._m(s.get("address_registered")), True),
             ("Address (Operations)", self._m(s.get("address_operations")), True),
@@ -817,7 +819,7 @@ body {{
             ("Email", self._low(s.get("email")), True),
             ("Website", self._low(s.get("website")), True),
         ]
-        return self._card("Contact Details", self._grid_table(rows))
+        return self._card("Contact Details", self._grid_table(rows, verified))
 
     def _render_company_overview(self) -> str:
         ov = self._subject.get("overview") or {}
@@ -857,7 +859,7 @@ body {{
                 ("Gender", self._label(gender)),
                 ("Date of Birth", self._date(dob)),
                 ("PEP", "YES" if is_pep else "NO"),
-                ("Address (Latest)", self._m(address_latest)),
+                ("Address (Current)", self._m(address_latest)),
                 ("Address (Previous)", self._m(address_prev)),
                 ("Email", self._low(email)),
                 ("Mobile", self._e(mobile)),
@@ -1149,8 +1151,10 @@ body {{
             bank_rows = [
                 ("Account Name", self._m(b.get("account_name"))),
                 ("Type", self._label(b.get("account_type", ""))),
-                ("Narration", self._e(narration)),
                 ("Bank report date acquired", self._date(b.get("date_of_acquirement"))),
+                ("Narration", self._e(narration)),
+                ("Amount", self._e(b.get("amount"))),
+                ("Period", self._e(b.get("period"))),
                 ("Account No.", self._e(f"{b.get('account_number', '')}({b.get('currency')})" if b.get("currency") else b.get("account_number"))),
             ]
             

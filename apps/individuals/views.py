@@ -25,10 +25,10 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
     """
     A viewset for viewing and editing individual instances.
     """
-    
     queryset = Individuals.objects.prefetch_related(
         "claims",
         "absconders",
+        "directorship",
         "court_judgements",
         "insolvency_records",
         "public_information",

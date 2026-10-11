@@ -19,7 +19,7 @@ import type { CompanyOverviewFormData } from "@/hooks/useCompanyOverview";
 import type { ReportExtrasFormData } from "@/hooks/useReportExtras";
 export interface RouteItem  {
     name: string;
-    link: string;
+    link?: string;
     icon?: LucideIcon;
     component?: ComponentType<any>;
     children?: RouteItem[]
@@ -109,6 +109,8 @@ export interface onSelectEntityProps {
 export interface ListReport extends Timestamps{
   id: number;
   enquiry_reference: string;
+  report_narration: string | null
+  analyst_name :  string | null
   client: MiniCompany | MiniIndividual;
   subject: MiniCompany | MiniIndividual;
   subject_type : EntityValue,
@@ -178,12 +180,12 @@ export interface CompanyOperations {
   sales_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
   purchases_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
 }
-
 export interface  CompanyDirector extends Timestamps {
   position: "director" | "secretary" | "other";
   id: number,
   individual:number,
   individual_detail? : Individual | null
+  other_individual_directorships: string | null
 }
 
 export interface Shareholding extends Timestamps {
@@ -227,6 +229,8 @@ export interface BankerAccount {
   date_of_acquirement?: string;
   bank_code_narration?: "A" | "B" | "C" | "D" | "E" | "none";
   currency?: string | null;
+  amount?: string | null;
+  period?: string | null;
 }
 
 export interface ProfessionalPartner {
@@ -397,7 +401,9 @@ export interface Report extends Timestamps {
   overall_risk_rating : string | null,
   summary : string | null
   username: string | null
-  username_mobile : string | null
+  username_mobile : string | null,
+  report_narration: string | null
+  analyst_name :  string | null
   contact_person:string | null
   last_report :string | null
   suspension_reason : string | null,
@@ -422,7 +428,9 @@ export interface DefaultHeaderProps{
   subject_unique_id:string,
   enquiry_reference : string,
   last_report: string | null,
+  report_date: string | null,
   created_at : string,
+
 }
 
 export interface MonthlySummary {

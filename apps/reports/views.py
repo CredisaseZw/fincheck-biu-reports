@@ -7,9 +7,7 @@ from django.conf import settings
 from apps.utils.base_viewset import BaseAuthJSONViewSet
 from django.db.models.functions import TruncMonth
 from apps.reports.models import Report
-from apps.companies.models import Company
-from apps.individuals.models import Individuals
-from .serializers import ReportSerializer, ListReportSerializer
+from .serializers import ReportSerializer, ListReportSerializer, UpdateReportSerializer
 from rest_framework import status as STATUS
 from apps.utils.base_viewset import BaseListDataViewSet
 from rest_framework.decorators import action
@@ -37,7 +35,8 @@ from .lock_management import (
 from apps.utils.helpers import (
     get_content_type_id,
     bucket_date_range,
-    bucket_for_date    
+    bucket_for_date,
+    get_cycle_start
 )
 
 logger = logging.getLogger(__name__)
@@ -64,6 +63,8 @@ class ReportViewSet(BaseAuthJSONViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return ListReportSerializer
+        if self.action in ["update", "partial_update"]:
+            return UpdateReportSerializer
         return ReportSerializer
 
     @action(detail=False, methods=["POST"], url_path="request-report")
@@ -156,6 +157,7 @@ class ReportViewSet(BaseAuthJSONViewSet):
         subject_type = request.data.get("subject_type")
         client_type = request.data.get("client_type")    
         username_mobile = request.data.get("username_mobile", "")    
+        analyst_id = request.data.get("analyst_id", None)
 
         subject_content_type_id = get_content_type_id(subject_id, subject_type)
         client_content_type_id = get_content_type_id(client_id, client_type)
@@ -185,6 +187,10 @@ class ReportViewSet(BaseAuthJSONViewSet):
                 status=STATUS.HTTP_423_LOCKED,
             )
         
+        analyst = user
+        if analyst_id:
+            analyst = User.objects.filter(pk = int(analyst_id)).first()
+
         with transaction.atomic():
             status = Report.StatusChoices.IN_PROGRESS if self.request.user.is_staff else Report.StatusChoices.DRAFT
             report = Report.objects.create(
@@ -197,7 +203,9 @@ class ReportViewSet(BaseAuthJSONViewSet):
                 client_content_type_id=client_content_type_id,
                 status = status,
                 report_date = report_date,
+                analyst = analyst,
                 updated_by = user   
+
             )
 
         report.refresh_from_db()
@@ -397,10 +405,6 @@ class ArchivedReportsViewSet(BaseListDataViewSet, DestroyModelMixin):
             finalized_at__date__gte=start, finalized_at__date__lte=end
         )
 
-        # page = self.paginate_queryset(instance)
-        # serializer = self.get_serializer(page or instance, many=True)
-        # return self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
-
         serializer = self.get_serializer(instance, many = True)
         return Response(serializer.data, status=STATUS.HTTP_200_OK)
 class DashboardStats(ViewSet):
@@ -429,7 +433,7 @@ class DashboardStats(ViewSet):
     def list(self, request, *args, **kwargs):
         now = timezone.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_start = get_cycle_start(now)
         year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
 
         data = {

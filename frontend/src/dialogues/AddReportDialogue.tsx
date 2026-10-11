@@ -81,7 +81,8 @@ function AddReportDialogue({ report_item }: props) {
         reportExtras,
         createdAt,
         usernameMobile,
-        isRefreshingCredits, 
+        isRefreshingCredits,
+        onSelectAnalyst,
         refreshCreditRecords,
         setUsernameMobile,
         setCreatedAt,
@@ -139,6 +140,7 @@ function AddReportDialogue({ report_item }: props) {
                                 contactPerson = {contactPerson}
                                 createdAt = {createdAt}
                                 usernameMobile = {usernameMobile}
+                                onSelectAnalyst = {onSelectAnalyst}
                                 setUsernameMobile = {setUsernameMobile}
                                 setCreatedAt ={setCreatedAt}
                                 setContactPerson = {setContactPerson}

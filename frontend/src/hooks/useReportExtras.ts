@@ -8,11 +8,13 @@ import useDetailCacheUpdate from './useDetailCacheUpdate';
 import { getItem } from '@/lib/storage';
 import useSectionTouched from './useSectionTouched';
 import useInstanceMutation from './api/useInstanceMutation';
+import { toast } from 'sonner';
 
 const schema = z.object({
     username : z.string().optional(),
     contact_person :z.string().optional(),
     username_mobile : z.string().optional(),
+    report_narration: z.string().optional(),
 })
 
 export type ReportExtrasFormData = z.infer<typeof schema>;
@@ -58,9 +60,11 @@ export default function useReportExtras({
             mode:  "update"
         }, {
             onSuccess : (report: Report) =>{
-                if (changes.username_mobile){ cache.set(["username_mobile"], report.username_mobile)}
-                if (changes.username){ cache.set(["username"], report.username)}
-                if (changes.contact_person){ cache.set(["contact_person"], report.contact_person) }
+                if (changes.username_mobile) { cache.set(["username_mobile"], report.username_mobile)}
+                if (changes.username) { cache.set(["username"], report.username)}
+                if (changes.contact_person) { cache.set(["contact_person"], report.contact_person) }
+                if (changes.report_narration) { cache.set(["report_narration"], report.report_narration)}
+                toast.success("Report Extras updated successfully")
                 onTouched();
             },
             onError: (error) => handleAxiosError(error)

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
-
+from apps.directors.models import CompanyDirector
 class MiniCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
@@ -46,6 +46,21 @@ class MiniIndividualDebtorSerializers(serializers.ModelSerializer):
             "debtor_object_id" : obj.id,
             "debtor_type" : "individual"      
         }
+class MiniCompanyDirectorSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyDirector
+        fields = [
+            "id",
+            "position",
+            "company"
+        ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['company'] = instance.company.registered_name
+        return representation
+
+
 class MiniCompanyDebtorSerializers(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     extras = serializers.SerializerMethodField()

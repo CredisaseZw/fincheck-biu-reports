@@ -21,7 +21,7 @@ import {
   KeyRound,
   LogOut,
 } from 'lucide-react'
-import { CORE_ROUTES, USERS_LINKS } from "@/constants/routes"
+import { CORE_ROUTES, USERS_LINKS, BIZ_SAFE_ROUTES } from "@/constants/routes"
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { useMemo, useState } from 'react';
@@ -40,12 +40,7 @@ export function AppSidebar() {
         : user?.full_name
     }, [user])
 
-    const ROUTES = useMemo(()=>{
-        return CORE_ROUTES.map((route)=>{
-            if(user?.i_s) return route
-            if(!user?.i_s && route.name !== "Dashboard")return route 
-        })
-    }, [user])
+    const ROUTES = useMemo(() => CORE_ROUTES.filter((route) => user?.i_s || route.name !== "Dashboard"),[user])
 
     return (
     <Sidebar>
@@ -76,6 +71,17 @@ export function AppSidebar() {
                     </SidebarMenu>
                 </SidebarGroupContent>
             </SidebarGroup>
+            {
+                user?.i_s &&
+                <SidebarGroup>
+                    <SidebarGroupLabel>BIZSAFE</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {BIZ_SAFE_ROUTES.map((link) => <CustomSidebarMenuItem link={link} key={link.name} />)}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            }
             {
                 user?.i_s &&
                 <SidebarGroup>

@@ -92,7 +92,32 @@ function BankerDetails({
                                     <p className="text-destructive text-sm">{errors.accounts[index].account_name.message}</p>
                                 )}
                             </div>
-                            <ColumnsContainer numberOfCols={2} gapClass="gap-4">
+                            <ColumnsContainer numberOfCols={3} gapClass="gap-4">
+                                <div className="form-group">
+                                    <Label>Account Type</Label>
+                                    <Controller
+                                        key={getValues(`accounts.${index}.account_type`)}
+                                        control={control}
+                                        name={`accounts.${index}.account_type`}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {ACCOUNT_TYPES.map((t) => (
+                                                        <SelectItem key={t.value} value={t.value}>
+                                                            {t.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                    {errors.accounts?.[index]?.account_type && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].account_type.message}</p>
+                                    )}
+                                </div>
                                 <div className="form-group">
                                     <Label>Account Number</Label>
                                     <Input {...register(`accounts.${index}.account_number`)} />   
@@ -126,30 +151,19 @@ function BankerDetails({
                                     )}
                                 </div>
                             </ColumnsContainer>
-                            <ColumnsContainer numberOfCols={3}>
+                            <ColumnsContainer numberOfCols={4}>
                                 <div className="form-group">
-                                    <Label>Account Type</Label>
-                                    <Controller
-                                        key={getValues(`accounts.${index}.account_type`)}
-                                        control={control}
-                                        name={`accounts.${index}.account_type`}
-                                        render={({ field }) => (
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select type" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {ACCOUNT_TYPES.map((t) => (
-                                                        <SelectItem key={t.value} value={t.value}>
-                                                            {t.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                    {errors.accounts?.[index]?.account_type && (
-                                        <p className="text-destructive text-sm">{errors.accounts[index].account_type.message}</p>
+                                    <Label>Amount</Label>
+                                    <Input {...register(`accounts.${index}.amount`)}/>
+                                    {errors.accounts?.[index]?.amount && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].amount.message}</p>
+                                    )}
+                                </div>
+                                <div className="form-group">
+                                    <Label>Period</Label>
+                                    <Input {...register(`accounts.${index}.period`)}/>
+                                    {errors.accounts?.[index]?.period && (
+                                        <p className="text-destructive text-sm">{errors.accounts[index].period.message}</p>
                                     )}
                                 </div>
                                 <div className="form-group">
@@ -200,11 +214,11 @@ function BankerDetails({
                         variant="outline"
                         className="self-start"
                         onClick={() => append({
-                            bank: "",
-                            branch: "",
-                            account_name: "",
+                            bank: undefined,
+                            branch: undefined,
+                            account_name: undefined,
                             account_type: "none",
-                            account_number: "",
+                            account_number: undefined,
                             date_of_acquirement: undefined,
                             bank_code_narration: "none",
                         })}

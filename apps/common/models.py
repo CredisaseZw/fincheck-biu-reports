@@ -64,7 +64,7 @@ class BankerAccounts(BaseModelWithSubject):
         A = "A", "A - Very Good Credit Worthiness (Lowest Risk)"
         B = "B", "B - Good Credit Worthiness (Low Risk)"
         C = "C", "C - Satisfactory Credit Worthiness (Moderate Risk)"
-        D = "D", "D - No Credit Worthy"
+        D = "D", "D - Not Credit Worthy"
         E = "E", "E - Rating Suspended"
         NONE = "none", "None"
     class Currency(models.TextChoices):
@@ -99,6 +99,8 @@ class BankerAccounts(BaseModelWithSubject):
         blank=True,
         null=True
     )
+    amount = models.CharField(max_length=250, blank = True, null = True)
+    period = models.CharField(max_length=300, blank = True, null = True)
 
     class Meta:
 

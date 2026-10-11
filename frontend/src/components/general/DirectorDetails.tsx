@@ -231,7 +231,7 @@ const DirectorRow = ({
         
             <ColumnsContainer>
                 <div className="form-group">
-                    <Label className="required">Latest Address</Label>
+                    <Label className="required">Current Address</Label>
                     <Textarea {...register(`directors.${index}.residential_address`)} disabled={isChecking} />
                     {errors.directors?.[index]?.residential_address && (
                         <p className="text-destructive text-sm">{errors.directors[index].residential_address.message}</p>
@@ -246,6 +246,25 @@ const DirectorRow = ({
                     )}
                 </div>
             </ColumnsContainer>
+            <div className="form-group">
+                <div className="card">
+                    <Label>Other Directorships & Positions</Label>
+                    {/* {(()=>{
+                        const value = getValues(`directors.${index}.other_individual_directorships`)
+                    
+                        return (
+                            <ol>
+                                {
+                                    value.split("\n").map((item: string, index: number)=>(
+                                        <li key={index}>{item}</li>
+                                    ))
+                                }
+                                <li></li>
+                            </ol>
+                        )
+                    })()} */}
+                </div>
+            </div>
             <div className="form-group">
                 <div className="card relative">
                     <Label className="mb-2.5">Insolvencies, Judgements, Defaults</Label>

@@ -72,6 +72,10 @@ function ArchivedReportsTable({
                         <span>{subject_bottom_level}</span>
                     </div>
                 </TableCell>
+                {
+                    user?.i_s &&
+                    <TableCell> {item.analyst_name ?? '-'} </TableCell>
+                }
                 <TableCell>{(!item.username || item.username.trim() === "") ? '-' : item.username}</TableCell>
                 <TableCell className="text-center">
                     {item.overall_risk_rating !== null ? item.overall_risk_rating : "-"}

@@ -23,6 +23,8 @@ const accountSchema = z.object({
     date_of_acquirement: z.string().optional(),
     bank_code_narration: Narrations.optional(),
     currency: z.string().optional(),
+    amount: z.string().optional(),
+    period: z.string().optional(),
 })
 
 const schema = z.object({ accounts: z.array(accountSchema) })

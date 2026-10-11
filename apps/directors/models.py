@@ -24,7 +24,7 @@ class CompanyDirector(BaseModel):
     individual = models.ForeignKey(
         "individuals.Individuals",
         on_delete=models.CASCADE,
-        related_name='directorship',
+        related_name='c',
         blank=True,
         null=True
     )

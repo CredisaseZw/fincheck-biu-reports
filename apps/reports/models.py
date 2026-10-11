@@ -35,7 +35,6 @@ class Report(BaseModel):
     )
     subject_object_id = models.PositiveIntegerField()
     subject = GenericForeignKey("subject_content_type", "subject_object_id")
-
     client_content_type = models.ForeignKey(
         ContentType,
         on_delete=models.PROTECT,
@@ -43,7 +42,17 @@ class Report(BaseModel):
     )
     client_object_id = models.PositiveIntegerField()
     client = GenericForeignKey( "client_content_type",  "client_object_id")
-    
+    analyst = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="analyst_reports"
+    )
+    report_narration = models.TextField(
+        blank=True,
+        null=True
+    )
     contact_person = models.TextField(
         blank=True,
         null=True

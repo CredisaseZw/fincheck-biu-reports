@@ -34,6 +34,9 @@ function useAddReportDialogue(list_report?: ListReport) {
   const { mutate } = useCreateReport();
   const { setReportLoading } = useReport()
   const [open, setOpen] = useState(false);  
+
+  // Report Header form elements
+
   const [clientObjectId, setClientObjectId] = useState<number | null>(null);
   const [subjectObjectId, setSubjectObjectId] = useState<number | null>(null);
   const [clientType, setClientType] = useState<EntityValue>("company")
@@ -42,6 +45,10 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [usernameMobile, setUsernameMobile] = useState<string>("");
   const [contactPerson, setContactPerson] = useState<string>("")
   const [createdAt, setCreatedAt] = useState<string>(toDatetimeLocal(new Date().toISOString()))
+  const [analystId, setAnalystId] = useState<null | number>(null);
+  
+  // Report Sub Components
+
   const [report, setReport] =useState<Report | undefined>(undefined)
   const [headerEditMode, setHeaderEditMode ] = useState<boolean>()
   const [defaultHeader, setDefaultHeader] = useState<DefaultHeaderProps | undefined>(undefined);
@@ -129,6 +136,13 @@ function useAddReportDialogue(list_report?: ListReport) {
     setSubjectObjectId(value)
   }
 
+  const onSelectAnalyst = (analyst_id: number | null) =>{
+    if(!analyst_id){
+      setAnalystId(null)
+      return
+    }
+    setAnalystId(analyst_id)
+  } 
 
   useEffect(() => {
     if (!open) return;
@@ -148,6 +162,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     if(!report) return;
 
     setDefaultHeader({
+      report_date: report.report_date,
       client_default_search : getEntityName(report.client),
       subject_default_search : getEntityName(report.subject),
       subject_unique_id : getEntityID(report.subject),
@@ -158,27 +173,28 @@ function useAddReportDialogue(list_report?: ListReport) {
     })
 
     setReportExtras({
-      username_mobile : report.username_mobile ?? "",
-      username :  report.username ?? "",
-      contact_person : report.contact_person ?? "",
+      username_mobile : report.username_mobile ?? undefined,
+      username :  report.username ?? undefined,
+      contact_person : report.contact_person ?? undefined,
+      report_narration : report.report_narration ?? undefined
     })
     
     if(report.subject_type === "company"){
       const company = report.subject as Company
       setCompanyInformation({
         id: company.id,
-        registration_number: company?.registration_number ?? "",
-        registered_name: company?.registered_name ?? "",
-        re_registration_number: company?.re_registration_number ?? "",
-        trading_name: company?.trading_name ?? "",
+        registration_number: company?.registration_number ?? undefined,
+        registered_name: company?.registered_name ?? undefined,
+        re_registration_number: company?.re_registration_number ?? undefined,
+        trading_name: company?.trading_name ?? undefined,
         date_of_incorporation: company?.date_of_incorporation ?? undefined,
         date_of_registration: company?.date_of_registration ?? undefined,
-        address_registered: company?.address_registered ?? "", 
-        address_operations: company?.address_operations ?? "", 
-        email: company?.email ?? "",
-        telephone_number: company?.telephone_number ?? "",
-        mobile_number: company?.mobile_number ?? "",
-        website: company?.website ?? "",
+        address_registered: company?.address_registered ?? undefined, 
+        address_operations: company?.address_operations ?? undefined, 
+        email: company?.email ?? undefined,
+        telephone_number: company?.telephone_number ?? undefined,
+        mobile_number: company?.mobile_number ?? undefined,
+        website: company?.website ?? undefined,
         is_address_registered_verified: company?.is_address_registered_verified ?? true, 
       })
       setCompanyOverview({
@@ -271,12 +287,12 @@ function useAddReportDialogue(list_report?: ListReport) {
       
       setEmploymentInformation({
         individual_id : individual.id,
-        employer: individual.employment_information?.employer ?? "",
-        position: individual.employment_information?.position ?? "",
+        employer: individual.employment_information?.employer ?? undefined,
+        position: individual.employment_information?.position ?? undefined,
         employment_status: individual.employment_information?.employment_status ?? undefined,
         years_employed: individual.employment_information?.years_employed ?? undefined,
-        monthly_income: individual.employment_information?.monthly_income ?? "",
-        previous_employer: individual.employment_information?.previous_employer ?? "",
+        monthly_income: individual.employment_information?.monthly_income ?? undefined,
+        previous_employer: individual.employment_information?.previous_employer ?? undefined,
       })
       
       setNextOfKin({
@@ -310,13 +326,13 @@ function useAddReportDialogue(list_report?: ListReport) {
       report.subject.absconders.length > 0
       ? report.subject.absconders.map(item => ({
         id: item.id,
-        creditor_name : item.creditor_name ?? "",
+        creditor_name : item.creditor_name ?? undefined,
         currency : item.currency ?? "USD",
         amount : Number(item.amount),
         start_date: item.start_date,
         status : item.status,
         ...(item.overdue_balance && { overdue_balance : Number(item.overdue_balance)}),
-        account_number : item.account_number ?? "",
+        account_number : item.account_number ?? undefined,
         default_search : item.debtor.name,
         debtor_object_id: item.debtor.extras.debtor_object_id,
         debtor_type: item.debtor.extras.debtor_type, 
@@ -332,7 +348,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         court_name: item.court_name,
         currency : item.currency,
         status : item.status,
-        plaintf_name : item.plaintf_name ?? "",
+        plaintf_name : item.plaintf_name ?? undefined,
         amount : Number(item.amount),
         judgement_date : item.judgement_date
       }))
@@ -436,15 +452,17 @@ function useAddReportDialogue(list_report?: ListReport) {
           date_of_acquirement: item.date_of_acquirement ?? undefined,  
           bank_code_narration: item.bank_code_narration,
           currency: item.currency ?? undefined,
+          amount: item.amount ?? undefined,
+          period: item.period ?? undefined
       }))
       : [{
-            bank: "",
-            account_name: "",
+            bank: undefined,
+            account_name: undefined,
             account_type: "none",
-            account_number: "",
+            account_number: undefined,
             date_of_acquirement: undefined,
             bank_code_narration: "none",
-            currency: "",
+            currency: undefined,
         }]
     )
 
@@ -466,11 +484,14 @@ function useAddReportDialogue(list_report?: ListReport) {
     if(!clientObjectId || !subjectObjectId) return;
     setReportLoading(true);
 
+    console.log(analystId)
+
     const payload = {
+      ...(analystId && { analyst_id : analystId }),
       ...(username && { username : username,}),
       ...(usernameMobile && { username_mobile : usernameMobile }),
       ...(contactPerson && {contact_person : contactPerson}),
-      ...(createdAt && {report_date: new Date(createdAt).toISOString()}),
+      ...(createdAt && { report_date: new Date(createdAt).toISOString()}),
       client_object_id : clientObjectId,
       client_type :  clientType,
       subject_object_id : subjectObjectId,
@@ -499,6 +520,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     setReportExtras(undefined)
     setDefaultHeader(undefined)
     setClientObjectId(null)
+    setAnalystId(null)
     setSubjectObjectId(null)
     setHeaderEditMode(!list_report);
     setCompanyOverview(undefined);
@@ -559,6 +581,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     createdAt,
     isRefreshingCredits,
     usernameMobile,
+    onSelectAnalyst,
     refreshCreditRecords,
     setUsernameMobile,
     setCreatedAt,

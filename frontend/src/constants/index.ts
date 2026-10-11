@@ -2,24 +2,22 @@ import type { Address, Header } from "@/types/core";
 import { FileText, Image, File } from "lucide-react";
 import {z} from "zod"
 
-export const LiveReportHeaders:Header[] = [
-    { name : "Enquiry Ref", textAlign : "center"},
-    { name : "Request Date", textAlign : "center" },
-    { name : "Client" },
-    { name : "Subject" },
-    { name : "Requestor", textAlign: "left"},
-    { name : "Contact Person", textAlign: "left"},
-    { name : "Report Status"},
-    { name : "Action", textAlign : "center" },
+export const LiveReportHeaders: Header[] = [
+    { name: "Enquiry Ref / Date", textAlign: "center" },
+    { name: "Client" },
+    { name: "Subject" },
+    { name: "Requestor / Analyst", textAlign: "left" },
+    { name: "Contact Person", textAlign: "left" },
+    { name: "Report Status" },
+    { name: "Action", textAlign: "center" },
 ]
-export const LiveClientReportHeaders:Header[] = [
-    { name : "Enquiry Ref", textAlign : "center"},
-    { name : "Request Date", textAlign : "center" },
-    { name : "Subject" },
-    { name : "Requestor", textAlign: "left"},
-    { name : "Contact Person", textAlign: "left"},
-    { name : "Report Status"},
-    { name : "Action", textAlign : "center" },   
+export const LiveClientReportHeaders: Header[] = [
+    { name: "Enquiry Ref / Date", textAlign: "center" },
+    { name: "Subject" },
+    { name: "Requestor", textAlign: "left" },
+    { name: "Contact Person", textAlign: "left" },
+    { name: "Report Status" },
+    { name: "Action", textAlign: "center" },
 ]
 export const ReportHeaders:Header[] = [
     { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
@@ -27,6 +25,7 @@ export const ReportHeaders:Header[] = [
     { name : "Request Date", textAlign : "center", value : "created_at" },
     { name : "Client", value : "client"},
     { name : "Subject", value : "subject"},
+    { name : "Analyst", value : "analyst_name"},
     { name : "Requestor", textAlign: "left", value:"username"},
     { name : "Overall Risk Rating", textAlign : "center"},
     { name : "Action", textAlign : "center" },
@@ -34,6 +33,7 @@ export const ReportHeaders:Header[] = [
 export const ClientReportHeaders:Header[] = [
     { name : "Enquiry Ref", textAlign : "center", value : "enquiry_reference"},
     { name : "Report Date", textAlign : "center", value : "created_at" },
+    { name : "Request Date", textAlign : "center", value : "created_at" },
     { name : "Subject", value : "subject"},
     { name : "Requestor", textAlign: "left", value:"username"},
     { name : "Overall Risk Rating", textAlign : "center"},

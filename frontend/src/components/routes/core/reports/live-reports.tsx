@@ -1,24 +1,16 @@
 import BaseTable from "@/components/general/BaseTable";
 import ColumnsContainer from "@/components/general/ColumnsContainer";
-import { OptionButton } from "@/components/general/OptionButton";
-import OptionsWrapper from "@/components/general/OptionsWrapper";
+import LiveReportRows from "@/components/general/LiveReportRows";
 import SearchBox from "@/components/general/Searchbox";
 import SectionHeader from "@/components/general/SectionHeader";
-import { StatusPill } from "@/components/general/StatusPills";
-import { TableCell, TableRow } from "@/components/ui/table";
-import { REPORT_STATUS_PILL_VARIANTS, LiveReportHeaders, LiveClientReportHeaders } from "@/constants";
+import { LiveReportHeaders, LiveClientReportHeaders } from "@/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import AddReportDialogue from "@/dialogues/AddReportDialogue";
 import ClientRequestReportsDialog from "@/dialogues/ClientRequestReportsDialog";
 import CreateCompanyDialogue from "@/dialogues/CreateCompanyDialogue";
 import CreateIndividualDialogue from "@/dialogues/CreateIndividualDialogue";
-import DeleteReportAlert from "@/dialogues/DeleteReportDialogue";
 import FilterOptionsDialogue from "@/dialogues/FilterOptionsDialgue";
-import SuspendReportDialog from "@/dialogues/SuspendReportDialog";
 import useReports from "@/hooks/useReports";
-import { getEntityName, getFormattedDate, toCap } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
-import { toast } from "sonner";
 
 function LiveReports() {
     const { user } = useAuth()
@@ -28,6 +20,8 @@ function LiveReports() {
         isLoading,
         isError,
     } = useReports();
+
+    const isStaff = !!user?.i_s
 
     return (
     <div className="flex flex-col gap-6">
@@ -40,14 +34,14 @@ function LiveReports() {
             />
             <div className="flex flex-col gap-3 md:flex-row md:justify-end self-center">
                 {
-                    user?.i_s 
-                    ?<AddReportDialogue/>
+                    isStaff
+                    ? <AddReportDialogue/>
                     : <ClientRequestReportsDialog/>
                 }
                 {
-                    user?.i_s &&<>
+                    isStaff && <>
                         <CreateCompanyDialogue/>
-                        <CreateIndividualDialogue/>                    
+                        <CreateIndividualDialogue/>
                     </>
                 }
             </div>
@@ -62,95 +56,15 @@ function LiveReports() {
 
             <div className="mt-5">
                 <BaseTable
-                    isLoading = {isLoading}
-                    isError = {isError}
-                    isEmpty = {reports.length === 0}
+                    isLoading={isLoading}
+                    isError={isError}
+                    isEmpty={reports.length === 0}
                     paginationData={pagination}
-                    headers={
-                        user?.i_s 
-                        ? LiveReportHeaders
-                        : LiveClientReportHeaders
-                    }
+                    headers={isStaff ? LiveReportHeaders : LiveClientReportHeaders}
                 >
-                    {
-                        reports.map((item)=>{
-                            const client_bottom_level = "national_id" in  item.client
-                            ? item.client.national_id ?? "-"
-                            : item.client.re_registration_number ?? item.client.registration_number ?? item.client.trading_name ??"-"
-
-                            const subject_bottom_level = "national_id" in  item.subject
-                            ? item.subject.national_id ?? "-"
-                            : item.subject.re_registration_number ?? item.subject.registration_number ?? item.subject.trading_name ?? "-"
-                            
-                            const pillVariant = (item.is_stale && item.status === "in_progress") ? "danger" : REPORT_STATUS_PILL_VARIANTS[item.status]
-
-                            return (
-                            <TableRow key={item.id}>
-                                <TableCell className="text-center">{item.enquiry_reference}</TableCell>
-                                <TableCell className="text-center">
-                                    {getFormattedDate(item.report_date ?? item.created_at)}
-                                </TableCell>
-                                {
-                                    user?.i_s &&
-                                    <TableCell>
-                                        <div className="flex flex-col gap-1 text-center">
-                                            <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.client)}</span>
-                                            <span>{client_bottom_level}</span>
-                                        </div>
-                                    </TableCell>
-                                }
-                                <TableCell>
-                                    <div className="flex flex-col gap-1 text-center">
-                                        <span className="font-bold text-gray-700 dark:text-gray-200">{getEntityName(item.subject)}</span>
-                                        <span>{subject_bottom_level}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{(!item.username || item.username.trim() === "") ? '-' : item.username}</TableCell>
-                                <TableCell className="max-w-50 wrap-break-word">{(!item.contact_person || item.contact_person.trim() === "") ? '-' : item.contact_person}</TableCell>
-                                <TableCell className="text-center">
-                                    <StatusPill variant={pillVariant as any}>
-                                        {toCap(item.status)}
-                                    </StatusPill>
-                                </TableCell>
-                                <TableCell className="flex items-center justify-center">
-                                    <OptionsWrapper>
-                                        {
-                                            user?.i_s &&
-                                            <>
-                                                {
-                                                    (item.status === "finalized")
-                                                    ? <OptionButton
-                                                        onClick={() =>
-                                                            item.report_pdf
-                                                                ? window.open(item.report_pdf, "_blank", "noopener,noreferrer")
-                                                                : toast.error("Report PDF not available")
-                                                        }
-                                                        Icon={ExternalLink}
-                                                        label="View Report"
-                                                    /> 
-                                                    :<> 
-                                                        {
-                                                            item.status === "suspended"
-                                                            ? <SuspendReportDialog 
-                                                                mode={"unsuspend"} 
-                                                                reason={item.suspension_reason}
-                                                                id={item.id}
-                                                            />
-                                                            : <AddReportDialogue report_item={item}/>
-                                                        }
-                                                    </>
-                                                }
-                                            </>
-                                        }
-                                        <DeleteReportAlert 
-                                            id={item.id}
-                                            disabled={!user?.i_s && ["in_progress", "suspended", "finalized"].includes(item.status)}
-                                        />
-                                    </OptionsWrapper>
-                                </TableCell>
-                            </TableRow>
-                        )})
-                    }
+                    {reports.map((item) => (
+                        <LiveReportRows key={item.id} item={item} isStaff={isStaff} />
+                    ))}
                 </BaseTable>
             </div>
         </div>

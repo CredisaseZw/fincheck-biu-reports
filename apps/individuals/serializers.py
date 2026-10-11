@@ -26,6 +26,7 @@ from apps.credit_records.serializers import (
     InsolvencyRecordSerializer,
     PublicInformationSerializer,
 )
+from apps.utils.mini_serializers import MiniCompanyDirectorSerializers
 from apps.utils.enitity_helpers import sync_insolvencies_summary
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.utils.entity_lookup import EntityLookUp
@@ -117,7 +118,7 @@ class IndividualDirectorSerializer(serializers.ModelSerializer):
             "email",
             "address_prev",
             "insolvencies_judgements",
-            "is_pep"
+            "is_pep",
         ]
 
 # Write Serializers 

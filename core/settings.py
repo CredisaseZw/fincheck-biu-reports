@@ -35,6 +35,14 @@ _extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
 if _extra_hosts:
     ALLOWED_HOSTS += [h.strip() for h in _extra_hosts.split(',') if h.strip()]
 
+#FILE SIZE MANAGEMENT
+DATA_UPLOAD_MAX_MEMORY_SIZE = 15728640  # 15 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 15728640 
+
+#SYSTEM SETTINGS
+END_MONTH_END =  25
+CYCLE_START_DATE = 26
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer, EnquirySerializer
+from .serializers import UserSignInSerializers, CreateUserSerializer, UserSerializer, ChangePasswordSerializer, EnquirySerializer, WriteUserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -155,7 +155,12 @@ class UsersViewset(
     queryset = User.objects.all()
     filterset_class = UserFilterSet
     ordering = ["-created_at"]
-    serializer_class = UserSerializer
+
+    def get_serializer_class(self):
+        if self.action in ["partial_update", "update"]:
+            return WriteUserSerializer
+        return UserSerializer
+
 
     def perform_update(self, serializer):
         password = self.request.data.get("password", None)

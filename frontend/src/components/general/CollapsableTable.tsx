@@ -73,7 +73,7 @@ export default function CollapsableTable({
             />
             <span className="text-sm font-bold text-primary">{label}</span>
           </div>
-          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold dark:text-gray-100 text-primary">
             {count} {count === 1 ? "Report" : "Reports"}
           </span>
         </button>

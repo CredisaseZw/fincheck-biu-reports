@@ -82,6 +82,8 @@ class BankerAccountsWriteSerializer(serializers.ModelSerializer):
             "date_of_acquirement",
             "bank_code_narration",
             "currency",
+            "amount", 
+            "period"
         ]
 
 
