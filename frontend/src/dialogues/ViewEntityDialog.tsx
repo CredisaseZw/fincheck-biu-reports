@@ -224,6 +224,47 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
                 );
               })}
             </div>
+            {(() => {
+              const otherDirs = d.other_individual_directorships || (d.individual_detail as any)?.other_individual_directorships || [];
+              const extDirs = d.individual_detail?.external_directors || (d as any).external_directors;
+              const directorships: string[] = [];
+              if (Array.isArray(otherDirs)) {
+                otherDirs.forEach((item) => {
+                  if (item && item.trim()) directorships.push(item.trim());
+                });
+              } else if (typeof otherDirs === "string" && (otherDirs as string).trim()) {
+                (otherDirs as string).split("\n").forEach((line) => {
+                  if (line && line.trim()) directorships.push(line.trim());
+                });
+              }
+
+              if (extDirs) {
+                if (Array.isArray(extDirs)) {
+                  extDirs.forEach((item: string) => {
+                    if (item && item.trim()) directorships.push(item.trim());
+                  });
+                } else if (typeof extDirs === "string") {
+                  extDirs.split("\n").forEach((line) => {
+                    if (line && line.trim()) directorships.push(line.trim());
+                  });
+                }
+              }
+
+              if (directorships.length === 0) return null;
+
+              return (
+                <div className="mt-2 pt-2 border-t border-dashed border-gray-200">
+                  <span className="text-[7pt] font-bold uppercase tracking-wide text-gray-500 block mb-1">
+                    Other Directorships & Positions
+                  </span>
+                  <ul className="list-disc list-inside text-[8.5pt] font-semibold text-gray-900 uppercase space-y-0.5">
+                    {directorships.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
           </div>
         ))}
       </div>

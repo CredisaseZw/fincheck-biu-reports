@@ -25,7 +25,8 @@ const director = z.object({
     email : z.string().optional(),
     mobile_number :z.string().optional(),
     insolvencies_judgements : z.string().optional(),
-    other_individual_directorships : z.string().optional()
+    external_directors: z.string().optional(),
+    other_individual_directorships : z.array(z.string()).optional()
 })
 const schema = z.object({ directors : z.array(director) })
 

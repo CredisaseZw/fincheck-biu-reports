@@ -72,6 +72,7 @@ class Individuals(BaseModel):
         blank = True,
         null = True
     )
+    external_directors =models.TextField(blank=True, null=True)
     is_pep = models.BooleanField(default= False)
     mobile_number = models.CharField(_("Mobile number"),
         max_length=50,

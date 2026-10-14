@@ -872,6 +872,41 @@ body {{
                     if val_str and val_str not in ("-", "—"):
                         rows_html += f'<div class="dir-row"><span class="dir-l">{lbl}</span><span class="dir-v">{val}</span></div>\n              '
 
+            # Directorships & Positions
+            other_dirs = d.get("other_individual_directorships") or ind.get("other_individual_directorships") or []
+            ext_dirs = ind.get("external_directors") or d.get("external_directors")
+
+            directorships_list = []
+            if isinstance(other_dirs, list):
+                for item in other_dirs:
+                    if item and str(item).strip():
+                        directorships_list.append(str(item).strip())
+            elif isinstance(other_dirs, str) and other_dirs.strip():
+                for item in other_dirs.splitlines():
+                    if item.strip():
+                        directorships_list.append(item.strip())
+
+            if ext_dirs:
+                if isinstance(ext_dirs, list):
+                    for item in ext_dirs:
+                        if item and str(item).strip():
+                            directorships_list.append(str(item).strip())
+                elif isinstance(ext_dirs, str) and ext_dirs.strip():
+                    for item in ext_dirs.splitlines():
+                        if item.strip():
+                            directorships_list.append(item.strip())
+
+            dirs_html = ""
+            if directorships_list:
+                items_html = "".join(f'<li style="margin-bottom: 2px;">{self._u(item)}</li>' for item in directorships_list)
+                dirs_html = f"""
+              <div style="margin-top: 10px; border-top: 1px dashed #E2E8F0; padding-top: 8px;">
+                <span class="dir-l" style="display: block; margin-bottom: 4px;">Other Directorships & Positions</span>
+                <ul class="dir-v" style="margin: 0; padding-left: 16px; list-style-type: disc;">
+                  {items_html}
+                </ul>
+              </div>"""
+
             position = d.get("position", "")
 
             cards += f"""
@@ -881,6 +916,7 @@ body {{
                 <span class="dir-pos"> — {self._label(position)}</span>
               </div>
               {rows_html.strip()}
+              {dirs_html}
               <div class="dir-v" style="margin-top: 10px; display: block; border-top: 1px dashed #E2E8F0; padding-top: 10px;">{solvencies}</div>
             </div>"""
 

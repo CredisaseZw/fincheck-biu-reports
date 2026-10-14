@@ -185,7 +185,7 @@ export interface  CompanyDirector extends Timestamps {
   id: number,
   individual:number,
   individual_detail? : Individual | null
-  other_individual_directorships: string | null
+  other_individual_directorships: string[] | null
 }
 
 export interface Shareholding extends Timestamps {
@@ -379,6 +379,7 @@ export interface Individual extends CommonFields {
   date_of_birth: string;
   gender: "male" | "female" | "unknown";
   marital_status: "single" | "married" | "divorced" | "widowed";
+  external_directors: string | null;
   nationality: string;
   residential_address: string;
   mobile_number: string;

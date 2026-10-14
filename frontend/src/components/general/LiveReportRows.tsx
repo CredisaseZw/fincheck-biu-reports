@@ -127,7 +127,7 @@ export default function LiveReportRows({ item, isStaff }: { item: ListReport, is
                             </div>
                             {narration ? (
                                 <p className={cn(
-                                    "text-sm whitespace-pre-wrap wrap-break-word",
+                                    "text-sm whitespace-pre-wrap wrap-break-word text-primary",
                                     !expanded && "line-clamp-2"
                                 )}>
                                     {narration}

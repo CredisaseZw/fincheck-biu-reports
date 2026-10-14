@@ -247,7 +247,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         company.directors.length > 0
         ? company.directors.map(item => {
           const individualDetail = item?.individual_detail ?? undefined
-
+        
           return {
             id: individualDetail?.id ?? undefined,
             full_name: individualDetail?.full_name ?? "",
@@ -261,6 +261,8 @@ function useAddReportDialogue(list_report?: ListReport) {
             address_prev: individualDetail?.address_prev ?? undefined,
             national_id: individualDetail?.national_id ?? undefined,
             email: individualDetail?.email ?? undefined,
+            external_directors: individualDetail?.external_directors ?? undefined,
+            other_individual_directorships: item.other_individual_directorships ?? undefined,
             mobile_number: individualDetail?.mobile_number ?? undefined,
             insolvencies_judgements: individualDetail?.insolvencies_judgements ?? undefined
           }
@@ -269,7 +271,6 @@ function useAddReportDialogue(list_report?: ListReport) {
       )
       
     } else {
-      
       const individual = report.subject as Individual
       setIndividualDetails({
         id: individual.id,

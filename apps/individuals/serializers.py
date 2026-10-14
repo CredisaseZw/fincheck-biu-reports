@@ -119,6 +119,7 @@ class IndividualDirectorSerializer(serializers.ModelSerializer):
             "address_prev",
             "insolvencies_judgements",
             "is_pep",
+            'external_directors'
         ]
 
 # Write Serializers 

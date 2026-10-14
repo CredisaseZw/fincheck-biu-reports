@@ -59,6 +59,7 @@ const DirectorRow = ({
                         if (ind.mobile_number) setValue(`directors.${index}.mobile_number`, ind.mobile_number, { shouldValidate: true });
                         if (ind.email) setValue(`directors.${index}.email`, ind.email, { shouldValidate: true });
                         if (ind.residential_address) setValue(`directors.${index}.residential_address`, ind.residential_address, { shouldValidate: true });
+                        if (ind.external_directors) setValue(`directors.${index}.external_directors`, ind.external_directors, { shouldValidate: true });
                         if (ind.insolvencies_judgements)  setValue(`directors.${index}.insolvencies_judgements`, ind.insolvencies_judgements, { shouldValidate: true });
                     }
                 } catch (error) { 
@@ -215,15 +216,21 @@ const DirectorRow = ({
                         control={control}
                         name={`directors.${index}.is_pep`}
                         render={({ field }) => (
-                        <div className="flex items-center gap-2 mt-4">
-                            <Checkbox
-                                id={`is_pep_d_${index}`}
-                                checked={field.value}
-                                disabled={isChecking}
-                                onCheckedChange={(val) => field.onChange(val === true)}
-                            />
-                            <label className="text-sm" htmlFor={`is_pep_d_${index}`}>PEP</label>
+                        <div>
+                            <div className="flex items-center gap-2 mt-4">
+                                <Checkbox
+                                    id={`is_pep_d_${index}`}
+                                    checked={field.value}
+                                    disabled={isChecking}
+                                    onCheckedChange={(val) => field.onChange(val === true)}
+                                />
+                                <label className="text-sm" htmlFor={`is_pep_d_${index}`}>PEP</label>
+                            </div>
+                            {errors.directors?.[index]?.is_pep && (
+                                <p className="text-destructive text-sm">{errors.directors[index].is_pep.message}</p>
+                            )}
                         </div>
+
                         )}
                     />
                 </div>
@@ -247,23 +254,34 @@ const DirectorRow = ({
                 </div>
             </ColumnsContainer>
             <div className="form-group">
+                <Label>Other Directorships & Positions</Label>
                 <div className="card">
-                    <Label>Other Directorships & Positions</Label>
-                    {/* {(()=>{
-                        const value = getValues(`directors.${index}.other_individual_directorships`)
-                    
+                    {(()=>{
+                        const internalDirs: string[] = getValues(`directors.${index}.other_individual_directorships`) || [];
+                        const externalDirs: string = watch(`directors.${index}.external_directors`) || "";
+                        const externalList = externalDirs ? externalDirs.split("\n").map((s: string) => s.trim()).filter(Boolean) : [];
+                        const allDirs = [
+                            ...(Array.isArray(internalDirs) ? internalDirs.filter(Boolean) : []),
+                            ...externalList
+                        ];
+
+                        if (allDirs.length === 0) return <p className="text-xs italic text-center text-muted-foreground">{"No other directorships recorded"}</p>;
                         return (
-                            <ol>
+                            <ol className="list-decimal list-inside space-y-1 text-sm">
                                 {
-                                    value.split("\n").map((item: string, index: number)=>(
-                                        <li key={index}>{item}</li>
+                                    allDirs.map((item: string, i: number)=>(
+                                        <li key={i}>{item}</li>
                                     ))
                                 }
-                                <li></li>
                             </ol>
-                        )
-                    })()} */}
+                        );
+                    })()}
                 </div>
+                <Label className = "text-sm">External directorships</Label>
+                <Textarea {...register(`directors.${index}.external_directors`)} disabled={isChecking} placeholder="Enter external directorships (one per line)" />
+                {errors.directors?.[index]?.external_directors && (
+                    <p className="text-destructive text-sm">{errors.directors[index].external_directors.message}</p>
+                )}
             </div>
             <div className="form-group">
                 <div className="card relative">
