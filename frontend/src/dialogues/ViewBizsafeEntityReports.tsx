@@ -1,7 +1,7 @@
 import { OptionButton } from "@/components/general/OptionButton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { toCap } from "@/lib/utils";
+import { getFormattedDate, toCap } from "@/lib/utils";
 import type { ReportGroupBy, ReportItem } from "@/types/core";
 import { Eye, Printer } from "lucide-react";
 import { useRef, useState } from "react";
@@ -76,7 +76,7 @@ function ViewBizsafeEntityReports({
                                 <tr key={index} className="border-b border-gray-300 even:bg-gray-50">
                                     <td className="py-2.5 px-4">{item.enquiry_reference}</td>
                                     <td className="py-2.5 px-4">{item.name}</td>
-                                    <td className="py-2.5 px-4">{item.report_date}</td>
+                                    <td className="py-2.5 px-4">{getFormattedDate(item.report_date)}</td>
                                 </tr>  
                             ))
                         }
