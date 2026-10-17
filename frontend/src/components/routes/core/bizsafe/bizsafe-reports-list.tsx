@@ -25,13 +25,13 @@ function BizsafeReportsList() {
             <h3 className="font-semibold text-sm">Showing results from {results.period.start} to {results.period.end}</h3>
             {
               results.results.length !== 0 &&
-              <Button>Download All</Button>
+              <Button>Download All</Button> // RETHINK THE FLOW
             }
           </div>
           
           <BaseTable
             isEmpty = {results.results.length === 0}
-            headers={ BIZ_SAFE_RESPONSE_TABLE } 
+            headers={ BIZ_SAFE_RESPONSE_TABLE }  
           >
             {
               results.results.map((item: ReportGroup, index: number) => (
