@@ -7,11 +7,23 @@ from django.conf import settings
 from apps.utils.base_viewset import BaseAuthJSONViewSet
 from django.db.models.functions import TruncMonth
 from apps.reports.models import Report
-from .serializers import ReportSerializer, ListReportSerializer, UpdateReportSerializer
+from django.contrib.contenttypes.models import ContentType
+from .serializers import (
+    ReportSerializer, 
+    ListReportSerializer, 
+    UpdateReportSerializer,
+    ReportListQuerySerializer,
+    ReportRowSerializer,
+    ReportGroupSerializer
+)
+from apps.companies.models import Company
+from apps.individuals.models import Individuals
 from rest_framework import status as STATUS
 from apps.utils.base_viewset import BaseListDataViewSet
 from rest_framework.decorators import action
+from rest_framework.viewsets import GenericViewSet
 from django.db import transaction
+from apps.utils.permissions import IsStaffUser
 from django.utils import timezone
 from datetime import date, timedelta
 from django.db.models import Q, Count
@@ -27,6 +39,8 @@ from .filters import (
     ReportsFilter, 
     BusinessReportsSearchFilter
 )
+from functools import reduce
+from operator import and_, or_
 from .lock_management import (
     acquire_report_lock,
     refresh_report_lock,
@@ -36,7 +50,9 @@ from apps.utils.helpers import (
     get_content_type_id,
     bucket_date_range,
     bucket_for_date,
-    get_cycle_start
+    get_cycle_start,
+    validate_serializer,
+    entity_name
 )
 
 logger = logging.getLogger(__name__)
@@ -480,3 +496,76 @@ class ClientMonthlyStats(ViewSet):
         ]
 
         return Response(data)
+
+class BizSafeReports(GenericViewSet):
+    permission_classes = [IsStaffUser]
+    queryset = Report.objects.filter(status=Report.StatusChoices.FINALIZED, is_deleted=False)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.SEARCHABLE = {
+            Company: ["registered_name", "trading_name"],
+            Individuals: ["full_name"],
+        }
+    
+    def entity_q(self, prefix: str, term: str) -> Q:
+        """Match reports whose client/subject (prefix) has a name matching every word in term."""
+        tokens = term.split()
+        q = Q()
+        for model, fields in self.SEARCHABLE.items():
+            name_q = reduce(and_, (
+                reduce(or_, (Q(**{f"{f}__icontains": t}) for f in fields))
+                for t in tokens
+            ))
+            q |= Q(**{
+                f"{prefix}_content_type": ContentType.objects.get_for_model(model),
+                f"{prefix}_object_id__in": model.objects.filter(name_q).values("pk"),
+            })
+        return q
+    
+    @action(detail=False, url_path="analytic-search", methods=["GET"])
+    def analytic_search(self, request, *args, **kwargs):
+        q = ReportListQuerySerializer(data=request.query_params)
+        error = validate_serializer(serializer=q)
+        if error:
+            return error
+        p = q.validated_data
+
+        group_by = p["report_selection"]                      
+        other = "subject" if group_by == "client" else "client"
+
+        qs = (
+            self.get_queryset()
+            .annotate(sort_date=Coalesce("report_date", "created_at"))
+            .filter(sort_date__gte=p["start"], sort_date__lt=p["end"])
+            .prefetch_related("client", "subject")        
+            .order_by("-sort_date")
+        )
+
+        if p["entity_term"]:
+            qs = qs.filter(self.entity_q(group_by, p["entity_term"]))
+
+        groups = {}
+        for r in qs:
+            key = (getattr(r, f"{group_by}_content_type_id"), getattr(r, f"{group_by}_object_id"))
+            g = groups.setdefault(key, {
+                "entity_id": key[1],
+                "name": entity_name(getattr(r, group_by)),
+                "reports": [],
+            })
+            g["reports"].append(r)
+
+        results = sorted(groups.values(), key=lambda g: g["name"].lower())
+        for g in results:
+            g["count"] = len(g["reports"])
+
+        return Response({
+            "mode": p["mode"],
+            "group_by": group_by,
+            "period": {
+                "label": p["label"],
+                "start": p["start"].date(),
+                "end": (p["end"] - timedelta(days=1)).date(),
+            },
+            "results": ReportGroupSerializer(results, many=True, context={"other": other}).data,
+        })

@@ -11,6 +11,7 @@ class DirectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyDirector
         exclude = ['company']
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if not getattr(instance, "individual_id", None):

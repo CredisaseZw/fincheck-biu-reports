@@ -72,11 +72,6 @@ export const DEFAULT_ADDRESSES:Address = {
     postal_code : ""
 }
 
-export function getYearRange(yearsBack: number = 50): number[] {
-  const currentYear = new Date().getFullYear();
-  return Array.from({ length: yearsBack + 1 }, (_, i) => currentYear - i);
-}
-
 export const COUNTRIES =  ["Zimbabwe", "Zambia", "Yemen", "Western Sahara", "Wallis and Futuna", 
 "Virgin Islands, U.S.", "Virgin Islands, British", "Viet Nam", "Venezuela", "Vanuatu", "Uzbekistan",
 "Uruguay", "United States Minor Outlying Islands", "United States", "United Kingdom", 
@@ -242,4 +237,30 @@ export const FILE_STYLES = {
       "border-red-300 bg-red-50 text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-400",
   },
 } as const;
+
 export const CLEAR_MESSAGE = "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"
+
+export const CYCLE_END_DAY = 25;
+
+export const SHORT_MONTHS = [
+    "jan", "feb", "mar", "apr", "may", "jun",
+    "jul", "aug", "sep", "oct", "nov", "dec",
+];
+
+export const LONG_MONTHS = [
+    "january", "february", "march", "april", "may", "june",
+    "july", "august", "september", "october", "november", "december",
+];
+
+export const BIZ_SAFE_RESPONSE_TABLE:Header[] = [
+    { name: "#"},
+    { name: "Name", textAlign: "left"},
+    { name: "Count"},
+    { name: "Action"}
+]
+
+export const BIZ_SAFE_ENTITY_TABLE:Header[] = [
+    { name: "#"},
+    { name: "Subject", textAlign: "left"},
+    { name: "Date"}
+]

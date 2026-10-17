@@ -6,8 +6,9 @@ import { CollapsableTableSkeleton } from "@/components/general/Skeletons";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getYearRange, ReportHeaders } from "@/constants";
+import { ReportHeaders } from "@/constants";
 import useBusinessReport from "@/hooks/useBusinessReport";
+import { getYearRange } from "@/lib/utils";
 import { Search, X } from "lucide-react";
 
 function BusinessReports() {

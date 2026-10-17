@@ -189,6 +189,12 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
         with transaction.atomic():
             shareholding = CompanyShareholding.objects.filter(pk=data.get("id")).first()
 
+            # Fallback: if no id was provided (or it didn't match), look up by company.
+            # CompanyShareholding has a OneToOne with Company, so creating a second one
+            # would violate the unique constraint. We update the existing one instead.
+            if shareholding is None:
+                shareholding = CompanyShareholding.objects.filter(company=company).first()
+
             if shareholding:
                 shareholding_serializer = CompanyShareholdingWriteSerializer(
                     data=data,

@@ -4,7 +4,7 @@ import Dashboard from "@/components/routes/core/reports/dashboard";
 import InternalUsers from "@/components/routes/core/reports/internal-users";
 import LiveReports from "@/components/routes/core/reports/live-reports";
 import type { RouteItem } from "@/types/core";
-import { Archive, FileText, LayoutDashboardIcon, Users2} from "lucide-react";
+import { Archive, FileText, LayersPlus, LayoutDashboardIcon, Users2} from "lucide-react";
 
 export const CORE_ROUTES: RouteItem[] = [
   {
@@ -30,7 +30,7 @@ export const CORE_ROUTES: RouteItem[] = [
 export const BIZ_SAFE_ROUTES: RouteItem[] = [
   {
     name: 'Bizsafe Reports',
-    icon: FileText,
+    icon: LayersPlus,
     children: [
       {
         name: 'Reports List',

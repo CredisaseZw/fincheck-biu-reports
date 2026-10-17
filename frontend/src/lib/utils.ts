@@ -1,4 +1,4 @@
-import { FILE_STYLES } from "@/constants";
+import { CYCLE_END_DAY, FILE_STYLES, LONG_MONTHS, SHORT_MONTHS } from "@/constants";
 import type { Address, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
@@ -33,6 +33,22 @@ export function getCurrentDateFormatted() {
   return `${day}-${month.toUpperCase()}-${year}`;
 }
 
+function getCycle(now: Date) {
+  const idx = now.getMonth() + (now.getDate() > CYCLE_END_DAY ? 1 : 0);
+  return {
+    month: idx % 12,
+    year: now.getFullYear() + (idx > 11 ? 1 : 0),
+  };
+}
+
+export function getCurrentMonth(now: Date = new Date()): (typeof LONG_MONTHS)[number] {
+  return LONG_MONTHS[getCycle(now).month];
+}
+
+export function getCurrentYear(now: Date = new Date()): string {
+  return String(getCycle(now).year);
+}
+
 export function getFormattedDate(dateStr: string){
    const date = new Date(dateStr);
 
@@ -40,13 +56,10 @@ export function getFormattedDate(dateStr: string){
     throw new Error("Invalid date string");
   }
 
-  const months = [
-    "jan", "feb", "mar", "apr", "may", "jun",
-    "jul", "aug", "sep", "oct", "nov", "dec",
-  ];
+
 
   const day = String(date.getDate()).padStart(2, "0");
-  const month = months[date.getMonth()];
+  const month = SHORT_MONTHS[date.getMonth()];
   const year = date.getFullYear();
 
   return `${day}-${month.toLocaleUpperCase()}-${year}`;
@@ -283,4 +296,9 @@ export const returnStringedList = (value: string) =>{
 
 export function normalize_national_id(value: string):string {
   return value.replace(/[^A-Za-z0-9]/g, "").trim().toUpperCase();
+}
+
+export function getYearRange(yearsBack: number = 50): number[] {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: yearsBack + 1 }, (_, i) => currentYear - i);
 }

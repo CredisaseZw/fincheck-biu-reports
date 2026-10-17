@@ -460,6 +460,38 @@ export interface EntityInformationProps{
   entity_type : EntityValue,
   id: number
 } 
+
+export type ISODateTime = string;
+export type ISODate = string;
+export type ReportMode = "month" | "period_month";
+export type ReportGroupBy = "client" | "subject"
+
+export interface ReportPeriod {
+  label: string;
+  start: ISODate;
+  end: ISODate;
+}
+
+export interface ReportItem {
+  id: number;
+  enquiry_reference: string;
+  name: string;
+  report_date: ISODateTime;
+}
+
+export interface ReportGroup {
+  entity_id: number;
+  name: string;
+  count: number;
+  reports: ReportItem[];
+}
+
+export interface BizsafeReportSummaryResponse {
+  mode: ReportMode;
+  group_by: ReportGroupBy;
+  period: ReportPeriod;
+  results: ReportGroup[];
+}
 export interface AbsconderProps extends ReportEntityProps{
   absconders_data: AbsconderFormData[]
 }

@@ -10,10 +10,12 @@ import { getItem } from "@/lib/storage";
 import { toast } from "sonner";
 import { GENDERS } from "@/constants";
 import useSectionTouched from "./useSectionTouched";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Positions = z.enum(["director", "secretary", "chairman","other"])
 const director = z.object({
     id : z.number().optional(),
+    director_id: z.number().optional(),
     full_name : z.string().min(1,"A valid name is required"),
     position: Positions,
     gender : GENDERS,
@@ -56,6 +58,7 @@ function useDirectors({
     })
 
     const cache = useDetailCacheUpdate<Report>(["report", subject_type, report_id])
+    const queryClient = useQueryClient()
     const CACHE_KEY = useMemo(()=>genStorageKey(report_id, subject_type, "directors_details"), [report_id,subject_type])
     const { mutate, isPending } = useInstanceMutation()
     const {onTouched, touched} = useSectionTouched(CACHE_KEY);
@@ -80,6 +83,8 @@ function useDirectors({
 
     const onSubmit = (data : DirectorsFormData) => {
         const changes = handleTrackChangedArray(directors_data, data.directors)
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            .map(({ director_id, ...rest }) => rest)
         if(changes.length === 0){
             onTouched();
             return
@@ -100,13 +105,23 @@ function useDirectors({
         })
     }
 
-    const onDelete = (id: number) =>{
+    const onDelete = (director_id: number) =>{
         mutate({
-            url : `/api/directors/${id}/`,
+            url : `/api/directors/${director_id}/`,
             mode : "deletion"
         }, {
             onSuccess : () => {
-                cache.removeFromList(["subject", "directors"], id)
+                queryClient.setQueryData<Report>(["report", subject_type, report_id], (old) => {
+                    if (!old || !old.subject) return old;
+                    const subject = old.subject as any;
+                    return {
+                        ...old,
+                        subject: {
+                            ...subject,
+                            directors: (subject.directors ?? []).filter((d: any) => d.id !== director_id)
+                        }
+                    };
+                });
                 toast.success("Directors successfully removed.")
                 onTouched();
             },

@@ -106,6 +106,11 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
             entity.sync_entity_records(instance, chained_data)
 
         instance.refresh_from_db()
+        # Clear Django's prefetch cache so related managers (directors, shareholdings,
+        # claims, etc.) are freshly re-queried after the sync above.
+        if hasattr(instance, '_prefetched_objects_cache'):
+            instance._prefetched_objects_cache = {}
+
         data =  super().to_representation(instance)
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()

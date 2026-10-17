@@ -250,6 +250,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         
           return {
             id: individualDetail?.id ?? undefined,
+            director_id: item?.id ?? undefined,
             full_name: individualDetail?.full_name ?? "",
             gender: individualDetail?.gender && individualDetail.gender.length >= 2
               ? individualDetail.gender
@@ -547,7 +548,7 @@ function useAddReportDialogue(list_report?: ListReport) {
 
   return { 
     subject_object_id : report?.subject.id ?? null,
-    subject_type : report?.subject_type ?? null,
+    subject_type : list_report?.subject_type ?? report?.subject_type ?? null,
     claims,
     professionals,
     report,

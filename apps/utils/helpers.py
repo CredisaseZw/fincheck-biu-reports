@@ -8,9 +8,10 @@ from apps.individuals.serializers import IndividualSerializer
 from apps.companies.serializers import CompanySerializer
 from apps.utils.mini_serializers import MiniCompanySerializer, MiniIndividualSerializer
 from calendar import monthrange
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from django.utils import timezone
 from django.conf import settings
+
 
 def clean_error(error):
     if isinstance(error, serializers.ValidationError):
@@ -97,3 +98,19 @@ def get_cycle_start(now):
         last_of_prev = start.replace(day=1) - timedelta(days=1)
         start = last_of_prev.replace(day=settings.CYCLE_START_DATE)
     return start
+
+
+def cycle_bounds(year: int, month: int):
+    py, pm = (year - 1, 12) if month == 1 else (year, month - 1)
+    start = timezone.make_aware(datetime(py, pm, 26))
+    end = timezone.make_aware(datetime(year, month, 26)) 
+    return start, end
+
+def entity_name(obj) -> str:
+    if obj is None:
+        return "Unknown"
+    for attr in ("registered_name", "full_name", "name"):
+        val = getattr(obj, attr, None)
+        if val:
+            return str(val)
+    return str(obj)

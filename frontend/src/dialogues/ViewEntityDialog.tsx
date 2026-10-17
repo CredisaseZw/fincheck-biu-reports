@@ -134,18 +134,38 @@ function GridRow({ label, value, extra }: { label: string; value: string | strin
   );
 }
 
-function DataTable({ headers, children }: { headers: string[]; children: React.ReactNode }) {
+type DataTableSize = "sm" | "md" | "lg";
+const SIZE_STYLES: Record<DataTableSize, { header: string; body: string; cell: string }> = {
+  sm: { header: "text-[6.5pt]", body: "text-[7.5pt]", cell: "py-2 px-3" },
+  md: { header: "text-[7.5pt]", body: "text-[8.5pt]", cell: "py-2.5 px-4" },
+  lg: { header: "text-[9pt]", body: "text-[10pt]", cell: "py-3 px-5" },
+};
+
+interface DataTableProps {
+  headers: string[];
+  children: React.ReactNode;
+  size?: DataTableSize;
+}
+
+export function DataTable({ headers, children, size = "md" }: DataTableProps) {
+  const s = SIZE_STYLES[size];
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-left">
         <thead>
           <tr className="bg-[#1E5474]">
             {headers.map((h, i) => (
-              <th key={i} className="text-white py-2.5 px-4 text-[7.5pt] font-bold uppercase tracking-wide">{h}</th>
+              <th
+                key={i}
+                className={`text-white ${s.cell} ${s.header} font-bold uppercase tracking-wide`}
+              >
+                {h}
+              </th>
             ))}
           </tr>
         </thead>
-        <tbody className="text-[8.5pt] font-medium uppercase text-gray-900">
+        <tbody className={`${s.body} font-medium uppercase text-gray-900`}>
           {children}
         </tbody>
       </table>
