@@ -56,8 +56,6 @@ export function getFormattedDate(dateStr: string){
     throw new Error("Invalid date string");
   }
 
-
-
   const day = String(date.getDate()).padStart(2, "0");
   const month = SHORT_MONTHS[date.getMonth()];
   const year = date.getFullYear();

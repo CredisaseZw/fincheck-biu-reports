@@ -1,5 +1,6 @@
 import BaseTable from "@/components/general/BaseTable";
 import BizsafeReportsListFormHeader from "@/components/general/BizsafeReportsListFormHeader";
+import LoadingIndicator from "@/components/general/LoadingIndicator";
 import SectionHeaderTitle from "@/components/general/SectionHeaderTitle";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -11,6 +12,8 @@ import type { ReportGroup } from "@/types/core";
 function BizsafeReportsList() {
   const {
     results,
+    isPending,
+    onDownloadAll,
     setResults
   } = useBizsafeReportsList();
 
@@ -25,7 +28,18 @@ function BizsafeReportsList() {
             <h3 className="font-semibold text-sm">Showing results from {results.period.start} to {results.period.end}</h3>
             {
               results.results.length !== 0 &&
-              <Button>Download All</Button> // RETHINK THE FLOW
+              <Button 
+                onClick={onDownloadAll}
+                disabled = {isPending}>
+                {
+                  isPending ?
+                  <>
+                    Downloading...
+                    <LoadingIndicator variant="button"/>
+                  </>
+                  : "Download All"
+                }
+              </Button>
             }
           </div>
           

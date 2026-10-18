@@ -1,6 +1,6 @@
 import { OptionButton } from "@/components/general/OptionButton";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { getFormattedDate, toCap } from "@/lib/utils";
 import type { ReportGroupBy, ReportItem } from "@/types/core";
 import { Eye, Printer } from "lucide-react";
@@ -39,7 +39,7 @@ function ViewBizsafeEntityReports({
                 className="w-fit"
             />
         </DialogTrigger>
-        <DialogContent className="md:max-w-230 md:h-[90vh] overflow-y-auto bg-white text-gray-800">
+        <DialogContent className="md:max-w-230 md:max-h-[90vh] overflow-y-auto bg-white text-gray-800">
             <div ref = {printRef}>
                 <style type="text/css" media="print">{`
                     @page {
@@ -81,14 +81,17 @@ function ViewBizsafeEntityReports({
                             ))
                         }
                     </DataTable>
-                    <div className="flex flex-row justify-end">
-                        <Button onClick={handlePrint}>
-                            <Printer/>
-                            Print
-                        </Button>
-                    </div>
                 </div>
             </div>
+            <DialogFooter>
+                <DialogClose>
+                    <Button variant={"ghost"}>Cancel</Button>
+                </DialogClose>
+                <Button onClick={handlePrint}>
+                    <Printer/>
+                    Print
+                </Button>
+            </DialogFooter>
         </DialogContent>
     </Dialog>
   )

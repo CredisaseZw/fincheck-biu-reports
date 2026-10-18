@@ -173,3 +173,20 @@ class ListReportSerializer(serializers.ModelSerializer):
         data['subject_type'] = 'individual' if subject_data and 'national_id' in subject_data else 'company'
 
         return data
+
+
+class ReportListItemInSerializer(serializers.Serializer):
+    enquiry_reference = serializers.CharField(max_length=20)
+    name = serializers.CharField(max_length=255)
+    report_date = serializers.DateTimeField()
+
+
+class ReportListGroupInSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    reports = ReportListItemInSerializer(many=True, allow_empty=False)
+
+
+class ReportListPDFRequestSerializer(serializers.Serializer):
+    group_by = serializers.ChoiceField(choices=["client", "subject"])
+    label = serializers.CharField(max_length=40)
+    groups = ReportListGroupInSerializer(many=True, allow_empty=False, max_length=200)

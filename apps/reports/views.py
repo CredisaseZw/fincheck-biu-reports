@@ -1,5 +1,9 @@
 import redis
 import logging
+import io
+import zipfile
+import re
+from django.http import FileResponse
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
@@ -13,8 +17,8 @@ from .serializers import (
     ListReportSerializer, 
     UpdateReportSerializer,
     ReportListQuerySerializer,
-    ReportRowSerializer,
-    ReportGroupSerializer
+    ReportGroupSerializer,
+    ReportListPDFRequestSerializer,
 )
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
@@ -33,6 +37,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.reports.GenerateReport import FincheckReportPDF
+from apps.reports.GenerateBizsafeReports import BizsafeReportListPDF
 from apps.users.models import User
 from .filters import (
     ReportSearchFilter,
@@ -569,3 +574,37 @@ class BizSafeReports(GenericViewSet):
             },
             "results": ReportGroupSerializer(results, many=True, context={"other": other}).data,
         })
+
+    @action(detail=False, url_path="download", methods=["POST"])
+    def download(self, request, *args, **kwargs):
+        s = ReportListPDFRequestSerializer(data=request.data)
+        error = validate_serializer(serializer=s)
+        if error:
+            return error
+        
+        d = s.validated_data
+        files = []
+        for g in d["groups"]:
+            pdf = BizsafeReportListPDF(d["group_by"], d["label"], g["name"], g["reports"])
+            files.append((pdf.filename(), pdf.generate_bytes()))
+
+        if len(files) == 1:
+            name, data = files[0]
+            return FileResponse(
+                io.BytesIO(data), 
+                as_attachment=True,
+                filename=name,
+                content_type="application/pdf"
+            )
+
+        buf = io.BytesIO()
+        seen = {}
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            for name, data in files:
+                n = seen.get(name, 0)
+                seen[name] = n + 1
+                zf.writestr(name if n == 0 else name.replace(".pdf", f" ({n}).pdf"), data)
+        buf.seek(0)
+        slug = re.sub(r"[^A-Za-z0-9]", "", d["label"])
+        return FileResponse(buf, as_attachment=True,
+                            filename=f"Report Lists {slug}.zip", content_type="application/zip")
