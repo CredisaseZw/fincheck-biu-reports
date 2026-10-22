@@ -111,6 +111,24 @@ class BankerAccounts(BaseModelWithSubject):
     def __str__(self):
         return f"{self.subject} | {self.account_name} ({self.account_number})"
 
+class ArchivedBankerCodes(BaseModel):
+    account = models.ForeignKey(
+        BankerAccounts,
+        on_delete=models.CASCADE,
+        related_name="account_codes"
+    )
+
+    report_date = models.DateField(db_index=True)   
+    narration = models.CharField(max_length=150)
+    amount = models.DecimalField(max_digits=16, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=10, choices=BankerAccounts.Currency.choices, default="USD")
+    period = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        db_table = "archived_accounts"
+        verbose_name = "Archived Accounts"
+        verbose_name_plural = "Banker Accounts"
+
 class ProfessionalPartners(BaseModelWithSubject): #PUSH TO COMMON 
     auditors = models.TextField()
     lawyers = models.TextField()

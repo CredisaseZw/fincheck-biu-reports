@@ -25,6 +25,15 @@ const accountSchema = z.object({
     currency: z.string().optional(),
     amount: z.string().optional(),
     period: z.string().optional(),
+    prev_reports: z
+    .array(
+        z.object({
+        key: z.union([z.string(), z.number()]),
+        date: z.string(),
+        text: z.string(),
+        })
+    )
+    .optional(),
 })
 
 const schema = z.object({ accounts: z.array(accountSchema) })

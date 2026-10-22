@@ -28,7 +28,6 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
     queryset = Individuals.objects.prefetch_related(
         "claims",
         "absconders",
-        "directorship",
         "court_judgements",
         "insolvency_records",
         "public_information",

@@ -256,6 +256,8 @@ class CompanyOverview(BaseModel):
         JOINT_VENTURE = "joint_venture", "Joint Venture"
         COOPERATIVE = "cooperative", "Cooperative"
         SOLE_TRADER = "sole_trader", "Sole Trader"
+        GOVERNMENT_ORGANIZATION = "government_organization", "Government Organization"
+        PARASTATAL = "parastatal", "Parastatal"
    
     company = models.OneToOneField(
         Company,
@@ -269,7 +271,7 @@ class CompanyOverview(BaseModel):
         blank=True
     )
     legal_form = models.CharField(
-        max_length=20,
+        max_length=100,
         choices=LegalForm.choices,
         null=True,
         blank=True

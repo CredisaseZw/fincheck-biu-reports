@@ -46,7 +46,9 @@ function BankerDetails({
             <Fieldset legendTitle="Banker Details" className="flex flex-col gap-4">
 
                 {   fields.length > 0 ?
-                    fields.map((field, index) => (
+                    fields.map((field, index) => {
+                        const prev_reports = getValues(`accounts.${index}.prev_reports`);
+                        return (
                         <div key={field.id} className="flex flex-col gap-4 border rounded-md p-4">
                             <div className="flex justify-between items-center">
                                 <p className="text-sm font-semibold text-muted-foreground">
@@ -202,9 +204,21 @@ function BankerDetails({
                                     )}
                                 </div>
                             </ColumnsContainer>
-
+                            {prev_reports?.length ? (
+                                <div className="form-group card">
+                                        <Label>Previous Report Codes</Label>
+                                        <div className="flex flex-col gap-3">
+                                        {prev_reports.map((h) => (
+                                            <div key={h.key} className="flex flex-col">
+                                            <span className="font-bold">{h.date}</span>
+                                            <p>{h.text}</p>
+                                            </div>
+                                        ))}
+                                        </div>
+                                    </div>
+                            ) : null}
                         </div>
-                    ))
+                    )})
                     : <span className="text-muted-foreground text-center">Add a Banker row</span>
                 }
 

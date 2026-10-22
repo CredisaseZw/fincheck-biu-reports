@@ -22,6 +22,8 @@ const LegalForm = z.enum([
     "joint_venture",
     "cooperative",
     "sole_trader",
+    "government_organization",
+    "parastatal"
 ])
 export const LegalForms = LegalForm.options;
 

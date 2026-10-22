@@ -26,10 +26,11 @@ from apps.credit_records.serializers import (
     InsolvencyRecordSerializer,
     PublicInformationSerializer,
 )
-from apps.utils.mini_serializers import MiniCompanyDirectorSerializers
 from apps.utils.enitity_helpers import sync_insolvencies_summary
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.utils.entity_lookup import EntityLookUp
+from apps.utils.manipulate_entities import CreateEntityGenericHandlers, UpdateEntityGenericHandlers
+
 entity = EntityLookUp()
 class EmploymentInformationSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
     class Meta:
@@ -123,7 +124,10 @@ class IndividualDirectorSerializer(serializers.ModelSerializer):
         ]
 
 # Write Serializers 
-class IndividualCreateSerializer(serializers.ModelSerializer):
+class IndividualCreateSerializer(
+    serializers.ModelSerializer,
+    CreateEntityGenericHandlers
+):
     date_of_birth = NullableDateField(required=False, allow_null=True)
     next_of_kin = NextOfKinSerializer(required=False)
     employment_information = EmploymentInformationSerializer(required=False)
@@ -152,28 +156,6 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Individuals
         fields = "__all__"
-
-    def _create_generic_relations(self, individual, data_list, model, content_type, updated_by = None):
-        for item in data_list:
-            item.pop("id", None)
-            model.objects.create(
-                subject_content_type=content_type,
-                subject_object_id=individual.id,
-                updated_by = updated_by,
-                **item
-            )
-
-    def _create_oto_generic(self, instance, data, model, content_type, updated_by = None):
-        if not data:
-            return
-        data = data.copy()
-        data.pop("id", None)
-        model.objects.create(
-            subject_content_type=content_type,
-            subject_object_id=instance.id,
-            updated_by = updated_by,
-            **data
-        )
 
     def create(self, validated_data):
         updated_by = validated_data.get("updated_by")
@@ -210,7 +192,7 @@ class IndividualCreateSerializer(serializers.ModelSerializer):
             self._create_generic_relations(individual, trade_references_data, TradeReferences,content_type, updated_by)
         return individual
     
-class IndividualUpdateSerializer(serializers.ModelSerializer):
+class IndividualUpdateSerializer(serializers.ModelSerializer, UpdateEntityGenericHandlers):
     next_of_kin = NextOfKinSerializer(required=False)
     date_of_birth = NullableDateField(required=False, allow_null=True)
     employment_information = EmploymentInformationSerializer(required=False)
@@ -242,31 +224,6 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
     def validate_national_id(self, value):
         return Individuals.normalize_national_id(value)
     
-    def _update_generic_relations(self, individual, data_list, model,content_type, updated_by = None):
-        for item in data_list:
-            item_id = item.pop("id", None)
-            model.objects.update_or_create(
-                pk=item_id,
-                defaults={
-                    **item,
-                    "subject_content_type": content_type,
-                    "subject_object_id": individual.id,
-                    'updated_by' : updated_by
-                },
-            )
-    def _update_oto_generic(self, instance, data, model, content_type, updated_by = None):
-        if not data:
-            return
-        data = data.copy()
-
-        data.pop("id", None)
-        data['updated_by'] = updated_by
-        model.objects.update_or_create(
-            subject_content_type=content_type,     
-            subject_object_id=instance.id,
-            defaults=data
-        )
-
     def update(self, instance, validated_data):
         updated_by = validated_data.get("updated_by")
         employment_information_data = validated_data.pop("employment_information", None)
@@ -299,9 +256,8 @@ class IndividualUpdateSerializer(serializers.ModelSerializer):
             
             self._update_oto_generic(instance, professional_partners_data, ProfessionalPartners, content_type, updated_by)
             self._update_oto_generic(instance, registration_accounts_data, RegistrationAccounts, content_type, updated_by)
-            self._update_generic_relations(instance, banker_accounts_data, BankerAccounts,content_type, updated_by)
+            self._update_banker_account_rows(instance, banker_accounts_data, content_type, updated_by)           
             self._update_generic_relations(instance, trade_references_data, TradeReferences, content_type, updated_by)
         instance.refresh_from_db()
         return instance
-    
     

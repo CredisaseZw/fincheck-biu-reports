@@ -643,6 +643,28 @@ function BankersSection({ accounts }: { accounts: BankerAccount[] }) {
           </tr>
         ))}
       </DataTable>
+      {accounts.some((b) => b.prev_reports && b.prev_reports.length > 0) && (
+        <div className="px-5 py-3 border-t border-gray-200">
+          <div className="text-[8pt] font-extrabold uppercase tracking-wider text-[#1E5474] mb-2">Previous Report Codes</div>
+          <div className="space-y-3">
+            {accounts.map((b) =>
+              b.prev_reports && b.prev_reports.length > 0 ? (
+                <div key={b.id} className="border border-gray-100 rounded p-3">
+                  <div className="text-[8pt] font-bold text-gray-700 uppercase mb-1">
+                    {_upper(b.bank)} — {_val(b.account_number)}
+                  </div>
+                  {b.prev_reports.map((h) => (
+                    <div key={h.key} className="flex gap-3 items-baseline text-[8pt]">
+                      <span className="font-bold text-gray-600 whitespace-nowrap">{h.date}</span>
+                      <span className="text-gray-900 uppercase">{h.text}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null
+            )}
+          </div>
+        </div>
+      )}
     </SectionCard>
   );
 }

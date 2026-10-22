@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from decimal import Decimal, InvalidOperation
 from .models import (
     RegistrationAccounts,
     BankerAccounts, 
@@ -6,21 +7,104 @@ from .models import (
     Financials,
     FinancialFiles,
     TradeReferences,
+    ArchivedBankerCodes
 )
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
+
+
+def _format_amount(amount):
+    if amount is None or str(amount).strip() == "":
+        return None
+    try:
+        val = Decimal(str(amount))
+    except (InvalidOperation, ValueError):
+        return str(amount)
+    return f"{val:,.2f}".replace(",", " ")
+
+
+def parse_archived_account_codes(banker_account_instance):
+    codes = ArchivedBankerCodes.objects.filter(
+        account=banker_account_instance.pk,
+    ).order_by("-report_date")[:3]
+
+    results = []
+    for item in codes:
+        narration = item.narration
+        has_code = narration and str(narration).strip().lower() != "none"
+        amount = _format_amount(item.amount)
+
+        parts = []
+        if has_code:
+            parts.append(f"BANK CODE {narration}")
+        if amount:
+            parts.append(f"FOR {amount} {item.currency or ''}")
+        if item.period:
+            parts.append(f"OVER {item.period}")
+
+        text = " ".join(parts).strip()
+        results.append({
+            "key": item.id,
+            "date": str(item.report_date) if item.report_date else "",
+            "text": text,
+        })
+    return results
+
+
+def parse_archived_account_codes_from_dict(account_codes_list):
+    if not account_codes_list:
+        return []
+
+    sorted_codes = sorted(
+        account_codes_list,
+        key=lambda x: x.get("report_date") or "",
+        reverse=True,
+    )
+
+    results = []
+    for item in sorted_codes:
+        narration = item.get("narration")
+        has_code = narration and str(narration).strip().lower() != "none"
+        amount = _format_amount(item.get("amount"))
+
+        parts = []
+        if has_code:
+            parts.append(f"BANK CODE {narration}")
+        if amount:
+            parts.append(f"FOR {amount} {item.get('currency', '')}")
+        period = item.get("period")
+        if period:
+            parts.append(f"OVER {period}")
+
+        text = " ".join(parts).strip()
+        results.append({
+            "key": item.get("id"),
+            "date": str(item.get("report_date", "")),
+            "text": text,
+        })
+    return results
+
+
 # READ SERIALIZERS
 class RegistrationAccountsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = RegistrationAccounts
         exclude = ["subject_content_type", "subject_object_id"]
 
+class ArchivedBankCodesSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
+    class Meta:
+        model = ArchivedBankerCodes
+        exclude = ["account", "created_at"]
 class BankerAccountsSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
+    prev_reports = serializers.SerializerMethodField()
     bank_code_narration_display = serializers.CharField(source="get_bank_code_narration_display", read_only=True)
     
     class Meta:
         model = BankerAccounts
         exclude = ["subject_content_type", "subject_object_id"]
 
+    def get_prev_reports(self, instance: BankerAccounts):
+        return parse_archived_account_codes(instance)
+    
 class ProfessionalPartnersSerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = ProfessionalPartners
@@ -130,4 +214,3 @@ class TradeReferencesWriteSerializer(serializers.ModelSerializer):
             "credit_terms",
             "payment_trend",
         ]
-

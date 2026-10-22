@@ -455,7 +455,12 @@ function useAddReportDialogue(list_report?: ListReport) {
           bank_code_narration: item.bank_code_narration,
           currency: item.currency ?? undefined,
           amount: item.amount ?? undefined,
-          period: item.period ?? undefined
+          period: item.period ?? undefined,
+          prev_reports: (item.prev_reports ?? []).map((report, index) => ({
+            ...report,
+            key: report.key ?? index,
+            date: report.date ?? ""
+          }))
       }))
       : [{
             bank: undefined,

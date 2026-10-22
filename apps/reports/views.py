@@ -606,5 +606,10 @@ class BizSafeReports(GenericViewSet):
                 zf.writestr(name if n == 0 else name.replace(".pdf", f" ({n}).pdf"), data)
         buf.seek(0)
         slug = re.sub(r"[^A-Za-z0-9]", "", d["label"])
-        return FileResponse(buf, as_attachment=True,
-                            filename=f"Report Lists {slug}.zip", content_type="application/zip")
+        
+        return FileResponse(
+            buf, 
+            as_attachment=True,
+            filename=f"Report Lists {slug}.zip", 
+            content_type="application/zip"
+        )

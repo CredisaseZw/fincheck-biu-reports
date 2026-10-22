@@ -1198,12 +1198,32 @@ body {{
             for lbl, val in bank_rows:
                 if val is not None:
                     val_str = str(val).strip()
-                    if val_str and val_str not in ("-", "—"):
+                    if val_str and val_str not in ("-", "\u2014"):
                         rows_html += f'<div class="dir-row"><span class="dir-l">{lbl}</span><span class="dir-v">{val}</span></div>\n              '
+
+            prev_reports = b.get("prev_reports") or []
+            if not prev_reports:
+                from apps.common.serializer import parse_archived_account_codes_from_dict
+                prev_reports = parse_archived_account_codes_from_dict(b.get("account_codes"))
+
+            prev_html = ""
+            if prev_reports:
+                items_html = ""
+                for pr in prev_reports:
+                    pr_date = self._e(pr.get("date"))
+                    pr_text = self._u(pr.get("text"))
+                    if pr_text and str(pr_text).strip() not in ("-", "\u2014", ""):
+                        items_html += f'<div class="dir-row"><span class="dir-l">{pr_date}</span><span class="dir-v">{pr_text}</span></div>\n                  '
+                if items_html:
+                    prev_html = f"""
+              <div style="margin-top: 10px; border-top: 1px dashed #E2E8F0; padding-top: 8px;">
+                <span class="dir-l" style="display: block; margin-bottom: 4px;">Previous Report Codes</span>
+                {items_html.strip()}
+              </div>"""
 
             bank_name = self._u(b.get("bank"))
             branch = self._label(b.get("branch", ""))
-            branch_html = f'<span class="dir-pos"> — {branch}</span>' if branch and branch != "—" else ""
+            branch_html = f'<span class="dir-pos"> \u2014 {branch}</span>' if branch and branch != "\u2014" else ""
 
             cards += f"""
             <div class="bank-card">
@@ -1212,10 +1232,12 @@ body {{
                 {branch_html}
               </div>
               {rows_html.strip()}
+              {prev_html}
             </div>"""
 
         return self._card("Bankers", f'<div class="bank-grid">{cards}</div>')
 
+    
     def _render_professionals(self) -> str:
         pp = self._subject.get("professional_partners") or {}
 

@@ -223,6 +223,7 @@ export interface BankerAccount {
   id: number;
   bank?: string;
   branch?: string;
+  prev_reports?: { key: number | string | null; date: string; text: string }[];
   account_name?: string;
   account_type?: "current" | "savings" | "loan" | "fixed_deposit" | "none" | null;
   account_number?: string;
