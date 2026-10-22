@@ -79,6 +79,12 @@ class Individuals(BaseModel):
         blank = True,
         null = True    
     )
+    # whatsapp_number = models.CharField(
+    #     _("Whatsapp Number"),
+    #     max_length=50,
+    #     blank=True,
+    #     null=True,
+    # )
     email = models.CharField(_("Email"), blank=True, null=True, max_length=100)
     is_deleted = models.BooleanField(_("Is deleted"), default=False)
     refer_type = models.CharField(

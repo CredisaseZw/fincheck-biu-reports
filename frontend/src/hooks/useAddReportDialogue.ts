@@ -270,6 +270,52 @@ function useAddReportDialogue(list_report?: ListReport) {
         })
         : []
       )
+      setFinancials(
+      company.financials
+      ? {
+        id: company.financials.id,
+        total_assets: company.financials.total_assets ?? undefined,
+        net_profit: company.financials.net_profit ?? "",
+        net_worth: company.financials.net_worth ?? "",
+        total_revenue: company.financials.total_revenue ?? "",
+        financial_year: company.financials.financial_year,
+        asset_ratio : company.financials.asset_ratio ?? undefined, 
+        files : company.financials.files.map((item)=>({
+          id : item.id,
+          default_file : item.file ?? "",
+          file_title: item.file_title ?? ""
+        })) ?? [{
+          file_title : ""
+        }],
+      }
+      : undefined
+    )
+     
+    setProfessionals(
+      company.professional_partners ?
+      { 
+        id: company.professional_partners.id,
+        lawyers : company.professional_partners.lawyers,
+        auditors : company.professional_partners.auditors
+      }: undefined
+    )
+
+    setAccounts(
+      company.registration_accounts ?
+      {
+        is_nssa_verified :company.registration_accounts.is_nssa_verified,
+        is_praz_verified : company.registration_accounts.is_praz_verified,
+        is_tin_verified : company.registration_accounts.is_tin_verified,
+        is_vat_verified : company.registration_accounts.is_vat_verified,
+        tax_clearance_expiration_date : company.registration_accounts.tax_clearance_expiration_date ?? undefined,
+        is_tax_clearance_expiration_date : company.registration_accounts.is_tax_clearance_expiration_date,
+        nssa_number : company.registration_accounts.nssa_number ?? undefined,
+        praz_number : company.registration_accounts.praz_number ?? undefined,
+        tin_number :company.registration_accounts.tin_number ?? undefined,
+        vat_number : company.registration_accounts.vat_number?? undefined
+      } : undefined
+    )
+
       
     } else {
       const individual = report.subject as Individual
@@ -378,52 +424,6 @@ function useAddReportDialogue(list_report?: ListReport) {
         record_date : item.record_date
       }))
       : []
-    )
-
-    setFinancials(
-      report.subject.financials
-      ? {
-        id: report.subject.financials.id,
-        total_assets: report.subject.financials.total_assets ?? undefined,
-        net_profit: report.subject.financials.net_profit ?? "",
-        net_worth: report.subject.financials.net_worth ?? "",
-        total_revenue: report.subject.financials.total_revenue ?? "",
-        financial_year: report.subject.financials.financial_year,
-        asset_ratio : report.subject.financials.asset_ratio ?? undefined, 
-        files : report.subject.financials.files.map((item)=>({
-          id : item.id,
-          default_file : item.file ?? "",
-          file_title: item.file_title ?? ""
-        })) ?? [{
-          file_title : ""
-        }],
-      }
-      : undefined
-    )
-     
-    setProfessionals(
-      report.subject.professional_partners ?
-      { 
-        id: report.subject.professional_partners.id,
-        lawyers : report.subject.professional_partners.lawyers,
-        auditors : report.subject.professional_partners.auditors
-      }: undefined
-    )
-
-    setAccounts(
-      report.subject.registration_accounts ?
-      {
-        is_nssa_verified :report.subject.registration_accounts.is_nssa_verified,
-        is_praz_verified : report.subject.registration_accounts.is_praz_verified,
-        is_tin_verified : report.subject.registration_accounts.is_tin_verified,
-        is_vat_verified : report.subject.registration_accounts.is_vat_verified,
-        tax_clearance_expiration_date : report.subject.registration_accounts.tax_clearance_expiration_date ?? undefined,
-        is_tax_clearance_expiration_date : report.subject.registration_accounts.is_tax_clearance_expiration_date,
-        nssa_number : report.subject.registration_accounts.nssa_number ?? undefined,
-        praz_number : report.subject.registration_accounts.praz_number ?? undefined,
-        tin_number :report.subject.registration_accounts.tin_number ?? undefined,
-        vat_number : report.subject.registration_accounts.vat_number?? undefined
-      } : undefined
     )
 
     setTradeReferences(

@@ -3,12 +3,9 @@ from django.db import transaction
 from .models import Individuals, EmploymentInformation, NextOfKin
 from apps.common.serializer import (
     RegistrationAccountsSerializer,
-    RegistrationAccountsWriteSerializer,
     ProfessionalPartnersSerializer,
-    ProfessionalPartnersWriteSerializer,
     TradeReferencesSerializer,
     TradeReferencesWriteSerializer,
-    FinancialsSerializer,
     BankerAccountsSerializer,
     BankerAccountsWriteSerializer,
 )
@@ -16,8 +13,6 @@ from django.contrib.contenttypes.models import ContentType
 from apps.common.models import (
     BankerAccounts,
     TradeReferences,
-    RegistrationAccounts,
-    ProfessionalPartners,
 )
 from apps.credit_records.serializers import (
     ClaimsSerializer,
@@ -72,12 +67,6 @@ class IndividualSerializer(serializers.ModelSerializer):
 
         instance.refresh_from_db()
         data = super().to_representation(instance)
-        professional_partners = instance.professional_partners.first()
-        registration_accounts = instance.registration_accounts.first()
-        financials = instance.financials.first()
-        data['professional_partners'] = ProfessionalPartnersSerializer(professional_partners).data if professional_partners else None
-        data['registration_accounts'] = RegistrationAccountsSerializer(registration_accounts).data if registration_accounts else None
-        data['financials'] = FinancialsSerializer(financials).data if financials else None
         return data
 
     class Meta:
@@ -139,8 +128,6 @@ class IndividualCreateSerializer(
     insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
     public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
     trade_references = TradeReferencesWriteSerializer(many=True, write_only=True, required=False)
-    registration_accounts = RegistrationAccountsWriteSerializer(required=False, write_only=True)
-    professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -161,9 +148,7 @@ class IndividualCreateSerializer(
         updated_by = validated_data.get("updated_by")
         employment_information_data = validated_data.pop("employment_information", None)
         next_of_kin_data = validated_data.pop("next_of_kin", None)
-        registration_accounts_data = validated_data.pop("registration_accounts", [])
         banker_accounts_data = validated_data.pop("banker_accounts", [])
-        professional_partners_data = validated_data.pop("professional_partners", [])
         trade_references_data = validated_data.pop("trade_references", [])
 
         with transaction.atomic():
@@ -186,8 +171,6 @@ class IndividualCreateSerializer(
                     updated_by = updated_by
                 )
             
-            self._create_oto_generic(individual, professional_partners_data, ProfessionalPartners, content_type, updated_by)
-            self._create_oto_generic(individual, registration_accounts_data, RegistrationAccounts, content_type, updated_by)
             self._create_generic_relations(individual, banker_accounts_data, BankerAccounts, content_type, updated_by)
             self._create_generic_relations(individual, trade_references_data, TradeReferences,content_type, updated_by)
         return individual
@@ -204,8 +187,6 @@ class IndividualUpdateSerializer(serializers.ModelSerializer, UpdateEntityGeneri
     insolvency_records = InsolvencyRecordSerializer(read_only=True, many=True, required=False)
     public_information = PublicInformationSerializer(read_only=True, many=True, required=False)
     trade_references = TradeReferencesWriteSerializer(many=True, write_only=True, required=False)
-    registration_accounts = RegistrationAccountsWriteSerializer(required=False, write_only=True)
-    professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -228,9 +209,7 @@ class IndividualUpdateSerializer(serializers.ModelSerializer, UpdateEntityGeneri
         updated_by = validated_data.get("updated_by")
         employment_information_data = validated_data.pop("employment_information", None)
         next_of_kin_data = validated_data.pop("next_of_kin", None)
-        registration_accounts_data = validated_data.pop("registration_accounts", [])
         banker_accounts_data = validated_data.pop("banker_accounts", [])
-        professional_partners_data = validated_data.pop("professional_partners", [])
         trade_references_data = validated_data.pop("trade_references", [])
 
         with transaction.atomic():
@@ -254,8 +233,6 @@ class IndividualUpdateSerializer(serializers.ModelSerializer, UpdateEntityGeneri
                     defaults=next_of_kin_data
                 )
             
-            self._update_oto_generic(instance, professional_partners_data, ProfessionalPartners, content_type, updated_by)
-            self._update_oto_generic(instance, registration_accounts_data, RegistrationAccounts, content_type, updated_by)
             self._update_banker_account_rows(instance, banker_accounts_data, content_type, updated_by)           
             self._update_generic_relations(instance, trade_references_data, TradeReferences, content_type, updated_by)
         instance.refresh_from_db()

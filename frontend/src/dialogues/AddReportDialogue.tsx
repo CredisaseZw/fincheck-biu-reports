@@ -295,24 +295,29 @@ function AddReportDialogue({ report_item }: props) {
                                     subject_object_id={subject_object_id}
                                     subject_type={subject_type}
                                 />
-                                <FinancialsDetails 
-                                    financials_data={financials}
-                                    report_id={report.id}
-                                    subject_object_id={subject_object_id}
-                                    subject_type={subject_type}
-                                />
-                                <RegistrationAccountsDetails
-                                    accounts_data={accounts}
-                                    report_id={report.id}
-                                    subject_object_id={subject_object_id}
-                                    subject_type={subject_type} 
-                                />
-                                <ProfessionalPartnersDetails
-                                    professionals_data={professionals}
-                                    report_id={report.id}
-                                    subject_object_id={subject_object_id}
-                                    subject_type={subject_type}
-                                />
+                                {
+                                    subjectType === "company" &&
+                                    <>
+                                        <FinancialsDetails 
+                                            financials_data={financials}
+                                            report_id={report.id}
+                                            subject_object_id={subject_object_id}
+                                            subject_type={subject_type}
+                                        />
+                                        <RegistrationAccountsDetails
+                                            accounts_data={accounts}
+                                            report_id={report.id}
+                                            subject_object_id={subject_object_id}
+                                            subject_type={subject_type} 
+                                        />
+                                        <ProfessionalPartnersDetails
+                                            professionals_data={professionals}
+                                            report_id={report.id}
+                                            subject_object_id={subject_object_id}
+                                            subject_type={subject_type}
+                                        />
+                                    </>
+                                }
                                 <ReportDetails
                                     report_data={reportDetails}
                                     report_id={report.id}
