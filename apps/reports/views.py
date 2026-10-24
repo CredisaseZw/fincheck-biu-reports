@@ -543,7 +543,8 @@ class BizSafeReports(GenericViewSet):
             self.get_queryset()
             .annotate(sort_date=Coalesce("finalized_at", "report_date"))
             .filter(sort_date__gte=p["start"], sort_date__lt=p["end"])
-            .select_related("client", "subject")
+            .select_related("client_content_type", "subject_content_type")
+            .prefetch_related("client", "subject")
             .order_by("-sort_date")
         )
         
