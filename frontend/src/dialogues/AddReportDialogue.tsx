@@ -39,7 +39,7 @@ import FinalizedReportDialog from "./FinalizedReportDialogue";
 import CompanyOverview from "@/components/general/CompanyOverview";
 import SuspendReportDialog from "./SuspendReportDialog";
 import ReportExtras from "@/components/general/ReportExtras";
-import DirectorshipsDetails from "@/components/general/DirectorshipsDetails";
+// import DirectorshipsDetails from "@/components/general/DirectorshipsDetails";
 
 interface props {
     report_item?: ListReport
@@ -319,10 +319,12 @@ function AddReportDialogue({ report_item }: props) {
                                         />
                                     </>
                                 }
-                                {
+                                {/* {
                                     subjectType === "individual" &&
-                                    <DirectorshipsDetails/>
-                                }
+                                    <DirectorshipsDetails
+
+                                    />
+                                } */}
                                 <ReportDetails
                                     report_data={reportDetails}
                                     report_id={report.id}

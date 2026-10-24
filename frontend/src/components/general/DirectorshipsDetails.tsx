@@ -7,11 +7,11 @@ function DirectorshipsDetails() {
         <Fieldset legendTitle="Directorships">
             <div>
                 <Label className="text-xs">Internal Directorships</Label>
-
+                
             </div>
             <div>
                 <Label className="text-xs">External Directorships</Label>
-                
+
             </div>
         </Fieldset>
     </div>
