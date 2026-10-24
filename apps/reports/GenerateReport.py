@@ -994,13 +994,17 @@ body {{
 
     def _render_individual_contact(self) -> str:
         s = self._subject
+        v = {
+            "Residential Address" : " " + self._badge(True) if s.get("is_address_registered") else "",
+        }
         rows = [
             ("Mobile Number", self._e(s.get("mobile_number"))),
+            ("Whatsapp Number", self._e(s.get("whatsapp_number"))),
             ("Email", self._low(s.get("email"))),
-            ("Residential Address", self._m(s.get("residential_address"))),
+            ("Residential Address", self._m(s.get("residential_address")), True),
             ("", "—"),
         ]
-        return self._card("Contact Details", self._grid_table(rows))
+        return self._card("Contact Details", self._grid_table(rows, v))
 
     def _render_employment(self) -> str:
         emp = self._subject.get("employment_information") or {}
@@ -1008,6 +1012,9 @@ body {{
             ("Employer", self._u(emp.get("employer"))),
             ("Position", self._u(emp.get("position"))),
             ("Employment Status", self._label(emp.get("employment_status", ""))),
+            ("Employer Industry", self._label(emp.get("employer_industry", ""))),
+            ("Employer Industry Type", self._label(emp.get("employer_industry_type", ""))),
+            ("Employment address", self._label(emp.get("employment_address", ""))),
             ("Years Employed", self._e(emp.get("years_employed"))),
             ("Monthly Income", self._money(emp.get("monthly_income"))),
             ("Previous Employer", self._u(emp.get("previous_employer"))),

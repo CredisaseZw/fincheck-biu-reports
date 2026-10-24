@@ -17,6 +17,7 @@ import type { DirectorFormData } from "@/hooks/useDirectors"
 import type { ReportDetailsFormData } from "@/hooks/useReportDetails";
 import type { CompanyOverviewFormData } from "@/hooks/useCompanyOverview";
 import type { ReportExtrasFormData } from "@/hooks/useReportExtras";
+import { INDUSTRIES } from "@/constants";
 export interface RouteItem  {
     name: string;
     link?: string;
@@ -260,6 +261,9 @@ export interface EmploymentInformation {
   id: number;
   employer: string | null;
   position: string | null;
+  employer_industry: (typeof INDUSTRIES)["options"][number];
+  employer_industry_type: string | null
+  employment_address: string | null
   employment_status: "employed" | "self_employed" | "unemployed" | "part_time" | "retired" | "student";
   years_employed: number | null;
   monthly_income: string | null;
@@ -381,16 +385,23 @@ export interface Individual extends CommonFields {
   gender: "male" | "female" | "unknown";
   marital_status: "single" | "married" | "divorced" | "widowed";
   external_directors: string | null;
-  nationality: string;
-  residential_address: string;
+  nationality: string | null;
+  residential_address: string | null;
   mobile_number: string;
+  whatsapp_number: string | null;
   status: string | null;
   refer_type: string;
   is_pep: boolean,
+  is_address_registered: boolean;
   insolvencies_judgements: string | null;
   employment_information: EmploymentInformation | null;
   next_of_kin: NextOfKin | null;
-  address_prev:  string | null
+  address_prev:  string | null;
+  directorships: {
+    id: number,
+    position: "director" | "secretary" | "other",
+    company: string 
+  }[]
 }
 
 export interface Report extends Timestamps {

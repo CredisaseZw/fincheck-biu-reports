@@ -79,12 +79,12 @@ class Individuals(BaseModel):
         blank = True,
         null = True    
     )
-    # whatsapp_number = models.CharField(
-    #     _("Whatsapp Number"),
-    #     max_length=50,
-    #     blank=True,
-    #     null=True,
-    # )
+    whatsapp_number = models.CharField(
+        _("Whatsapp Number"),
+        max_length=50,
+        blank=True,
+        null=True,
+    )
     email = models.CharField(_("Email"), blank=True, null=True, max_length=100)
     is_deleted = models.BooleanField(_("Is deleted"), default=False)
     refer_type = models.CharField(
@@ -93,6 +93,7 @@ class Individuals(BaseModel):
         help_text=_("Where was individual data retrieved from, default is BIU."),
         default= ReferType.BIU
     )
+    is_address_registered = models.BooleanField(default= False)
 
     # Generic RECORDS
     claims = GenericRelation(
@@ -191,7 +192,10 @@ class EmploymentInformation(BaseModel):
         on_delete=models.CASCADE,
     )
     employer = models.CharField(_("Employer"), max_length=255, blank=True, null=True)
+    employer_industry = models.CharField(_("Employer Industry"), max_length=255, blank=True, null=True)
+    employer_industry_type = models.CharField(_("Employer Industry Type"), max_length=255, blank=True, null=True)
     position = models.CharField(_("Position"), max_length=255, blank=True, null=True)
+    employment_address = models.TextField(blank=True, null =True)
     employment_status = models.CharField(_("Employment Status"), max_length=100, blank=True, null=True)
     years_employed = models.PositiveIntegerField(_("Years Employed"), null=True, blank=True)
     monthly_income = models.CharField(_("Monthly Income"), max_length=255, null=True, blank=True)
@@ -199,6 +203,7 @@ class EmploymentInformation(BaseModel):
         _("Previous Employer"),
         max_length=255,
         blank=True,
+   
         null=True,
     )
 

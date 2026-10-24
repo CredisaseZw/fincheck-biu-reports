@@ -25,6 +25,7 @@ from apps.utils.enitity_helpers import sync_insolvencies_summary
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.utils.entity_lookup import EntityLookUp
 from apps.utils.manipulate_entities import CreateEntityGenericHandlers, UpdateEntityGenericHandlers
+from apps.utils.mini_serializers import MiniCompanyDirectorSerializers
 
 entity = EntityLookUp()
 class EmploymentInformationSerializer(UpdatedBySerializerMixin,serializers.ModelSerializer):
@@ -47,6 +48,7 @@ class ClientIndividualSerializer(serializers.ModelSerializer):
 
 class IndividualSerializer(serializers.ModelSerializer):
     claims = ClaimsSerializer(read_only=True, many=True)
+    directorships = MiniCompanyDirectorSerializers(read_only = True, many = True)
     absconders = AbscondersSerializer(read_only= True, many = True)
     court_judgements = CourtJudgementSerializer(read_only= True, many = True)
     insolvency_records = InsolvencyRecordSerializer(read_only= True, many = True)

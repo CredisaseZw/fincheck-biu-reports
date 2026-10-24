@@ -36,6 +36,7 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
         "financials",
         "registration_accounts",
         "professional_partners",
+        "directorships"
     ).select_related(
         "employment_information",
         "next_of_kin"

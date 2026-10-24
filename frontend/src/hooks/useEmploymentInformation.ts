@@ -10,11 +10,15 @@ import useDetailCacheUpdate from "./useDetailCacheUpdate";
 import type { EntityValue, Individual, Report } from "@/types/core";
 import useSectionTouched from "./useSectionTouched";
 import { useQueryClient } from "@tanstack/react-query";
+import { INDUSTRIES } from "@/constants";
 
 const EmploymentStatus = z.enum(["employed", "self_employed", "unemployed", "part_time", "retired", "student"])
 const employmentSchema = z.object({
     individual_id: z.number().optional(),
     employer: z.string().max(255).optional(),
+    employer_industry: INDUSTRIES.optional(),
+    employer_industry_type : z.string().optional(),
+    employment_address : z.string().max(255).optional(),
     position: z.string().max(255).optional(),
     employment_status: EmploymentStatus.optional(),
     years_employed: z.number().int().positive().optional(),

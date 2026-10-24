@@ -329,6 +329,8 @@ function useAddReportDialogue(list_report?: ListReport) {
         nationality: individual.nationality ?? undefined,
         residential_address: individual.residential_address ?? "",
         mobile_number: individual.mobile_number ?? undefined,
+        whatsapp_number: individual.whatsapp_number ?? undefined,
+        is_address_registered: individual.is_address_registered,
         email: individual.email ?? undefined,
         address_prev: individual.address_prev ?? undefined
       })
@@ -337,6 +339,9 @@ function useAddReportDialogue(list_report?: ListReport) {
         individual_id : individual.id,
         employer: individual.employment_information?.employer ?? undefined,
         position: individual.employment_information?.position ?? undefined,
+        employer_industry: individual.employment_information?.employer_industry ?? undefined,
+        employer_industry_type: individual.employment_information?.employer_industry_type ?? undefined,
+        employment_address: individual.employment_information?.employment_address ?? undefined,
         employment_status: individual.employment_information?.employment_status ?? undefined,
         years_employed: individual.employment_information?.years_employed ?? undefined,
         monthly_income: individual.employment_information?.monthly_income ?? undefined,

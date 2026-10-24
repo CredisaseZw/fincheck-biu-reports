@@ -12,6 +12,7 @@ import CustomSubmitButton from "./CustomSubmitButton";
 import { Textarea } from "../ui/textarea";
 import { GENDER_OPTIONS } from "@/constants";
 import { toCap } from "@/lib/utils";
+import { Switch } from "../ui/switch";
 
 interface props{
     report_id?: number | undefined
@@ -91,13 +92,18 @@ function IndividualDetails({ individual_details, report_id } : props) {
                         <Input {...register("nationality")} />
                         {errors.nationality && <p className="text-destructive text-sm">{errors.nationality.message}</p>}
                     </div>
-
+                </ColumnsContainer>
+                <ColumnsContainer numberOfCols={3} gapClass="gap-4">
                     <div className="form-group">
                         <Label className="required">Mobile Number</Label>
                         <Input {...register("mobile_number")} />
                         {errors.mobile_number && <p className="text-destructive text-sm">{errors.mobile_number.message}</p>}
                     </div>
-
+                    <div className="form-group">
+                        <Label>Whatsapp Number</Label>
+                        <Input {...register("whatsapp_number")} />
+                        {errors.whatsapp_number && <p className="text-destructive text-sm">{errors.whatsapp_number.message}</p>}
+                    </div>
                    <div className="form-group">
                         <Label>Marital Status</Label>
                         <Controller
@@ -119,7 +125,6 @@ function IndividualDetails({ individual_details, report_id } : props) {
                         />
                         {errors.marital_status && <p className="text-destructive text-sm">{errors.marital_status.message}</p>}
                     </div>
-
                 </ColumnsContainer>
                 <ColumnsContainer>
                     <div className="form-group">
@@ -135,6 +140,26 @@ function IndividualDetails({ individual_details, report_id } : props) {
                     </div>
 
                 </ColumnsContainer>
+                <Controller
+                    control={control}
+                    name={"is_address_registered"}
+                    render={({field})=>(
+                        <div className="p-5 dark:bg-[#1A2330]/10 bg-gray-50 rounded border">
+                            <div className="flex flex-row justify-between cursor-pointer">
+                                <label className="flex flex-col gap-1" htmlFor="is_verified">
+                                    <span className="font-semibold text-[1rem] text-gray-800 dark:text-gray-200">Address Verification</span>
+                                    <span className="text-muted-foreground">Was the registered address visited</span>
+                                </label>
+                                <Switch
+                                    className="self-center"
+                                    id="is_verified"
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                            </div>          
+                        </div>
+                    )}
+                />
                 
                 <CustomSubmitButton
                     onFine={onTouched}

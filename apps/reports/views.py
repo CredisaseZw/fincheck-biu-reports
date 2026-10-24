@@ -541,12 +541,12 @@ class BizSafeReports(GenericViewSet):
 
         qs = (
             self.get_queryset()
-            .annotate(sort_date=Coalesce("report_date", "created_at"))
+            .annotate(sort_date=Coalesce("finalized_at", "report_date"))
             .filter(sort_date__gte=p["start"], sort_date__lt=p["end"])
-            .prefetch_related("client", "subject")        
+            .select_related("client", "subject")
             .order_by("-sort_date")
         )
-
+        
         if p["entity_term"]:
             qs = qs.filter(self.entity_q(group_by, p["entity_term"]))
 

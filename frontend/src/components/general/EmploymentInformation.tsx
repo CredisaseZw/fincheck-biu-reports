@@ -7,6 +7,7 @@ import { Controller } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import CustomSubmitButton from "./CustomSubmitButton";
 import type { EntityValue } from "@/types/core";
+import { INDUSTRIES } from "@/constants";
 
 interface props {
     subject_type : EntityValue | null
@@ -59,16 +60,46 @@ function EmploymentInformation({
                         )}
                     </div>
                     <div className="form-group">
-                        <Label>Employer</Label>
+                        <Label>Employer Name</Label>
                         <Input {...register("employer")} />
                     </div>
-
+                    <div className="form-group">
+                        <Label>Employment Address</Label>
+                        <Input {...register("employment_address")} />
+                    </div>
+                    
+                    <div className="form-group">
+                        <Label>Employer Industry</Label>
+                        <Controller
+                            control={control}
+                            name={"employer_industry"}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {
+                                            INDUSTRIES.options.map((item, index) =>(
+                                                <SelectItem value={item} key = {index}>{item}</SelectItem>
+                                            ))
+                                        }
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                        {errors.employer_industry && (
+                            <p className="text-destructive text-sm">{errors.employer_industry.message}</p>
+                        )}
+                    </div>
+                    <div className="form-group">
+                        <Label>Employer Industry Type</Label>
+                        <Input {...register("employer_industry_type")} />
+                    </div>
                     <div className="form-group">
                         <Label>Position</Label>
                         <Input {...register("position")} />
                     </div>
-                </ColumnsContainer>
-                <ColumnsContainer>
                     <div className="form-group">
                         <Label>Previous Employer</Label>
                         <Input {...register("previous_employer")} />
@@ -86,14 +117,18 @@ function EmploymentInformation({
                             <p className="text-destructive text-sm">{errors.years_employed.message}</p>
                         )}
                     </div>
+                    <div className="form-group">
+                        <Label>Monthly Income</Label>
+                        <Input
+                            {...register("monthly_income")}
+                        />
+                        {
+                            errors.monthly_income && (
+                                <p className="text-destructive text-sm">{errors.monthly_income.message}</p>
+                            )
+                        }
+                    </div>
                 </ColumnsContainer>
-                <div className="form-group">
-                    <Label>Monthly Income</Label>
-                    <Input
-                        {...register("monthly_income")}
-                    />
-                    {}
-                </div>
                 <CustomSubmitButton
                     showFine = {Boolean(report_id)}
                     onFine={onTouched}

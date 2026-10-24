@@ -369,8 +369,9 @@ function IndividualContactSection({ data }: { data: Individual }) {
   return (
     <SectionCard title="Contact Details">
       <GridRow label="Mobile Number" value={_val(data.mobile_number)} />
+      <GridRow label="Whatsapp Number" value={_val(data.whatsapp_number)} />
       <GridRow label="Email" value={returnStringedList(_val(data.email))} />
-      <GridRow label="Residential Address" value={_upper(data.residential_address)} />
+      <GridRow label="Residential Address" value={_upper(data.residential_address)} extra ={data.is_address_registered !== undefined ? _badge(!!data.is_address_registered) : undefined}/>
     </SectionCard>
   );
 }
@@ -381,6 +382,9 @@ function EmploymentSection({ data }: { data: EmploymentInformation }) {
       <GridRow label="Employer" value={_upper(data.employer)} />
       <GridRow label="Position" value={_upper(data.position)} />
       <GridRow label="Employment Status" value={_label(data.employment_status)} />
+      <GridRow label="Employer Industry" value={_label(data.employer_industry)} />
+      <GridRow label="Employer Industry Type" value={_label(data.employer_industry_type)} />
+      <GridRow label="Employment Address" value={_label(data.employment_address)} />
       <GridRow label="Years Employed" value={_val(data.years_employed)} />
       <GridRow label="Monthly Income" value={_money(data.monthly_income)} />
       <GridRow label="Previous Employer" value={_upper(data.previous_employer)} />

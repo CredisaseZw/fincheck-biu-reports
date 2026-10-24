@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form"
+import { useEffect, useMemo, useRef } from "react";
+import { useForm, useWatch} from "react-hook-form"
 import { z } from "zod"
 import type { InstanceMutation } from "./api/useInstanceMutation";
 import { cleanPayload, formatAddressToString, handleAxiosError, handleTrackChangedFields, genStorageKey } from "@/lib/utils";
@@ -24,10 +24,12 @@ export const individualSchema = z.object({
     gender: GENDERS,
     marital_status: MaritalStatus.optional(),
     nationality: z.string().optional(),
+    whatsapp_number: z.string().optional(),
     mobile_number: z.string().min(1, "Mobile number is required").max(50),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
     residential_address: z.string().min(1, "Residential address is required"),
     address_prev: z.string().optional(),
+    is_address_registered: z.boolean().optional()
 })
 
 export type IndividualFormData = z.infer<typeof individualSchema>
@@ -49,12 +51,31 @@ function useIndividualDetails({individual_details, report_id}:props) {
         control,
         reset,
         register,
+        getValues,
+        setValue,
         handleSubmit,
         formState: { errors },
     } = useForm<IndividualFormData>({
         resolver: zodResolver(individualSchema),
         defaultValues: individual_details
     })
+    const mobile_number = useWatch({control, name: "mobile_number"});
+
+    const prevMobileRef = useRef(mobile_number);
+
+    useEffect(() => {
+        const prevMobile = prevMobileRef.current;
+        prevMobileRef.current = mobile_number;
+
+        if (!mobile_number) return;
+        const currentWhatsapp = getValues("whatsapp_number");
+
+        if (currentWhatsapp && currentWhatsapp !== prevMobile) return;
+        setValue("whatsapp_number", mobile_number, {
+            shouldDirty: true,
+            shouldValidate: true,
+        });
+    }, [mobile_number, setValue, getValues]);
 
     useEffect(()=>{
         if(individual_details){
@@ -62,8 +83,7 @@ function useIndividualDetails({individual_details, report_id}:props) {
         }
     }, [individual_details, reset])
 
-    useEffect(()=>{
-        
+    useEffect(()=>{        
         const state = getItem(CACHE_KEY)
         if(state === "touched") onTouched();
     }, [report_id, CACHE_KEY, onTouched])
