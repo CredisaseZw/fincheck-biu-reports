@@ -35,6 +35,7 @@ from apps.shareholding.serializers import (
     ShareholdingsSerializers,
     ShareholderWriteSerializer
 )
+from django.db.models import Prefetch
 from rest_framework.throttling import AnonRateThrottle
 from apps.utils.permissions import HasSecretHeader
 import logging
@@ -47,26 +48,22 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
     filterset_class = CompanySearchFilter
     ordering_fields = ["created_at", "registered_name", "trading_name"]
 
-    queryset = Company.objects.prefetch_related(
-        "claims",
-        "absconders",
-        "court_judgements",
-        "insolvency_records",
-        "public_information",
-        "directors",
-        "secretary_appointments",
-        "banker_accounts",
-        "trade_references",
-        "financials",
-        "registration_accounts",
-        "professional_partners",
-        "updated_by"
-    ).select_related(
-        "structure",
-        "operations",
-        "overview",
-        "shareholdings"
-    ).filter(is_deleted = False)
+    def get_queryset(self):
+        base = Company.objects.filter(is_deleted=False)
+
+        if self.action == "retrieve":
+            return base.select_related(
+                "structure", "operations", "overview", "shareholdings", "updated_by"
+            ).prefetch_related(
+                "claims", "absconders", "court_judgements", "insolvency_records",
+                "public_information", "banker_accounts", "trade_references",
+                "financials", "registration_accounts", "professional_partners",
+                "shareholdings__shareholders",
+                Prefetch("directors", queryset=CompanyDirector.objects.select_related("individual")),
+                Prefetch("secretary_appointments", queryset=CompanySecretary.objects.select_related("secretary")),
+            )
+
+        return base
 
     def get_serializer_class(self):
         if self.action == "list":

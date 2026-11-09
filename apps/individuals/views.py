@@ -15,6 +15,8 @@ from rest_framework import status as STATUS
 from apps.utils.base_viewset import BaseAuthJSONViewSet
 from rest_framework.decorators import action
 from apps.utils.entity_lookup import EntityLookUp
+from django.db.models import Prefetch
+from apps.directors.models import CompanyDirector
 import logging
 
 entity = EntityLookUp()
@@ -25,26 +27,37 @@ class IndividualsViewSet(BaseAuthJSONViewSet):
     """
     A viewset for viewing and editing individual instances.
     """
-    queryset = Individuals.objects.prefetch_related(
-        "claims",
-        "absconders",
-        "court_judgements",
-        "insolvency_records",
-        "public_information",
-        "banker_accounts",
-        "trade_references",
-        "financials",
-        "registration_accounts",
-        "professional_partners",
-        "directorships"
-    ).select_related(
-        "employment_information",
-        "next_of_kin"
-    ).filter(is_deleted = False)
+
     filter_backends = [DjangoFilterBackend]
     filterset_class = IndividualSearchFilter
     serializer_class = IndividualSerializer
+    from django.db.models import Prefetch
 
+    def get_queryset(self):
+        base = Individuals.objects.filter(is_deleted=False)
+        if self.action == "retrieve":
+            return base.select_related(
+                "employment_information",
+                "next_of_kin",
+            ).prefetch_related(
+                "claims",
+                "absconders",
+                "court_judgements",
+                "insolvency_records",
+                "public_information",
+                "banker_accounts",
+                "trade_references",
+                "financials",
+                "registration_accounts",
+                "professional_partners",
+                Prefetch(
+                    "directorships",
+                    queryset=CompanyDirector.objects.select_related("company"),
+                ),
+            )
+
+        return base 
+    
     def get_serializer_class(self):
         if self.action == "list":
             return IndividualListSerializer
