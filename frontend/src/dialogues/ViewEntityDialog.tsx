@@ -227,6 +227,7 @@ function DirectorsSection({ directors }: { directors: CompanyDirector[] }) {
                 ["National ID", _val(d.individual_detail?.national_id)],
                 ["Gender", _label(d.individual_detail?.gender)],
                 ["Date of Birth", _date(d.individual_detail?.date_of_birth)],
+                ["Date of Appointment", _date(d.date_of_appointment)],
                 ["PEP", d.individual_detail?.is_pep ? "YES" : "NO"],
                 ["Address (Latest)", _upper(d.individual_detail?.residential_address)],
                 ["Address (Previous)", _upper(d.individual_detail?.address_prev)],
@@ -683,6 +684,18 @@ function ProfessionalsSection({ data }: { data: ProfessionalPartner }) {
   );
 }
 
+function CompanySecretarySection({ data }: { data: Company }) {
+  const sec = data.company_company_secretary;
+  if (!sec) return null;
+  return (
+    <SectionCard title="Company Secretary">
+      <GridRow label="Secretary" value={_upper(sec.secretary?.registered_name)} />
+      <GridRow label="Registration Number" value={_val(sec.secretary?.registration_number)} />
+      <GridRow label="Date of Appointment" value={_date(sec.date_of_appointment)} />
+    </SectionCard>
+  );
+}
+
 function EntityContent({ entity_type, data }: { entity_type: EntityValue; data: Company | Individual }) {
   const commonData = data as Company & Individual;
 
@@ -695,6 +708,7 @@ function EntityContent({ entity_type, data }: { entity_type: EntityValue; data: 
           <CompanyContactSection data={data as Company} />
           {(data as Company).overview && <CompanyOverviewSection data={(data as Company).overview!} />}
           <DirectorsSection directors={(data as Company).directors || []} />
+          <CompanySecretarySection data={data as Company} />
           {(data as Company).shareholdings && <ShareholdingSection data={(data as Company).shareholdings!} />}
           {(data as Company).structure && <StructureSection data={(data as Company).structure!} />}
           {(data as Company).operations && <OperationsSection data={(data as Company).operations!} />}

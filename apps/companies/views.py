@@ -318,7 +318,9 @@ class TokenFreeCompanyQueryViewSet(GenericViewSet):
     permission_classes = [HasSecretHeader]
     throttle_classes = [AnonRateThrottle]
 
-    queryset = Company.objects.all()
+    queryset = Company.objects.select_related(
+        "overview").filter(is_deleted=False)
+    
     serializer_class = GeneralCompanyDetailsSerializer
     pagination_class = None
 

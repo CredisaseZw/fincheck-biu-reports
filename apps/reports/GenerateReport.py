@@ -858,6 +858,7 @@ body {{
                 ("National ID", self._e(national_id)),
                 ("Gender", self._label(gender)),
                 ("Date of Birth", self._date(dob)),
+                ("Date of Appointment", self._date(d.get("date_of_appointment"))),
                 ("PEP", "YES" if is_pep else "NO"),
                 ("Address (Current)", self._m(address_latest)),
                 ("Address (Previous)", self._m(address_prev)),
@@ -922,6 +923,22 @@ body {{
 
         grid_cols = "1fr" if len(dirs) == 1 else "1fr 1fr"
         return self._card("Directors", f'<div class="dir-grid" style="grid-template-columns: {grid_cols}">{cards}</div>')
+
+    def _render_company_secretary(self) -> str:
+        sec = self._subject.get("company_company_secretary") or {}
+        if not sec:
+            return ""
+        secretary_info = sec.get("secretary") or {}
+        secretary_name = secretary_info.get("registered_name") or ""
+        secretary_reg = secretary_info.get("registration_number") or ""
+        appointment_date = sec.get("date_of_appointment")
+        rows = [
+            ("Secretary", self._u(secretary_name)),
+            ("Registration Number", self._e(secretary_reg)),
+            ("Date of Appointment", self._date(appointment_date)),
+            ("", ""),
+        ]
+        return self._card("Company Secretary", self._grid_table(rows))
 
     def _render_shareholding(self) -> str:
         sh = self._subject.get("shareholdings") or {}
@@ -1279,6 +1296,7 @@ body {{
                 self._render_company_contact(),
                 self._render_company_overview(),
                 self._render_directors(),
+                self._render_company_secretary(),
                 self._render_shareholding(),
                 self._render_structure(),
                 self._render_operations(),
