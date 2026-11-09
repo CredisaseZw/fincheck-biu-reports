@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import UniqueConstraint
 from apps.utils.base_models import BaseModel
 from apps.companies.models import Company
@@ -34,6 +36,12 @@ class CompanyDirector(BaseModel):
         default=Positions.DIRECTOR,
         help_text=_("Director position in the company")
     )
+    date_of_appointment = models.DateField(
+        blank=True, 
+        null=True,
+        help_text=_("Date of appointment as secretary")
+    )
+    
     class Meta:
         ordering = ["-created_at"]
         db_table = 'company_directors'
@@ -44,3 +52,31 @@ class CompanyDirector(BaseModel):
     def __str__(self):
         name = self.individual.full_name if self.individual else "Unknown"
         return f"{name} | ({self.company})"
+
+
+class CompanySecretary(BaseModel):
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='secretary_appointments'
+    )
+    secretary = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name='secretary_for'
+    )    
+    date_of_appointment = models.DateField(
+        blank=True, 
+        null=True,
+        help_text=_("Date of appointment as secretary")
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        db_table = 'company_secretaries'
+        verbose_name = "Company Secretary"
+        verbose_name_plural = "Company Secretaries"        

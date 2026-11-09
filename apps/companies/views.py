@@ -8,7 +8,12 @@ from .serializers import (
     CompanySerializer,
     ClientCompanySerializer,
     CompanyUpdateSerializer,
+    GeneralCompanyDetailsSerializer
 )
+from rest_framework.viewsets import GenericViewSet
+from django.http import Http404
+from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 from django.db.models import ProtectedError
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -16,7 +21,8 @@ from rest_framework import status as STATUS
 from apps.users.models import User
 from apps.directors.models import CompanyDirector
 from apps.utils.helpers import validate_serializer
-from apps.directors.serializers import CompanyDirectorsSerializer
+from apps.directors.serializers import CompanyDirectorsSerializer, CompanySecretaryNoCompanyWriteSerializer, CompanySecretaryNoCompanyReadSerializer
+from apps.directors.models import CompanySecretary
 from apps.individuals.models import Individuals
 from apps.individuals.serializers import IndividualDirectorSerializer
 from rest_framework.decorators import action
@@ -29,6 +35,8 @@ from apps.shareholding.serializers import (
     ShareholdingsSerializers,
     ShareholderWriteSerializer
 )
+from rest_framework.throttling import AnonRateThrottle
+from apps.utils.permissions import HasSecretHeader
 import logging
 
 logger = logging.getLogger(__name__)
@@ -46,6 +54,7 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
         "insolvency_records",
         "public_information",
         "directors",
+        "secretary_appointments",
         "banker_accounts",
         "trade_references",
         "financials",
@@ -115,24 +124,45 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
     def update_or_create_directors(self, request: Request, *args, **kwargs):
         user: User = request.user
         if not user.is_staff:
-            return Response({
-                "error": "Access error."
-            }, status=STATUS.HTTP_403_FORBIDDEN)
+            return Response({"error": "Access error."}, status=STATUS.HTTP_403_FORBIDDEN)
 
         company = self.get_object()
         directors = request.data.get("directors", [])
+        secretary = request.data.get("secretary")
 
-        validated_data = []
-        for d in directors:
+        secretary_serializer = None
+        if secretary:
+            existing = CompanySecretary.objects.filter(company=company).first()
+            secretary_serializer = CompanySecretaryNoCompanyWriteSerializer(
+                instance=existing,
+                data=secretary,
+                partial=existing is not None,
+                context={"company": company},
+            )
+            error = validate_serializer(serializer=secretary_serializer)
+            if error:
+                return error
+
+        prepared = []
+        for raw in directors:
+            d = dict(raw)  
             position = d.pop("position", None)
+            director_id = d.pop("director_id", None)
+            has_date = "date_of_appointment" in d
+            date_of_appointment = d.pop("date_of_appointment", None) or None  # "" -> None
+
             if not position:
                 logger.error(f"Missing position for director: {d}")
-                return Response({
-                    "error": "Position is required for each director."
-                }, status=STATUS.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Position is required for each director."},
+                    status=STATUS.HTTP_400_BAD_REQUEST,
+                )
 
             individual_id = d.get("id")
-            national_id = Individuals.normalize_national_id(d.get("national_id", "")) if d.get("national_id") else None
+            national_id = (
+                Individuals.normalize_national_id(d["national_id"])
+                if d.get("national_id") else None
+            )
 
             director_serializer = IndividualDirectorSerializer(data=d)
             error = validate_serializer(serializer=director_serializer)
@@ -140,40 +170,88 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                 logger.error(f"Validation error for director: {d}, Error: {error.data}")
                 return error
 
-            i_data = director_serializer.validated_data
+            i_data = dict(director_serializer.validated_data)
             i_data.pop("id", None)
 
-            individual = None
-            if individual_id:
-                individual = Individuals.objects.filter(pk=individual_id).first()
-
-            if individual is None and national_id:
-                individual = Individuals.objects.filter(national_id=national_id).first()
-
-            if individual is None:
-                individual = Individuals.objects.create(**i_data)
-            else:
-                for attr, value in i_data.items():
-                    setattr(individual, attr, value)
-
-                individual.save()
-            validated_data.append((individual, position))
+            prepared.append({
+                "individual_id": individual_id,
+                "national_id": national_id,
+                "i_data": i_data,
+                "position": position,
+                "director_id": director_id,
+                "has_date": has_date,
+                "date_of_appointment": date_of_appointment,
+            })
 
         with transaction.atomic():
-            for individual, position in validated_data:
-                CompanyDirector.objects.update_or_create(
-                    company=company,
-                    individual=individual,
-                    position=position,
-                    defaults={},
-                )
+            for item in prepared:
+                individual = None
+                if item["individual_id"]:
+                    individual = Individuals.objects.filter(pk=item["individual_id"]).first()
+                if individual is None and item["national_id"]:
+                    individual = Individuals.objects.filter(national_id=item["national_id"]).first()
+
+                if individual is None:
+                    individual = Individuals.objects.create(**item["i_data"])
+                else:
+                    for attr, value in item["i_data"].items():
+                        setattr(individual, attr, value)
+                    individual.save()
+
+                defaults = {}
+                if item["has_date"]:
+                    defaults["date_of_appointment"] = item["date_of_appointment"]
+
+                link = None
+                if item["director_id"]:
+                    link = CompanyDirector.objects.filter(
+                        pk=item["director_id"], company=company
+                    ).first()
+
+                if link:
+                    clash = (
+                        CompanyDirector.objects
+                        .filter(company=company, individual=individual, position=item["position"])
+                        .exclude(pk=link.pk)
+                        .exists()
+                    )
+                    if clash:
+                        transaction.set_rollback(True)
+                        return Response(
+                            {"error": f"{individual.full_name} already holds the position "
+                                    f"'{item['position']}' in this company."},
+                            status=STATUS.HTTP_400_BAD_REQUEST,
+                        )
+                    link.individual = individual
+                    link.position = item["position"]
+                    for k, v in defaults.items():
+                        setattr(link, k, v)
+                    link.save()
+                else:
+                    CompanyDirector.objects.update_or_create(
+                        company=company,
+                        individual=individual,
+                        position=item["position"],
+                        defaults=defaults,
+                    )
+
+            if secretary_serializer:
+                secretary_serializer.save(company=company)
 
         company.refresh_from_db()
+        appointment = company.secretary_appointments.select_related("secretary").first()
+
         return Response(
-            CompanyDirectorsSerializer(instance=company).data,
+            {
+                **CompanyDirectorsSerializer(instance=company).data,
+                "company_company_secretary": (
+                    CompanySecretaryNoCompanyReadSerializer(appointment).data
+                    if appointment else None
+                ),
+            },
             status=STATUS.HTTP_200_OK,
         )
-
+    
     @action(detail=True, methods=["POST"], url_path="shareholders")
     def update_or_create_shareholders(self, request:Request, *args, **kwargs):
         user:User = request.user
@@ -188,10 +266,6 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
 
         with transaction.atomic():
             shareholding = CompanyShareholding.objects.filter(pk=data.get("id")).first()
-
-            # Fallback: if no id was provided (or it didn't match), look up by company.
-            # CompanyShareholding has a OneToOne with Company, so creating a second one
-            # would violate the unique constraint. We update the existing one instead.
             if shareholding is None:
                 shareholding = CompanyShareholding.objects.filter(company=company).first()
 
@@ -238,3 +312,35 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
 
         read_serializer = ShareholdingsSerializers(shareholding)
         return Response(read_serializer.data, status=STATUS.HTTP_200_OK)
+
+class TokenFreeCompanyQueryViewSet(GenericViewSet):
+    authentication_classes = []
+    permission_classes = [HasSecretHeader]
+    throttle_classes = [AnonRateThrottle]
+
+    queryset = Company.objects.all()
+    serializer_class = GeneralCompanyDetailsSerializer
+    pagination_class = None
+
+    def list(self, request, *args, **kwargs):
+        reg_no = request.query_params.get("search", "").strip()
+        if not reg_no:
+            raise ValidationError({"search": "Registration number is required."})
+
+        matches = list(
+            self.get_queryset()
+            .filter(
+                Q(registration_number__iexact=reg_no)
+                | Q(re_registration_number__iexact=reg_no)
+            )[:2]
+        )
+
+        if not matches:
+            raise Http404("No company found with that registration number.")
+        if len(matches) > 1:
+            return Response(
+                {"error": "Multiple companies match this registration number."},
+                status=409,
+            )
+
+        return Response(self.get_serializer(matches[0]).data)

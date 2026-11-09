@@ -22,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-kr!&d@o4jnm-)c-d$(q9ojm84vn*$#kk05tccdt^)rov*osw)m')
+TOKEN_FREE_API_SECRET = os.environ.get("TOKEN_FREE_API_SECRET", "tsD_Qvnd6c6DmlNCeFSB5xAs7O0o36nyULHltBrevdudH_OCJof3j92YUOpMoiVj")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
@@ -195,6 +196,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # REST Framework
 REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
+    "DEFAULT_THROTTLE_RATES": {"anon": "60/min"},
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [

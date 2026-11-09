@@ -174,7 +174,7 @@ export const REPORT_STATUS_PILL_VARIANTS = {
 export const GENDERS = z.enum(["male", "female", "unknown"], {message : "Gender is required"})
 export const GENDER_OPTIONS = GENDERS.options
 
-export const DEBTOR_TYPE = z.enum(["company", "individual"])
+export const ENTITY_TYPE = z.enum(["company", "individual"])
 
 export const SETTLEMENT_OPTIONS = z.enum(["open", "settled", "disputed", "written_off", "indeterminant"])
 

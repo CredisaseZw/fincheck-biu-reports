@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
 import { getEntityID, getEntityName, handleAxiosError, toDatetimeLocal } from "@/lib/utils";
-import type { CommonFields, Company, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report } from "@/types/core";
+import type { CommonFields, Company, CompanyDirectorData, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report } from "@/types/core";
 import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
@@ -23,12 +23,13 @@ import type { BankerAccountFormData } from "./useBankersDetails";
 import type { CompanyStructureFormData } from "./useCompanyStructure";
 import type { CompanyOperationsFormData } from "./useCompanyOperations";
 import type { ShareholdingsFormData } from "./useShareholdingDetails";
-import type { DirectorFormData } from "./useDirectors";
 import type { ReportDetailsFormData } from "./useReportDetails";
 import type { CompanyOverviewFormData } from "./useCompanyOverview";
 import type { ReportExtrasFormData } from "./useReportExtras";
 import { api } from "@/axios/api";
 import useDetailCacheUpdate from "./useDetailCacheUpdate";
+
+type DirectorsData = CompanyDirectorData["directors_data"]
 
 function useAddReportDialogue(list_report?: ListReport) {
   const { mutate } = useCreateReport();
@@ -71,7 +72,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [companyStructure, setCompanyStructure] = useState<CompanyStructureFormData | undefined>(undefined);
   const [companyOperations, setCompanyOperations] = useState<CompanyOperationsFormData | undefined>(undefined)
   const [shareholding, setShareholding] = useState<ShareholdingsFormData | undefined>();
-  const [directors, setDirectors] = useState<DirectorFormData[]>([])
+  const [directors, setDirectors] = useState<DirectorsData | undefined>(undefined);
   const [reportDetails, setReportDetails] = useState<ReportDetailsFormData | undefined>(undefined);
   const [isRefreshingCredits, setIsRefreshingCredits] = useState(false);
   const cache = useDetailCacheUpdate<Report>(["report", list_report?.subject_type, list_report?.id])
@@ -242,34 +243,40 @@ function useAddReportDialogue(list_report?: ListReport) {
         : []
       })
       
-      setDirectors(
-        company.directors &&
-        company.directors.length > 0
-        ? company.directors.map(item => {
-          const individualDetail = item?.individual_detail ?? undefined
-        
+      const secretary = company.company_company_secretary
+
+      setDirectors({
+        directors: (company.directors ?? []).map(item => {
+          const detail = item.individual_detail
           return {
-            id: individualDetail?.id ?? undefined,
-            director_id: item?.id ?? undefined,
-            full_name: individualDetail?.full_name ?? "",
-            gender: individualDetail?.gender && individualDetail.gender.length >= 2
-              ? individualDetail.gender
-              : "unknown",
-            date_of_birth: individualDetail?.date_of_birth ?? undefined,
-            position: item?.position,
-            is_pep: individualDetail?.is_pep ?? false,
-            residential_address: individualDetail?.residential_address ?? "",
-            address_prev: individualDetail?.address_prev ?? undefined,
-            national_id: individualDetail?.national_id ?? undefined,
-            email: individualDetail?.email ?? undefined,
-            external_directors: individualDetail?.external_directors ?? undefined,
+            id: detail?.id,
+            director_id: item.id,
+            full_name: detail?.full_name ?? "",
+            gender: detail?.gender && detail.gender.length >= 2 ? detail.gender : "unknown",
+            date_of_birth: detail?.date_of_birth ?? undefined,
+            position: item.position,
+            is_pep: detail?.is_pep ?? false,
+            residential_address: detail?.residential_address ?? "",
+            address_prev: detail?.address_prev ?? undefined,
+            national_id: detail?.national_id ?? undefined,
+            email: detail?.email ?? undefined,
+            date_of_appointment: item?.date_of_appointment ?? undefined,
+            external_directors: detail?.external_directors ?? undefined,
             other_individual_directorships: item.other_individual_directorships ?? undefined,
-            mobile_number: individualDetail?.mobile_number ?? undefined,
-            insolvencies_judgements: individualDetail?.insolvencies_judgements ?? undefined
+            mobile_number: detail?.mobile_number ?? undefined,
+            insolvencies_judgements: detail?.insolvencies_judgements ?? undefined,
           }
-        })
-        : []
-      )
+        }),
+        company_company_secretary: secretary
+          ? {
+              company: report.subject.id,
+              secretary: secretary.secretary?.id,
+              secretary_name: secretary.secretary?.registered_name ?? undefined,
+              date_of_appointment: secretary?.date_of_appointment ?? undefined,
+            }
+          : undefined,
+      })
+
       setFinancials(
       company.financials
       ? {
@@ -552,7 +559,10 @@ function useAddReportDialogue(list_report?: ListReport) {
     setCompanyStructure(undefined);
     setCompanyOperations(undefined);
     setShareholding(undefined);
-    setDirectors([]);
+    setDirectors({
+      directors : [],
+      company_company_secretary : undefined
+    });
     setReportDetails(undefined);
   };
 

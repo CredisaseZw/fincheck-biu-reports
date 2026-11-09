@@ -87,7 +87,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
 class IndividualDirectorSerializer(serializers.ModelSerializer):
     national_id = serializers.CharField(required=True)
     date_of_birth = NullableDateField(required=False, allow_null=True)
-
+    
     def to_representation(self, instance):
         payload = entity.hit_endpoint("individual", instance.national_id)
         if payload:
@@ -111,7 +111,7 @@ class IndividualDirectorSerializer(serializers.ModelSerializer):
             "address_prev",
             "insolvencies_judgements",
             "is_pep",
-            'external_directors'
+            'external_directors',
         ]
 
 # Write Serializers 

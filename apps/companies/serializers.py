@@ -39,7 +39,7 @@ from apps.credit_records.serializers import (
     PublicInformationSerializer,
 )
 from django.contrib.contenttypes.models import ContentType
-from apps.directors.serializers import DirectorSerializer
+from apps.directors.serializers import DirectorSerializer, CompanySecretaryNoCompanyReadSerializer
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.shareholding.serializers import ShareholdingsSerializers
 from apps.utils.entity_lookup import EntityLookUp
@@ -84,6 +84,30 @@ class ClientCompanySerializer(UpdatedBySerializerMixin, serializers.ModelSeriali
         model = Company
         fields = '__all__'
 
+class GeneralCompanyDetailsSerializer(serializers.ModelSerializer):
+    overview = CompanyOverviewSerializer(read_only=True)  
+    class Meta:
+        model = Company
+        fields = [
+            "id",
+            "registered_name",
+            "trading_name",
+            "registration_number",
+            "re_registration_number",
+            "date_of_incorporation",
+            "date_of_registration",
+            "location",
+            "site_ownership",
+            "address_registered",
+            "address_operations",
+            "email",
+            "telephone_number",
+            "mobile_number",
+            "website",
+            "is_address_registered_verified",
+            "overview",
+        ]
+        read_only_fields = fields
 class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)
     structure = CompanyStructureSerializer(read_only=True)
@@ -115,7 +139,9 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
         data =  super().to_representation(instance)
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
+        company_company_secretary = instance.secretary_appointments.first()
         financials = instance.financials.first()
+        data['company_company_secretary'] = CompanySecretaryNoCompanyReadSerializer(company_company_secretary).data if company_company_secretary else None
         data['professional_partners'] = ProfessionalPartnersSerializer(professional_partners).data if professional_partners else None
         data['registration_accounts'] = RegistrationAccountsSerializer(registration_accounts).data if registration_accounts else None
         data['financials'] = FinancialsSerializer(financials).data if financials else None

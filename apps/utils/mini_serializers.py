@@ -25,6 +25,7 @@ class MiniIndividualSerializer(serializers.ModelSerializer):
             "national_id",
             "residential_address",
             "mobile_number",
+            "residential_address",
             "email"
         ]
         
@@ -51,13 +52,13 @@ class MiniCompanyDirectorSerializers(serializers.ModelSerializer):
         model = CompanyDirector
         fields = [
             "id",
-            "position",
-            "company"
+            "position"
         ]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['company'] = instance.company.registered_name
+        representation['company_id'] = instance.company.id
         return representation
 
 

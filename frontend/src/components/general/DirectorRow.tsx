@@ -1,5 +1,5 @@
 import { Checkbox } from "../ui/checkbox";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { handleAxiosError, normalize_national_id, toCap } from "@/lib/utils";
 import { api } from "@/axios/api";
 import { CLEAR_MESSAGE, GENDER_OPTIONS } from "@/constants";
@@ -13,14 +13,15 @@ import {
     Select, SelectContent, SelectItem,
     SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Trash2,  RotateCw } from "lucide-react"
+import { Trash2,  RotateCw, Search } from "lucide-react"
 import ColumnsContainer from "./ColumnsContainer"
 import { Textarea } from "../ui/textarea";
-import type { Individual } from "@/types/core";
+import type { Individual, MiniCompanyDirector } from "@/types/core";
 
 const DirectorRow = ({ 
     index, 
     field, 
+    subject_object_id,
     remove, 
     onDelete, 
     getValues, 
@@ -34,40 +35,39 @@ const DirectorRow = ({
     const [isRefreshing, setIsRefreshing] = useState(false);
     const nationalId = watch(`directors.${index}.national_id`);
     const id = watch(`directors.${index}.id`)
+    const position =  watch(`directors.${index}.position`)
 
-
-    useEffect(() => {
+    const onFetchData = async() =>{
         if (!nationalId) return;
-        if (nationalId === field.national_id) return;
-        const nidRegex = /^\d{2}\d{6,7}[A-Za-z]\d{2}$/;
-        const passportRegex = /^[A-Za-z]{2}\d{7}$/;
-        
-        if (nidRegex.test(nationalId) || passportRegex.test(nationalId)) {
-            const checkData = async () => {
-                try {
-                    setIsChecking(true);
-                    const res = await api.get(`/api/individuals/lookup/?national_id=${normalize_national_id(nationalId)}`);
-                    if (res.data) {
-                        const ind = res.data;
-                        if (ind.id) setValue(`directors.${index}.id`, ind.id)
-                        if (ind.full_name) setValue(`directors.${index}.full_name`, ind.full_name, { shouldValidate: true });
-                        if (ind.gender) setValue(`directors.${index}.gender`, ind.gender.toLocaleLowerCase(), { shouldValidate: true });
-                        if (ind.date_of_birth) setValue(`directors.${index}.date_of_birth`, ind.date_of_birth, { shouldValidate: true });
-                        if (ind.mobile_number) setValue(`directors.${index}.mobile_number`, ind.mobile_number, { shouldValidate: true });
-                        if (ind.email) setValue(`directors.${index}.email`, ind.email, { shouldValidate: true });
-                        if (ind.residential_address) setValue(`directors.${index}.residential_address`, ind.residential_address, { shouldValidate: true });
-                        if (ind.external_directors) setValue(`directors.${index}.external_directors`, ind.external_directors, { shouldValidate: true });
-                        if (ind.insolvencies_judgements)  setValue(`directors.${index}.insolvencies_judgements`, ind.insolvencies_judgements, { shouldValidate: true });
+        if (isChecking) return;
+        try {
+            setIsChecking(true);
+            const res = await api.get<Individual>(`/api/individuals/lookup/?national_id=${normalize_national_id(nationalId)}`);
+            if (res.data) {
+                const ind = res.data;
+                if (ind.id) setValue(`directors.${index}.id`, ind.id)
+                if (ind.full_name) setValue(`directors.${index}.full_name`, ind.full_name, { shouldValidate: true });
+                if (ind.gender) setValue(`directors.${index}.gender`, ind.gender.toLocaleLowerCase(), { shouldValidate: true });
+                if (ind.date_of_birth) setValue(`directors.${index}.date_of_birth`, ind.date_of_birth, { shouldValidate: true });
+                if (ind.mobile_number) setValue(`directors.${index}.mobile_number`, ind.mobile_number, { shouldValidate: true });
+                if (ind.email) setValue(`directors.${index}.email`, ind.email, { shouldValidate: true });
+                if (ind.residential_address) setValue(`directors.${index}.residential_address`, ind.residential_address, { shouldValidate: true });
+                if (ind.external_directors) setValue(`directors.${index}.external_directors`, ind.external_directors, { shouldValidate: true });
+                if (ind.insolvencies_judgements)  setValue(`directors.${index}.insolvencies_judgements`, ind.insolvencies_judgements, { shouldValidate: true });
+                if (ind.directorships){
+                    if (Array.isArray(ind.directorships) && ind.directorships.length > 0){
+                        const o_d = ind.directorships.filter((item: MiniCompanyDirector)=> item.company_id !== subject_object_id)
+                        const other_directorships = o_d.map((item: MiniCompanyDirector)=> `${item.position.toUpperCase()} AT ${item.company}`)
+                        setValue(`directors.${index}.other_individual_directorships`, other_directorships)
                     }
-                } catch (error) { 
-                    console.log(error)
-                } finally {
-                    setIsChecking(false);
                 }
-            };            
-            checkData();
+            }
+        } catch (error) { 
+            console.log(error)
+        } finally {
+            setIsChecking(false);
         }
-    }, [nationalId, index, setValue, field.national_id]);
+    }
 
     const refreshJudgements = async() => {
         if(!id){
@@ -116,10 +116,31 @@ const DirectorRow = ({
             <ColumnsContainer numberOfCols={3} gapClass="gap-4">
                 <div className="form-group flex-1">
                     <Label className="required">National ID / Passport ID</Label>
-                    <Input 
-                        {...register(`directors.${index}.national_id`)} 
-                        placeholder="e.g 69235489C67 or ZN1234567" 
-                    />
+                    <div className="relative">
+                        <Input 
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                    event.preventDefault();
+                                    void onFetchData();
+                                }
+                            }}
+                            {...register(`directors.${index}.national_id`)} 
+                            placeholder="e.g 69235489C67 or ZN1234567" 
+                        />
+                        <Button 
+                            disabled = {isChecking}
+                            type="button"
+                            size={"icon-sm"}
+                            onClick={() => void onFetchData()}
+                            className="absolute cursor-pointer right-3 flex self-center top-1.5"
+                        >
+                            {
+                                isChecking
+                                ? <LoadingIndicator variant={"button"}/>
+                                : <Search/>
+                            }
+                        </Button>
+                    </div>
                     {errors.directors?.[index]?.national_id && (
                         <p className="text-destructive text-sm">{errors.directors[index].national_id.message}</p>
                     )}
@@ -193,6 +214,19 @@ const DirectorRow = ({
                 </div>
             </ColumnsContainer>
             
+            {
+                position === "secretary" &&
+                <div className="form-group">
+                    <Label>Date of appointment</Label>
+                    <Input
+                        {
+                            ...register(`directors.${index}.date_of_appointment`)
+                        }
+                        type={"date"}
+                    />
+                </div>
+            }
+
             <ColumnsContainer numberOfCols={2}>
                 <div className="form-group">
                     <Label>Date of Birth</Label>

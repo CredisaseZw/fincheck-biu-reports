@@ -1107,7 +1107,7 @@ body {{
             rows = "".join(f"""<tr>
               <td class="nowrap">{self._date(p.get("record_date"))}</td>
               <td>{self._u(p.get("summary"))}</td>
-              <td style="font-size:8pt;text-transform:none">{self._e(p.get("link"))}</td>
+              <td style="font-size:8pt;text-transform:none">{self._m(p.get("link"))}</td>
             </tr>""" for p in recs)
             return self._data_table(
                 ["Record Date", "Summary", "Link"],

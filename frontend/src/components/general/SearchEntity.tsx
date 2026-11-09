@@ -32,8 +32,8 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     onSetEntityId
 }, ref) => {
     const { setOpenIndividualFields, setOpenCompanyFields } = useReport()
-    const [ query, setQuery ] = useState(defaultSearch ?? "")
-    const [ searchTerm, setSearchTerm ] = useState(defaultSearch ?? "")
+    const [ query, setQuery ] = useState("")
+    const [ searchTerm, setSearchTerm ] = useState("")
     const [ hasInteracted, setHasInteracted ] = useState(false)
     const [ isOpen, setIsOpen ] = useState(false)
     const [ activeIndex, setActiveIndex ] = useState(-1)
@@ -41,6 +41,11 @@ const SearchEntity = forwardRef<SearchEntityRef, props>(({
     const containerRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        setQuery(defaultSearch ?? "")
+        setSearchTerm(defaultSearch ?? "")
+    }, [defaultSearch])
 
     const { data, error, isLoading, isFetching } = useGetEntityObject(
         entityType,

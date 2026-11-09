@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CURRENCY, DEBTOR_TYPE, SETTLEMENT_OPTIONS } from "@/constants";
+import { CURRENCY, ENTITY_TYPE, SETTLEMENT_OPTIONS } from "@/constants";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from  "zod"
@@ -25,7 +25,7 @@ const claim = z.object({
   account_number : z.string().optional(),
   overdue_balance : z.number().optional(),
   debtor_object_id : z.number().positive("A valid debtor object id is required"),
-  debtor_type : DEBTOR_TYPE,
+  debtor_type : ENTITY_TYPE,
   debtor_default :z.string().optional()
 })  
 

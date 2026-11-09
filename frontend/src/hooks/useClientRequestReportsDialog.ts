@@ -1,5 +1,5 @@
 import type { SearchEntityRef } from "@/components/general/SearchEntity";
-import { DEBTOR_TYPE } from "@/constants";
+import { ENTITY_TYPE } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { handleAxiosError } from "@/lib/utils";
 
 const row = z.object({
-    subject_type : DEBTOR_TYPE,
+    subject_type : ENTITY_TYPE,
     subject_object_id : z.number("A valid subject object id is required").positive("A valid subject object id is required"),
     contact_person: z.string().optional()
 })

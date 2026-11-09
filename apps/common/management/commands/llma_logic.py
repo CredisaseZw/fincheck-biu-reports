@@ -10,7 +10,6 @@ from langchain_together import ChatTogether
 from apps.common.report_types import (
     ReportType,
     SYSTEM_PROMPT,
-    detect_report_type,
     CompanyReportSchema,
     IndividualReportSchema,
 )

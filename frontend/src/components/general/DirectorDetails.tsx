@@ -5,6 +5,10 @@ import Fieldset from "./FieldSet"
 import type { CompanyDirectorsProps } from "@/types/core";
 import CustomSubmitButton from "./CustomSubmitButton";
 import DirectorRow from "./DirectorRow";
+import ColumnsContainer from "./ColumnsContainer";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import SearchEntity from "./SearchEntity";
 
 function DirectorDetails({
     directors_data,
@@ -18,6 +22,7 @@ function DirectorDetails({
         fields,
         control,
         isPending, 
+        default_search,
         onDelete,    
         getValues,
         setValue,
@@ -40,6 +45,7 @@ function DirectorDetails({
             <Fieldset legendTitle="Directors" className="flex flex-col gap-4">
                 {fields.map((field, index) => (
                     <DirectorRow 
+                        subject_object_id = {subject_object_id}
                         key={field.id}
                         index={index}
                         field={field}
@@ -77,14 +83,41 @@ function DirectorDetails({
                     >
                         <Plus size={16} className="mr-2" /> Add Director
                     </Button>
-                    <CustomSubmitButton
-                        onFine={onTouched}
-                        showFine
-                        state={touched}
-                        isPending={isPending}
-                    />
+            
                 </div>
-
+                <Fieldset legendTitle="Company Secretary" className="flex justify-end">
+                    <ColumnsContainer>
+                        <div className="form-group">
+                            <Label>Company</Label>
+                            <SearchEntity
+                                entityType={"company"}
+                                defaultSearch={default_search}
+                                onClear={()=> {
+                                    setValue("company_company_secretary.secretary", undefined)
+                                    setValue("company_company_secretary.secretary_name", undefined)
+                                }}
+                                onSelectItem={(id: number) =>{
+                                    setValue("company_company_secretary.secretary", id);
+                                }}
+                            /> 
+                        </div>
+                        <div className="form-group mt-1">
+                            <Label>Date of appointment</Label>
+                            <Input
+                                {
+                                    ...register("company_company_secretary.date_of_appointment")
+                                }
+                                type={"date"}
+                            />
+                        </div>
+                    </ColumnsContainer>
+                </Fieldset>
+                <CustomSubmitButton
+                    onFine={onTouched}
+                    showFine
+                    state={touched}
+                    isPending={isPending}
+                />
             </Fieldset>
         </form>
     )

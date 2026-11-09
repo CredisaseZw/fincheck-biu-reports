@@ -181,10 +181,18 @@ export interface CompanyOperations {
   sales_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
   purchases_payment_terms: "cash_only" | "cash_and_credit" | "credit_only";
 }
+type DirectorPositions = "director" | "secretary" | "other";
+export interface MiniCompanyDirector {
+  id: number,
+  position: DirectorPositions,
+  company: string
+  company_id: number
+}
 export interface  CompanyDirector extends Timestamps {
-  position: "director" | "secretary" | "other";
+  position: DirectorPositions
   id: number,
   individual:number,
+  date_of_appointment: string | null;
   individual_detail? : Individual | null
   other_individual_directorships: string[] | null
 }
@@ -352,10 +360,15 @@ export interface CommonFields extends Timestamps{
   professional_partners: ProfessionalPartner;
   financials: Financial;
 }
-
+export type CompanySecretary = {
+  id: number;
+  secretary: MiniCompany |  null;
+  date_of_appointment: string | null;
+} | null;
 export interface Company extends CommonFields{
   company_name: string;
   re_registration_number: string | null;
+  company_company_secretary: CompanySecretary;
   registration_number: string| null;
   registered_name: string;
   date_of_incorporation: string | null;
@@ -397,11 +410,7 @@ export interface Individual extends CommonFields {
   employment_information: EmploymentInformation | null;
   next_of_kin: NextOfKin | null;
   address_prev:  string | null;
-  directorships: {
-    id: number,
-    position: "director" | "secretary" | "other",
-    company: string 
-  }[]
+  directorships: MiniCompanyDirector[]
 }
 
 export interface Report extends Timestamps {
@@ -543,9 +552,20 @@ export interface CompanyOperationsProps extends ReportEntityProps{
 export interface CompanyShareholdingProps extends ReportEntityProps{
   shareholdings_data : ShareholdingsFormData | undefined
 }
-export interface CompanyDirectorsProps extends ReportEntityProps{
-  directors_data : DirectorFormData[]  
+
+export type CompanyDirectorData = {
+directors_data: {
+    directors: DirectorFormData[]
+    company_company_secretary?: {
+      company: number | undefined;
+      secretary: number |  undefined;
+      secretary_name: string | undefined
+      date_of_appointment: string | undefined;
+    }
+  }
 }
+export interface CompanyDirectorsProps extends ReportEntityProps, CompanyDirectorData {}
+
 export interface ReportDetailsProps extends ReportEntityProps{
   report_data : ReportDetailsFormData | undefined
 }
