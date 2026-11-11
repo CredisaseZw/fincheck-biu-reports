@@ -107,6 +107,12 @@ class BankerAccounts(BaseModelWithSubject):
         db_table ="bank_accounts"
         verbose_name = "Banker Account"
         verbose_name_plural = "Banker Accounts"
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="bank_accounts_subj_idx"
+            ),
+        ]
 
     def __str__(self):
         return f"{self.subject} | {self.account_name} ({self.account_number})"
@@ -252,6 +258,12 @@ class TradeReferences(BaseModelWithSubject):
         verbose_name = _("Trade Reference")
         verbose_name_plural = _("Trade Reference")
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="trade_references_subj_idx"
+            ),
+        ]
     
     def __str__(self):
         name = self.name or "N/A"

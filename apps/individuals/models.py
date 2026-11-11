@@ -2,7 +2,7 @@ import re
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from apps.utils.base_models import BaseModel
-from django.db.models import UniqueConstraint
+from django.db.models import Q, UniqueConstraint
 from apps.reports.models import Report
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
@@ -175,6 +175,13 @@ class Individuals(BaseModel):
         verbose_name = _("Individual")
         verbose_name_plural = _("Individuals")
         ordering = ["full_name"]
+        indexes = [
+            models.Index(
+                fields=["full_name"],
+                name="individuals_full_name_idx",
+                condition=Q(is_deleted=False)
+            ),
+        ]
         constraints = [
             UniqueConstraint(
                 fields=["national_id"],

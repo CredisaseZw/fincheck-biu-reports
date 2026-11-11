@@ -223,6 +223,16 @@ class Company(BaseModel):
         db_table = "companies"
         verbose_name = _("company")
         verbose_name_plural = _("Companies")        
+        indexes = [
+            models.Index(
+                fields=["registration_number"],
+                name="companies_reg_number_idx"
+            ),
+            models.Index(
+                fields=["re_registration_number"],
+                name="companies_re_reg_num_idx"
+            ),
+        ]
         constraints = [
             UniqueConstraint(
                 fields=['registered_name', 'trading_name'],

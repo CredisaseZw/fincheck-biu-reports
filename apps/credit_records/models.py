@@ -25,6 +25,16 @@ class Claims(BaseFinancialRecord):
         db_table = "claims"
         verbose_name = "Claim"
         verbose_name_plural = "Claims"
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="claims_subj_idx"
+            ),
+            models.Index(
+                fields=["debtor_content_type", "debtor_object_id"],
+                name="claims_debtor_idx"
+            ),
+        ]
 
 class Absconders(BaseFinancialRecord):
     class SettlementOptions(models.TextChoices):
@@ -51,6 +61,16 @@ class Absconders(BaseFinancialRecord):
         db_table= "absconder"
         verbose_name = "Absconder Record"
         verbose_name_plural = "Absconder Records"
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="absconders_subj_idx"
+            ),
+            models.Index(
+                fields=["debtor_content_type", "debtor_object_id"],
+                name="absconders_debtor_idx"
+            ),
+        ]
 
 class CourtJudgement(BaseModelWithSubject):
     class SettlementOptions(models.TextChoices):
@@ -108,6 +128,12 @@ class CourtJudgement(BaseModelWithSubject):
         db_table = "court_judgement"
         verbose_name = "Court Judgement"
         verbose_name_plural = "Court Judgement's"
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="court_judgement_subj_idx"
+            ),
+        ]
         
 class InsolvencyRecord(BaseModelWithSubject):
     class InsolvencyType(models.TextChoices):
@@ -142,6 +168,12 @@ class InsolvencyRecord(BaseModelWithSubject):
         db_table = "insolvency_record"
         verbose_name = "Insolvency Record"
         verbose_name_plural = "Insolvency Records"
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="insolvency_record_subj_idx"
+            ),
+        ]
 
 class PublicInformation(BaseModelWithSubject):
     record_date = models.DateField(
@@ -159,4 +191,10 @@ class PublicInformation(BaseModelWithSubject):
         db_table = "public_information"
         verbose_name = "Public Information"
         verbose_name_plural = "Public Information"
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="public_information_subj_idx"
+            ),
+        ]
 

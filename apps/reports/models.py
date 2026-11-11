@@ -157,6 +157,29 @@ class Report(BaseModel):
         ordering = [
             OrderBy(Coalesce('report_date', 'created_at'), descending=True)
         ]
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="report_subj_ct_obj_idx"
+            ),
+            models.Index(
+                fields=["client_content_type", "client_object_id"],
+                name="report_client_ct_obj_idx"
+            ),
+            models.Index(
+                fields=["status", "-finalized_at"],
+                name="report_status_fin_idx"
+            ),
+            models.Index(
+                Coalesce("report_date", "created_at").desc(),
+                name="report_sort_date_idx"
+            ),
+            models.Index(
+                fields=["enquiry_reference"],
+                name="report_enquiry_pat_idx",
+                opclasses=["varchar_pattern_ops"]
+            ),
+        ]
         constraints = [
             UniqueConstraint(
                 fields= ["enquiry_reference"],

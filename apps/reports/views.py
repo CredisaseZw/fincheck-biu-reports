@@ -74,12 +74,18 @@ class ReportViewSet(BaseAuthJSONViewSet):
         if user.is_staff or user.is_superuser:
             return Report.objects.annotate(
             sort_date=Coalesce('report_date', 'created_at')
+        ).select_related("analyst"
+        ).prefetch_related("client", "subject"
         ).order_by('-sort_date').filter().exclude(status=Report.StatusChoices.FINALIZED)
         else:
             return Report.objects.filter(
                 client_object_id = user.client_object_id,
                 client_content_type = user.client_content_type,
-            ).exclude(status=Report.StatusChoices.FINALIZED)
+            ).select_related(
+            "analyst"
+        ).prefetch_related(
+            "client", "subject"
+        ).exclude(status=Report.StatusChoices.FINALIZED)
     
     def get_serializer_class(self):
         if self.action == "list":
