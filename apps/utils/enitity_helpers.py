@@ -1,90 +1,96 @@
-def _summarize_claims(claims) -> str:
-    if not claims:
-        return ""
+"""Text summaries for FIN credit records.
+
+These format the objects returned by :class:`apps.utils.entity_lookup.EntityLookUp`
+into the ``Insolvencies, Judgements, Defaults`` text block. They are pure
+functions: no database reads or writes happen here.
+"""
+
+
+def normalize_currency(value: str | None) -> str:
+    """Map FIN's currency codes onto the currencies we display."""
+    if not value:
+        return "USD"
+    value = str(value).strip().upper()
+    if value in ("NOT GIVEN", "NOT SPECIFIED") or len(value) > 4:
+        return "USD"
+    if value[:2] == "ZW":
+        return "ZiG"
+    if value[:2] == "US":
+        return "USD"
+    return value
+
+
+def _status(record) -> str:
+    return "settled" if getattr(record, "is_closed", False) else "open"
+
+
+def _date(value) -> str:
+    text = str(value).strip() if value else ""
+    if not text:
+        return "unknown date"
+    return text
+
+
+def _claim_lines(claims, label: str) -> list[str]:
     lines = []
-    for c in claims:
-        summary = f"Claim on {getattr(c, 'claim_date', None) or 'unknown date'}"
-        if getattr(c, 'creditor_name', None):
-            summary += f" by creditor {c.creditor_name}"
-        if getattr(c, 'amount', None):
-            summary += f" for {getattr(c, 'currency', None) or 'USD'} {c.amount}"
-        if getattr(c, 'overdue_balance', None):
-            summary += f" (Overdue: {getattr(c, 'currency', None) or 'USD'} {c.overdue_balance})"
-        summary += f" with status {getattr(c, 'status', None) or 'open'}."
-        lines.append(summary)
-    return "\n".join(lines)
+    for claim in claims:
+        date = _date(getattr(claim, "date_of_claim", None))
+        currency = normalize_currency(getattr(claim, "currency_type", None))
+        line = f"{label} on {date}"
 
-def _summarize_absconders(absconders) -> str:
-    if not absconders:
-        return ""
+        creditor = getattr(claim, "company_creditor_fins__registration_name", None)
+        if creditor:
+            line += f" by creditor {creditor}"
+
+        amount = getattr(claim, "amount", None)
+        if amount:
+            line += f" for {currency} {amount}"
+
+        overdue = getattr(claim, "overdue_balance", None)
+        if overdue:
+            line += f" (Overdue: {currency} {overdue})"
+
+        line += f" with status {_status(claim)}."
+        lines.append(line)
+    return lines
+
+
+def _summarize_claims(claims) -> list[str]:
+    return _claim_lines(claims, "Claim")
+
+
+def _summarize_absconders(absconders) -> list[str]:
+    return _claim_lines(absconders, "Absconder record")
+
+
+def _summarize_court_judgements(records) -> list[str]:
     lines = []
-    for a in absconders:
-        summary = f"Absconder record from {getattr(a, 'start_date', None) or 'unknown date'}"
-        if getattr(a, 'creditor_name', None):
-            summary += f" by creditor {a.creditor_name}"
-        if getattr(a, 'amount', None):
-            summary += f" for {getattr(a, 'currency', None) or 'USD'} {a.amount}"
-        if getattr(a, 'overdue_balance', None):
-            summary += f" (Overdue: {getattr(a, 'currency', None) or 'USD'} {a.overdue_balance})"
-        summary += f" with status {getattr(a, 'status', None) or 'open'}."
-        lines.append(summary)
-    return "\n".join(lines)
+    for record in records:
+        court = getattr(record, "court_name", None) or "unknown court"
+        date = _date(getattr(record, "judgement_date", None))
+        line = f"Court judgement from {court} on {date}"
 
-def _summarize_court_judgements(judgements) -> str:
-    if not judgements:
-        return ""
-    lines = []
-    for j in judgements:
-        summary = (
-            f"Court judgement from {getattr(j, 'court_name', None) or 'unknown court'} "
-            f"on {getattr(j, 'judgement_date', None) or 'unknown date'}"
-        )
-        if getattr(j, 'amount', None):
-            summary += f" for {getattr(j, 'currency', None) or 'USD'} {j.amount}"
-        if getattr(j, 'plaintf_name', None):
-            summary += f" by plaintiff {j.plaintf_name}"
-        summary += f" with status {getattr(j, 'status', None) or 'open'}."
-        lines.append(summary)
-    return "\n".join(lines)
+        amount = getattr(record, "amount", None)
+        if amount:
+            currency = normalize_currency(getattr(record, "currency_type", None))
+            line += f" for {currency} {amount}"
 
-def _summarize_public_info(public_info) -> str:
-    if not public_info:
-        return ""
-    lines = []
-    for p in public_info:
-        record_date = getattr(p, 'record_date', None) or 'unknown date'
-        summary_text = getattr(p, 'summary', None) or ''
-        lines.append(f"Public info on {record_date}: {summary_text}.")
-    return "\n".join(lines)
+        plaintiff = getattr(record, "plaintf_name", None)
+        if plaintiff:
+            line += f" by plaintiff {plaintiff}"
 
-def _build_insolvencies_summary(instance) -> str:
-    claims = [c for c in instance.claims.all() if getattr(c, 'status', None) == 'open']
-    absconders = [a for a in instance.absconders.all() if getattr(a, 'status', None) == 'open']
-    court_judgements = list(instance.court_judgements.all())
-    public_info = (
-        list(instance.public_information.all())
-        if hasattr(instance, 'public_information')
-        else []
-    )
+        line += f" with status {_status(record)}."
+        lines.append(line)
+    return lines
 
-    parts = []
-    if court_judgements:
-        parts.append(_summarize_court_judgements(court_judgements))
-    if public_info:
-        parts.append(_summarize_public_info(public_info))
 
-    absconders_summary = _summarize_absconders(absconders)
-    if absconders_summary:
-        parts.append(absconders_summary)
-
-    claims_summary = _summarize_claims(claims)
-    if claims_summary:
-        parts.append(claims_summary)
-
+def build_insolvencies_summary(claims=None, absconders=None, court_records=None) -> str:
+    """Build the ``Insolvencies, Judgements, Defaults`` text block."""
+    parts: list[str] = []
+    if court_records:
+        parts.extend(_summarize_court_judgements(court_records))
+    if absconders:
+        parts.extend(_summarize_absconders(absconders))
+    if claims:
+        parts.extend(_summarize_claims(claims))
     return "\n".join(parts).strip()
-
-def sync_insolvencies_summary( instance):
-    if not hasattr(instance, 'insolvencies_judgements'):
-        return
-    instance.insolvencies_judgements = _build_insolvencies_summary(instance)
-    instance.save(update_fields=['insolvencies_judgements'])

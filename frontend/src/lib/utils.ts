@@ -1,5 +1,5 @@
 import { CYCLE_END_DAY, FILE_STYLES, LONG_MONTHS, SHORT_MONTHS } from "@/constants";
-import type { Address, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
+import type { Address, Claim, Company, EntityValue, Individual, MiniCompany, MiniIndividual } from "@/types/core";
 import { isAxiosError, type AxiosError } from "axios";
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner";
@@ -299,4 +299,31 @@ export function normalize_national_id(value: string):string {
 export function getYearRange(yearsBack: number = 50): number[] {
   const currentYear = new Date().getFullYear();
   return Array.from({ length: yearsBack + 1 }, (_, i) => currentYear - i);
+}
+
+export function display(value: string | number | null | undefined): string {
+    if (value === null || value === undefined) return "—";
+    const text = String(value).trim();
+    if (!text || text === "0" || text === "0.00" || text === "0.0") return "—";
+    return text.toUpperCase();
+}
+
+export function money(value: string | number | null | undefined): string {
+    if (value === null || value === undefined) return "—";
+    const parsed = parseFloat(String(value));
+    if (isNaN(parsed) || parsed === 0) return "—";
+    return parsed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export function date(value: string | null | undefined): string {
+    const text = value ? String(value).trim() : "";
+    if (!text || text.startsWith("0001-01-01")) return "—";
+    return text.toUpperCase();
+}
+
+export function statusVariant(status: Claim["status"]) {
+    if (status === "settled") return "success" as const;
+    if (status === "disputed") return "danger" as const;
+    if (status === "written_off") return "ghost" as const;
+    return "warning" as const;
 }

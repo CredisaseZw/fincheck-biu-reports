@@ -21,7 +21,6 @@ from apps.credit_records.serializers import (
     InsolvencyRecordSerializer,
     PublicInformationSerializer,
 )
-from apps.utils.enitity_helpers import sync_insolvencies_summary
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.utils.entity_lookup import EntityLookUp
 from apps.utils.manipulate_entities import CreateEntityGenericHandlers, UpdateEntityGenericHandlers
@@ -60,15 +59,15 @@ class IndividualSerializer(serializers.ModelSerializer):
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
 
     def to_representation(self, instance):
-        payload = entity.hit_endpoint("individual", instance.national_id)
-        if payload:
-            chained_data = entity._prepare_serializer_individual_data(payload, instance.pk)
-            entity.sync_entity_records(instance, chained_data)
-        
-        sync_insolvencies_summary(instance)
-
-        instance.refresh_from_db()
         data = super().to_representation(instance)
+        data.update(
+            entity.credit_record_payload(
+                "individual",
+                instance.national_id,
+                subject_object_id=instance.pk,
+                subject_name=instance.full_name,
+            )
+        )
         return data
 
     class Meta:
@@ -89,14 +88,11 @@ class IndividualDirectorSerializer(serializers.ModelSerializer):
     date_of_birth = NullableDateField(required=False, allow_null=True)
     
     def to_representation(self, instance):
-        payload = entity.hit_endpoint("individual", instance.national_id)
-        if payload:
-            chained_data = entity._prepare_serializer_individual_data(payload, instance.pk)
-            entity.sync_entity_records(instance, chained_data)
-
-        sync_insolvencies_summary(instance)
-        instance.refresh_from_db()
-        return super().to_representation(instance)
+        data = super().to_representation(instance)
+        summary = entity.credit_records_text("individual", instance.national_id)
+        if summary is not None:
+            data["insolvencies_judgements"] = summary
+        return data
     class Meta:
         model = Individuals
         fields = [

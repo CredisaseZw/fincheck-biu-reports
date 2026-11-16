@@ -1,15 +1,16 @@
-from django.db.models import Model
 from django.db import IntegrityError
 from apps.individuals.models import Individuals
 from apps.companies.models import Company
-from apps.credit_records.models import Claims, Absconders, CourtJudgement
+from django.conf import settings
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ValidationError
 from django.contrib.contenttypes.models import ContentType
+from apps.utils.enitity_helpers import build_insolvencies_summary, normalize_currency
 import requests
 
 import logging
 logger = logging.getLogger(__name__)
+
 class IndividualInterface(BaseModel):
     fins_number: str
     national_id: Optional[str] = None
@@ -34,20 +35,23 @@ class CompanyInterface(BaseModel):
     legal_status: Optional[str] = None
     trading_status: Optional[str] = None
 
+
 class Summary(BaseModel):
     claims_count: int
     court_cases_count: int
+
 
 class Claim(BaseModel):
     claim_number: int
     account_number: Optional[str] = None
     amount: Optional[str] = None
     overdue_balance: Optional[str] = None
-    date_of_claim: Optional[str]= None
+    date_of_claim: Optional[str] = None
     currency_type: Optional[str] = None
     is_closed: bool
     is_absconder: bool
     company_creditor_fins__registration_name: Optional[str] = None
+
 
 class CourtRecord(BaseModel):
     case_number: Optional[str] = None
@@ -58,12 +62,14 @@ class CourtRecord(BaseModel):
     is_closed: bool
     plaintf_name: Optional[str] = None
 
+
 class LookupCompanyResponse(BaseModel):
     found: bool
     company: CompanyInterface
     summary: Summary
     claims: List[Claim]
     court_records: List[CourtRecord]
+
 
 class LookupIndividualResponse(BaseModel):
     found: bool
@@ -72,29 +78,26 @@ class LookupIndividualResponse(BaseModel):
     claims: List[Claim]
     court_records: List[CourtRecord]
 
+
+class EntityCreditRecords(BaseModel):
+    """Credit records as returned by the FIN endpoint - never persisted."""
+    claims: List[Claim] = Field(default_factory=list)
+    absconders: List[Claim] = Field(default_factory=list)
+    court_records: List[CourtRecord] = Field(default_factory=list)
+    summary: str = ""
+
+
 class EntityLookUp:
     def __init__(self):
         self._FIN_LINK = "https://secure-fincheckzim.com"
         self.HEADERS = {
-            "username": "assetsafe.com",
-            "token": "IJl1lIASX3AQAZJbZPT",
+            "username": settings.FINCHECK_USERNAME,
+            "token": settings.FINCHECK_PASSWORD,
         }
         self.LINKS = {
             "company": "/lookup-company/",
             "individual": "/lookup-person/"
         }
-    
-    @staticmethod
-    def _handle_currency_type(value: str) -> str:
-        if not value:
-            return "USD"
-        if value == "Not Given" or value == "Not Specified" or len(value) > 4:
-            return "USD"
-        if value[:2] == "ZW":
-            return "ZiG"
-        if value[:2] == "US":
-            return "USD"
-        return value.upper()
 
     @staticmethod
     def _handle_gender(value: str) -> str:
@@ -104,10 +107,10 @@ class EntityLookUp:
         if value in ["female", "f"]:
             return "female"
         return "unknown"
-    
+
     @staticmethod
     def _get_existing_company(
-            registered_name: Optional[str], 
+            registered_name: Optional[str],
             trading_name: Optional[str],
             registration_number: Optional[str]) -> Optional["Company"]:
         if registration_number:
@@ -125,7 +128,7 @@ class EntityLookUp:
         return None
 
     @staticmethod
-    def get_content_type_id(subject_object_id, subject_type: str, return_id= True) -> int | None:
+    def get_content_type_id(subject_object_id, subject_type: str, return_id=True) -> int | None:
         model_map = {
             "company": Company,
             "individual": Individuals,
@@ -144,36 +147,6 @@ class EntityLookUp:
         if return_id:
             return ContentType.objects.get_for_model(subject).id
         return ContentType.objects.get_for_model(subject)
-
-    def _prepare_claim_data(self, claim: Claim, debtor_content_type, debtor_object_id: int) -> dict:
-        date_field = 'start_date' if claim.is_absconder else 'claim_date'
-        return {
-            'debtor_content_type': debtor_content_type,
-            'debtor_object_id': debtor_object_id,
-            'subject_content_type': debtor_content_type,
-            'subject_object_id': debtor_object_id,
-            'amount': claim.amount,
-            'status': 'settled' if claim.is_closed else 'open',
-            date_field: claim.date_of_claim,
-            **({'account_number': claim.account_number} if claim.account_number else {}),
-            **({'creditor_name': claim.company_creditor_fins__registration_name} if claim.company_creditor_fins__registration_name else {}),
-            **({'currency': self._handle_currency_type(claim.currency_type.upper())} if claim.currency_type else {}),
-            **({'overdue_balance': claim.overdue_balance} if claim.overdue_balance else {}),
-            '_is_absconder': claim.is_absconder,
-        }
-
-    def _prepare_court_data(self, record: CourtRecord, debtor_content_type, debtor_object_id: int) -> dict:
-        return {
-            'subject_content_type': debtor_content_type,
-            'subject_object_id': debtor_object_id,
-            'amount': record.amount,
-            'status': 'settled' if record.is_closed else 'open',
-            **({'currency': self._handle_currency_type(record.currency_type.upper())} if record.currency_type else {}),
-            **({'case_number': record.case_number} if record.case_number else {}),
-            **({'court_name': record.court_name} if record.court_name else {}),
-            **({'judgement_date': record.judgement_date} if record.judgement_date else {}),
-            **({'plaintf_name': record.plaintf_name} if record.plaintf_name else {}),
-        }
 
     def _prepare_individual_data(self, individual: IndividualInterface) -> dict:
         return {
@@ -194,41 +167,6 @@ class EntityLookUp:
             **({'address_registered': company.current_address} if company.current_address else {}),
             'registered_name': company.registration_name,
         }
-    
-    def _claim_key(self, d: dict) -> tuple:
-        if d.get('account_number'):
-            return ('acc', d['account_number'])
-        return ('amt', str(d.get('amount')))
-
-    def _court_key(self, d: dict) -> tuple:
-        if d.get('case_number'):
-            return ('case', d['case_number'])
-        return ('amt_date', str(d.get('amount')), d.get('judgement_date'))
-
-    def _changed_fields(self, existing: dict, incoming: dict, watch_fields: list) -> dict:
-        changed = {}
-        for field in watch_fields:
-            if field not in incoming:
-                continue
-            if str(existing.get(field)) != str(incoming.get(field)):
-                changed[field] = incoming[field]
-        return changed
-
-    def _sync_records(self, model, existing_queryset, incoming: list):
-        existing_queryset.delete()
-        for item in incoming:
-            try:
-                model.objects.create(**item)
-            except Exception:
-                logger.exception("Failed to create %s", model.__name__)
-
-    def sync_entity_records(self, instance, chained_data: Optional[dict]):
-        if not chained_data:
-            return
-        
-        self._sync_records(Claims, instance.claims.all(), chained_data['claims'])
-        self._sync_records(Absconders, instance.absconders.all(), chained_data['absconders'])
-        self._sync_records(CourtJudgement, instance.court_judgements.all(), chained_data['court_records'])
 
     def save_company_data(self, response):
         data = LookupCompanyResponse.model_validate(response)
@@ -237,7 +175,7 @@ class EntityLookUp:
 
         if not data.company.registration_name:
             return None
-        
+
         company_data = self._prepare_company_data(data.company)
         try:
             company_instance = Company.objects.create(**company_data, refer_type="fp3")
@@ -252,7 +190,6 @@ class EntityLookUp:
             raise
 
         return company_instance
-
 
     def save_individual_data(self, response):
         data = LookupIndividualResponse.model_validate(response)
@@ -270,75 +207,118 @@ class EntityLookUp:
 
         return individual_instance
 
-    def _prepare_serializer_individual_data(self, response: dict, debtor_object_id: int) -> Optional[dict]:
-        data = LookupIndividualResponse.model_validate(response)
+    def fetch_credit_records(self, type: str, value: Optional[str]) -> Optional[EntityCreditRecords]:
+        """Hit the FIN endpoint and return its claims, absconders and court judgements.
+
+        Returns ``None`` when the lookup fails or the entity is not found.
+        Nothing is written to the database.
+        """
+        if not value:
+            return None
+
+        payload = self.hit_endpoint(type=type, value=value)
+        if not payload:
+            return None
+
+        schema = LookupIndividualResponse if type == "individual" else LookupCompanyResponse
+        try:
+            data = schema.model_validate(payload)
+        except ValidationError:
+            logger.exception("Unexpected FIN lookup payload for type=%s value=%s", type, value)
+            return None
+
         if not data.found:
             return None
 
-        debtor_content_type = self.get_content_type_id(
-            subject_object_id=debtor_object_id,
-            subject_type="individual",
-            return_id=False,
+        claims = [claim for claim in data.claims if not claim.is_absconder and not claim.is_closed]
+        absconders = [claim for claim in data.claims if claim.is_absconder and not claim.is_closed]
+        court_records = list(data.court_records)
+
+        return EntityCreditRecords(
+            claims=claims,
+            absconders=absconders,
+            court_records=court_records,
+            summary=build_insolvencies_summary(claims, absconders, court_records),
         )
 
-        claims_data, absconders_data = [], []
-        for claim in data.claims:
-            if claim.is_closed:
-                continue
-
-            prepared = self._prepare_claim_data(claim, debtor_content_type, debtor_object_id)
-            is_absconder = prepared.pop('_is_absconder')
-            (absconders_data if is_absconder else claims_data).append(prepared)
-
-        court_data = [
-            self._prepare_court_data(r, debtor_content_type, debtor_object_id)
-            for r in data.court_records
-        ]
-
-        return {
-            'claims': claims_data,
-            'absconders': absconders_data,
-            'court_records': court_data,
-        }
-
-    def _prepare_serializer_company_data(self, response: dict, debtor_object_id: int) -> Optional[dict]:
-        data = LookupCompanyResponse.model_validate(response)
-        if not data.found or not data.company.registration_name:
+    def credit_records_text(self, type: str, value: Optional[str]) -> Optional[str]:
+        """The ``Insolvencies, Judgements, Defaults`` text, or ``None`` if the lookup failed."""
+        records = self.fetch_credit_records(type, value)
+        if records is None:
             return None
+        return records.summary
 
-        debtor_content_type = self.get_content_type_id(
-            subject_object_id=debtor_object_id,
-            subject_type="company",
-            return_id=False,
-        )
-
-        claims_data, absconders_data = [], []
-        for claim in data.claims:
-            if claim.is_closed:
-                continue
-
-            prepared = self._prepare_claim_data(claim, debtor_content_type, debtor_object_id)
-            is_absconder = prepared.pop('_is_absconder')
-            (absconders_data if is_absconder else claims_data).append(prepared)
-
-        court_data = [
-            self._prepare_court_data(r, debtor_content_type, debtor_object_id)
-            for r in data.court_records
-        ]
-
+    def _claim_payload(self, claim: Claim, date_field: str, debtor: dict) -> dict:
         return {
-            'claims': claims_data,
-            'absconders': absconders_data,
-            'court_records': court_data,
+            "id": claim.claim_number,
+            "debtor": debtor,
+            "creditor_name": claim.company_creditor_fins__registration_name,
+            "currency": normalize_currency(claim.currency_type),
+            "amount": claim.amount,
+            "account_number": claim.account_number,
+            "overdue_balance": claim.overdue_balance,
+            date_field: claim.date_of_claim,
+            "status": "settled" if claim.is_closed else "open",
         }
-    
-    def hit_endpoint(self, type:str, value: str):
+
+    def _court_payload(self, record: CourtRecord, record_id: int) -> dict:
+        return {
+            "id": record_id,
+            "court_name": record.court_name,
+            "case_number": record.case_number,
+            "plaintf_name": record.plaintf_name,
+            "currency": normalize_currency(record.currency_type),
+            "amount": record.amount,
+            "judgement_date": record.judgement_date,
+            "status": "settled" if record.is_closed else "open",
+        }
+
+    def credit_record_payload(
+        self,
+        type: str,
+        value: Optional[str],
+        subject_object_id: Optional[int] = None,
+        subject_name: Optional[str] = None,
+    ) -> dict:
+        """Serialized credit records plus their text summary.
+
+        Returns an empty dict when the endpoint cannot be reached so callers can
+        merge the result straight into a representation.
+        """
+        records = self.fetch_credit_records(type, value)
+        if records is None:
+            return {}
+
+        debtor = {
+            "name": subject_name,
+            "extras": {
+                "debtor_object_id": subject_object_id,
+                "debtor_type": type,
+            },
+        }
+        return {
+            "claims": [
+                self._claim_payload(claim, "claim_date", debtor)
+                for claim in records.claims
+            ],
+            "absconders": [
+                self._claim_payload(claim, "start_date", debtor)
+                for claim in records.absconders
+            ],
+            "court_judgements": [
+                self._court_payload(record, index)
+                for index, record in enumerate(records.court_records, start=1)
+            ],
+            "insolvencies_judgements": records.summary,
+        }
+
+    def hit_endpoint(self, type: str, value: str):
         params = {"national_id": Individuals.normalize_national_id(value)} if type == "individual" else {"search": value}
 
         try:
             response = requests.get(
                 f"{self._FIN_LINK}{self.LINKS[type]}",
-                headers= self.HEADERS,
+                headers=self.HEADERS,
                 params=params,
                 timeout=5,
             )
@@ -355,7 +335,7 @@ class EntityLookUp:
 
         return payload
 
-    def entity_look_up(self, type: str, value: str) -> Optional[Model]:
+    def entity_look_up(self, type: str, value: str):
         payload = self.hit_endpoint(type=type, value=value)
         try:
             instance = (

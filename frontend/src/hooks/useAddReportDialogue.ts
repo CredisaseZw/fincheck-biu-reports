@@ -5,14 +5,11 @@ import { useCallback, useEffect, useState} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
 import { getEntityID, getEntityName, handleAxiosError, toDatetimeLocal } from "@/lib/utils";
-import type { CommonFields, Company, CompanyDirectorData, DefaultHeaderProps, EntityMode, EntityValue, Individual, ListReport, onSelectEntityProps, Report } from "@/types/core";
+import type { Absconder, Claim, CommonFields, Company, CompanyDirectorData, CourtJudgement, DefaultHeaderProps, EntityMode, EntityValue, Individual, IndividualDirectorsFormData, ListReport, onSelectEntityProps, Report } from "@/types/core";
 import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
 import type { NextOfKinFormData } from "./useNextOfKin";
-import type { ClaimFormData } from "./useClaims";
-import type { AbsconderFormData } from "./useAbsconderDetails";
-import type { CourtJudgementFormData } from "./useCourtDetails";
 import type { InsolvencyRecordFormData } from "./useInsolvencyRecordsDetails";
 import type { PublicInformationFormData } from "./usePublicInformation";
 import type { FinancialEntryFormData } from "./useFinancialsDetails";
@@ -58,9 +55,9 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [individualDetails, setIndividualDetails] = useState<IndividualFormData | undefined>(undefined)
   const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
   const [nextOfKin, setNextOfKin] = useState<NextOfKinFormData | undefined>(undefined);
-  const [claims, setClaims] = useState<ClaimFormData[]>([])
-  const [absconders, setAbsconders] = useState<AbsconderFormData[]>([])
-  const [courtJudgements, setCourtJudgements] = useState<CourtJudgementFormData[]>([])
+  const [claims, setClaims] = useState<Claim[]>([])
+  const [absconders, setAbsconders] = useState<Absconder[]>([])
+  const [courtJudgements, setCourtJudgements] = useState<CourtJudgement[]>([])
   const [insolvencyRecords, setInsolvencyRecords] = useState<InsolvencyRecordFormData[]>([])
   const [publicInformation, setPublicInformation] = useState<PublicInformationFormData[]>([])
   const [financials, setFinancials] = useState<FinancialEntryFormData | undefined>(undefined)
@@ -75,6 +72,8 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [directors, setDirectors] = useState<DirectorsData | undefined>(undefined);
   const [reportDetails, setReportDetails] = useState<ReportDetailsFormData | undefined>(undefined);
   const [isRefreshingCredits, setIsRefreshingCredits] = useState(false);
+  const [individualDirectorships, setIndividualDirectorships] = useState<IndividualDirectorsFormData | undefined>(undefined);
+
   const cache = useDetailCacheUpdate<Report>(["report", list_report?.subject_type, list_report?.id])
 
   const {data, isLoading, error } = useGetSingleReport({
@@ -361,60 +360,20 @@ function useAddReportDialogue(list_report?: ListReport) {
         contact_number : individual.next_of_kin?.contact_number ?? "",
         relationship : individual.next_of_kin?.relationship ?? ""
       })
+
+      setIndividualDirectorships(()=> ({
+        other_directors : individual.directorships ?? [],
+        external_directors : individual.external_directors
+      }))
     }
 
     // setup common data
-    setClaims(
-      report.subject.claims.length > 0
-      ? report.subject.claims.map(item => ({
-        id: item.id,
-        creditor_name: item.creditor_name,
-        currency: item.currency,
-        amount: Number(item.amount),
-        claim_date: item.claim_date,
-        status: item.status,
-        ...(item.overdue_balance && { overdue_balance : Number(item.overdue_balance)}),
-        account_number : item.account_number ?? "",
-        debtor_object_id: item.debtor.extras.debtor_object_id,
-        debtor_type: item.debtor.extras.debtor_type,   
-        debtor_default : item.debtor.name
-      }))
-      : []
-    )
+    setClaims(report.subject.claims ?? [])
 
-    setAbsconders(
-      report.subject.absconders.length > 0
-      ? report.subject.absconders.map(item => ({
-        id: item.id,
-        creditor_name : item.creditor_name ?? undefined,
-        currency : item.currency ?? "USD",
-        amount : Number(item.amount),
-        start_date: item.start_date,
-        status : item.status,
-        ...(item.overdue_balance && { overdue_balance : Number(item.overdue_balance)}),
-        account_number : item.account_number ?? undefined,
-        default_search : item.debtor.name,
-        debtor_object_id: item.debtor.extras.debtor_object_id,
-        debtor_type: item.debtor.extras.debtor_type, 
-      }))
-      : []
-    )
+    setAbsconders(report.subject.absconders ?? [])
 
-    setCourtJudgements(
-      report.subject.court_judgements.length > 0
-      ? report.subject.court_judgements.map(item => ({
-        id : item.id,
-        case_number: item.case_number,
-        court_name: item.court_name,
-        currency : item.currency,
-        status : item.status,
-        plaintf_name : item.plaintf_name ?? undefined,
-        amount : Number(item.amount),
-        judgement_date : item.judgement_date
-      }))
-      : []
-    )
-    
+    setCourtJudgements(report.subject.court_judgements ?? [])
+
     setInsolvencyRecords(
       report.subject.insolvency_records.length > 0
       ? report.subject.insolvency_records.map(item =>({
@@ -559,6 +518,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     setCompanyStructure(undefined);
     setCompanyOperations(undefined);
     setShareholding(undefined);
+    setIndividualDirectorships(undefined)
     setDirectors({
       directors : [],
       company_company_secretary : undefined
@@ -603,6 +563,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     createdAt,
     isRefreshingCredits,
     usernameMobile,
+    individualDirectorships,
     onSelectAnalyst,
     refreshCreditRecords,
     setUsernameMobile,

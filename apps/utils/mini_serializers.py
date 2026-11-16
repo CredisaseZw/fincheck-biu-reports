@@ -2,7 +2,6 @@ from rest_framework import serializers
 from apps.companies.models import Company
 from apps.individuals.models import Individuals
 from apps.directors.models import CompanyDirector
-from apps.utils.enitity_helpers import _build_insolvencies_summary
 from apps.utils.entity_lookup import EntityLookUp
 
 entity = EntityLookUp()
@@ -70,14 +69,10 @@ class MiniCompanyDirectorSerializers(serializers.ModelSerializer):
         if instance.company.registration_number in ("", None):
             return None 
         
-        payload = entity.hit_endpoint("company", instance.company.registration_number)
-        if payload:
-            chained_data = entity._prepare_serializer_company_data(payload, instance.company.pk)
-            entity.sync_entity_records(instance.company, chained_data)
-            insolvencies = _build_insolvencies_summary(instance.company)
-            if insolvencies == "" or len(insolvencies) == 0:
-                return "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"
-        return None
+        insolvencies = entity.credit_records_text("company", instance.company.registration_number)
+        if insolvencies is None:
+            return None
+        return insolvencies or "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"
 
 class MiniCompanyDebtorSerializers(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()

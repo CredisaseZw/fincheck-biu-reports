@@ -112,24 +112,36 @@ export const COMMON_RECORD_HEADERS: Header[] =[
     { name : "Overdue Balance" ,textAlign : "end"},
     { name : "Account Number",},
 ]
-export const CLAIMS_HEADERS:Header[] = [...COMMON_RECORD_HEADERS,
-    { name : "Claim Date" },
-    { name : "Status" }
-]
-export const ABSCONDERS_HEADERS:Header [] = [
-    ...COMMON_RECORD_HEADERS,
-    { name : "Start Date" },
-    { name : "Status" }
-]
+export const CLAIM_HEADERS: Header[] = [
+    { name: "Creditor" },
+    { name: "A/C No." },
+    { name: "Currency" },
+    { name: "Amount"},
+    { name: "Overdue" },
+    { name: "Claim Date" },
+    { name: "Status" },
+];
 
-export const COURT_HEADERS:Header[] = [
-    {name : "Court Name", textAlign : "end"},
-    {name : "Case Number", textAlign : "end"},
-    {name : "Plaintiff Name"},
-    {name : "Currency" },
-    {name : "Amount",},
-    {name : "Judgement Date", textAlign : "end"},
-]
+export const ABSCONDER_HEADERS: Header[] = [
+    { name: "Creditor" },
+    { name: "A/C No." },
+    { name: "Currency" },
+    { name: "Amount" },
+    { name: "Overdue" },
+    { name: "Start Date" },
+    { name: "Status" },
+];
+
+export const COURT_HEADERS: Header[] = [
+    { name: "Court Name" },
+    { name: "Case Number" },
+    { name: "Plaintiff Name" },
+    { name: "Currency" },
+    { name: "Amount" },
+    { name: "Judgement Date" },
+    { name: "Status" },
+];
+
 
 export const INSOLVENCY_HEADERS:Header[] = [
     {name : "Solvency Type", textAlign : "end"},

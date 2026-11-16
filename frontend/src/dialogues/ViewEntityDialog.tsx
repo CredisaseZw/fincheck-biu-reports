@@ -30,7 +30,7 @@ function _label(raw: string | null | undefined): string {
 function _date(val: string | null | undefined): string {
   if (!val) return "—";
   const strVal = String(val).trim();
-  if (strVal === "0.00" || strVal === "0" || strVal === "0.0") return "—";
+  if (strVal === "0.00" || strVal === "0" || strVal === "0.0" || strVal.startsWith("0001-01-01")) return "—";
   try {
     const d = new Date(val);
     if (isNaN(d.getTime())) return String(val).toUpperCase();

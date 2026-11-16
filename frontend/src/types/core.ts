@@ -1,6 +1,3 @@
-import type { AbsconderFormData } from "@/hooks/useAbsconderDetails";
-import type { ClaimFormData } from "@/hooks/useClaims";
-import type { CourtJudgementFormData } from "@/hooks/useCourtDetails";
 import type { InsolvencyRecordFormData } from "@/hooks/useInsolvencyRecordsDetails";
 import type { PublicInformationFormData } from "@/hooks/usePublicInformation";
 import type { FinancialEntryFormData } from "@/hooks/useFinancialsDetails";
@@ -185,8 +182,8 @@ type DirectorPositions = "director" | "secretary" | "other";
 export interface MiniCompanyDirector {
   id: number,
   position: DirectorPositions,
-  company: string
-  company_id: number
+  company: MiniCompany,
+  company_credit_records: string | null,
 }
 export interface  CompanyDirector extends Timestamps {
   position: DirectorPositions
@@ -514,13 +511,13 @@ export interface BizsafeReportSummaryResponse {
   results: ReportGroup[];
 }
 export interface AbsconderProps extends ReportEntityProps{
-  absconders_data: AbsconderFormData[]
+  absconders_data: Absconder[]
 }
 export interface ClaimsProps extends ReportEntityProps{
-  claims_data: ClaimFormData[]
+  claims_data: Claim[]
 }
 export interface CourtJudgementsProps extends ReportEntityProps{
-  court_judgements_data: CourtJudgementFormData[]
+  court_judgements_data: CourtJudgement[]
 }
 export interface InsolvencyRecordsProps extends ReportEntityProps{
   insolvency_data : InsolvencyRecordFormData[]
@@ -562,8 +559,8 @@ directors_data: {
       secretary_name: string | undefined
       date_of_appointment: string | undefined;
     }
-  }
-}
+  } | undefined
+} 
 export interface CompanyDirectorsProps extends ReportEntityProps, CompanyDirectorData {}
 
 export interface ReportDetailsProps extends ReportEntityProps{
@@ -576,4 +573,11 @@ export interface CompanyOverviewProps extends ReportEntityProps{
 
 export interface ReportExtrasProps extends ReportEntityProps{
   report_extras: ReportExtrasFormData| undefined
+}
+export interface IndividualDirectorsFormData {
+  other_directors: MiniCompanyDirector[],
+  external_directors: string | null
+} 
+export interface IndividualDirectorsProps extends ReportEntityProps{
+  directorships_data: IndividualDirectorsFormData | undefined
 }

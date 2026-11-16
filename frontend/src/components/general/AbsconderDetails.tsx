@@ -1,190 +1,38 @@
-import { CLEAR_MESSAGE, CURRENCY_OPTIONS, numericField } from "@/constants";
+import { ABSCONDER_HEADERS, CLEAR_MESSAGE } from "@/constants";
 import Fieldset from "./FieldSet";
-import useAbsconderDetails from "@/hooks/useAbsconderDetails";
-import { Controller } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Trash2, Plus } from "lucide-react";
+import BaseTable from "./BaseTable";
+import { TableCell, TableRow } from "../ui/table";
+import { StatusPill } from "./StatusPills";
 import type { AbsconderProps } from "@/types/core";
-import CustomSubmitButton from "./CustomSubmitButton";
-import ColumnsContainer from "./ColumnsContainer";
+import { display, money, statusVariant, date } from "@/lib/utils";
 
-function AbsconderDetails({
-  absconders_data,
-  subject_object_id,
-  subject_type,
-  report_id
-}:AbsconderProps) {
-    const {
-        append, 
-        remove, 
-        onTouched,
-        onSubmit,
-        onDelete,
-        handleSubmit, 
-        register,
-        getValues,
-        isPending,
-        control, 
-        errors, 
-        fields, 
-        touched,
-    } = useAbsconderDetails({
-        absconders_data,
-        subject_object_id,
-        subject_type,
-        report_id
-    })
-
+function AbsconderDetails({ absconders_data }: AbsconderProps) {
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <Fieldset legendTitle="Absconder Records" className="flex flex-col gap-4" >
-                {
-                    fields.length <= 0 &&
-                    <div className="text-center text-muted-foreground">{CLEAR_MESSAGE}</div>
-                }
-                {   
-                    fields.length > 0  &&
-                    fields.map((field, idx) => {
-                    return (
-                        <div key={field.id} className="rounded-lg border p-4 space-y-3">
-                            <div className="form-group">
-                                <label className="text-sm font-medium mb-1 inline-block">Creditor Name</label>
-                                <Input
-                                    placeholder="Creditor Name"
-                                    {...register(`absconders.${idx}.creditor_name`)} />
-                                {errors.absconders?.[idx]?.creditor_name && (
-                                    <p className="text-destructive text-sm">{errors.absconders[idx].creditor_name.message}</p>
-                                )}
-                            </div>
-                            <ColumnsContainer numberOfCols={3}>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Currency</label>
-                                    <Controller
-                                        control={control}
-                                        name={`absconders.${idx}.currency`}
-                                        render={({ field }) => (
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Currency" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {CURRENCY_OPTIONS.map(currency => (
-                                                        <SelectItem key={currency} value={currency}>{currency}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Amount</label>
-                                    <Input
-                                        placeholder="Amount"
-                                        type="number"
-                                        step="0.01"
-                                        {...register(`absconders.${idx}.amount`, numericField)}
-                                    />
-                                    {errors.absconders?.[idx]?.amount && (
-                                        <p className="text-destructive text-sm">{errors.absconders[idx].amount.message}</p>
-                                    )}
-                                </div>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Overdue Balance</label>
-                                    <Input
-                                        placeholder="Overdue Balance"
-                                        type="number"
-                                        step="0.01"
-                                        {...register(`absconders.${idx}.overdue_balance`, numericField)}
-                                    />
-                                    {errors.absconders?.[idx]?.overdue_balance && (
-                                        <p className="text-destructive text-sm">{errors.absconders[idx].overdue_balance.message}</p>
-                                    )}
-                                </div>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Account Number</label>
-                                    <Input
-                                        placeholder="Account Number"
-                                        {...register(`absconders.${idx}.account_number`)}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Start Date</label>
-                                    <Input
-                                        type="date"
-                                        {...register(`absconders.${idx}.start_date`)}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label className="text-sm font-medium mb-1 inline-block">Status</label>
-                                    <Controller
-                                        control={control}
-                                        name={`absconders.${idx}.status`}
-                                        render={({ field }) => (
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Status" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="open">Open</SelectItem>
-                                                    <SelectItem value="settled">Settled</SelectItem>
-                                                    <SelectItem value="disputed">Disputed</SelectItem>
-                                                    <SelectItem value="indeterminant">Indeterminant</SelectItem>
-                                                    <SelectItem value="written_off">Written Off</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                </div>
-                            </ColumnsContainer>
-                            <div className="flex justify-end">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() =>{
-                                        const id = getValues(`absconders.${idx}.id`)
-                                        remove(idx)
-                                        if(typeof id  === "number"){
-                                            onDelete(id)
-                                        }
-                                    }}
-                                >
-                                    <Trash2 size={16} className="text-destructive" />
-                                </Button>
-                            </div>
-                        </div>
-                    )
-                })}
-
-                <div className="flex justify-between">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => append({
-                            creditor_name: "",
-                            currency: "USD",
-                            amount: 0,
-                            start_date: undefined,
-                            status: "open",
-                            debtor_object_id: Number(subject_object_id),
-                            debtor_type: subject_type ?? "company",
-                        })}
-                    >
-                        <Plus size={16} className="mr-2" /> Add Row
-                    </Button>
-                    <CustomSubmitButton
-                        showFine
-                        onFine={onTouched}
-                        state={touched}
-                        isPending={isPending}
-                    />
-                </div>
-
-            </Fieldset>
-        </form>
-    )
+        <Fieldset legendTitle="Absconder Records">
+            {absconders_data.length === 0 && (
+                <div className="text-center text-muted-foreground">{CLEAR_MESSAGE}</div>
+            )}
+            {absconders_data.length > 0 && (
+                <BaseTable isEmpty={false} headers={ABSCONDER_HEADERS}>
+                    {absconders_data.map((absconder) => (
+                        <TableRow key={absconder.id}>
+                            <TableCell>{display(absconder.creditor_name)}</TableCell>
+                            <TableCell>{display(absconder.account_number)}</TableCell>
+                            <TableCell className="text-center">{display(absconder.currency)}</TableCell>
+                            <TableCell className="text-center">{money(absconder.amount)}</TableCell>
+                            <TableCell className="text-center">{money(absconder.overdue_balance)}</TableCell>
+                            <TableCell className="whitespace-nowrap">{date(absconder.start_date)}</TableCell>
+                            <TableCell>
+                                <StatusPill variant={statusVariant(absconder.status)}>
+                                    {display(absconder.status)}
+                                </StatusPill>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </BaseTable>
+            )}
+        </Fieldset>
+    );
 }
 
-export default AbsconderDetails
+export default AbsconderDetails;

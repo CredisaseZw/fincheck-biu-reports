@@ -56,8 +56,8 @@ const DirectorRow = ({
                 if (ind.insolvencies_judgements)  setValue(`directors.${index}.insolvencies_judgements`, ind.insolvencies_judgements, { shouldValidate: true });
                 if (ind.directorships){
                     if (Array.isArray(ind.directorships) && ind.directorships.length > 0){
-                        const o_d = ind.directorships.filter((item: MiniCompanyDirector)=> item.company_id !== subject_object_id)
-                        const other_directorships = o_d.map((item: MiniCompanyDirector)=> `${item.position.toUpperCase()} AT ${item.company}`)
+                        const o_d = ind.directorships.filter((item: MiniCompanyDirector)=> item.company.id !== subject_object_id)
+                        const other_directorships = o_d.map((item: MiniCompanyDirector)=> `${item.position.toUpperCase()} AT ${item.company.registered_name.toUpperCase()}`)
                         setValue(`directors.${index}.other_individual_directorships`, other_directorships)
                     }
                 }

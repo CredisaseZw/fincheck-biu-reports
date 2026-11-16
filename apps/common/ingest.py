@@ -21,11 +21,9 @@ from apps.common.models import (
 )
 from apps.credit_records.models import InsolvencyRecord
 from .report_types import CompanyReportSchema, IndividualReportSchema
-from apps.utils.entity_lookup import EntityLookUp
 from pprintpp import pprint
 
 logger = logging.getLogger(__name__)
-entity_lookup = EntityLookUp()
 
 def _dec(value) -> Decimal | None:
     """float/None -> Decimal/None. Goes through str() to avoid binary float
@@ -150,20 +148,6 @@ def save_individual(data: IndividualReportSchema) -> Individuals:
             defaults=data.next_of_kin.model_dump(),
         )
 
-    # SAVE CLAIMS, ABS SOMETHING AND COURT RECORDS
-
-    payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
-    try:
-        if payload:
-            chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
-            entity_lookup.sync_entity_records(individual, chained_data)
-    except Exception:
-        logger.exception(
-            "Entity lookup failed for individual '%s' (pk=%s) — "
-            "Individual was saved but credit records were not synced",
-            individual.full_name, individual.pk,
-        )
-        
     _save_common_subject_records(individual, data)
     return individual
 
@@ -174,7 +158,7 @@ def _get_or_create_director_individual(director):
         return None
     
     d_national_id = Individuals.normalize_national_id(director.national_id)
-    individual, created = Individuals.objects.get_or_create(
+    individual, _ = Individuals.objects.get_or_create(
         national_id= d_national_id or f"UNKNOWN-{director.full_name}",
         defaults={
             "national_id": d_national_id,
@@ -183,18 +167,6 @@ def _get_or_create_director_individual(director):
             "residential_address": director.residential_address,
         },
     )
-    if created:
-        try:
-            payload = entity_lookup.hit_endpoint("individual", value = individual.national_id)
-            if payload:
-                chained_data = entity_lookup._prepare_serializer_individual_data(payload, individual.pk)
-                entity_lookup.sync_entity_records(individual, chained_data)
-        except Exception:
-            logger.exception(
-                "Entity lookup failed for individual '%s' (pk=%s) — "
-                "Individual was saved but credit records were not synced",
-                individual.full_name, individual.pk,
-            )               
     return individual
 
 @transaction.atomic
@@ -290,21 +262,6 @@ def save_company(data: CompanyReportSchema) -> Company:
                 individual=individual,
                 defaults={"position": director.position},
             )
-
-    # Entity lookup — wrapped so a fincheck API failure doesn't tank the save
-    try:
-        value = company.registration_number if company.registration_number else company.re_registration_number
-        if value:
-            payload = entity_lookup.hit_endpoint("company", value)
-            if payload: 
-                chained_data = entity_lookup._prepare_serializer_company_data(payload, company.pk)
-                entity_lookup.sync_entity_records(company, chained_data)
-    except Exception:
-        logger.exception(
-            "Entity lookup failed for company '%s' (pk=%s) — "
-            "company was saved but credit records were not synced",
-            data.registered_name, company.pk,
-        )
 
     _save_common_subject_records(company, data)
     return company

@@ -184,12 +184,6 @@ class FincheckReportPDF:
         return f'<span class="{cls}">{ok_t if ok else fail_t}</span>'
 
     @staticmethod
-    def _status_badge(status: str) -> str:
-        s = (status or "open").lower()
-        cls = {"open": "badge-warn", "settled": "badge-ok", "closed": "badge-muted"}.get(s, "badge-muted")
-        return f'<span class="badge {cls}">{s.upper()}</span>'
-
-    @staticmethod
     def _card(title: str, body: str, page_break: bool = False) -> str:
         if not body or not body.strip():
             return ""
@@ -572,6 +566,14 @@ body {{
 .dir-card:last-child {{ border-bottom: none; }}
 .dir-card:nth-last-child(2):nth-child(odd) {{ border-bottom: none; }}
 
+/* ── Individual directorships ── */
+.dir-list {{ padding: 6px 20px 14px; }}
+.dir-item {{ padding: 10px 0; border-bottom: 1px solid #F1F5F9; break-inside: avoid; }}
+.dir-item:last-child {{ border-bottom: none; }}
+.dir-item-no {{ display: inline-block; min-width: 16px; }}
+.dir-item-title {{ font-size: 9pt; font-weight: 800; color: {c.PRIMARY}; text-transform: uppercase; margin-bottom: 4px; }}
+.dir-item-body {{ padding-left: 16px; font-size: 8.5pt; color: {c.MUTED}; line-height: 1.6; }}
+
 /* ── Bankers ── */
 .bank-grid {{
   display: grid;
@@ -624,6 +626,12 @@ body {{
   letter-spacing: .5px;
   color: {c.ACCENT};
   margin-bottom: 10px;
+}}
+.insolvency-lines {{
+  padding: 0 0 14px;
+  font-size: 9pt;
+  line-height: 1.7;
+  color: {c.TEXT};
 }}
 
 /* ── Misc ── */
@@ -1048,60 +1056,57 @@ body {{
         ]
         return self._card("Next of Kin", self._grid_table(rows))
 
+    def _render_individual_directorships(self) -> str:
+        s = self._subject
+        directorships = s.get("directorships") or []
+        external = (s.get("external_directors") or "").strip()
+
+        items = ""
+        for idx, d in enumerate(directorships, start=1):
+            company = d.get("company") or {}
+            company_name = company.get("registered_name") if isinstance(company, dict) else company
+            position = self._label(d.get("position") or "director")
+            records = (d.get("company_credit_records") or "").strip() or "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"
+            lines = [html.escape(line.strip()) for line in records.splitlines() if line.strip()]
+            items += f"""
+            <div class="dir-item">
+              <div class="dir-item-title">
+                <span class="dir-item-no">{idx}.</span> {position} AT {self._u(company_name or "N/A")}
+              </div>
+              <div class="dir-item-body">{"<br/>".join(lines)}</div>
+            </div>"""
+
+        parts = []
+        if items:
+            parts.append(f'<div class="dir-list">{items}</div>')
+        if external:
+            ext_lines = [self._u(line.strip()) for line in external.splitlines() if line.strip()]
+            parts.append(
+                '<div class="cr-sub">'
+                '<div class="cr-title">External Directorships</div>'
+                f'<div class="insolvency-lines">{"<br/>".join(ext_lines)}</div>'
+                "</div>"
+            )
+        if not parts:
+            return ""
+        return self._card("Directorships", "".join(parts))
+
     def _render_credit_records(self) -> str:
-        def claims_html() -> str:
-            recs = self._subject.get("claims") or []
-            recs = [c for c in recs if str(c.get("status", "")).upper() != "SETTLED"]
-            if not recs:
+        def summary_html() -> str:
+            summary = (self._subject.get("insolvencies_judgements") or "").strip()
+            if not summary:
                 return ""
-            rows = "".join(f"""<tr>
-              <td>{self._u(c.get("creditor_name"))}</td>
-              <td>{self._e(c.get("account_number"))}</td>
-              <td>{self._e(c.get("currency"))}</td>
-              <td class="ta-r">{self._money(c.get("amount"))}</td>
-              <td class="ta-r">{self._money(c.get("overdue_balance"))}</td>
-              <td class="nowrap">{self._date(c.get("claim_date"))}</td>
-              <td class="ta-c">{self._status_badge(c.get("status", "open"))}</td>
-            </tr>""" for c in recs)
-            return self._data_table(
-                ["Creditor", "A/C No.", "Currency", "Amount", "Overdue", "Claim Date", "Status"],
-                rows)
-
-        def absconders_html() -> str:
-            recs = self._subject.get("absconders") or []
-            recs = [c for c in recs if str(c.get("status", "")).upper() != "SETTLED"]
-            if not recs:
-                return ""
-            rows = "".join(f"""<tr>
-              <td>{self._u(a.get("creditor_name"))}</td>
-              <td>{self._m(a.get("account_number"))}</td>
-              <td>{self._e(a.get("currency"))}</td>
-              <td class="ta-r">{self._money(a.get("amount"))}</td>
-              <td class="ta-r">{self._money(a.get("overdue_balance"))}</td>
-              <td class="nowrap">{self._date(a.get("start_date"))}</td>
-              <td class="ta-c">{self._status_badge(a.get("status", "open"))}</td>
-            </tr>""" for a in recs)
-            return self._data_table(
-                ["Creditor", "A/C No.", "Currency", "Amount", "Overdue", "Start Date", "Status"],
-                rows)
-
-        def court_html() -> str:
-            recs = self._subject.get("court_judgements") or []
-            recs = [c for c in recs if str(c.get("status", "")).upper() != "SETTLED"]
-            if not recs:
-                return ""
-            rows = "".join(f"""<tr>
-              <td>{self._u(c.get("court_name"))}</td>
-              <td>{self._m(c.get("case_number"))}</td>
-              <td>{self._u(c.get("plaintf_name"))}</td>
-              <td>{self._e(c.get("currency"))}</td>
-              <td class="ta-r">{self._money(c.get("amount"))}</td>
-              <td class="nowrap">{self._date(c.get("judgement_date"))}</td>
-              <td class="ta-c">{self._status_badge(c.get("status", "open"))}</td>
-            </tr>""" for c in recs)
-            return self._data_table(
-                ["Court", "Case No.", "Plaintiff", "Currency", "Amount", "Judgement Date", "Status"],
-                rows)
+            lines = [
+                html.escape(line.strip())
+                for line in summary.splitlines()
+                if line.strip()
+            ]
+            return (
+                '<div class="cr-sub">'
+                '<div class="cr-title">Insolvencies, Judgements, Defaults</div>'
+                f'<div class="insolvency-lines">{"<br/>".join(lines)}</div>'
+                "</div>"
+            )
 
         def insolvency_html() -> str:
             recs = self._subject.get("insolvency_records") or []
@@ -1131,12 +1136,8 @@ body {{
                 rows)
 
         parts = []
-        c_html = claims_html()
-        if c_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Claims</div>{c_html}</div>')
-        a_html = absconders_html()
-        if a_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Absconders</div>{a_html}</div>')
-        co_html = court_html()
-        if co_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Court Judgements</div>{co_html}</div>')
+        s_html = summary_html()
+        if s_html: parts.append(s_html)
         i_html = insolvency_html()
         if i_html: parts.append(f'<div class="cr-sub"><div class="cr-title">Insolvency / Judicial Management</div>{i_html}</div>')
         p_html = public_html()
@@ -1307,6 +1308,7 @@ body {{
                 self._render_individual_contact(),
                 self._render_employment(),
                 self._render_next_of_kin(),
+                self._render_individual_directorships(),
             ]
 
         parts += [

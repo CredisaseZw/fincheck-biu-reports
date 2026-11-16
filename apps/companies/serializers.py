@@ -125,18 +125,15 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
    
     def to_representation(self, instance):
-        payload = entity.hit_endpoint("company", instance.registration_number)
-        if payload:
-            chained_data = entity._prepare_serializer_company_data(payload, instance.pk)
-            entity.sync_entity_records(instance, chained_data)
-
-        instance.refresh_from_db()
-        # Clear Django's prefetch cache so related managers (directors, shareholdings,
-        # claims, etc.) are freshly re-queried after the sync above.
-        if hasattr(instance, '_prefetched_objects_cache'):
-            instance._prefetched_objects_cache = {}
-
-        data =  super().to_representation(instance)
+        data = super().to_representation(instance)
+        data.update(
+            entity.credit_record_payload(
+                "company",
+                instance.registration_number,
+                subject_object_id=instance.pk,
+                subject_name=instance.registered_name,
+            )
+        )
         professional_partners = instance.professional_partners.first()
         registration_accounts = instance.registration_accounts.first()
         company_company_secretary = instance.secretary_appointments.first()

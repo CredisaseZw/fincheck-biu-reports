@@ -36,6 +36,10 @@ _extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
 if _extra_hosts:
     ALLOWED_HOSTS += [h.strip() for h in _extra_hosts.split(',') if h.strip()]
 
+#SECURE FINCHECK SETTINGS
+FINCHECK_USERNAME = os.environ.get("FINCHECK_USERNAME")
+FINCHECK_PASSWORD = os.environ.get("FINCHECK_PASSWORD")
+
 #FILE SIZE MANAGEMENT
 DATA_UPLOAD_MAX_MEMORY_SIZE = 15728640  # 15 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 15728640 
