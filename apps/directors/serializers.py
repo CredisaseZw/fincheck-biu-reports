@@ -5,8 +5,12 @@ from apps.individuals.serializers import IndividualDirectorSerializer
 from .models import CompanyDirector, CompanySecretary
 from apps.utils.base_serialisers import NullableDateField
 
-def build_other_directors_string(data : dict):
-    return f"{data.get("position", "Director").upper()} AT {data.get("company", "N/A").upper()}"
+def build_other_directors_string(data: dict) -> str:
+    position = data.get("position") or "Director"
+    company = data.get("company") or {}
+    company_name = company.get("registered_name") if isinstance(company, dict) else company
+    company_name = company_name or "N/A"
+    return f"{position.upper()} AT {company_name.upper()}"
 
 class DirectorSerializer(serializers.ModelSerializer):
     individual_detail = IndividualDirectorSerializer(source="individual", read_only=True)
