@@ -176,7 +176,13 @@ function useAddReportDialogue(list_report?: ListReport) {
       username_mobile : report.username_mobile ?? undefined,
       username :  report.username ?? undefined,
       contact_person : report.contact_person ?? undefined,
-      report_narration : report.report_narration ?? undefined
+      report_narration : report.report_narration ?? undefined,
+      contact_person_mobile : report.contact_person_mobile ?? undefined,
+      report_reason: report.report_reason ?? undefined,
+      currency : report.currency ?? undefined,
+      amount: report.amount ? Number(report.amount) : undefined,
+      period: report.period ?? undefined,
+      occurrence: report.occurrence ?? undefined
     })
     
     if(report.subject_type === "company"){

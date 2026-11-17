@@ -424,12 +424,17 @@ export interface Report extends Timestamps {
   report_narration: string | null
   analyst_name :  string | null
   contact_person:string | null
+  contact_person_mobile: string | null
   last_report :string | null
   suspension_reason : string | null,
   is_stale : boolean
   report_date : string | null
   status : "draft" | "finalized"
-  references: TradeReference[];
+  report_reason:  'credit_line' | 'kyc' |  'kys' | 'rentals' | 'loan' | 'insurance_assets' | 'insurance_loan' | 'insurance_supplier_cover' | 'other'
+  currency: Currencies | null
+  amount: string | null
+  period: string | null
+  occurrence: "once_off" | "recurring" | null  
 }
 export interface Address {
   street_address: string ;
