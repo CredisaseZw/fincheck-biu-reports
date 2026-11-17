@@ -22,6 +22,27 @@ def report_pdf_path(instance, filename):
 
 # Create your models here.
 class Report(BaseModel):
+    class Currency(models.TextChoices):
+        USD = "USD", "US Dollar"
+        ZIG = "ZiG", "Zimbabwe Gold"
+        AUD = "AUD", "Australian Dollar"
+        CAD = "CAD", "Canadian Dollar"
+        CHF = "CHF", "Swiss Franc"
+        ZAR = "ZAR", "South African Rand"
+    class ReportReasons(models.TextChoices):
+        CREDIT_LINE = "credit_line", "Credit Line"
+        KYC = "kyc", "KYC"
+        KYS = "kys", "KYS"
+        RENTALS = "rentals", "Rentals"
+        LOAN = "loan", "Loan"
+        INSURANCE_ASSETS = "insurance_assets", "Insurance Assets"
+        INSURANCE_LOAN = "insurance_loan", "Insurance Loan"
+        INSURANCE_SUPPLIER_COVER = "insurance_supplier_cover", "Insurance Supplier Cover"
+        OTHER = "other", "Other"
+    
+    class Occurrence(models.TextChoices):
+        ONCE_OFF = "once_off", "Once Off"
+        RECURRING = "recurring", "Recurring"
     class StatusChoices(models.TextChoices):
         DRAFT = "draft", "Draft"
         IN_PROGRESS = "in_progress", "In Progress"
@@ -57,16 +78,22 @@ class Report(BaseModel):
         blank=True,
         null=True
     )
-    username = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True
-    )
-    username_mobile = models.CharField(
+    contact_person_mobile = models.CharField(
         max_length=15,
         blank=True,
         null=True
     )
+
+    username = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    ) # Name of the requestor (not the current user)
+    username_mobile = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True
+    ) # Requestors mobile number
     status = models.CharField(
         max_length=20, 
         choices=StatusChoices.choices, 
@@ -102,6 +129,39 @@ class Report(BaseModel):
         null=True,
         blank=True,
     )
+    
+    # ANALYTIC FIELDS
+    report_reason = models.CharField(
+        max_length=50,
+        choices=ReportReasons.choices,
+        null=True,
+        blank=True
+    )  
+    currency = models.CharField(
+        max_length=4,
+        choices=Currency.choices,
+        default=Currency.USD,
+        blank=True,
+        null=True
+    )
+    amount = models.DecimalField(
+        max_digits=18,
+        blank=True,
+        null=True,
+        decimal_places=2
+    )
+    period = models.CharField(
+        max_length=50,  
+        blank=True,
+        null=True
+    )
+    occurrence = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        choices=Occurrence.choices
+    )
+
     enquiry_reference = models.CharField(max_length=20, unique=True, editable=False)
     is_deleted = models.BooleanField(default=False)
     report_date = models.DateTimeField(blank=True, null=True)

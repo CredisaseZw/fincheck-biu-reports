@@ -77,9 +77,15 @@ class UpdateReportSerializer(serializers.ModelSerializer):
             'is_stale',
             'last_report',
             'contact_person',
+            'contact_person_mobile',
             'analyst',
             'suspension_reason',
             'overall_risk_rating',
+            'report_reason',
+            'currency',
+            'amount',
+            'period',
+            'occurrence',
             'summary',
             'report_narration',
             'report_date',
@@ -91,29 +97,8 @@ class ReportSerializer(serializers.ModelSerializer):
     is_stale = serializers.BooleanField(read_only=True)
     class Meta:
         model = Report
-        fields = [
-            'id',
-            'analyst',
-            'analyst_name',
-            'enquiry_reference',
-            'client',
-            'subject',
-            'username',
-            'username_mobile',
-            'status',
-            'is_stale',
-            'last_report',
-            'contact_person',
-            'suspension_reason',
-            'overall_risk_rating',
-            'summary',
-            'report_narration',
-            'report_date',
-            'created_at',
-            'updated_at',
-            'finalized_at',
-            'report_pdf',
-        ]
+        fields = '__all__'
+
     def get_analyst_name(self, instance):
         if instance.analyst:
             return instance.analyst.get_full_name()
