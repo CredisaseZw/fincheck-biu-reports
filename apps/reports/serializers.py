@@ -99,12 +99,12 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = '__all__'
 
-    def get_analyst_name(self, instance):
+    def get_analyst_name(self, instance: Report):
         if instance.analyst:
             return instance.analyst.get_full_name()
         return None
         
-    def to_representation(self, instance):
+    def to_representation(self, instance: Report):
         data = super().to_representation(instance)
 
         client_data = _content_ob_serializer(instance.client, True)
@@ -114,7 +114,7 @@ class ReportSerializer(serializers.ModelSerializer):
         data['subject'] = subject_data
         data['client_type'] = 'individual' if client_data and 'national_id' in client_data else 'company'
         data['subject_type'] = 'individual' if subject_data and 'national_id' in subject_data else 'company'
-
+        data['last_report'] = instance.last_report()
         return data
     
 class ListReportSerializer(serializers.ModelSerializer):
