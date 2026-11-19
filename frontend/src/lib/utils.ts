@@ -296,6 +296,30 @@ export function normalize_national_id(value: string):string {
   return value.replace(/[^A-Za-z0-9]/g, "").trim().toUpperCase();
 }
 
+export const getIndividualLookupValues = (
+  individual: Individual,
+  excludeCompanyId?: number
+): Record<string, unknown> => {
+  const directorships = (individual.directorships ?? [])
+    .filter(item => item.company?.id !== excludeCompanyId)
+    .map(item => `${item.position.toUpperCase()} AT ${item.company.registered_name.toUpperCase()}`)
+
+  return {
+    ...(individual.id && { individual: individual.id }),
+    ...(individual.full_name && { full_name: individual.full_name }),
+    ...(individual.national_id && { national_id: individual.national_id }),
+    ...(individual.email && { email: individual.email }),
+    ...(individual.gender && { gender: individual.gender.toLowerCase() }),
+    ...(individual.date_of_birth && { date_of_birth: individual.date_of_birth }),
+    ...(individual.mobile_number && { mobile_number: individual.mobile_number }),
+    ...(individual.residential_address && { residential_address: individual.residential_address }),
+    ...(individual.address_prev && { address_prev: individual.address_prev }),
+    // Always replace the read-only cards so they never show the previous person's records.
+    directorships,
+    insolvencies_judgements: individual.insolvencies_judgements ?? "",
+  }
+}
+
 export function getYearRange(yearsBack: number = 50): number[] {
   const currentYear = new Date().getFullYear();
   return Array.from({ length: yearsBack + 1 }, (_, i) => currentYear - i);

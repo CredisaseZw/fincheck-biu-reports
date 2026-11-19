@@ -110,6 +110,36 @@ class IndividualDirectorSerializer(serializers.ModelSerializer):
             'external_directors',
         ]
 
+class IndividualInlineWriteSerializer(serializers.ModelSerializer):
+    date_of_birth = NullableDateField(required=False, allow_null=True)
+    national_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        max_length=100,
+    )
+    full_name = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    gender = serializers.CharField(required=False, allow_blank=True, max_length=50)
+
+    class Meta:
+        model = Individuals
+        fields = [
+            "id",
+            "full_name",
+            "national_id",
+            "gender",
+            "date_of_birth",
+            "residential_address",
+            "mobile_number",
+            "email",
+            "address_prev",
+        ]
+
+    def validate_national_id(self, value):
+        if not value:
+            return None
+        return Individuals.normalize_national_id(value)
+
 # Write Serializers 
 class IndividualCreateSerializer(
     serializers.ModelSerializer,

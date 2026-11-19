@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import type { EntityValue, Company, Individual, Claim, Absconder, CourtJudgement, InsolvencyRecord, PublicInformation, TradeReference, BankerAccount, Financial, RegistrationAccount, ProfessionalPartner, CompanyDirector, Shareholding, CompanyOverview, CompanyStructure, CompanyOperations, EmploymentInformation, NextOfKin, EntityInformationProps } from "@/types/core";
+import type { EntityValue, Company, Individual, Claim, Absconder, CourtJudgement, InsolvencyRecord, PublicInformation, TradeReference, BankerAccount, Financial, RegistrationAccount, ProfessionalPartner, CompanyDirector, Shareholding, CompanyOverview, CompanyStructure, CompanyOperations, CompanyManagement as CompanyManagementData, ManagementMember, EmploymentInformation, NextOfKin, EntityInformationProps } from "@/types/core";
 import { Eye, Printer, Loader2, Paperclip, EyeOff } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { useEffect, useRef, useState } from "react"
@@ -332,6 +332,74 @@ function StructureSection({ data }: { data: CompanyStructure }) {
       <GridRow label="Associated Companies" value={_upper(data.associated_companies)} />
       <GridRow label="Divisions" value={_upper(data.divisions)} />
       <GridRow label="Branches" value={_upper(data.branches)} />
+    </SectionCard>
+  );
+}
+
+function ManagementSection({ data }: { data: CompanyManagementData }) {
+  const members: ManagementMember[] = [
+    ...(data.executive_head ? [data.executive_head] : []),
+    ...(data.finance_head ? [data.finance_head] : []),
+    ...(data.others ?? []),
+  ];
+  if (members.length === 0) return null;
+
+  return (
+    <SectionCard title="Management">
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        {members.map((member) => (
+          <div key={member.id} className="p-4 border-b border-r border-gray-200">
+            <div className="text-[10pt] font-extrabold text-[#051C2C] mb-2 pb-2 border-b border-blue-50">
+              {_upper(member.full_name)}
+              <span className="font-medium text-[8.5pt] text-[#1E5474] ml-2">
+                — {_label(member.title || member.role)}
+              </span>
+            </div>
+            <div className="space-y-1">
+              {[
+                ["National ID", _val(member.national_id)],
+                ["Gender", _label(member.gender)],
+                ["Date of Birth", _date(member.date_of_birth)],
+                ["Email", _val(member.email)],
+                ["Mobile", _val(member.mobile_number)],
+                ["Address (Current)", _upper(member.residential_address)],
+                ["Address (Previous)", _upper(member.address_prev)],
+              ].map(([lbl, val]) => {
+                const value = String(val).trim();
+                if (!value || value === "—") return null;
+                return (
+                  <div key={lbl} className="flex gap-2 items-baseline">
+                    <span className="text-[7pt] font-bold uppercase tracking-wide text-gray-500 min-w-25 shrink-0">{lbl}</span>
+                    <span className={cn("text-[8.5pt] font-semibold text-gray-900", lbl.toLowerCase() !== "email" && "uppercase")}>{val}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {(member.directorships ?? []).length > 0 && (
+              <div className="mt-2 pt-2 border-t border-dashed border-gray-200">
+                <span className="text-[7pt] font-bold uppercase tracking-wide text-gray-500 block mb-1">
+                  Directorships &amp; Other Positions
+                </span>
+                <ul className="list-disc list-inside text-[8.5pt] font-semibold text-gray-900 uppercase space-y-0.5">
+                  {(member.directorships ?? []).map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="mt-2 pt-2 border-t border-dashed border-gray-200">
+              <span className="text-[7pt] font-bold uppercase tracking-wide text-gray-500 block mb-1">
+                Insolvencies, Judgements, Defaults
+              </span>
+              <span className="text-[8.5pt] font-semibold text-gray-900 uppercase">
+                {member.insolvencies_judgements
+                  ? _upper(member.insolvencies_judgements)
+                  : "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </SectionCard>
   );
 }
@@ -711,6 +779,7 @@ function EntityContent({ entity_type, data }: { entity_type: EntityValue; data: 
           <CompanySecretarySection data={data as Company} />
           {(data as Company).shareholdings && <ShareholdingSection data={(data as Company).shareholdings!} />}
           {(data as Company).structure && <StructureSection data={(data as Company).structure!} />}
+          {(data as Company).management && <ManagementSection data={(data as Company).management!} />}
           {(data as Company).operations && <OperationsSection data={(data as Company).operations!} />}
         </>
       ) : (

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReport } from "@/contexts/ReportMutationContext";
 import { getEntityID, getEntityName, handleAxiosError, toDatetimeLocal } from "@/lib/utils";
-import type { Absconder, Claim, CommonFields, Company, CompanyDirectorData, CourtJudgement, DefaultHeaderProps, EntityMode, EntityValue, Individual, IndividualDirectorsFormData, ListReport, onSelectEntityProps, Report } from "@/types/core";
+import type { Absconder, Claim, CommonFields, Company, CompanyDirectorData, CompanyManagement as CompanyManagementData, CourtJudgement, DefaultHeaderProps, EntityMode, EntityValue, Individual, IndividualDirectorsFormData, ListReport, onSelectEntityProps, Report } from "@/types/core";
 import type { CompanyFormData } from "./useCompanyDetails";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
@@ -68,6 +68,7 @@ function useAddReportDialogue(list_report?: ListReport) {
   const [companyOverview, setCompanyOverview] = useState<CompanyOverviewFormData | undefined>(undefined);
   const [companyStructure, setCompanyStructure] = useState<CompanyStructureFormData | undefined>(undefined);
   const [companyOperations, setCompanyOperations] = useState<CompanyOperationsFormData | undefined>(undefined)
+  const [management, setManagement] = useState<CompanyManagementData | undefined>(undefined)
   const [shareholding, setShareholding] = useState<ShareholdingsFormData | undefined>();
   const [directors, setDirectors] = useState<DirectorsData | undefined>(undefined);
   const [reportDetails, setReportDetails] = useState<ReportDetailsFormData | undefined>(undefined);
@@ -226,6 +227,7 @@ function useAddReportDialogue(list_report?: ListReport) {
         operations_territories : company.operations?.operations_territories,
         property_ownership :company.operations?.property_ownership
       })
+      setManagement(company.management ?? { executive_head: null, finance_head: null, others: [] })
       setShareholding({
         id :  company.shareholdings?.id ?? undefined,
         issued_share_capital : company.shareholdings?.issued_share_capital ? Number(company.shareholdings.issued_share_capital) : undefined,
@@ -523,6 +525,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     setBankerDetails([]);
     setCompanyStructure(undefined);
     setCompanyOperations(undefined);
+    setManagement(undefined);
     setShareholding(undefined);
     setIndividualDirectorships(undefined)
     setDirectors({
@@ -563,6 +566,7 @@ function useAddReportDialogue(list_report?: ListReport) {
     financials,
     accounts,
     companyOperations,
+    management,
     companyInformation,
     contactPerson, 
     reportExtras,

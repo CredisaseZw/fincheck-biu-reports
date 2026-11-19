@@ -3,6 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from apps.companies.models import (
     Company,
+    CompanyManagement,
     CompanyOperations,
     CompanyOverview,
     CompanyStructure,
@@ -39,7 +40,12 @@ from apps.credit_records.serializers import (
     PublicInformationSerializer,
 )
 from django.contrib.contenttypes.models import ContentType
-from apps.directors.serializers import DirectorSerializer, CompanySecretaryNoCompanyReadSerializer
+from apps.directors.serializers import (
+    DirectorSerializer,
+    CompanySecretaryNoCompanyReadSerializer,
+    build_other_directors_string,
+)
+from apps.individuals.serializers import IndividualInlineWriteSerializer
 from apps.utils.base_serialisers import UpdatedBySerializerMixin, NullableDateField
 from apps.shareholding.serializers import ShareholdingsSerializers
 from apps.utils.entity_lookup import EntityLookUp
@@ -75,6 +81,88 @@ class CompanyOperationsSerializer(UpdatedBySerializerMixin,serializers.ModelSeri
             "updated_at",
             "company",
         ]
+class CompanyManagementReadSerializer(serializers.ModelSerializer):
+    individual = serializers.IntegerField(source="individual_id", read_only=True)
+    national_id = serializers.CharField(source="individual.national_id", read_only=True)
+    full_name = serializers.CharField(source="individual.full_name", read_only=True)
+    email = serializers.CharField(source="individual.email", read_only=True)
+    gender = serializers.CharField(source="individual.gender", read_only=True)
+    date_of_birth = serializers.DateField(source="individual.date_of_birth", read_only=True)
+    mobile_number = serializers.CharField(source="individual.mobile_number", read_only=True)
+    residential_address = serializers.CharField(source="individual.residential_address", read_only=True)
+    address_prev = serializers.CharField(source="individual.address_prev", read_only=True)
+    directorships = serializers.SerializerMethodField()
+    insolvencies_judgements = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CompanyManagement
+        fields = [
+            "id",
+            "role",
+            "title",
+            "individual",
+            "national_id",
+            "full_name",
+            "email",
+            "gender",
+            "date_of_birth",
+            "mobile_number",
+            "residential_address",
+            "address_prev",
+            "directorships",
+            "insolvencies_judgements",
+        ]
+
+    def get_directorships(self, instance: CompanyManagement):
+        if instance.individual_id is None:
+            return []
+        return [
+            build_other_directors_string(
+                {"position": item.position, "company": item.company.registered_name}
+            )
+            for item in instance.individual.directorships.all()
+            if item.company_id != instance.company_id
+        ]
+
+    def get_insolvencies_judgements(self, instance: CompanyManagement):
+        individual = instance.individual
+        if individual is None or not individual.national_id:
+            return None
+        return entity.credit_records_text("individual", individual.national_id)
+
+
+def serialize_company_management(company):
+    payload = {"executive_head": None, "finance_head": None, "others": []}
+    for member in company.management.all():
+        data = CompanyManagementReadSerializer(member).data
+        if member.role == CompanyManagement.Role.EXECUTIVE_HEAD:
+            payload["executive_head"] = data
+        elif member.role == CompanyManagement.Role.FINANCE_HEAD:
+            payload["finance_head"] = data
+        else:
+            payload["others"].append(data)
+    return payload
+class CompanyManagementMemberWriteSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False, allow_null=True)
+    title = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=60)
+    individual = IndividualInlineWriteSerializer()
+
+    def validate(self, attrs):
+        role = self.context.get("role")
+        title_choices = CompanyManagement.TITLE_CHOICES.get(role)
+        if title_choices is None:
+            attrs["title"] = attrs.get("title") or None
+            return attrs
+
+        title = attrs.get("title")
+        if not title:
+            raise serializers.ValidationError({"title": "A title is required."})
+        if title not in title_choices.values:
+            raise serializers.ValidationError(
+                {"title": "Invalid title for this management role."}
+            )
+        return attrs
+
 class ClientCompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     overview = CompanyOverviewSerializer(read_only=True)
     structure = CompanyStructureSerializer(read_only=True)
@@ -123,6 +211,10 @@ class CompanySerializer(UpdatedBySerializerMixin, serializers.ModelSerializer):
     banker_accounts = BankerAccountsSerializer(many = True, read_only = True)
     company_name = serializers.CharField(read_only=True)
     refer_type = serializers.CharField(source="get_refer_type_display", read_only=True)
+    management = serializers.SerializerMethodField()
+
+    def get_management(self, instance):
+        return serialize_company_management(instance)
    
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -186,7 +278,11 @@ class CompanyCreateSerializer(
     banker_accounts = BankerAccountsWriteSerializer(many = True, write_only=True, required=False)
     registration_accounts = RegistrationAccountsWriteSerializer(required=False, write_only=True)
     professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
-        
+    management = serializers.SerializerMethodField()
+
+    def get_management(self, instance):
+        return serialize_company_management(instance)
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
@@ -261,6 +357,10 @@ class CompanyUpdateSerializer(serializers.ModelSerializer, UpdateEntityGenericHa
     trade_references = TradeReferencesWriteSerializer(many=True, write_only=True, required=False)
     registration_accounts = RegistrationAccountsWriteSerializer(required=False, write_only=True)
     professional_partners = ProfessionalPartnersWriteSerializer(required=False, write_only=True)
+    management = serializers.SerializerMethodField()
+
+    def get_management(self, instance):
+        return serialize_company_management(instance)
    
     def to_representation(self, instance):
         data = super().to_representation(instance)

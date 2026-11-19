@@ -186,6 +186,28 @@ export const REPORT_STATUS_PILL_VARIANTS = {
 export const GENDERS = z.enum(["male", "female", "unknown"], {message : "Gender is required"})
 export const GENDER_OPTIONS = GENDERS.options
 
+export const EXECUTIVE_HEAD_TITLES = [
+    { value: "chief_executive_officer", label: "Chief Executive Officer" },
+    { value: "managing_director", label: "Managing Director" },
+    { value: "executive_director", label: "Executive Director" },
+    { value: "general_manager", label: "General Manager" },
+    { value: "country_head", label: "Country Head" },
+    { value: "owner_proprietor", label: "Owner/Proprietor" },
+    { value: "secretary_general", label: "Secretary General" },
+    { value: "operations_director", label: "Operations Director/Manager" },
+    { value: "other", label: "Other" },
+]
+
+export const FINANCE_HEAD_TITLES = [
+    { value: "chief_financial_officer", label: "Chief Financial Officer" },
+    { value: "finance_director", label: "Finance Director" },
+    { value: "head_of_finance", label: "Head of Finance" },
+    { value: "finance_manager", label: "Finance Manager" },
+    { value: "accountant", label: "Accountant" },
+    { value: "bookkeeper", label: "Bookkeeper" },
+    { value: "other_finance", label: "Other - Finance" },
+]
+
 export const ENTITY_TYPE = z.enum(["company", "individual"])
 
 export const SETTLEMENT_OPTIONS = z.enum(["open", "settled", "disputed", "written_off", "indeterminant"])

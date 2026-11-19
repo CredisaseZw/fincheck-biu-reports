@@ -6,7 +6,7 @@ import type { CompanyFormData } from "./useCompanyDetails";
 import type { EmploymentFormData } from "./useEmploymentInformation";
 import type { IndividualFormData } from "./useIndividualDetails";
 import type { NextOfKinFormData } from "./useNextOfKin";
-import type { Company, EntityInformationProps, Individual } from "@/types/core";
+import type { Company, CompanyManagement, EntityInformationProps, Individual } from "@/types/core";
 import useGetSingleEntity from "./api/useGetSingleEntity";
 import { handleAxiosError } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ const useEditEntity = ({entity_type, id}:EntityInformationProps) => {
     const [companyOverview, setCompanyOverview] = useState<CompanyOverviewFormData | undefined>(undefined);
     const [companyStructure, setCompanyStructure] = useState<CompanyStructureFormData | undefined>(undefined);
     const [companyOperations, setCompanyOperations] = useState<CompanyOperationsFormData | undefined>(undefined)
+    const [management, setManagement] = useState<CompanyManagement | undefined>(undefined)
     const [individualDetails, setIndividualDetails] = useState<IndividualFormData | undefined>(undefined)
     const [employmentInformation, setEmploymentInformation] = useState<EmploymentFormData | undefined>(undefined);
     const [nextOfKin, setNextOfKin] = useState<NextOfKinFormData | undefined>(undefined);
@@ -76,6 +77,7 @@ const useEditEntity = ({entity_type, id}:EntityInformationProps) => {
                 operations_territories : company.operations?.operations_territories,
                 property_ownership :company.operations?.property_ownership
             })
+            setManagement(company.management ?? { executive_head: null, finance_head: null, others: [] })
         } else if (entity_type=== "individual"){
             const individual = data as Individual;
             setIndividualDetails({
@@ -117,6 +119,7 @@ const useEditEntity = ({entity_type, id}:EntityInformationProps) => {
             setCompanyOperations(undefined)
             setCompanyOverview(undefined)
             setCompanyStructure(undefined)
+            setManagement(undefined)
             setCompanyInformation(undefined)
         } else if(entity_type === "individual"){
             setIndividualDetails(undefined)
@@ -130,6 +133,7 @@ const useEditEntity = ({entity_type, id}:EntityInformationProps) => {
         companyOperations,
         companyStructure,
         companyOverview,
+        management,
         individualDetails,
         employmentInformation,
         nextOfKin,

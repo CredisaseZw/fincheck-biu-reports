@@ -987,6 +987,76 @@ body {{
         ]
         return self._card("Company Structure", self._grid_table(rows))
 
+    def _render_management(self) -> str:
+        management = self._subject.get("management") or {}
+        if not isinstance(management, dict):
+            return ""
+
+        members = []
+        for key in ("executive_head", "finance_head"):
+            member = management.get(key)
+            if member:
+                members.append(member)
+        members += management.get("others") or []
+        if not members:
+            return ""
+
+        cards = ""
+        for member in members:
+            member_rows = [
+                ("National ID", self._e(member.get("national_id"))),
+                ("Gender", self._label(member.get("gender", ""))),
+                ("Date of Birth", self._date(member.get("date_of_birth"))),
+                ("Email", self._low(member.get("email"))),
+                ("Mobile", self._e(member.get("mobile_number"))),
+                ("Address (Current)", self._m(member.get("residential_address"))),
+                ("Address (Previous)", self._m(member.get("address_prev"))),
+            ]
+
+            rows_html = ""
+            for lbl, val in member_rows:
+                if val is not None:
+                    val_str = str(val).strip()
+                    if val_str and val_str not in ("-", "\u2014"):
+                        rows_html += f'<div class="dir-row"><span class="dir-l">{lbl}</span><span class="dir-v">{val}</span></div>\n              '
+
+            directorships = member.get("directorships") or []
+            dirs_html = ""
+            if directorships:
+                items_html = "".join(
+                    f'<li style="margin-bottom: 2px;">{self._u(item)}</li>'
+                    for item in directorships if item and str(item).strip()
+                )
+                if items_html:
+                    dirs_html = f"""
+              <div style="margin-top: 10px; border-top: 1px dashed #E2E8F0; padding-top: 8px;">
+                <span class="dir-l" style="display: block; margin-bottom: 4px;">Directorships &amp; Other Positions</span>
+                <ul class="dir-v" style="margin: 0; padding-left: 16px; list-style-type: disc;">
+                  {items_html}
+                </ul>
+              </div>"""
+
+            insolvencies = (
+                self._u(member.get("insolvencies_judgements"))
+                if member.get("insolvencies_judgements")
+                else "CLEAR TO DATE IN THE NAME OF THE BUSINESS AND PRINCIPALS"
+            )
+            role_label = self._label(member.get("title") or member.get("role") or "")
+
+            cards += f"""
+            <div class="dir-card">
+              <div class="dir-name">
+                {self._u(member.get("full_name"))}
+                <span class="dir-pos"> — {role_label}</span>
+              </div>
+              {rows_html.strip()}
+              {dirs_html}
+              <div class="dir-v" style="margin-top: 10px; display: block; border-top: 1px dashed #E2E8F0; padding-top: 10px;">{insolvencies}</div>
+            </div>"""
+
+        grid_cols = "1fr" if len(members) == 1 else "1fr 1fr"
+        return self._card("Management", f'<div class="dir-grid" style="grid-template-columns: {grid_cols}">{cards}</div>')
+
     def _render_operations(self) -> str:
         op = self._subject.get("operations") or {}
         rows = [
@@ -1300,6 +1370,7 @@ body {{
                 self._render_company_secretary(),
                 self._render_shareholding(),
                 self._render_structure(),
+                self._render_management(),
                 self._render_operations(),
             ]
         else:

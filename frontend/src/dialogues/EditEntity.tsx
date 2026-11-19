@@ -10,6 +10,7 @@ import IndividualDetails from '@/components/general/IndividualDetails';
 import CompanyOverview from '@/components/general/CompanyOverview';
 import CompanyStructure from '@/components/general/CompanyStructure';
 import CompanyOperations from '@/components/general/CompanyOperations';
+import CompanyManagement from '@/components/general/CompanyManagement';
 import EmploymentInformation from '@/components/general/EmploymentInformation';
 import NextOfKin from '@/components/general/NextOfKin';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const EditEntity = ({
     companyInformation,
     companyOperations,
     companyStructure,
+    management,
     companyOverview,
     individualDetails,
     employmentInformation,
@@ -64,6 +66,12 @@ const EditEntity = ({
                     />
                     <CompanyStructure 
                         structure_data = {companyStructure}
+                        report_id={undefined}
+                        subject_object_id = {id}
+                        subject_type = {entity_type}
+                    />
+                    <CompanyManagement
+                        management_data = {management}
                         report_id={undefined}
                         subject_object_id = {id}
                         subject_type = {entity_type}

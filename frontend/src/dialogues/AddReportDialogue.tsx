@@ -2,6 +2,7 @@ import NextOfKin from "@/components/general/NextOfKin"
 import CompanyDetails from "@/components/general/CompanyDetails";
 import CompanyOperations from "@/components/general/CompanyOperations";
 import CompanyStructure from "@/components/general/CompanyStructure";
+import CompanyManagement from "@/components/general/CompanyManagement";
 import CustomDialogueHeader from "@/components/general/CustomDialogueHeader";
 import CustomDialogueTrigger from "@/components/general/CustomDialogueTrigger";
 import EmploymentInformation from "@/components/general/EmploymentInformation";
@@ -56,6 +57,7 @@ function AddReportDialogue({ report_item }: props) {
         employmentInformation,
         courtJudgements,
         companyStructure,
+        management,
         tradeReferences,
         defaultHeader,
         isLoading, 
@@ -183,6 +185,12 @@ function AddReportDialogue({ report_item }: props) {
                                         />
                                         <CompanyStructure 
                                             structure_data = {companyStructure}
+                                            report_id={report.id}
+                                            subject_object_id = {subject_object_id}
+                                            subject_type = {subject_type}
+                                        />
+                                        <CompanyManagement
+                                            management_data = {management}
                                             report_id={report.id}
                                             subject_object_id = {subject_object_id}
                                             subject_type = {subject_type}

@@ -1,6 +1,7 @@
 from apps.utils.base_viewset import BaseAuthJSONViewSet
 from .models import (
-    Company
+    Company,
+    CompanyManagement,
 )
 from .serializers import (
     CompanyCreateSerializer,
@@ -8,7 +9,9 @@ from .serializers import (
     CompanySerializer,
     ClientCompanySerializer,
     CompanyUpdateSerializer,
-    GeneralCompanyDetailsSerializer
+    CompanyManagementMemberWriteSerializer,
+    GeneralCompanyDetailsSerializer,
+    serialize_company_management,
 )
 from rest_framework.viewsets import GenericViewSet
 from django.http import Http404
@@ -61,6 +64,17 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
                 "shareholdings__shareholders",
                 Prefetch("directors", queryset=CompanyDirector.objects.select_related("individual")),
                 Prefetch("secretary_appointments", queryset=CompanySecretary.objects.select_related("secretary")),
+                Prefetch(
+                    "management",
+                    queryset=CompanyManagement.objects.select_related(
+                        "individual"
+                    ).prefetch_related(
+                        Prefetch(
+                            "individual__directorships",
+                            queryset=CompanyDirector.objects.select_related("company"),
+                        )
+                    ),
+                ),
             )
 
         return base
@@ -249,6 +263,154 @@ class CompaniesViewSet(BaseAuthJSONViewSet):
             status=STATUS.HTTP_200_OK,
         )
     
+    @staticmethod
+    def _upsert_management_individual(data):
+        """Create or update the individual behind a management slot."""
+        individual_data = dict(data)
+        individual_id = individual_data.pop("id", None)
+        national_id = individual_data.get("national_id")
+
+        individual = None
+        if individual_id:
+            individual = Individuals.objects.filter(pk=individual_id).first()
+        if individual is None and national_id:
+            individual = Individuals.objects.filter(national_id=national_id).first()
+
+        if individual is None:
+            individual_data.setdefault("gender", "unknown")
+            return Individuals.objects.create(**individual_data)
+
+        for attr, value in individual_data.items():
+            setattr(individual, attr, value)
+        individual.save()
+        return individual
+
+    @action(detail=True, methods=["POST"], url_path="management")
+    def update_or_create_management(self, request: Request, *args, **kwargs):
+        user: User = request.user
+        if not user.is_staff:
+            return Response({"error": "Access error."}, status=STATUS.HTTP_403_FORBIDDEN)
+
+        company = self.get_object()
+        data = request.data or {}
+
+        prepared = []
+        for role, key in (
+            (CompanyManagement.Role.EXECUTIVE_HEAD, "executive_head"),
+            (CompanyManagement.Role.FINANCE_HEAD, "finance_head"),
+        ):
+            if key not in data:
+                continue
+            raw = data.get(key)
+            if not raw:
+                prepared.append({"role": role, "clear": True})
+                continue
+            serializer = CompanyManagementMemberWriteSerializer(
+                data=raw, context={"role": role}
+            )
+            error = validate_serializer(serializer=serializer)
+            if error:
+                return error
+            prepared.append({"role": role, "data": serializer.validated_data})
+
+        others_supplied = "others" in data
+        if others_supplied:
+            for raw in data.get("others") or []:
+                serializer = CompanyManagementMemberWriteSerializer(
+                    data=raw, context={"role": CompanyManagement.Role.MANAGER}
+                )
+                error = validate_serializer(serializer=serializer)
+                if error:
+                    return error
+                prepared.append(
+                    {"role": CompanyManagement.Role.MANAGER, "data": serializer.validated_data}
+                )
+
+        members = [item["data"] for item in prepared if item.get("data")]
+        national_ids = [m["individual"].get("national_id") for m in members]
+        national_ids = [n for n in national_ids if n]
+        individual_ids = [m["individual"].get("id") for m in members]
+        individual_ids = [i for i in individual_ids if i]
+
+        if len(national_ids) != len(set(national_ids)) or len(individual_ids) != len(set(individual_ids)):
+            return Response(
+                {"error": "The same individual cannot hold more than one management position."},
+                status=STATUS.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            kept_manager_ids = []
+            for item in prepared:
+                role = item["role"]
+
+                if item.get("clear"):
+                    CompanyManagement.objects.filter(company=company, role=role).delete()
+                    continue
+
+                member = item["data"]
+                individual = self._upsert_management_individual(member["individual"])
+
+                # Reuse the row this member already owns so a form resubmitted without
+                # ids updates that row instead of colliding with itself.
+                link = None
+                if member.get("id"):
+                    link = CompanyManagement.objects.filter(
+                        pk=member["id"], company=company, role=role
+                    ).first()
+                if link is None:
+                    link = CompanyManagement.objects.filter(
+                        company=company, individual=individual, role=role
+                    ).first()
+                if link is None and role != CompanyManagement.Role.MANAGER:
+                    link = CompanyManagement.objects.filter(
+                        company=company, role=role
+                    ).first()
+
+                clash = CompanyManagement.objects.filter(
+                    company=company, individual=individual
+                )
+                if link:
+                    clash = clash.exclude(pk=link.pk)
+                clash = clash.first()
+                if clash:
+                    transaction.set_rollback(True)
+                    return Response(
+                        {
+                            "error": f"{individual.full_name} already holds the "
+                            f"'{clash.get_role_display()}' position in this company."
+                        },
+                        status=STATUS.HTTP_400_BAD_REQUEST,
+                    )
+
+                defaults = {
+                    "individual": individual,
+                    "title": member.get("title") or None,
+                    "updated_by": user,
+                }
+
+                if link is None:
+                    link = CompanyManagement.objects.create(
+                        company=company, role=role, **defaults
+                    )
+                else:
+                    for attr, value in defaults.items():
+                        setattr(link, attr, value)
+                    link.save()
+
+                if role == CompanyManagement.Role.MANAGER:
+                    kept_manager_ids.append(link.pk)
+
+            if others_supplied:
+                CompanyManagement.objects.filter(
+                    company=company, role=CompanyManagement.Role.MANAGER
+                ).exclude(pk__in=kept_manager_ids).delete()
+
+        company.refresh_from_db()
+        return Response(
+            {"management": serialize_company_management(company)},
+            status=STATUS.HTTP_200_OK,
+        )
+
     @action(detail=True, methods=["POST"], url_path="shareholders")
     def update_or_create_shareholders(self, request:Request, *args, **kwargs):
         user:User = request.user

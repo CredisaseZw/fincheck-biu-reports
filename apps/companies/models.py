@@ -369,3 +369,86 @@ class CompanyOperations(BaseModel):
 
     def __str__(self):
         return f"Operations of {self.company}"
+
+
+class CompanyManagement(BaseModel):
+    class Role(models.TextChoices):
+        EXECUTIVE_HEAD = "executive_head", "Executive Head"
+        FINANCE_HEAD = "finance_head", "Finance Head"
+        MANAGER = "manager", "Manager"
+
+    class ExecutiveHeadTitle(models.TextChoices):
+        CHIEF_EXECUTIVE_OFFICER = "chief_executive_officer", "Chief Executive Officer"
+        MANAGING_DIRECTOR = "managing_director", "Managing Director"
+        EXECUTIVE_DIRECTOR = "executive_director", "Executive Director"
+        GENERAL_MANAGER = "general_manager", "General Manager"
+        COUNTRY_HEAD = "country_head", "Country Head"
+        OWNER_PROPRIETOR = "owner_proprietor", "Owner/Proprietor"
+        SECRETARY_GENERAL = "secretary_general", "Secretary General"
+        OPERATIONS_DIRECTOR = "operations_director", "Operations Director/Manager"
+        OTHER = "other", "Other"
+
+    class FinanceHeadTitle(models.TextChoices):
+        CHIEF_FINANCIAL_OFFICER = "chief_financial_officer", "Chief Financial Officer"
+        FINANCE_DIRECTOR = "finance_director", "Finance Director"
+        HEAD_OF_FINANCE = "head_of_finance", "Head of Finance"
+        FINANCE_MANAGER = "finance_manager", "Finance Manager"
+        ACCOUNTANT = "accountant", "Accountant"
+        BOOKKEEPER = "bookkeeper", "Bookkeeper"
+        OTHER_FINANCE = "other_finance", "Other - Finance"
+
+    TITLE_CHOICES = {
+        Role.EXECUTIVE_HEAD: ExecutiveHeadTitle,
+        Role.FINANCE_HEAD: FinanceHeadTitle,
+    }
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="management",
+    )
+    individual = models.ForeignKey(
+        "individuals.Individuals",
+        on_delete=models.CASCADE,
+        related_name="management_positions",
+        help_text=_("The person holding this management position."),
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.MANAGER,
+        help_text=_("Management slot held in the company."),
+    )
+    title = models.CharField(
+        max_length=60,
+        blank=True,
+        null=True,
+        help_text=_("Role specific title, e.g. Chief Executive Officer."),
+    )
+
+    class Meta:
+        app_label = "companies"
+        db_table = "company_management"
+        verbose_name = _("Company Management")
+        verbose_name_plural = _("Company Management")
+        ordering = ["role", "created_at"]
+        indexes = [
+            models.Index(
+                fields=["company", "role"],
+                name="company_mgmt_company_role_idx",
+            ),
+        ]
+        constraints = [
+            UniqueConstraint(
+                fields=["company", "individual"],
+                name="unique_management_individual_per_company",
+            ),
+            UniqueConstraint(
+                fields=["company", "role"],
+                condition=models.Q(role__in=["executive_head", "finance_head"]),
+                name="unique_management_head_per_company",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.individual.full_name} | {self.get_role_display()} | {self.company}"

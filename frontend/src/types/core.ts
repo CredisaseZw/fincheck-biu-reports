@@ -166,6 +166,31 @@ export interface CompanyStructure {
   branches: string;
 }
 
+export type ManagementRole = "executive_head" | "finance_head" | "manager";
+
+export interface ManagementMember {
+  id: number;
+  role: ManagementRole;
+  title: string | null;
+  individual: number;
+  national_id: string | null;
+  full_name: string;
+  email: string | null;
+  gender: "male" | "female" | "unknown" | null;
+  date_of_birth: string | null;
+  mobile_number: string | null;
+  residential_address: string | null;
+  address_prev: string | null;
+  directorships: string[];
+  insolvencies_judgements: string | null;
+}
+
+export interface CompanyManagement {
+  executive_head: ManagementMember | null;
+  finance_head: ManagementMember | null;
+  others: ManagementMember[];
+}
+
 export interface CompanyOperations {
   id: number;
   industry: string;
@@ -384,6 +409,7 @@ export interface Company extends CommonFields{
   overview: CompanyOverview | null;
   structure: CompanyStructure | null;
   operations: CompanyOperations | null;
+  management: CompanyManagement | null;
   directors: CompanyDirector[];
   shareholdings: Shareholding | null;
 }
@@ -550,6 +576,21 @@ export interface CompanyStructureProps extends ReportEntityProps{
 }
 export interface CompanyOperationsProps extends ReportEntityProps{
   operations_data : CompanyOperationsFormData | undefined
+}
+export interface CompanyManagementProps extends ReportEntityProps{
+  management_data : CompanyManagement | undefined
+}
+export interface ManagementMemberCardProps {
+  heading: string
+  base: string
+  role: ManagementRole
+  subject_object_id?: number | null
+  register: any
+  control: any
+  errors: any
+  watch: any
+  setValue: any
+  onRemove?: () => void
 }
 export interface CompanyShareholdingProps extends ReportEntityProps{
   shareholdings_data : ShareholdingsFormData | undefined
