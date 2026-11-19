@@ -114,7 +114,7 @@ class ReportSerializer(serializers.ModelSerializer):
         data['subject'] = subject_data
         data['client_type'] = 'individual' if client_data and 'national_id' in client_data else 'company'
         data['subject_type'] = 'individual' if subject_data and 'national_id' in subject_data else 'company'
-        data['last_report'] = instance.last_report()
+        data['last_report'] = instance.last_report
         return data
     
 class ListReportSerializer(serializers.ModelSerializer):
